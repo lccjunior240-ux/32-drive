@@ -54,11 +54,11 @@
     <label for="pPhone">Telefone do passageiro</label>
     <input id="pPhone" type="tel" placeholder="Ex.: 53 99999-9999" />
 
-    <label for="pickup">Origem (endereço, bairro ou referência)</label>
-    <input id="pickup" type="text" placeholder="Ex.: Cassino ou Av. Rio Grande" oninput="limparGpsSeEditar()" />
+    <label for="pickup">Origem (bairro, empresa ou referência)</label>
+    <input id="pickup" type="text" placeholder="Ex.: Cassino, Querência, Parque Guanabara, ABC" oninput="limparGpsSeEditar()" />
 
-    <label for="dropoff">Destino (endereço, bairro ou referência)</label>
-    <input id="dropoff" type="text" placeholder="Ex.: Supermercado Guanabara Cassino ou FURG" />
+    <label for="dropoff">Destino (bairro, empresa ou referência)</label>
+    <input id="dropoff" type="text" placeholder="Ex.: Parque Marinha, Cidade Nova, Lar Gaúcho, Centro" />
 
     <button type="button" class="btn-blue" onclick="usarGPS()">Usar meu GPS</button>
     <button type="button" class="btn-calc" onclick="calcularCorrida()">Calcular corrida</button>
@@ -92,7 +92,7 @@
 
     document.getElementById("pixTexto").textContent = CHAVE_PIX_INTER;
 
-    const map = L.map("map").setView([-32.1830, -52.1640], 13);
+    const map = L.map("map").setView([-32.1400, -52.1450], 12);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution: "&copy; OpenStreetMap"
@@ -105,28 +105,53 @@
     let valorAtual = 7.99;
     let coordsOrigem = null;
 
+    // Bairros, comércios e empresas de Cassino, Barra e Rio Grande
     const PONTOS_REAIS = [
-      // Cassino
-      { chaves: ["guanabara", "supermercado", "mercado"], lat: -32.1852, lon: -52.1654, zona: "cassino", nome: "Supermercado Guanabara (Cassino)" },
-      { chaves: ["peruzzo"], lat: -32.1818, lon: -52.1628, zona: "cassino", nome: "Peruzzo (Cassino)" },
-      { chaves: ["terminal cassino", "terminal"], lat: -32.1805, lon: -52.1670, zona: "cassino", nome: "Terminal Cassino" },
-      { chaves: ["beira mar", "beira-mar", "praia", "iemanja", "iemanjá", "molhes"], lat: -32.1885, lon: -52.1585, zona: "cassino", nome: "Beira-Mar Cassino" },
-      { chaves: ["querencia", "querência"], lat: -32.1660, lon: -52.1690, zona: "cassino", nome: "Querência (Cassino)" },
-      { chaves: ["bolaxa"], lat: -32.1520, lon: -52.1720, zona: "cassino", nome: "Bolaxa" },
-      { chaves: ["av rio grande", "av. rio grande", "avenida rio grande"], lat: -32.1830, lon: -52.1640, zona: "cassino", nome: "Av. Rio Grande (Cassino)" },
-      { chaves: ["cassino", "balneario", "balneário"], lat: -32.1800, lon: -52.1660, zona: "cassino", nome: "Balneário Cassino" },
+      // Bairros e pontos do Cassino
+      { chaves: ["parque guanabara", "pq guanabara"], lat: -32.1745, lon: -52.1710, nome: "Parque Guanabara (Cassino)" },
+      { chaves: ["abc", "bairro abc"], lat: -32.1775, lon: -52.1755, nome: "Bairro ABC (Cassino)" },
+      { chaves: ["querencia", "querência"], lat: -32.1610, lon: -52.1695, nome: "Bairro Querência" },
+      { chaves: ["bolaxa"], lat: -32.1480, lon: -52.1730, nome: "Bolaxa" },
+      { chaves: ["senandes"], lat: -32.2150, lon: -52.1850, nome: "Senandes" },
+      { chaves: ["barracao", "barracão"], lat: -32.1700, lon: -52.1745, nome: "Barracão (Cassino)" },
+      { chaves: ["supermercado cassino", "mercado cassino"], lat: -32.1815, lon: -52.1635, nome: "Supermercado Cassino" },
+      { chaves: ["guanabara"], lat: -32.1856, lon: -52.1656, nome: "Supermercado Guanabara (Cassino)" },
+      { chaves: ["peruzzo"], lat: -32.1818, lon: -52.1628, nome: "Peruzzo (Cassino)" },
+      { chaves: ["terminal cassino", "terminal"], lat: -32.1805, lon: -52.1670, nome: "Terminal Cassino" },
+      { chaves: ["beira mar", "beira-mar", "praia", "iemanja", "iemanjá", "molhes"], lat: -32.1890, lon: -52.1580, nome: "Beira-Mar Cassino" },
+      { chaves: ["av rio grande", "av. rio grande", "avenida rio grande"], lat: -32.1830, lon: -52.1640, nome: "Av. Rio Grande (Cassino)" },
+      { chaves: ["cassino", "balneario", "balneário"], lat: -32.1825, lon: -52.1645, nome: "Balneário Cassino" },
 
-      // Rio Grande
-      { chaves: ["furg", "pavilhao", "pavilhão", "carreiros", "universidade"], lat: -32.0736, lon: -52.1670, zona: "rg", nome: "FURG Carreiros" },
-      { chaves: ["unicir", "vila unicir"], lat: -32.0650, lon: -52.1380, zona: "rg", nome: "Vila Unicir" },
-      { chaves: ["parque marinha", "marinha"], lat: -32.0750, lon: -52.1420, zona: "rg", nome: "Parque Marinha" },
-      { chaves: ["cidade nova"], lat: -32.0540, lon: -52.1180, zona: "rg", nome: "Cidade Nova" },
-      { chaves: ["laranjeiras"], lat: -32.0880, lon: -52.1490, zona: "rg", nome: "Laranjeiras" },
-      { chaves: ["getulio", "getúlio", "bgv"], lat: -32.0510, lon: -52.1090, zona: "rg", nome: "Getúlio Vargas" },
-      { chaves: ["santa rosa"], lat: -32.0480, lon: -52.1250, zona: "rg", nome: "Santa Rosa" },
-      { chaves: ["trevo"], lat: -32.0720, lon: -52.1480, zona: "rg", nome: "Trevo Rio Grande" },
-      { chaves: ["quinta"], lat: -32.0050, lon: -52.2350, zona: "rg", nome: "Vila da Quinta" },
-      { chaves: ["centro", "silva paes", "marechal floriano", "alfandega", "alfândega", "praca", "praça"], lat: -32.0352, lon: -52.0986, zona: "rg", nome: "Centro Rio Grande" }
+      // Barra / Quarta Secção da Barra / Empresas Portuárias
+      { chaves: ["quarta seccao", "4 seccao", "4ª seccao", "quarta seção", "4 seção", "4ª seção", "barra"], lat: -32.1420, lon: -52.1040, nome: "Quarta Secção da Barra" },
+      { chaves: ["termasa"], lat: -32.1140, lon: -52.1075, nome: "Termasa" },
+      { chaves: ["tergrasa"], lat: -32.1115, lon: -52.1070, nome: "Tergrasa" },
+      { chaves: ["tecon", "terminal de conteineres", "conteineres", "contêineres"], lat: -32.1210, lon: -52.1085, nome: "Tecon Rio Grande" },
+      { chaves: ["bianchini"], lat: -32.1050, lon: -52.1120, nome: "Bianchini" },
+      { chaves: ["superporto", "distrito industrial"], lat: -32.1150, lon: -52.1100, nome: "Superporto / Distrito Industrial" },
+      { chaves: ["porto de rio grande", "porto novo", "porto"], lat: -32.0460, lon: -52.0780, nome: "Porto de Rio Grande" },
+
+      // Bairros cadastrados de Rio Grande
+      { chaves: ["parque sao pedro", "parque são pedro"], lat: -32.0810, lon: -52.1540, nome: "Parque São Pedro" },
+      { chaves: ["sao pedro", "são pedro"], lat: -32.0790, lon: -52.1510, nome: "Bairro São Pedro" },
+      { chaves: ["parque marinha", "marinha"], lat: -32.0750, lon: -52.1420, nome: "Parque Marinha" },
+      { chaves: ["furg", "pavilhao", "pavilhão", "carreiros", "universidade"], lat: -32.0736, lon: -52.1670, nome: "FURG Carreiros" },
+      { chaves: ["trevo"], lat: -32.0720, lon: -52.1480, nome: "Trevo Rio Grande" },
+      { chaves: ["unicir", "vila unicir"], lat: -32.0650, lon: -52.1380, nome: "Vila Unicir" },
+      { chaves: ["cidade nova"], lat: -32.0540, lon: -52.1180, nome: "Cidade Nova" },
+      { chaves: ["sao joao", "são joão"], lat: -32.0560, lon: -52.1260, nome: "Bairro São João" },
+      { chaves: ["sao miguel", "são miguel"], lat: -32.0590, lon: -52.1320, nome: "Bairro São Miguel" },
+      { chaves: ["profilurb"], lat: -32.0620, lon: -52.1360, nome: "Bairro Profilurb" },
+      { chaves: ["lar gaucho", "lar gaúcho"], lat: -32.0580, lon: -52.1140, nome: "Lar Gaúcho" },
+      { chaves: ["santa rosa"], lat: -32.0480, lon: -52.1250, nome: "Santa Rosa" },
+      { chaves: ["castelo branco"], lat: -32.0460, lon: -52.1190, nome: "Castelo Branco" },
+      { chaves: ["vila santa tereza", "santa tereza", "santa teresa"], lat: -32.0420, lon: -52.1080, nome: "Vila Santa Tereza" },
+      { chaves: ["navegantes"], lat: -32.0310, lon: -52.0890, nome: "Bairro Navegantes" },
+      { chaves: ["getulio", "getúlio", "bgv"], lat: -32.0510, lon: -52.1090, nome: "Getúlio Vargas" },
+      { chaves: ["av pelotas", "av. pelotas", "avenida pelotas"], lat: -32.0430, lon: -52.1120, nome: "Av. Pelotas (Rio Grande)" },
+      { chaves: ["laranjeiras"], lat: -32.0880, lon: -52.1490, nome: "Laranjeiras" },
+      { chaves: ["quinta"], lat: -32.0050, lon: -52.2350, nome: "Vila da Quinta" },
+      { chaves: ["centro", "silva paes", "marechal floriano", "alfandega", "alfândega", "praca", "praça"], lat: -32.0352, lon: -52.0986, nome: "Centro Rio Grande" }
     ];
 
     function setMsg(texto) {
@@ -180,42 +205,63 @@
       return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     }
 
-    function resolverEndereco(texto) {
+    async function buscarRuaNoMapa(textoOriginal) {
+      const semNum = textoOriginal
+        .replace(/\(.*?\)/g, " ")
+        .replace(/\b(n[úu]mero|n[ºo°]|prox|pr[óo]ximo|ao lado|frente|ref)\b.*$/i, " ")
+        .replace(/,\s*\d+\b/g, " ")
+        .replace(/\s+\d+\b/g, " ")
+        .trim();
+
+      const consulta = semNum.toLowerCase().includes("rio grande")
+        ? `${semNum}, RS, Brasil`
+        : `${semNum}, Rio Grande, RS, Brasil`;
+
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&bounded=1&viewbox=-52.26,-31.98,-52.05,-32.25&q=${encodeURIComponent(consulta)}`;
+        const resp = await fetch(url);
+        if (resp.ok) {
+          const dados = await resp.json();
+          if (Array.isArray(dados) && dados.length > 0) {
+            return {
+              lat: parseFloat(dados[0].lat),
+              lon: parseFloat(dados[0].lon),
+              nome: textoOriginal
+            };
+          }
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    async function resolverEndereco(texto) {
       const limpo = (texto || "").trim();
       const matchGps = limpo.match(/GPS\s*\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/i);
       if (matchGps) {
-        const lat = parseFloat(matchGps[1]);
-        const lon = parseFloat(matchGps[2]);
-        return { lat, lon, zona: lat < -32.12 ? "cassino" : "rg", nome: "Meu GPS" };
+        return { lat: parseFloat(matchGps[1]), lon: parseFloat(matchGps[2]), nome: "Meu GPS" };
       }
 
       const norm = removerAcentos(limpo);
 
       for (const ponto of PONTOS_REAIS) {
         if (ponto.chaves.some(k => norm.includes(removerAcentos(k)))) {
-          return { lat: ponto.lat, lon: ponto.lon, zona: ponto.zona, nome: ponto.nome };
+          return { lat: ponto.lat, lon: ponto.lon, nome: ponto.nome };
         }
       }
 
-      if (norm.includes("rio grande") && !norm.includes("av") && !norm.includes("cassino")) {
-        return { lat: -32.0352, lon: -52.0986, zona: "rg", nome: "Rio Grande" };
+      const achouRua = await buscarRuaNoMapa(limpo);
+      if (achouRua) {
+        return achouRua;
       }
 
-      let hash = 0;
-      for (let i = 0; i < norm.length; i++) {
-        hash = (hash * 31 + norm.charCodeAt(i)) % 997;
+      if (norm.includes("cassino")) {
+        return { lat: -32.1830, lon: -52.1640, nome: "Balneário Cassino" };
       }
-      const dLat = ((hash % 20) - 10) * 0.0005;
-      const dLon = ((Math.floor(hash / 20) % 20) - 10) * 0.0005;
-      return {
-        lat: Number((-32.1825 + dLat).toFixed(5)),
-        lon: Number((-52.1645 + dLon).toFixed(5)),
-        zona: "cassino",
-        nome: limpo
-      };
+
+      return { lat: -32.1820, lon: -52.1650, nome: limpo };
     }
 
-    function calcularCorrida() {
+    async function calcularCorrida() {
       const origemTexto = document.getElementById("pickup").value.trim();
       const destinoTexto = document.getElementById("dropoff").value.trim();
 
@@ -224,8 +270,10 @@
         return;
       }
 
-      const pOrigem = coordsOrigem ? { ...coordsOrigem, zona: coordsOrigem.lat < -32.12 ? "cassino" : "rg", nome: "Meu GPS" } : resolverEndereco(origemTexto);
-      const pDestino = resolverEndereco(destinoTexto);
+      setMsg("Localizando pontos e calculando...");
+
+      const pOrigem = coordsOrigem ? { ...coordsOrigem, nome: "Meu GPS" } : await resolverEndereco(origemTexto);
+      const pDestino = await resolverEndereco(destinoTexto);
 
       if (marcadorOrigem) map.removeLayer(marcadorOrigem);
       if (marcadorDestino) map.removeLayer(marcadorDestino);
@@ -242,7 +290,7 @@
       map.fitBounds(linhaRota.getBounds(), { padding: [35, 35] });
 
       const retaKm = distanciaLinhaRetaKm(pOrigem, pDestino);
-      let kmFinal = retaKm * 1.20;
+      let kmFinal = retaKm * 1.22;
 
       if (kmFinal < 0.8) {
         kmFinal = 1.0;
@@ -250,7 +298,7 @@
 
       distanciaAtual = Number(kmFinal.toFixed(2));
       atualizarTela();
-      setMsg(`Rota: ${pOrigem.nome} → ${pDestino.nome} (${distanciaAtual.toFixed(2).replace(".", ",")} km)`);
+      setMsg(`${pOrigem.nome} → ${pDestino.nome}: ${distanciaAtual.toFixed(2).replace(".", ",")} km`);
     }
 
     function usarGPS() {
@@ -266,7 +314,7 @@
           document.getElementById("gpsStatus").textContent = "GPS ativo";
           document.getElementById("pickup").value = `GPS (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`;
           map.setView([latitude, longitude], 14);
-          setMsg("GPS capturado! Agora digite o destino e toque em Calcular corrida.");
+          setMsg("GPS capturado! Digite o destino e toque em Calcular corrida.");
         },
         () => {
           document.getElementById("gpsStatus").textContent = "GPS manual";
