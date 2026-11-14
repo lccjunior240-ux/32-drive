@@ -4,35 +4,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="32 Drive" />
-  <title>32 Drive - Cassino & Rio Grande</title>
+  <title>32 Drive</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Ctext x='50%25' y='48%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='900' font-size='210' fill='%23ffffff'%3E32%3C/text%3E%3Ctext x='50%25' y='73%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='800' font-size='54' letter-spacing='6' fill='%23ffffff'%3EDRIVE%3C/text%3E%3C/svg%3E" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Ctext x='50%25' y='48%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='900' font-size='210' fill='%23ffffff'%3E32%3C/text%3E%3Ctext x='50%25' y='73%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='800' font-size='54' letter-spacing='6' fill='%23ffffff'%3EDRIVE%3C/text%3E%3C/svg%3E" />
+  <link rel="manifest" id="pwaManifest" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
     body { background: #ffffff; color: #0f172a; padding: 16px; max-width: 580px; margin: 0 auto; font-size: 17px; }
     .card { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 16px; padding: 18px; margin-bottom: 16px; }
-    .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; flex-wrap: wrap; }
+    .top { display: flex; justify-content: flex-start; align-items: center; margin-bottom: 14px; }
     .badge { background: #0f172a; color: #ffffff; font-weight: 800; padding: 8px 14px; border-radius: 999px; font-size: 15px; }
-    .pill { background: #e2e8f0; color: #0f172a; padding: 8px 12px; border-radius: 999px; font-size: 14px; font-weight: 700; }
     #map { width: 100%; height: 220px; border-radius: 12px; border: 2px solid #cbd5e1; margin-bottom: 14px; }
     label { display: block; font-size: 16px; color: #0f172a; margin-bottom: 6px; font-weight: 800; }
     input { width: 100%; background: #ffffff; border: 2px solid #94a3b8; color: #0f172a; padding: 13px 14px; border-radius: 12px; margin-bottom: 14px; font-size: 18px; font-weight: 600; }
     input:focus { outline: none; border-color: #0f172a; }
-    button { width: 100%; border: none; border-radius: 12px; padding: 15px; font-size: 18px; font-weight: 800; cursor: pointer; margin-bottom: 12px; }
-    button:last-child { margin-bottom: 0; }
+    button, .btn-link { display: block; width: 100%; border: none; border-radius: 12px; padding: 15px; font-size: 18px; font-weight: 800; cursor: pointer; margin-bottom: 12px; text-align: center; text-decoration: none; }
+    button:last-child, .btn-link:last-child { margin-bottom: 0; }
     .btn-blue { background: #0f172a; color: #ffffff; }
     .btn-calc { background: #0284c7; color: #ffffff; }
     .btn-green { background: #15803d; color: #ffffff; }
-    .btn-waze { background: #0ea5e9; color: #ffffff; }
     .btn-dark { background: #334155; color: #ffffff; }
-    .resumo { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+    .resumo { display: none; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+    .resumo.visivel { display: block; }
     .resumo div { margin-bottom: 8px; font-size: 18px; color: #1e293b; font-weight: 600; }
+    .resumo div:last-child { margin-bottom: 0; }
     .resumo strong { color: #0f172a; font-size: 19px; }
-    .total { font-size: 24px !important; font-weight: 900; color: #15803d !important; }
+    .total { font-size: 26px !important; font-weight: 900; color: #15803d !important; }
     .pix-box { background: #ffffff; border: 2px dashed #0f172a; border-radius: 12px; padding: 14px; margin-top: 12px; }
     .pix-box strong { font-size: 17px; color: #0f172a; }
     .pix-key { font-family: monospace; font-size: 16px; font-weight: 700; word-break: break-all; background: #f1f5f9; padding: 10px; border-radius: 10px; margin: 10px 0; color: #0f172a; border: 1px solid #cbd5e1; }
@@ -43,39 +45,33 @@
   <div class="card">
     <div class="top">
       <span class="badge">32 DRIVE • Cassino & Rio Grande</span>
-      <span class="pill" id="gpsStatus">Pronto</span>
     </div>
 
     <div id="map"></div>
 
     <label for="pName">Nome do passageiro</label>
-    <input id="pName" type="text" placeholder="Ex.: João Silva" />
+    <input id="pName" type="text" placeholder="Ex.: João Silva" oninput="atualizarLinkWhats()" />
 
     <label for="pPhone">Telefone do passageiro</label>
-    <input id="pPhone" type="tel" placeholder="Ex.: 53 99999-9999" />
+    <input id="pPhone" type="tel" placeholder="Ex.: 53 99999-9999" oninput="atualizarLinkWhats()" />
 
     <label for="pickup">Origem (bairro, empresa ou referência)</label>
-    <input id="pickup" type="text" placeholder="Ex.: Cassino, Querência, Parque Guanabara, ABC" oninput="limparGpsSeEditar()" />
+    <input id="pickup" type="text" placeholder="Ex.: Cassino, Querência, Parque Guanabara, ABC" oninput="limparGpsSeEditar(); atualizarLinkWhats();" />
 
     <label for="dropoff">Destino (bairro, empresa ou referência)</label>
-    <input id="dropoff" type="text" placeholder="Ex.: Parque Marinha, Cidade Nova, Lar Gaúcho, Centro" />
+    <input id="dropoff" type="text" placeholder="Ex.: Parque Marinha, Cidade Nova, Lar Gaúcho, Centro" oninput="atualizarLinkWhats()" />
 
     <button type="button" class="btn-blue" onclick="usarGPS()">Usar meu GPS</button>
     <button type="button" class="btn-calc" onclick="calcularCorrida()">Calcular corrida</button>
 
-    <div class="resumo">
+    <div class="resumo" id="boxResumo">
       <div>Distância aprox.: <strong id="distVal">0,00 km</strong></div>
-      <div>Faixa: <strong id="faixaVal">Até 3,5 km (R$ 7,99)</strong></div>
-      <div class="total">Valor: <span id="valorVal">R$ 7,99</span></div>
+      <div class="total">Valor da viagem: <span id="valorVal">R$ 7,99</span></div>
     </div>
 
-    <button type="button" class="btn-green" id="btnWhats" onclick="enviarWhatsMotorista()">
+    <a class="btn-link btn-green" id="btnWhats" href="https://wa.me/5553991357231" target="_top" rel="noopener noreferrer">
       Enviar corrida no WhatsApp do motorista
-    </button>
-
-    <button type="button" class="btn-waze" id="btnWaze" onclick="abrirWaze()">
-      Abrir rota no Waze
-    </button>
+    </a>
 
     <div class="pix-box">
       <strong>Chave Pix (Banco Inter - Aleatória)</strong>
@@ -87,6 +83,25 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
+    // Configura manifest dinâmico para instalação como aplicativo (PWA)
+    (function configurarPWA() {
+      const iconeSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Ctext x='50%25' y='48%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='900' font-size='210' fill='%23ffffff'%3E32%3C/text%3E%3Ctext x='50%25' y='73%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='800' font-size='54' letter-spacing='6' fill='%23ffffff'%3EDRIVE%3C/text%3E%3C/svg%3E";
+      const manifestObj = {
+        name: "32 Drive",
+        short_name: "32 Drive",
+        start_url: window.location.href,
+        display: "standalone",
+        background_color: "#ffffff",
+        theme_color: "#0f172a",
+        icons: [
+          { src: iconeSvg, sizes: "192x192", type: "image/svg+xml" },
+          { src: iconeSvg, sizes: "512x512", type: "image/svg+xml" }
+        ]
+      };
+      const blob = new Blob([JSON.stringify(manifestObj)], { type: "application/manifest+json" });
+      document.getElementById("pwaManifest").setAttribute("href", URL.createObjectURL(blob));
+    })();
+
     const CHAVE_PIX_INTER = "45bd89b5-9dd7-4cda-8715-789257d06596";
     const WHATS_MOTORISTA = "5553991357231";
 
@@ -104,8 +119,8 @@
     let distanciaAtual = 0;
     let valorAtual = 7.99;
     let coordsOrigem = null;
+    let corridaCalculada = false;
 
-    // Bairros, comércios e empresas de Cassino, Barra e Rio Grande
     const PONTOS_REAIS = [
       // Bairros e pontos do Cassino
       { chaves: ["parque guanabara", "pq guanabara"], lat: -32.1745, lon: -52.1710, nome: "Parque Guanabara (Cassino)" },
@@ -175,11 +190,34 @@
       }
       return {
         km: limpo,
-        valor: Number(base.toFixed(2)),
-        faixa: limpo <= 3.5
-          ? (noturno ? "Até 3,5 km + Noturno 25%" : "Até 3,5 km (R$ 7,99)")
-          : (noturno ? "Acima de 3,5 km (R$ 2/km) + Noturno 25%" : "Acima de 3,5 km (R$ 2/km)")
+        valor: Number(base.toFixed(2))
       };
+    }
+
+    function atualizarLinkWhats() {
+      const nome = document.getElementById("pName").value.trim() || "Não informado";
+      const tel = document.getElementById("pPhone").value.trim() || "Não informado";
+      const origem = document.getElementById("pickup").value.trim() || "Não informado";
+      const destino = document.getElementById("dropoff").value.trim() || "Não informado";
+      const valorFmt = "R$ " + valorAtual.toFixed(2).replace(".", ",");
+      const distFmt = distanciaAtual.toFixed(2).replace(".", ",") + " km";
+
+      const linhas = [
+        "*NOVA CORRIDA - 32 DRIVE*",
+        `Passageiro: ${nome}`,
+        `Telefone: ${tel}`,
+        `Origem: ${origem}`,
+        `Destino: ${destino}`
+      ];
+
+      if (corridaCalculada) {
+        linhas.push(`Distância aprox.: ${distFmt}`);
+        linhas.push(`Valor: ${valorFmt}`);
+      }
+
+      linhas.push(`Pix Inter: ${CHAVE_PIX_INTER}`);
+
+      document.getElementById("btnWhats").href = `https://wa.me/${WHATS_MOTORISTA}?text=${encodeURIComponent(linhas.join("\n"))}`;
     }
 
     function atualizarTela() {
@@ -187,8 +225,11 @@
       distanciaAtual = calc.km;
       valorAtual = calc.valor;
       document.getElementById("distVal").textContent = calc.km.toFixed(2).replace(".", ",") + " km";
-      document.getElementById("faixaVal").textContent = calc.faixa;
       document.getElementById("valorVal").textContent = "R$ " + calc.valor.toFixed(2).replace(".", ",");
+      if (corridaCalculada) {
+        document.getElementById("boxResumo").classList.add("visivel");
+      }
+      atualizarLinkWhats();
     }
 
     function distanciaLinhaRetaKm(a, b) {
@@ -297,8 +338,9 @@
       }
 
       distanciaAtual = Number(kmFinal.toFixed(2));
+      corridaCalculada = true;
       atualizarTela();
-      setMsg(`${pOrigem.nome} → ${pDestino.nome}: ${distanciaAtual.toFixed(2).replace(".", ",")} km`);
+      setMsg(`${pOrigem.nome} → ${pDestino.nome}`);
     }
 
     function usarGPS() {
@@ -306,51 +348,20 @@
         setMsg("GPS não disponível neste aparelho.");
         return;
       }
-      document.getElementById("gpsStatus").textContent = "Buscando GPS...";
+      setMsg("Buscando localização pelo GPS...");
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const { latitude, longitude } = pos.coords;
           coordsOrigem = { lat: latitude, lon: longitude };
-          document.getElementById("gpsStatus").textContent = "GPS ativo";
           document.getElementById("pickup").value = `GPS (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`;
           map.setView([latitude, longitude], 14);
+          atualizarLinkWhats();
           setMsg("GPS capturado! Digite o destino e toque em Calcular corrida.");
         },
         () => {
-          document.getElementById("gpsStatus").textContent = "GPS manual";
           setMsg("GPS indisponível. Digite origem e destino e toque em Calcular corrida.");
         }
       );
-    }
-
-    function enviarWhatsMotorista() {
-      const nome = document.getElementById("pName").value.trim() || "Não informado";
-      const tel = document.getElementById("pPhone").value.trim() || "Não informado";
-      const origem = document.getElementById("pickup").value.trim() || "Não informado";
-      const destino = document.getElementById("dropoff").value.trim() || "Não informado";
-      const valorFmt = "R$ " + valorAtual.toFixed(2).replace(".", ",");
-      const distFmt = distanciaAtual.toFixed(2).replace(".", ",") + " km";
-
-      const texto = [
-        "*NOVA CORRIDA - 32 DRIVE*",
-        `Passageiro: ${nome}`,
-        `Telefone: ${tel}`,
-        `Origem: ${origem}`,
-        `Destino: ${destino}`,
-        `Distância aprox.: ${distFmt}`,
-        `Valor: ${valorFmt}`,
-        `Pix Inter: ${CHAVE_PIX_INTER}`
-      ].join("\n");
-
-      const url = `https://wa.me/${WHATS_MOTORISTA}?text=${encodeURIComponent(texto)}`;
-      window.location.href = url;
-    }
-
-    function abrirWaze() {
-      const destino = document.getElementById("dropoff").value.trim();
-      const alvo = destino || "Cassino, Rio Grande - RS";
-      const urlWaze = `https://waze.com/ul?q=${encodeURIComponent(alvo)}&navigate=yes`;
-      window.location.href = urlWaze;
     }
 
     async function copiarPix() {
@@ -369,7 +380,7 @@
       }
     }
 
-    atualizarTela();
+    atualizarLinkWhats();
   </script>
 </body>
 </html>
