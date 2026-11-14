@@ -3,31 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#ffffff" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="32 Drive" />
   <title>32 Drive - Rio Grande & Cassino</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Ctext x='50%25' y='48%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='900' font-size='210' fill='%23ffffff'%3E32%3C/text%3E%3Ctext x='50%25' y='73%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='800' font-size='54' letter-spacing='6' fill='%23ffffff'%3EDRIVE%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Ctext x='50%25' y='48%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='900' font-size='210' fill='%23ffffff'%3E32%3C/text%3E%3Ctext x='50%25' y='73%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='800' font-size='54' letter-spacing='6' fill='%23ffffff'%3EDRIVE%3C/text%3E%3C/svg%3E" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
     body { background: #ffffff; color: #0f172a; padding: 16px; max-width: 580px; margin: 0 auto; font-size: 17px; }
     .card { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 16px; padding: 18px; margin-bottom: 16px; }
     .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; flex-wrap: wrap; }
-    .badge { background: #0284c7; color: #ffffff; font-weight: 800; padding: 8px 12px; border-radius: 999px; font-size: 15px; }
+    .badge { background: #0f172a; color: #ffffff; font-weight: 800; padding: 8px 12px; border-radius: 999px; font-size: 15px; }
     .pill { background: #e2e8f0; color: #0f172a; padding: 8px 12px; border-radius: 999px; font-size: 14px; font-weight: 700; }
     #map { width: 100%; height: 240px; border-radius: 12px; border: 2px solid #cbd5e1; margin-bottom: 14px; }
     label { display: block; font-size: 16px; color: #0f172a; margin-bottom: 6px; font-weight: 800; }
     input { width: 100%; background: #ffffff; border: 2px solid #94a3b8; color: #0f172a; padding: 13px 14px; border-radius: 12px; margin-bottom: 14px; font-size: 18px; font-weight: 600; }
-    input:focus { outline: none; border-color: #0284c7; }
+    input:focus { outline: none; border-color: #0f172a; }
     button { width: 100%; border: none; border-radius: 12px; padding: 15px; font-size: 18px; font-weight: 800; cursor: pointer; margin-bottom: 12px; }
     button:last-child { margin-bottom: 0; }
-    .btn-blue { background: #0284c7; color: #ffffff; }
+    .btn-blue { background: #0f172a; color: #ffffff; }
     .btn-green { background: #15803d; color: #ffffff; }
     .btn-waze { background: #0ea5e9; color: #ffffff; }
-    .btn-dark { background: #1e293b; color: #ffffff; }
+    .btn-dark { background: #334155; color: #ffffff; }
     .resumo { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; padding: 14px; margin-bottom: 14px; }
     .resumo div { margin-bottom: 8px; font-size: 18px; color: #1e293b; font-weight: 600; }
     .resumo strong { color: #0f172a; font-size: 19px; }
     .total { font-size: 24px !important; font-weight: 900; color: #15803d !important; }
-    .pix-box { background: #ffffff; border: 2px dashed #0284c7; border-radius: 12px; padding: 14px; margin-top: 12px; }
+    .pix-box { background: #ffffff; border: 2px dashed #0f172a; border-radius: 12px; padding: 14px; margin-top: 12px; }
     .pix-box strong { font-size: 17px; color: #0f172a; }
     .pix-key { font-family: monospace; font-size: 16px; font-weight: 700; word-break: break-all; background: #f1f5f9; padding: 10px; border-radius: 10px; margin: 10px 0; color: #0f172a; border: 1px solid #cbd5e1; }
     .msg { font-size: 16px; font-weight: 700; color: #0f172a; margin-top: 8px; min-height: 22px; }
@@ -36,7 +41,7 @@
 <body>
   <div class="card">
     <div class="top">
-      <span class="badge">32 DRIVE • Rio Grande & Cassino</span>
+      <span class="badge">32 DRIVE • Cassino & Rio Grande</span>
       <span class="pill" id="gpsStatus">Cálculo automático</span>
     </div>
 
@@ -48,11 +53,11 @@
     <label for="pPhone">Telefone do passageiro</label>
     <input id="pPhone" type="tel" placeholder="Ex.: 53 99999-9999" />
 
-    <label for="pickup">Origem (endereço, bairro ou referência)</label>
-    <input id="pickup" type="text" placeholder="Ex.: Cassino ou Av. Rio Grande" />
+    <label for="pickup">Origem (endereço ou referência no Cassino)</label>
+    <input id="pickup" type="text" placeholder="Ex.: Av. Rio Grande, Cassino" />
 
-    <label for="dropoff">Destino (endereço, bairro ou referência)</label>
-    <input id="dropoff" type="text" placeholder="Ex.: Centro, Rio Grande" />
+    <label for="dropoff">Destino (endereço ou referência)</label>
+    <input id="dropoff" type="text" placeholder="Ex.: Supermercado Guanabara Cassino" />
 
     <button type="button" class="btn-blue" onclick="usarGPS()">Usar meu GPS</button>
 
@@ -85,7 +90,7 @@
 
     document.getElementById("pixTexto").textContent = CHAVE_PIX_INTER;
 
-    const map = L.map("map").setView([-32.10, -52.12], 12);
+    const map = L.map("map").setView([-32.1830, -52.1640], 14);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution: "&copy; OpenStreetMap"
@@ -94,21 +99,26 @@
     let marcadorOrigem = null;
     let marcadorDestino = null;
     let linhaRota = null;
-    let distanciaAtual = 3.0;
+    let distanciaAtual = 1.0;
     let valorAtual = 7.99;
     let coordsOrigem = null;
 
-    const SETORES_GEOGRAFICOS = [
-      { chaves: ["cassino", "balneario", "balneário", "av rio grande", "av. rio grande", "praia"], lat: -32.1835, lon: -52.1645, nome: "Cassino" },
-      { chaves: ["centro", "silva paes", "marechal floriano", "alfandega", "alfândega"], lat: -32.0352, lon: -52.0986, nome: "Centro Rio Grande" },
-      { chaves: ["cidade nova"], lat: -32.0540, lon: -52.1180, nome: "Cidade Nova" },
-      { chaves: ["getulio", "getúlio", "bgv"], lat: -32.0510, lon: -52.1090, nome: "Getúlio Vargas" },
-      { chaves: ["querencia", "querência"], lat: -32.0620, lon: -52.1420, nome: "Querência" },
-      { chaves: ["parque marinha", "marinha"], lat: -32.0780, lon: -52.1350, nome: "Parque Marinha" },
-      { chaves: ["laranjeiras"], lat: -32.0880, lon: -52.1490, nome: "Laranjeiras" },
-      { chaves: ["ilha dos marinheiros", "marinheiros"], lat: -31.9950, lon: -52.1550, nome: "Ilha dos Marinheiros" },
-      { chaves: ["quinta"], lat: -32.0050, lon: -52.2350, nome: "Quinta" },
-      { chaves: ["rio grande"], lat: -32.0420, lon: -52.1050, nome: "Rio Grande" }
+    const PONTOS_CASSINO_E_RG = [
+      { chaves: ["guanabara", "supermercado guanabara", "guanabara cassino"], lat: -32.1852, lon: -52.1654, zona: "cassino", nome: "Guanabara Cassino" },
+      { chaves: ["peruzzo", "peruzzo cassino"], lat: -32.1818, lon: -52.1628, zona: "cassino", nome: "Peruzzo Cassino" },
+      { chaves: ["av rio grande", "av. rio grande"], lat: -32.1830, lon: -52.1640, zona: "cassino", nome: "Av. Rio Grande (Cassino)" },
+      { chaves: ["beira mar", "beira-mar", "praia"], lat: -32.1875, lon: -52.1590, zona: "cassino", nome: "Beira-Mar Cassino" },
+      { chaves: ["terminal cassino", "terminal"], lat: -32.1805, lon: -52.1670, zona: "cassino", nome: "Terminal Cassino" },
+      { chaves: ["cassino", "balneario", "balneário"], lat: -32.1825, lon: -52.1645, zona: "cassino", nome: "Cassino" },
+
+      { chaves: ["centro", "silva paes", "marechal floriano", "alfandega", "alfândega"], lat: -32.0352, lon: -52.0986, zona: "rio_grande", nome: "Centro Rio Grande" },
+      { chaves: ["cidade nova"], lat: -32.0540, lon: -52.1180, zona: "rio_grande", nome: "Cidade Nova" },
+      { chaves: ["getulio", "getúlio", "bgv"], lat: -32.0510, lon: -52.1090, zona: "rio_grande", nome: "Getúlio Vargas" },
+      { chaves: ["querencia", "querência"], lat: -32.0620, lon: -52.1420, zona: "rio_grande", nome: "Querência" },
+      { chaves: ["parque marinha", "marinha"], lat: -32.0780, lon: -52.1350, zona: "rio_grande", nome: "Parque Marinha" },
+      { chaves: ["laranjeiras"], lat: -32.0880, lon: -52.1490, zona: "rio_grande", nome: "Laranjeiras" },
+      { chaves: ["quinta"], lat: -32.0050, lon: -52.2350, zona: "rio_grande", nome: "Quinta" },
+      { chaves: ["rio grande"], lat: -32.0420, lon: -52.1050, zona: "rio_grande", nome: "Rio Grande" }
     ];
 
     function setMsg(texto) {
@@ -151,45 +161,36 @@
       return 2 * R * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
     }
 
-    function resolverPontoGeografico(texto) {
+    function resolverPontoCassino(texto, forcarCassino) {
       const limpo = (texto || "").trim();
       const matchGps = limpo.match(/GPS\s*\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/i);
       if (matchGps) {
-        return {
-          lat: parseFloat(matchGps[1]),
-          lon: parseFloat(matchGps[2]),
-          nome: "GPS"
-        };
+        const lat = parseFloat(matchGps[1]);
+        const lon = parseFloat(matchGps[2]);
+        return { lat, lon, zona: lat < -32.12 ? "cassino" : "rio_grande", nome: "GPS" };
       }
 
       const lower = limpo.toLowerCase();
-      for (const setor of SETORES_GEOGRAFICOS) {
-        if (setor.chaves.some(k => lower.includes(k))) {
-          let hash = 0;
-          for (let i = 0; i < lower.length; i++) {
-            hash = (hash * 31 + lower.charCodeAt(i)) % 997;
-          }
-          const dLat = ((hash % 40) - 20) * 0.0009;
-          const dLon = ((Math.floor(hash / 40) % 40) - 20) * 0.0009;
-          return {
-            lat: Number((setor.lat + dLat).toFixed(5)),
-            lon: Number((setor.lon + dLon).toFixed(5)),
-            nome: setor.nome
-          };
+      for (const ponto of PONTOS_CASSINO_E_RG) {
+        if (ponto.chaves.some(k => lower.includes(k))) {
+          return { lat: ponto.lat, lon: ponto.lon, zona: ponto.zona, nome: ponto.nome };
         }
       }
 
-      let hash = 0;
-      for (let i = 0; i < lower.length; i++) {
-        hash = (hash * 37 + lower.charCodeAt(i)) % 997;
+      if (forcarCassino || !lower.includes("rio grande")) {
+        let hash = 0;
+        for (let i = 0; i < lower.length; i++) {
+          hash = (hash * 31 + lower.charCodeAt(i)) % 997;
+        }
+        return {
+          lat: Number((-32.1830 + ((hash % 30) - 15) * 0.0006).toFixed(5)),
+          lon: Number((-52.1640 + ((Math.floor(hash / 30) % 30) - 15) * 0.0006).toFixed(5)),
+          zona: "cassino",
+          nome: limpo || "Cassino"
+        };
       }
-      const baseLat = lower.includes("cassino") ? -32.18 : -32.05;
-      const baseLon = lower.includes("cassino") ? -52.16 : -52.11;
-      return {
-        lat: Number((baseLat + ((hash % 60) - 30) * 0.0012).toFixed(5)),
-        lon: Number((baseLon + ((Math.floor(hash / 60) % 60) - 30) * 0.0012).toFixed(5)),
-        nome: limpo || "Ponto local"
-      };
+
+      return { lat: -32.0420, lon: -52.1050, zona: "rio_grande", nome: limpo || "Rio Grande" };
     }
 
     function calcularAutomatico() {
@@ -201,8 +202,15 @@
         return;
       }
 
-      const pOrigem = coordsOrigem ? { ...coordsOrigem, nome: "GPS" } : resolverPontoGeografico(origemTexto);
-      const pDestino = resolverPontoGeografico(destinoTexto);
+      const lowerD = destinoTexto.toLowerCase();
+      const destinoEhRG = ["centro", "cidade nova", "getulio", "getúlio", "querencia", "querência", "marinha", "laranjeiras", "quinta", "rio grande"]
+        .some(b => lowerD.includes(b));
+
+      const pOrigem = coordsOrigem
+        ? { ...coordsOrigem, zona: coordsOrigem.lat < -32.12 ? "cassino" : "rio_grande", nome: "GPS" }
+        : resolverPontoCassino(origemTexto, !destinoEhRG);
+
+      const pDestino = resolverPontoCassino(destinoTexto, !destinoEhRG && pOrigem.zona === "cassino");
 
       if (marcadorOrigem) map.removeLayer(marcadorOrigem);
       if (marcadorDestino) map.removeLayer(marcadorDestino);
@@ -213,16 +221,22 @@
 
       linhaRota = L.polyline(
         [[pOrigem.lat, pOrigem.lon], [pDestino.lat, pDestino.lon]],
-        { color: "#0284c7", weight: 5, dashArray: "8, 6" }
+        { color: "#0f172a", weight: 5, dashArray: "8, 6" }
       ).addTo(map);
 
-      map.fitBounds(linhaRota.getBounds(), { padding: [28, 28] });
+      map.fitBounds(linhaRota.getBounds(), { padding: [32, 32] });
 
-      const reta = distanciaLinhaRetaKm(pOrigem, pDestino);
-      const kmAproximado = Math.max(1.0, Number((reta * 1.25).toFixed(2)));
-      distanciaAtual = kmAproximado;
+      const retaKm = distanciaLinhaRetaKm(pOrigem, pDestino);
+      let kmFinal;
+      if (pOrigem.zona === "cassino" && pDestino.zona === "cassino") {
+        kmFinal = retaKm < 0.25 ? 1.0 : Number(Math.min(4.5, Math.max(1.0, retaKm * 1.2)).toFixed(2));
+      } else {
+        kmFinal = Number(Math.max(12.0, retaKm * 1.25).toFixed(2));
+      }
+
+      distanciaAtual = kmFinal;
       atualizarTela();
-      setMsg(`Linha reta ajustada (${pOrigem.nome} → ${pDestino.nome}): ${kmAproximado.toFixed(2).replace(".", ",")} km.`);
+      setMsg(`Linha reta (${pOrigem.nome} → ${pDestino.nome}): ${kmFinal.toFixed(2).replace(".", ",")} km.`);
     }
 
     function usarGPS() {
@@ -241,7 +255,7 @@
         },
         () => {
           document.getElementById("gpsStatus").textContent = "GPS manual";
-          setMsg("GPS indisponível. Digite bairro ou rua que o cálculo sai automático.");
+          setMsg("GPS indisponível. Digite o endereço ou referência no Cassino.");
         }
       );
     }
