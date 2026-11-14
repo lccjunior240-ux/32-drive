@@ -2,225 +2,271 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#121212" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>32 Drive — Mobilidade Urbana</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>32 Drive • Rio Grande & Cassino</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    :root {
-      --bg: #121212;
-      --card: #1e1e1e;
-      --border: #2e2e2e;
-      --text: #f5f5f5;
-      --muted: #a0a0a0;
-      --accent: #f59e0b;
-      --accent-dark: #d97706;
-      --green: #16a34a;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    header {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .badge {
-      background: var(--accent);
-      color: #111;
-      font-weight: 800;
-      font-size: 15px;
-      padding: 6px 10px;
-      border-radius: 8px;
-      letter-spacing: 0.5px;
-    }
-    h1 { font-size: 18px; font-weight: 700; }
-    .subtitle { font-size: 12px; color: var(--muted); }
-    main {
-      flex: 1;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-width: 640px;
-      width: 100%;
-      margin: 0 auto;
-    }
-    #map {
-      width: 100%;
-      height: 250px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      overflow: hidden;
-    }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .card-title { font-size: 14px; font-weight: 600; color: var(--muted); }
-    label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px; }
-    input {
-      width: 100%;
-      padding: 11px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: #141414;
-      color: var(--text);
-      font-size: 15px;
-    }
-    input:focus { outline: none; border-color: var(--accent); }
-    .row { display: flex; gap: 10px; }
-    button, .btn-link {
-      flex: 1;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: none;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-    }
-    .btn-primary { background: var(--accent); color: #111; }
-    .btn-primary:active { background: var(--accent-dark); }
-    .btn-secondary { background: #262626; color: var(--text); border: 1px solid var(--border); }
-    .btn-pix { background: var(--green); color: #fff; }
-    .status { font-size: 13px; color: var(--muted); line-height: 1.4; }
-    .pix-box {
-      display: none;
-      background: #141414;
-      border: 1px dashed var(--accent);
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 13px;
-      word-break: break-all;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: #0f1115; color: #f3f5f8; padding: 14px; max-width: 520px; margin: 0 auto; }
+    .card { background: #181b22; border: 1px solid #2e3444; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+    .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
+    .badge { background: #f59e0b; color: #111; font-weight: 800; padding: 8px 12px; border-radius: 10px; font-size: 14px; }
+    .pill { background: rgba(22,163,74,.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 10px; border-radius: 999px; font-size: 12px; white-space: nowrap; }
+    #map { width: 100%; height: 215px; border-radius: 12px; border: 1px solid #2e3444; margin-bottom: 12px; }
+    label { display: block; font-size: 12px; color: #9aa3b2; margin-bottom: 4px; }
+    input { width: 100%; background: #222631; border: 1px solid #2e3444; color: #fff; border-radius: 10px; padding: 11px 12px; font-size: 14px; margin-bottom: 10px; }
+    input:focus { outline: none; border-color: #f59e0b; }
+    button { width: 100%; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 8px; color: #fff; background: #222631; border: 1px solid #2e3444; }
+    button:last-child { margin-bottom: 0; }
+    .btn-blue { background: #2563eb; border-color: #2563eb; }
+    .btn-green { background: #16a34a; border-color: #16a34a; }
+    .btn-waze { background: #f59e0b; border-color: #f59e0b; color: #111; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .res { background: #222631; border: 1px solid #2e3444; border-radius: 10px; padding: 11px 12px; margin-bottom: 10px; }
+    .res div { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; color: #cbd5e1; }
+    .total { font-size: 18px; font-weight: 800; color: #fbbf24; margin-bottom: 0 !important; }
+    .pix-box { display: none; background: #222631; border: 1px solid #2e3444; border-radius: 10px; padding: 11px; margin-top: 8px; }
+    .pix-key { font-family: monospace; font-size: 12px; word-break: break-all; background: #0f1115; padding: 8px; border-radius: 8px; margin: 6px 0; color: #e2e8f0; }
+    .msg { font-size: 12px; color: #9aa3b2; margin-top: 6px; line-height: 1.4; }
+    .waze-link { font-size: 12px; color: #93c5fd; word-break: break-all; margin-top: 6px; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="brand">
-      <span class="badge">32</span>
-      <div>
-        <h1>32 Drive</h1>
-        <div class="subtitle">Rio Grande • Balneário do Cassino</div>
-      </div>
+  <div class="card">
+    <div class="top">
+      <div class="badge">32 DRIVE • Rio Grande / Cassino</div>
+      <span class="pill" id="gpsStatus">GPS ativo</span>
     </div>
-    <span class="subtitle" id="gpsStatus">Localizando...</span>
-  </header>
 
-  <main>
-    <div id="map" aria-label="Mapa de localização"></div>
+    <div id="map"></div>
 
-    <section class="card">
-      <div class="card-title">Solicitar Corrida</div>
-      <div>
-        <label for="pickup">Ponto de embarque</label>
-        <input id="pickup" type="text" placeholder="Ex.: Av. Rio Grande, Cassino" />
-      </div>
-      <div>
-        <label for="destination">Destino</label>
-        <input id="destination" type="text" placeholder="Ex.: Centro de Rio Grande" />
-      </div>
-      <div class="row">
-        <button type="button" class="btn-secondary" id="locateBtn">Usar meu GPS</button>
-        <a class="btn-primary" id="wazeBtn" href="https://waze.com/ul?q=Balneario%20do%20Cassino%20Rio%20Grande&navigate=yes" target="_blank" rel="noopener">Abrir Waze</a>
-      </div>
-      <div class="status" id="rideSummary">Preencha origem e destino para abrir a rota no Waze.</div>
-    </section>
+    <label for="pName">Nome do passageiro</label>
+    <input id="pName" type="text" placeholder="Ex.: João Silva" />
 
-    <section class="card">
-      <div class="card-title">Pagamento</div>
-      <button type="button" class="btn-pix" id="pixBtn">Mostrar Chave Pix</button>
-      <div class="pix-box" id="pixBox">
-        Chave Pix (32 Drive): <strong id="pixKey">lccjunior240@gmail.com</strong>
-      </div>
-    </section>
-  </main>
+    <label for="pPhone">Telefone do passageiro</label>
+    <input id="pPhone" type="tel" placeholder="Ex.: 53 99999-9999" />
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <label for="pickup">Linha 1 — Onde vai pegar (embarque)</label>
+    <input id="pickup" type="text" placeholder="Ex.: Av. Rio Grande, Cassino, Rio Grande" />
+
+    <label for="dropoff">Linha 2 — Para onde vai levar (destino)</label>
+    <input id="dropoff" type="text" placeholder="Ex.: Centro de Rio Grande" />
+
+    <button type="button" class="btn-blue" onclick="useGPS()">Usar meu GPS</button>
+    <button type="button" class="btn-blue" onclick="calcRide()">Calcular Corrida</button>
+
+    <div class="res">
+      <div><span>Distância:</span><strong id="distTxt">— km</strong></div>
+      <div><span>Regra:</span><span>R$ 7,99 até 3,5 km | +R$ 2,50/km</span></div>
+      <div class="total"><span>Valor da corrida:</span><span id="priceTxt">R$ 7,99</span></div>
+    </div>
+
+    <button type="button" class="btn-green" onclick="sendWhats()">Pedir Corrida no WhatsApp</button>
+
+    <div class="row2">
+      <button type="button" class="btn-waze" onclick="openWaze()">Abrir Waze</button>
+      <button type="button" onclick="shareWaze()">Link Waze Viagem</button>
+    </div>
+
+    <div class="waze-link" id="wazeOut"></div>
+    <div class="msg" id="msg">Preencha passageiro, coleta e destino para calcular ou pedir.</div>
+  </div>
+
+  <div class="card">
+    <button type="button" class="btn-green" onclick="togglePix()">Mostrar Chave Pix</button>
+    <div class="pix-box" id="pixBox">
+      <div><strong>Banco Inter</strong> • Chave Aleatória</div>
+      <div class="pix-key">45bd89b5-9dd7-4cda-8715-789257d06596</div>
+      <button type="button" class="btn-blue" onclick="copyPix()">Copiar Chave Pix</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    (function () {
-      const defaultCoords = [-32.1819, -52.1649]; // Cassino / Rio Grande, RS
-      const map = L.map("map").setView(defaultCoords, 13);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: "&copy; OpenStreetMap"
-      }).addTo(map);
-      const marker = L.marker(defaultCoords).addTo(map).bindPopup("32 Drive").openPopup();
+    const DRIVER_WA = "5553991357231";
+    const PIX_KEY = "45bd89b5-9dd7-4cda-8715-789257d06596";
+    // Limites restritos a Rio Grande / Balneário do Cassino para o mapa não buscar longe
+    const VIEWBOX = "-52.65,-31.85,-51.95,-32.45";
+    const BASE_COORD = [-32.17235, -52.16878];
 
-      const pickupInput = document.getElementById("pickup");
-      const destInput = document.getElementById("destination");
-      const wazeBtn = document.getElementById("wazeBtn");
-      const summary = document.getElementById("rideSummary");
-      const gpsStatus = document.getElementById("gpsStatus");
+    const map = L.map("map").setView(BASE_COORD, 13);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap"
+    }).addTo(map);
 
-      function updateWaze() {
-        const dest = destInput.value.trim();
-        const pickup = pickupInput.value.trim();
-        if (dest) {
-          wazeBtn.href = "https://waze.com/ul?q=" + encodeURIComponent(dest + " Rio Grande RS") + "&navigate=yes";
-          summary.textContent = (pickup ? "De: " + pickup + " → " : "") + "Para: " + dest;
-        }
+    let m1 = L.marker(BASE_COORD).addTo(map).bindPopup("Embarque");
+    let m2 = null;
+    let line = null;
+    let lastRide = { km: null, price: 7.99 };
+
+    const fmtBRL = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    const calcFare = (km) => (km <= 3.5 ? 7.99 : 7.99 + (km - 3.5) * 2.5);
+
+    const localQuery = (txt) => {
+      const t = txt.trim();
+      const l = t.toLowerCase();
+      if (l.includes("rio grande") || l.includes("cassino")) {
+        return l.includes("rs") ? t : `${t}, Rio Grande, RS`;
       }
+      return `${t}, Rio Grande, RS`;
+    };
 
-      pickupInput.addEventListener("input", updateWaze);
-      destInput.addEventListener("input", updateWaze);
-
-      function setLocation() {
-        if (!navigator.geolocation) {
-          gpsStatus.textContent = "GPS indisponível";
-          return;
-        }
-        navigator.geolocation.getCurrentPosition(
-          function (pos) {
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-            map.setView([lat, lon], 15);
-            marker.setLatLng([lat, lon]);
-            if (!pickupInput.value) {
-              pickupInput.value = lat.toFixed(5) + ", " + lon.toFixed(5);
-            }
-            gpsStatus.textContent = "GPS ativo";
-            updateWaze();
-          },
-          function () {
-            gpsStatus.textContent = "Cassino / RG";
-          },
-          { enableHighAccuracy: true, timeout: 8000 }
-        );
+    async function geocodeRG(txt) {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&bounded=1&viewbox=${VIEWBOX}&q=${encodeURIComponent(localQuery(txt))}`;
+      const r = await fetch(url, { headers: { "Accept-Language": "pt-BR" } });
+      const d = await r.json();
+      if (!Array.isArray(d) || !d.length) {
+        throw new Error(`Endereço não encontrado em Rio Grande / Cassino: ${txt}`);
       }
+      return { lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon) };
+    }
 
-      document.getElementById("locateBtn").addEventListener("click", setLocation);
-      document.getElementById("pixBtn").addEventListener("click", function () {
-        const box = document.getElementById("pixBox");
-        box.style.display = box.style.display === "block" ? "none" : "block";
+    function useGPS() {
+      const st = document.getElementById("gpsStatus");
+      if (!navigator.geolocation) {
+        st.textContent = "Sem GPS";
+        return;
+      }
+      st.textContent = "Localizando...";
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const { latitude: lat, longitude: lon } = pos.coords;
+          st.textContent = "GPS ativo";
+          m1.setLatLng([lat, lon]);
+          map.setView([lat, lon], 14);
+          try {
+            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+            const j = await r.json();
+            const a = j.address || {};
+            document.getElementById("pickup").value = `${a.road || "Ponto GPS"}, ${a.suburb || a.neighbourhood || "Rio Grande"}, Rio Grande, RS`;
+          } catch {
+            document.getElementById("pickup").value = `${lat.toFixed(5)}, ${lon.toFixed(5)}, Rio Grande, RS`;
+          }
+        },
+        () => {
+          st.textContent = "GPS manual";
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    async function calcRide() {
+      const p = document.getElementById("pickup").value.trim();
+      const d = document.getElementById("dropoff").value.trim();
+      const msg = document.getElementById("msg");
+      if (!p || !d) {
+        msg.textContent = "Preencha onde vai pegar e para onde vai levar.";
+        return null;
+      }
+      msg.textContent = "Calculando rota em Rio Grande / Cassino...";
+      try {
+        const c1 = await geocodeRG(p);
+        const c2 = await geocodeRG(d);
+        m1.setLatLng([c1.lat, c1.lon]);
+        if (m2) {
+          m2.setLatLng([c2.lat, c2.lon]);
+        } else {
+          m2 = L.marker([c2.lat, c2.lon]).addTo(map).bindPopup("Destino");
+        }
+
+        let km = (L.latLng(c1.lat, c1.lon).distanceTo([c2.lat, c2.lon]) / 1000) * 1.25;
+        try {
+          const rr = await fetch(`https://router.project-osrm.org/route/v1/driving/${c1.lon},${c1.lat};${c2.lon},${c2.lat}?overview=full&geometries=geojson`);
+          const rj = await rr.json();
+          if (rj.routes && rj.routes[0]) {
+            km = rj.routes[0].distance / 1000;
+            const coords = rj.routes[0].geometry.coordinates.map(([x, y]) => [y, x]);
+            if (line) map.removeLayer(line);
+            line = L.polyline(coords, { color: "#f59e0b", weight: 5 }).addTo(map);
+            map.fitBounds(line.getBounds(), { padding: [20, 20] });
+          }
+        } catch {}
+
+        const price = calcFare(km);
+        lastRide = { km, price };
+        document.getElementById("distTxt").textContent = `${km.toFixed(2)} km`;
+        document.getElementById("priceTxt").textContent = fmtBRL(price);
+        msg.textContent = "Rota calculada. Pronto para pedir no WhatsApp ou abrir o Waze.";
+        return lastRide;
+      } catch (e) {
+        msg.textContent = e.message || "Erro ao calcular rota.";
+        return null;
+      }
+    }
+
+    async function sendWhats() {
+      const name = document.getElementById("pName").value.trim();
+      const phone = document.getElementById("pPhone").value.trim();
+      const pickup = document.getElementById("pickup").value.trim();
+      const dropoff = document.getElementById("dropoff").value.trim();
+      const msg = document.getElementById("msg");
+      if (!name || !phone || !pickup || !dropoff) {
+        msg.textContent = "Preencha nome, telefone, embarque e destino.";
+        return;
+      }
+      const ride = lastRide.km ? lastRide : await calcRide();
+      const text =
+        `*32 DRIVE — NOVO PEDIDO DE CORRIDA*\n` +
+        `Passageiro: ${name}\n` +
+        `Telefone: ${phone}\n` +
+        `Coleta: ${pickup}\n` +
+        `Destino: ${dropoff}\n` +
+        `Distância: ${ride && ride.km ? ride.km.toFixed(2) + " km" : "A confirmar"}\n` +
+        `Valor: ${fmtBRL(ride ? ride.price : 7.99)}\n` +
+        `Pix Banco Inter: ${PIX_KEY}`;
+      window.open(`https://wa.me/${DRIVER_WA}?text=${encodeURIComponent(text)}`, "_blank");
+    }
+
+    async function openWaze() {
+      const dropoff = document.getElementById("dropoff").value.trim();
+      if (!dropoff) {
+        document.getElementById("msg").textContent = "Informe o destino para abrir o Waze.";
+        return;
+      }
+      try {
+        const c2 = await geocodeRG(dropoff);
+        window.open(`https://waze.com/ul?ll=${c2.lat},${c2.lon}&navigate=yes`, "_blank");
+      } catch {
+        window.open(`https://waze.com/ul?q=${encodeURIComponent(localQuery(dropoff))}&navigate=yes`, "_blank");
+      }
+    }
+
+    async function shareWaze() {
+      const pickup = document.getElementById("pickup").value.trim();
+      const dropoff = document.getElementById("dropoff").value.trim();
+      const out = document.getElementById("wazeOut");
+      if (!dropoff) {
+        out.textContent = "Informe o destino para gerar o link do Waze.";
+        return;
+      }
+      try {
+        const c2 = await geocodeRG(dropoff);
+        let from = "";
+        if (pickup) {
+          const c1 = await geocodeRG(pickup);
+          from = `&from=${c1.lat},${c1.lon}`;
+        }
+        const url = `https://waze.com/ul?ll=${c2.lat},${c2.lon}${from}&navigate=yes`;
+        out.innerHTML = `Link Waze: <a href="${url}" target="_blank" style="color:#93c5fd;">${url}</a>`;
+        if (navigator.clipboard) navigator.clipboard.writeText(url).catch(() => {});
+      } catch {
+        const url = `https://waze.com/ul?q=${encodeURIComponent(localQuery(dropoff))}&navigate=yes`;
+        out.innerHTML = `Link Waze: <a href="${url}" target="_blank" style="color:#93c5fd;">${url}</a>`;
+      }
+    }
+
+    function togglePix() {
+      const b = document.getElementById("pixBox");
+      b.style.display = b.style.display === "block" ? "none" : "block";
+    }
+
+    function copyPix() {
+      navigator.clipboard.writeText(PIX_KEY).then(() => {
+        document.getElementById("msg").textContent = "Chave Pix do Banco Inter copiada!";
       });
+    }
 
-      setLocation();
-    })();
+    window.addEventListener("load", useGPS);
   </script>
 </body>
 </html>
