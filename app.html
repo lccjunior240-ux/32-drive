@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0f1115" />
+  <meta name="theme-color" content="#181b22" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="32 Drive" />
   <title>32 Drive • Rio Grande & Cassino</title>
-  <link id="appIconLink" rel="icon" type="image/png" href="" />
-  <link id="appleIconLink" rel="apple-touch-icon" href="" />
+  <link id="appIconLink" rel="icon" type="image/png" sizes="512x512" href="" />
+  <link id="appleIconLink" rel="apple-touch-icon" sizes="512x512" href="" />
   <link id="manifestLink" rel="manifest" href="" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
@@ -55,14 +56,14 @@
     <label for="pPhone">Telefone do passageiro</label>
     <input id="pPhone" type="tel" placeholder="Ex.: 53 99999-9999" />
 
-    <label for="pickup">Onde vai pegar (embarque)</label>
-    <input id="pickup" type="text" placeholder="Ex.: Av. Rio Grande, Cassino, Rio Grande" />
+    <label for="pickup">Onde vai pegar (embarque / coleta)</label>
+    <input id="pickup" type="text" placeholder="Ex.: Pavilhão 4 FURG ou Av. Rio Grande, Cassino" />
 
-    <label for="dropoff">Para onde vai levar (destino)</label>
-    <input id="dropoff" type="text" placeholder="Ex.: Centro de Rio Grande" />
+    <label for="dropoff">Para onde vai levar (destino / entrega)</label>
+    <input id="dropoff" type="text" placeholder="Ex.: Av. Silva Paes, 100, Rio Grande" />
 
     <button type="button" class="btn-blue" onclick="useGPS()">Usar meu GPS</button>
-    <button type="button" class="btn-blue" onclick="syncFromInputs(true)">Calcular Corrida</button>
+    <button type="button" class="btn-blue" id="calcBtn" onclick="syncFromInputs(true)">Calcular Corrida</button>
 
     <div class="res">
       <div><span>Distância estimada:</span><strong id="distTxt">0,00 km</strong></div>
@@ -73,11 +74,11 @@
 
     <div class="row2">
       <button type="button" class="btn-waze" onclick="openWaze()">Abrir Waze</button>
-      <button type="button" onclick="shareWaze()">Link Waze Viagem</button>
+      <button type="button" class="btn-waze" onclick="shareWaze()">Link Waze Viagem</button>
     </div>
 
     <div class="waze-link" id="wazeOut"></div>
-    <div class="msg" id="msg">Preencha os campos ou toque no mapa para definir embarque e destino.</div>
+    <div class="msg" id="msg">Digite embarque e destino e toque em Calcular Corrida (ou toque nos dois pontos no mapa).</div>
   </div>
 
   <div class="card">
@@ -111,36 +112,30 @@
         ctx.closePath();
       }
 
-      // Fundo limpo do ícone (só o emblema 32 DRIVE)
       ctx.fillStyle = "#181b22";
       roundRect(0, 0, 512, 512, 96);
       ctx.fill();
 
-      // Moldura metálica externa
       ctx.strokeStyle = "#9ca3af";
       ctx.lineWidth = 22;
       roundRect(20, 20, 472, 472, 84);
       ctx.stroke();
 
-      // Borda interna âmbar
       ctx.strokeStyle = "#f59e0b";
       ctx.lineWidth = 8;
       roundRect(42, 42, 428, 428, 68);
       ctx.stroke();
 
-      // Número 32 centralizado
       ctx.fillStyle = "#f3f5f8";
       ctx.font = "900 188px system-ui, -apple-system, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("32", 256, 174);
 
-      // Texto DRIVE
       ctx.fillStyle = "#f59e0b";
       ctx.font = "900 78px system-ui, -apple-system, sans-serif";
       ctx.fillText("DRIVE", 256, 298);
 
-      // Linhas laterais e pin de localização
       ctx.strokeStyle = "#d1d5db";
       ctx.lineWidth = 8;
       ctx.beginPath();
@@ -170,20 +165,29 @@
         name: "32 Drive",
         short_name: "32 Drive",
         start_url: "./app.html",
+        scope: "./",
         display: "standalone",
         background_color: "#0f1115",
-        theme_color: "#0f1115",
-        icons: [{ src: pngUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }]
+        theme_color: "#181b22",
+        icons: [
+          { src: pngUrl, sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: pngUrl, sizes: "512x512", type: "image/png", purpose: "maskable" }
+        ]
       };
-      const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
-      document.getElementById("manifestLink").href = URL.createObjectURL(blob);
+      const manifestDataUrl = "data:application/manifest+json;charset=utf-8," + encodeURIComponent(JSON.stringify(manifest));
+      document.getElementById("manifestLink").href = manifestDataUrl;
     })();
 
     const DRIVER_WA = "5553991357231";
     const PIX_KEY = "45bd89b5-9dd7-4cda-8715-789257d06596";
-    const VIEWBOX = "-52.65,-31.85,-51.95,-32.45";
     const BASE_PICKUP = [-32.17235, -52.16878];
     const BASE_DROPOFF = [-32.03500, -52.09860];
+
+    const KNOWN_PLACES = [
+      { keys: ["pavilhão 4", "pavilhao 4", "furg", "carreiros"], lat: -32.0752, lon: -52.1647 },
+      { keys: ["cassino", "av. rio grande"], lat: -32.17235, lon: -52.16878 },
+      { keys: ["silva paes"], lat: -32.0365, lon: -52.0995 }
+    ];
 
     const map = L.map("map").setView(BASE_PICKUP, 12);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -219,37 +223,104 @@
       return cleanKm * 2.0;
     }
 
-    function localQuery(txt) {
-      const t = txt.trim();
-      const l = t.toLowerCase();
-      if (l.includes("rio grande") || l.includes("cassino")) {
-        return l.includes("rs") ? t : `${t}, Rio Grande, RS`;
-      }
-      return `${t}, Rio Grande, RS`;
+    function isInRioGrandeArea(lat, lon) {
+      return lat >= -32.65 && lat <= -31.75 && lon >= -52.80 && lon <= -51.90;
     }
 
-    async function geocodeRG(txt) {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&bounded=1&viewbox=${VIEWBOX}&q=${encodeURIComponent(localQuery(txt))}`;
-      const r = await fetch(url, { headers: { "Accept-Language": "pt-BR" } });
-      const d = await r.json();
-      if (!Array.isArray(d) || !d.length) {
-        throw new Error(`Endereço não encontrado em Rio Grande / Cassino: ${txt}`);
+    function cleanPlaceText(raw) {
+      let t = raw.trim();
+      t = t.replace(/\bn[úu]mero\s*/gi, " ");
+      t = t.replace(/\bn[º°o]\.?\s*/gi, " ");
+      t = t.replace(/\s+/g, " ").trim();
+      const low = t.toLowerCase();
+      if (!low.includes("rio grande") && !low.includes("cassino")) {
+        t = `${t}, Rio Grande, RS`;
+      } else if (!low.includes("rs")) {
+        t = `${t}, RS`;
       }
-      return { lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon) };
+      return t;
+    }
+
+    function matchKnownPlace(rawTxt) {
+      const low = rawTxt.toLowerCase();
+      for (const p of KNOWN_PLACES) {
+        if (p.keys.some((k) => low.includes(k))) {
+          return { lat: p.lat, lon: p.lon };
+        }
+      }
+      return null;
+    }
+
+    async function searchPhoton(q) {
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=-32.08&lon=-52.13&limit=5`;
+      const r = await fetch(url);
+      if (!r.ok) return null;
+      const data = await r.json();
+      const feats = Array.isArray(data.features) ? data.features : [];
+      for (const f of feats) {
+        const [lon, lat] = f.geometry.coordinates;
+        if (isInRioGrandeArea(lat, lon)) {
+          return { lat, lon };
+        }
+      }
+      return null;
+    }
+
+    async function searchNominatim(q) {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=br&q=${encodeURIComponent(q)}`;
+      const r = await fetch(url, { headers: { "Accept-Language": "pt-BR" } });
+      if (!r.ok) return null;
+      const list = await r.json();
+      if (!Array.isArray(list)) return null;
+      for (const item of list) {
+        const lat = parseFloat(item.lat);
+        const lon = parseFloat(item.lon);
+        if (isInRioGrandeArea(lat, lon)) {
+          return { lat, lon };
+        }
+      }
+      return null;
+    }
+
+    async function geocodeAddress(rawTxt, label) {
+      const coordMatch = rawTxt.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+      if (coordMatch) {
+        return { lat: parseFloat(coordMatch[1]), lon: parseFloat(coordMatch[2]) };
+      }
+
+      const cleaned = cleanPlaceText(rawTxt);
+      const queries = [cleaned];
+      const noNumber = cleaned.replace(/,?\s*\b\d+\b/g, "").replace(/\s+/g, " ").trim();
+      if (noNumber && noNumber !== cleaned) queries.push(noNumber);
+
+      for (const q of queries) {
+        try {
+          const p = await searchPhoton(q);
+          if (p) return p;
+        } catch {}
+
+        try {
+          const n = await searchNominatim(q);
+          if (n) return n;
+        } catch {}
+      }
+
+      const known = matchKnownPlace(rawTxt);
+      if (known) return known;
+
+      throw new Error(`Não encontrei "${rawTxt}" (${label}). Tente colocar só o nome da rua/avenida ou toque no mapa.`);
     }
 
     async function reverseAddress(lat, lon) {
       try {
-        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`, {
-          headers: { "Accept-Language": "pt-BR" }
-        });
+        const r = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}`);
         const j = await r.json();
-        const a = j.address || {};
-        const street = a.road || a.pedestrian || a.footway || "Ponto no mapa";
-        const area = a.suburb || a.neighbourhood || a.village || a.town || "Rio Grande";
+        const p = j.features && j.features[0] && j.features[0].properties ? j.features[0].properties : {};
+        const street = p.street || p.name || "Ponto no mapa";
+        const area = p.district || p.suburb || p.city || "Rio Grande";
         return `${street}, ${area}, Rio Grande, RS`;
       } catch {
-        return `${lat.toFixed(5)}, ${lon.toFixed(5)}, Rio Grande, RS`;
+        return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
       }
     }
 
@@ -274,14 +345,14 @@
       if (routeLine) map.removeLayer(routeLine);
       routeLine = L.polyline(coords, { color: "#f59e0b", weight: 5 }).addTo(map);
       if (fitView) {
-        map.fitBounds(routeLine.getBounds(), { padding: [22, 22] });
+        map.fitBounds(routeLine.getBounds(), { padding: [24, 24] });
       }
 
       const price = calcFare(km);
       lastRide = { km, price, ready: true };
       document.getElementById("distTxt").textContent = `${km.toFixed(2).replace(".", ",")} km`;
       document.getElementById("priceTxt").textContent = fmtBRL(price);
-      document.getElementById("msg").textContent = `Valor da corrida calculado: ${fmtBRL(price)}.`;
+      document.getElementById("msg").textContent = `Corrida calculada: ${km.toFixed(2).replace(".", ",")} km • Total ${fmtBRL(price)}.`;
     }
 
     pickupMarker.on("dragend", async () => {
@@ -317,20 +388,38 @@
     document.getElementById("pickup").addEventListener("focus", () => { activeTarget = "pickup"; });
     document.getElementById("dropoff").addEventListener("focus", () => { activeTarget = "dropoff"; });
 
+    ["pickup", "dropoff"].forEach((id) => {
+      const el = document.getElementById(id);
+      el.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          syncFromInputs(true);
+        }
+      });
+      el.addEventListener("blur", () => {
+        if (document.getElementById("pickup").value.trim() && document.getElementById("dropoff").value.trim()) {
+          syncFromInputs(true);
+        }
+      });
+    });
+
     async function syncFromInputs(fitView = true) {
       const pTxt = document.getElementById("pickup").value.trim();
       const dTxt = document.getElementById("dropoff").value.trim();
       const msg = document.getElementById("msg");
+      const btn = document.getElementById("calcBtn");
 
       if (!pTxt || !dTxt) {
         msg.textContent = "Preencha embarque e destino (ou toque nos dois pontos no mapa).";
         return null;
       }
 
-      msg.textContent = "Sincronizando endereços, mapa e calculadora...";
+      btn.disabled = true;
+      btn.textContent = "Calculando...";
+      msg.textContent = "Buscando endereços e traçando rota...";
       try {
-        const c1 = await geocodeRG(pTxt);
-        const c2 = await geocodeRG(dTxt);
+        const c1 = await geocodeAddress(pTxt, "embarque");
+        const c2 = await geocodeAddress(dTxt, "destino");
         pickupMarker.setLatLng([c1.lat, c1.lon]);
         dropoffMarker.setLatLng([c2.lat, c2.lon]);
         await syncRouteAndPrice(fitView);
@@ -338,6 +427,9 @@
       } catch (e) {
         msg.textContent = e.message || "Erro ao localizar endereços.";
         return null;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Calcular Corrida";
       }
     }
 
@@ -364,7 +456,7 @@
         },
         () => {
           st.textContent = "GPS manual";
-          msg.textContent = "Não foi possível ler o GPS. Digite ou toque no mapa.";
+          msg.textContent = "Não foi possível ler o GPS. Digite o endereço ou toque no mapa.";
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
@@ -406,7 +498,7 @@
         return;
       }
       try {
-        const c2 = await geocodeRG(dropoff);
+        const c2 = await geocodeAddress(dropoff, "destino");
         window.open(`https://waze.com/ul?ll=${c2.lat},${c2.lon}&navigate=yes`, "_blank");
       } catch {
         const p2 = dropoffMarker.getLatLng();
@@ -423,10 +515,10 @@
         return;
       }
       try {
-        const c2 = await geocodeRG(dropoff);
+        const c2 = await geocodeAddress(dropoff, "destino");
         let from = "";
         if (pickup) {
-          const c1 = await geocodeRG(pickup);
+          const c1 = await geocodeAddress(pickup, "embarque");
           from = `&from=${c1.lat},${c1.lon}`;
         }
         const url = `https://waze.com/ul?ll=${c2.lat},${c2.lon}${from}&navigate=yes`;
@@ -451,7 +543,7 @@
       });
     }
 
-    window.addEventListener("load", useGPS);
+    setTimeout(() => { map.invalidateSize(); }, 200);
   </script>
 </body>
 </html>
