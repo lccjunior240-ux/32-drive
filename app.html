@@ -2,549 +2,796 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#181b22" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="32 Drive" />
-  <title>32 Drive • Rio Grande & Cassino</title>
-  <link id="appIconLink" rel="icon" type="image/png" sizes="512x512" href="" />
-  <link id="appleIconLink" rel="apple-touch-icon" sizes="512x512" href="" />
-  <link id="manifestLink" rel="manifest" href="" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0a1f44" />
+  <title>32 Drive — Cassino &amp; Rio Grande</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    body { background: #0f1115; color: #f3f5f8; padding: 14px; max-width: 540px; margin: 0 auto; font-size: 16px; }
-    .card { background: #181b22; border: 1px solid #2e3444; border-radius: 16px; padding: 16px; margin-bottom: 14px; }
-    .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; flex-wrap: wrap; }
-    .badge { background: #f59e0b; color: #111; font-weight: 900; padding: 10px 14px; border-radius: 12px; font-size: 16px; }
-    .pill { background: rgba(22,163,74,.2); color: #4ade80; border: 1px solid #4ade80; padding: 6px 12px; border-radius: 999px; font-size: 14px; font-weight: 700; white-space: nowrap; }
-    #map { width: 100%; height: 240px; border-radius: 14px; border: 1px solid #2e3444; margin-bottom: 10px; }
-    .map-hint { font-size: 15px; color: #cbd5e1; margin-bottom: 14px; line-height: 1.45; }
-    label { display: block; font-size: 15px; font-weight: 700; color: #e2e8f0; margin-bottom: 6px; }
-    input { width: 100%; background: #222631; border: 1px solid #3a4256; color: #fff; border-radius: 12px; padding: 14px; font-size: 17px; margin-bottom: 12px; }
-    input:focus { outline: none; border-color: #f59e0b; }
-    button { width: 100%; border: none; border-radius: 12px; padding: 15px; font-size: 17px; font-weight: 800; cursor: pointer; margin-bottom: 10px; color: #fff; background: #222631; border: 1px solid #3a4256; }
-    button:last-child { margin-bottom: 0; }
-    .btn-blue { background: #2563eb; border-color: #2563eb; }
-    .btn-green { background: #16a34a; border-color: #16a34a; }
-    .btn-waze { background: #f59e0b; border-color: #f59e0b; color: #111; }
-    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .res { background: #222631; border: 1px solid #3a4256; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
-    .res div { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 17px; color: #e2e8f0; }
-    .res div strong { font-size: 19px; color: #fff; }
-    .total { font-size: 24px !important; font-weight: 900; color: #fbbf24 !important; margin-bottom: 0 !important; }
-    .pix-box { display: none; background: #222631; border: 1px solid #3a4256; border-radius: 12px; padding: 14px; margin-top: 10px; font-size: 15px; }
-    .pix-key { font-family: monospace; font-size: 14px; word-break: break-all; background: #0f1115; padding: 10px; border-radius: 10px; margin: 8px 0; color: #f3f5f8; }
-    .msg { font-size: 15px; color: #cbd5e1; margin-top: 8px; line-height: 1.45; }
-    .waze-link { font-size: 14px; color: #93c5fd; word-break: break-all; margin-top: 8px; }
+    :root {
+      --azul: #0a1f44;
+      --azul-claro: #153670;
+      --laranja: #ff6b00;
+      --laranja-escuro: #e05a00;
+      --fundo: #f3f5f9;
+      --texto: #111827;
+      --cinza: #4b5563;
+      --borda: #cbd5e1;
+      --branco: #ffffff;
+      --verde: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--fundo);
+      color: var(--texto);
+      padding-bottom: 36px;
+    }
+
+    header {
+      background-color: var(--azul);
+      color: var(--branco);
+      padding: 16px;
+      text-align: center;
+      border-bottom: 4px solid var(--laranja);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .logo-titulo {
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .logo-titulo span {
+      color: var(--laranja);
+    }
+
+    .subtitulo {
+      font-size: 14px;
+      color: #e2e8f0;
+      margin-top: 3px;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 16px auto 0;
+      padding: 0 14px;
+    }
+
+    .card {
+      background: var(--branco);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 14px rgba(10, 31, 68, 0.08);
+      margin-bottom: 16px;
+    }
+
+    .card-titulo {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--azul);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+
+    .campo-grupo {
+      position: relative;
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--azul);
+      margin-bottom: 6px;
+    }
+
+    .input-wrap {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="number"] {
+      width: 100%;
+      font-size: 16px;
+      padding: 13px;
+      border: 2px solid var(--borda);
+      border-radius: 12px;
+      color: var(--texto);
+      background: #fff;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--laranja);
+    }
+
+    .btn-limpar {
+      background: #e2e8f0;
+      color: var(--texto);
+      border: none;
+      border-radius: 12px;
+      padding: 0 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .atalhos-rapidos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      background: #eef2ff;
+      color: var(--azul);
+      border: 1px solid #c7d2fe;
+      border-radius: 20px;
+      padding: 6px 11px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .chip:active {
+      background: var(--azul);
+      color: #fff;
+    }
+
+    .sugestoes {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      background: #fff;
+      border: 2px solid var(--azul);
+      border-radius: 12px;
+      margin-top: 4px;
+      z-index: 50;
+      max-height: 220px;
+      overflow-y: auto;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+      display: none;
+    }
+
+    .sugestao-item {
+      padding: 11px 14px;
+      border-bottom: 1px solid #e5e7eb;
+      cursor: pointer;
+    }
+
+    .sugestao-item:last-child {
+      border-bottom: none;
+    }
+
+    .sugestao-item strong {
+      display: block;
+      color: var(--azul);
+      font-size: 15px;
+    }
+
+    .sugestao-item small {
+      color: var(--cinza);
+      font-size: 13px;
+    }
+
+    .opcoes-taxas {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .check-linha {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--texto);
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .check-linha input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--laranja);
+    }
+
+    .taxa-extra-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--cinza);
+    }
+
+    .taxa-extra-wrap input {
+      width: 110px;
+      padding: 8px 10px;
+      font-size: 15px;
+      text-align: right;
+    }
+
+    .btn-principal {
+      width: 100%;
+      background: var(--laranja);
+      color: var(--branco);
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(255, 107, 0, 0.3);
+    }
+
+    .btn-principal:active {
+      background: var(--laranja-escuro);
+    }
+
+    .aviso {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #fef2f2;
+      color: #b91c1c;
+      font-size: 14px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .resultado {
+      display: none;
+      border: 2px solid var(--azul);
+    }
+
+    .res-linha {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 15px;
+    }
+
+    .res-linha.total {
+      border-bottom: none;
+      padding-top: 12px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .valor-destaque {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--azul);
+    }
+
+    .btn-whatsapp {
+      width: 100%;
+      margin-top: 14px;
+      background: var(--verde);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .rodape-info {
+      text-align: center;
+      font-size: 13px;
+      color: var(--cinza);
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="top">
-      <div class="badge">32 DRIVE • Rio Grande / Cassino</div>
-      <span class="pill" id="gpsStatus">Mapa sincronizado</span>
+
+  <header>
+    <div class="logo-titulo">32 <span>DRIVE</span></div>
+    <div class="subtitulo">Mobilidade Urbana • Balneário Cassino &amp; Rio Grande</div>
+  </header>
+
+  <div class="container">
+
+    <!-- DADOS DO PASSAGEIRO E ENDEREÇOS -->
+    <div class="card">
+      <div class="card-titulo">Dados da Corrida</div>
+
+      <div class="campo-grupo">
+        <label for="nome-passageiro">👤 Nome do Passageiro</label>
+        <input type="text" id="nome-passageiro" placeholder="Digite seu nome" />
+      </div>
+
+      <div class="campo-grupo">
+        <label for="tel-passageiro">📱 Celular / WhatsApp do Passageiro</label>
+        <input type="tel" id="tel-passageiro" placeholder="(53) 99999-9999" />
+      </div>
+
+      <!-- ORIGEM -->
+      <div class="campo-grupo">
+        <label for="origem">📍 Onde você está? (Rua, nº e referência)</label>
+        <div class="input-wrap">
+          <input type="text" id="origem" placeholder="Ex: Rua 15, 240 - perto do Guanabara..." autocomplete="off" />
+          <button type="button" class="btn-limpar" onclick="limparCampo('origem')">X</button>
+        </div>
+        <div class="atalhos-rapidos">
+          <button type="button" class="chip" onclick="selecionarLocalPredefinido('origem', 0)">Guanabara (Cassino)</button>
+          <button type="button" class="chip" onclick="selecionarLocalPredefinido('origem', 1)">Peruzzo (Cassino)</button>
+          <button type="button" class="chip" onclick="selecionarLocalPredefinido('origem', 2)">Iemanjá</button>
+        </div>
+        <div id="sugestoes-origem" class="sugestoes"></div>
+      </div>
+
+      <!-- DESTINO -->
+      <div class="campo-grupo">
+        <label for="destino">🏁 Para onde você vai? (Rua, nº e referência)</label>
+        <div class="input-wrap">
+          <input type="text" id="destino" placeholder="Ex: Av. Rio Grande, 800 - referência..." autocomplete="off" />
+          <button type="button" class="btn-limpar" onclick="limparCampo('destino')">X</button>
+        </div>
+        <div class="atalhos-rapidos">
+          <button type="button" class="chip" onclick="selecionarLocalPredefinido('destino', 0)">Guanabara (Cassino)</button>
+          <button type="button" class="chip" onclick="selecionarLocalPredefinido('destino', 1)">Peruzzo (Cassino)</button>
+          <button type="button" class="chip" onclick="selecionarLocalPredefinido('destino', 3)">Terminal Cassino</button>
+          <button type="button" class="chip" onclick="selecionarLocalPredefinido('destino', 4)">Centro Rio Grande</button>
+        </div>
+        <div id="sugestoes-destino" class="sugestoes"></div>
+      </div>
+
+      <!-- TAXAS E ADICIONAIS -->
+      <div class="opcoes-taxas">
+        <label class="check-linha">
+          <input type="checkbox" id="taxa-noturna" />
+          <span>🌙 Tarifa Noturna (a partir das 20h) — +25%</span>
+        </label>
+        <div class="taxa-extra-wrap">
+          <span>➕ Taxa adicional / Espera (R$):</span>
+          <input type="number" id="taxa-extra" value="0" min="0" step="0.50" />
+        </div>
+      </div>
+
+      <button type="button" class="btn-principal" id="btn-calcular" onclick="calcularCorrida()">
+        Calcular Valor da Corrida
+      </button>
+
+      <div id="aviso" class="aviso"></div>
     </div>
 
-    <div id="map"></div>
-    <div class="map-hint" id="mapHint">Toque no mapa ou arraste os pinos (verde = embarque, vermelho = destino) para atualizar o valor na hora.</div>
+    <!-- RESULTADO COM DETALHAMENTO DAS TAXAS -->
+    <div id="card-resultado" class="card resultado">
+      <div class="card-titulo">Resumo da Corrida</div>
+      <div class="res-linha">
+        <span>Distância / Tempo:</span>
+        <strong id="res-dist-tempo">-- km • -- min</strong>
+      </div>
+      <div class="res-linha">
+        <span>Faixa de tarifa:</span>
+        <span id="res-faixa">--</span>
+      </div>
+      <div class="res-linha">
+        <span>Adicional Noturno (+25%) / Extra:</span>
+        <span id="res-taxas">R$ 0,00</span>
+      </div>
+      <div class="res-linha total">
+        <span>Total da Corrida:</span>
+        <span class="valor-destaque" id="res-valor">R$ --</span>
+      </div>
 
-    <label for="pName">Nome do passageiro</label>
-    <input id="pName" type="text" placeholder="Ex.: João Silva" />
-
-    <label for="pPhone">Telefone do passageiro</label>
-    <input id="pPhone" type="tel" placeholder="Ex.: 53 99999-9999" />
-
-    <label for="pickup">Onde vai pegar (embarque / coleta)</label>
-    <input id="pickup" type="text" placeholder="Ex.: Pavilhão 4 FURG ou Av. Rio Grande, Cassino" />
-
-    <label for="dropoff">Para onde vai levar (destino / entrega)</label>
-    <input id="dropoff" type="text" placeholder="Ex.: Av. Silva Paes, 100, Rio Grande" />
-
-    <button type="button" class="btn-blue" onclick="useGPS()">Usar meu GPS</button>
-    <button type="button" class="btn-blue" id="calcBtn" onclick="syncFromInputs(true)">Calcular Corrida</button>
-
-    <div class="res">
-      <div><span>Distância estimada:</span><strong id="distTxt">0,00 km</strong></div>
-      <div class="total"><span>Valor total:</span><span id="priceTxt">R$ 7,99</span></div>
+      <button type="button" class="btn-whatsapp" onclick="enviarWhatsApp()">
+        Pedir Corrida no WhatsApp
+      </button>
     </div>
 
-    <button type="button" class="btn-green" onclick="sendWhats()">Pedir Corrida no WhatsApp</button>
-
-    <div class="row2">
-      <button type="button" class="btn-waze" onclick="openWaze()">Abrir Waze</button>
-      <button type="button" class="btn-waze" onclick="shareWaze()">Link Waze Viagem</button>
+    <div class="rodape-info">
+      32 Drive • Atendimento local em Cassino e Rio Grande - RS
     </div>
-
-    <div class="waze-link" id="wazeOut"></div>
-    <div class="msg" id="msg">Digite embarque e destino e toque em Calcular Corrida (ou toque nos dois pontos no mapa).</div>
   </div>
 
-  <div class="card">
-    <button type="button" class="btn-green" onclick="togglePix()">Mostrar Chave Pix</button>
-    <div class="pix-box" id="pixBox">
-      <div><strong>Banco Inter</strong> • Chave Aleatória</div>
-      <div class="pix-key">45bd89b5-9dd7-4cda-8715-789257d06596</div>
-      <button type="button" class="btn-blue" onclick="copyPix()">Copiar Chave Pix</button>
-    </div>
-  </div>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    (function setupAppIcon() {
-      const canvas = document.createElement("canvas");
-      canvas.width = 512;
-      canvas.height = 512;
-      const ctx = canvas.getContext("2d");
+    // CONFIGURAÇÕES DO 32 DRIVE
+    const WHATSAPP_MOTORISTA = "5553991357231";
+    const LIMITE_MINIMO_KM = 3.5;
+    const VALOR_ATE_3_5_KM = 7.99;
+    const VALOR_KM_ACIMA = 2.00;
+    const ACRESCIMO_NOTURNO = 0.25; // +25% a partir das 20h
 
-      function roundRect(x, y, w, h, r) {
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.lineTo(x + w - r, y);
-        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-        ctx.lineTo(x + w, y + h - r);
-        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-        ctx.lineTo(x + r, y + h);
-        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-        ctx.lineTo(x, y + r);
-        ctx.quadraticCurveTo(x, y, x + r, y);
-        ctx.closePath();
+    // Caixa geográfica de Rio Grande e Balneário Cassino
+    const LIMITS = {
+      minLat: -32.28,
+      maxLat: -31.98,
+      minLon: -52.32,
+      maxLon: -52.06
+    };
+
+    // Pontos locais pré-cadastrados
+    const LOCAIS_CONHECIDOS = [
+      {
+        nome: "Guanabara — Mercado Guanabara, Avenida Rio Grande (Cassino)",
+        detalhe: "Av. Rio Grande — Balneário Cassino, Rio Grande - RS",
+        apelidos: ["guanabara", "mercado guanabara", "supermercado guanabara", "guanabara cassino", "guanabara av rio grande"],
+        lat: -32.18235,
+        lon: -52.16425
+      },
+      {
+        nome: "Supermercado Peruzzo — Balneário Cassino",
+        detalhe: "Av. Rio Grande — Balneário Cassino, Rio Grande - RS",
+        apelidos: ["peruzzo", "peruso", "mercado peruzzo", "supermercado peruzzo", "peruzzo cassino"],
+        lat: -32.18090,
+        lon: -52.16180
+      },
+      {
+        nome: "Estátua de Iemanjá — Praia do Cassino",
+        detalhe: "Av. Atlântica / Av. Rio Grande — Balneário Cassino",
+        apelidos: ["iemanja", "iemanjá", "praia", "beira mar", "estatua"],
+        lat: -32.18940,
+        lon: -52.15580
+      },
+      {
+        nome: "Terminal de Ônibus do Cassino",
+        detalhe: "Balneário Cassino, Rio Grande - RS",
+        apelidos: ["terminal", "terminal cassino", "rodoviaria cassino"],
+        lat: -32.17850,
+        lon: -52.16590
+      },
+      {
+        nome: "Centro de Rio Grande (Praça Tamandaré)",
+        detalhe: "Centro, Rio Grande - RS",
+        apelidos: ["centro", "centro rio grande", "praca tamandare", "praça tamandaré"],
+        lat: -32.03500,
+        lon: -52.09860
+      },
+      {
+        nome: "FURG — Campus Carreiros",
+        detalhe: "Av. Itália, km 8 — Rio Grande - RS",
+        apelidos: ["furg", "carreiros", "universidade"],
+        lat: -32.07360,
+        lon: -52.16310
+      },
+      {
+        nome: "Estação Rodoviária de Rio Grande",
+        detalhe: "Rio Grande - RS",
+        apelidos: ["rodoviaria", "rodoviária", "rodoviaria rio grande"],
+        lat: -32.04360,
+        lon: -52.10450
       }
-
-      ctx.fillStyle = "#181b22";
-      roundRect(0, 0, 512, 512, 96);
-      ctx.fill();
-
-      ctx.strokeStyle = "#9ca3af";
-      ctx.lineWidth = 22;
-      roundRect(20, 20, 472, 472, 84);
-      ctx.stroke();
-
-      ctx.strokeStyle = "#f59e0b";
-      ctx.lineWidth = 8;
-      roundRect(42, 42, 428, 428, 68);
-      ctx.stroke();
-
-      ctx.fillStyle = "#f3f5f8";
-      ctx.font = "900 188px system-ui, -apple-system, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("32", 256, 174);
-
-      ctx.fillStyle = "#f59e0b";
-      ctx.font = "900 78px system-ui, -apple-system, sans-serif";
-      ctx.fillText("DRIVE", 256, 298);
-
-      ctx.strokeStyle = "#d1d5db";
-      ctx.lineWidth = 8;
-      ctx.beginPath();
-      ctx.moveTo(92, 382);
-      ctx.lineTo(212, 382);
-      ctx.moveTo(300, 382);
-      ctx.lineTo(420, 382);
-      ctx.stroke();
-
-      ctx.fillStyle = "#f59e0b";
-      ctx.beginPath();
-      ctx.arc(256, 374, 24, Math.PI, 0);
-      ctx.lineTo(256, 434);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = "#181b22";
-      ctx.beginPath();
-      ctx.arc(256, 374, 9, 0, Math.PI * 2);
-      ctx.fill();
-
-      const pngUrl = canvas.toDataURL("image/png");
-      document.getElementById("appIconLink").href = pngUrl;
-      document.getElementById("appleIconLink").href = pngUrl;
-
-      const manifest = {
-        name: "32 Drive",
-        short_name: "32 Drive",
-        start_url: "./app.html",
-        scope: "./",
-        display: "standalone",
-        background_color: "#0f1115",
-        theme_color: "#181b22",
-        icons: [
-          { src: pngUrl, sizes: "192x192", type: "image/png", purpose: "any" },
-          { src: pngUrl, sizes: "512x512", type: "image/png", purpose: "maskable" }
-        ]
-      };
-      const manifestDataUrl = "data:application/manifest+json;charset=utf-8," + encodeURIComponent(JSON.stringify(manifest));
-      document.getElementById("manifestLink").href = manifestDataUrl;
-    })();
-
-    const DRIVER_WA = "5553991357231";
-    const PIX_KEY = "45bd89b5-9dd7-4cda-8715-789257d06596";
-    const BASE_PICKUP = [-32.17235, -52.16878];
-    const BASE_DROPOFF = [-32.03500, -52.09860];
-
-    const KNOWN_PLACES = [
-      { keys: ["pavilhão 4", "pavilhao 4", "furg", "carreiros"], lat: -32.0752, lon: -52.1647 },
-      { keys: ["cassino", "av. rio grande"], lat: -32.17235, lon: -52.16878 },
-      { keys: ["silva paes"], lat: -32.0365, lon: -52.0995 }
     ];
 
-    const map = L.map("map").setView(BASE_PICKUP, 12);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap"
-    }).addTo(map);
+    const estado = {
+      origem: null,
+      destino: null,
+      ultimoCalculo: null
+    };
 
-    function makePin(color) {
-      return L.divIcon({
-        className: "",
-        html: `<div style="width:18px;height:18px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 0 6px rgba(0,0,0,.7);"></div>`,
-        iconSize: [18, 18],
-        iconAnchor: [9, 9]
-      });
+    // Marca automaticamente o noturno se for a partir das 20h até 05h59
+    (function verificarHorarioNoturnoInicial() {
+      const hora = new Date().getHours();
+      if (hora >= 20 || hora < 6) {
+        document.getElementById("taxa-noturna").checked = true;
+      }
+    })();
+
+    function formatarMoeda(valor) {
+      return "R$ " + valor.toFixed(2).replace(".", ",");
     }
 
-    const pickupMarker = L.marker(BASE_PICKUP, { draggable: true, icon: makePin("#22c55e") })
-      .addTo(map)
-      .bindPopup("Embarque");
-
-    const dropoffMarker = L.marker(BASE_DROPOFF, { draggable: true, icon: makePin("#ef4444") })
-      .addTo(map)
-      .bindPopup("Destino");
-
-    let routeLine = null;
-    let activeTarget = "dropoff";
-    let lastRide = { km: 0, price: 7.99, ready: false };
-
-    const fmtBRL = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
-    function calcFare(km) {
-      const cleanKm = Math.max(0, Number(km) || 0);
-      if (cleanKm <= 3.5) return 7.99;
-      return cleanKm * 2.0;
+    function normalizarTexto(txt) {
+      return txt
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
     }
 
-    function isInRioGrandeArea(lat, lon) {
-      return lat >= -32.65 && lat <= -31.75 && lon >= -52.80 && lon <= -51.90;
-    }
-
-    function cleanPlaceText(raw) {
-      let t = raw.trim();
-      t = t.replace(/\bn[úu]mero\s*/gi, " ");
-      t = t.replace(/\bn[º°o]\.?\s*/gi, " ");
-      t = t.replace(/\s+/g, " ").trim();
-      const low = t.toLowerCase();
-      if (!low.includes("rio grande") && !low.includes("cassino")) {
-        t = `${t}, Rio Grande, RS`;
-      } else if (!low.includes("rs")) {
-        t = `${t}, RS`;
-      }
-      return t;
-    }
-
-    function matchKnownPlace(rawTxt) {
-      const low = rawTxt.toLowerCase();
-      for (const p of KNOWN_PLACES) {
-        if (p.keys.some((k) => low.includes(k))) {
-          return { lat: p.lat, lon: p.lon };
-        }
-      }
-      return null;
-    }
-
-    async function searchPhoton(q) {
-      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=-32.08&lon=-52.13&limit=5`;
-      const r = await fetch(url);
-      if (!r.ok) return null;
-      const data = await r.json();
-      const feats = Array.isArray(data.features) ? data.features : [];
-      for (const f of feats) {
-        const [lon, lat] = f.geometry.coordinates;
-        if (isInRioGrandeArea(lat, lon)) {
-          return { lat, lon };
-        }
-      }
-      return null;
-    }
-
-    async function searchNominatim(q) {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=br&q=${encodeURIComponent(q)}`;
-      const r = await fetch(url, { headers: { "Accept-Language": "pt-BR" } });
-      if (!r.ok) return null;
-      const list = await r.json();
-      if (!Array.isArray(list)) return null;
-      for (const item of list) {
-        const lat = parseFloat(item.lat);
-        const lon = parseFloat(item.lon);
-        if (isInRioGrandeArea(lat, lon)) {
-          return { lat, lon };
-        }
-      }
-      return null;
-    }
-
-    async function geocodeAddress(rawTxt, label) {
-      const coordMatch = rawTxt.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
-      if (coordMatch) {
-        return { lat: parseFloat(coordMatch[1]), lon: parseFloat(coordMatch[2]) };
-      }
-
-      const cleaned = cleanPlaceText(rawTxt);
-      const queries = [cleaned];
-      const noNumber = cleaned.replace(/,?\s*\b\d+\b/g, "").replace(/\s+/g, " ").trim();
-      if (noNumber && noNumber !== cleaned) queries.push(noNumber);
-
-      for (const q of queries) {
-        try {
-          const p = await searchPhoton(q);
-          if (p) return p;
-        } catch {}
-
-        try {
-          const n = await searchNominatim(q);
-          if (n) return n;
-        } catch {}
-      }
-
-      const known = matchKnownPlace(rawTxt);
-      if (known) return known;
-
-      throw new Error(`Não encontrei "${rawTxt}" (${label}). Tente colocar só o nome da rua/avenida ou toque no mapa.`);
-    }
-
-    async function reverseAddress(lat, lon) {
-      try {
-        const r = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}`);
-        const j = await r.json();
-        const p = j.features && j.features[0] && j.features[0].properties ? j.features[0].properties : {};
-        const street = p.street || p.name || "Ponto no mapa";
-        const area = p.district || p.suburb || p.city || "Rio Grande";
-        return `${street}, ${area}, Rio Grande, RS`;
-      } catch {
-        return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-      }
-    }
-
-    async function syncRouteAndPrice(fitView = false) {
-      const p1 = pickupMarker.getLatLng();
-      const p2 = dropoffMarker.getLatLng();
-
-      let km = (p1.distanceTo(p2) / 1000) * 1.25;
-      let coords = [[p1.lat, p1.lng], [p2.lat, p2.lng]];
-
-      try {
-        const rr = await fetch(
-          `https://router.project-osrm.org/route/v1/driving/${p1.lng},${p1.lat};${p2.lng},${p2.lat}?overview=full&geometries=geojson`
-        );
-        const rj = await rr.json();
-        if (rj.routes && rj.routes[0]) {
-          km = rj.routes[0].distance / 1000;
-          coords = rj.routes[0].geometry.coordinates.map(([x, y]) => [y, x]);
-        }
-      } catch {}
-
-      if (routeLine) map.removeLayer(routeLine);
-      routeLine = L.polyline(coords, { color: "#f59e0b", weight: 5 }).addTo(map);
-      if (fitView) {
-        map.fitBounds(routeLine.getBounds(), { padding: [24, 24] });
-      }
-
-      const price = calcFare(km);
-      lastRide = { km, price, ready: true };
-      document.getElementById("distTxt").textContent = `${km.toFixed(2).replace(".", ",")} km`;
-      document.getElementById("priceTxt").textContent = fmtBRL(price);
-      document.getElementById("msg").textContent = `Corrida calculada: ${km.toFixed(2).replace(".", ",")} km • Total ${fmtBRL(price)}.`;
-    }
-
-    pickupMarker.on("dragend", async () => {
-      const { lat, lng } = pickupMarker.getLatLng();
-      document.getElementById("msg").textContent = "Atualizando embarque...";
-      document.getElementById("pickup").value = await reverseAddress(lat, lng);
-      await syncRouteAndPrice(false);
-    });
-
-    dropoffMarker.on("dragend", async () => {
-      const { lat, lng } = dropoffMarker.getLatLng();
-      document.getElementById("msg").textContent = "Atualizando destino...";
-      document.getElementById("dropoff").value = await reverseAddress(lat, lng);
-      await syncRouteAndPrice(false);
-    });
-
-    map.on("click", async (e) => {
-      const { lat, lng } = e.latlng;
-      if (activeTarget === "pickup") {
-        pickupMarker.setLatLng([lat, lng]);
-        document.getElementById("pickup").value = await reverseAddress(lat, lng);
-        activeTarget = "dropoff";
-        document.getElementById("mapHint").textContent = "Embarque marcado. Toque no mapa para marcar o destino.";
-      } else {
-        dropoffMarker.setLatLng([lat, lng]);
-        document.getElementById("dropoff").value = await reverseAddress(lat, lng);
-        activeTarget = "pickup";
-        document.getElementById("mapHint").textContent = "Destino marcado. Toque no mapa ou arraste os pinos para ajustar.";
-      }
-      await syncRouteAndPrice(false);
-    });
-
-    document.getElementById("pickup").addEventListener("focus", () => { activeTarget = "pickup"; });
-    document.getElementById("dropoff").addEventListener("focus", () => { activeTarget = "dropoff"; });
-
-    ["pickup", "dropoff"].forEach((id) => {
-      const el = document.getElementById(id);
-      el.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter") {
-          ev.preventDefault();
-          syncFromInputs(true);
-        }
-      });
-      el.addEventListener("blur", () => {
-        if (document.getElementById("pickup").value.trim() && document.getElementById("dropoff").value.trim()) {
-          syncFromInputs(true);
-        }
-      });
-    });
-
-    async function syncFromInputs(fitView = true) {
-      const pTxt = document.getElementById("pickup").value.trim();
-      const dTxt = document.getElementById("dropoff").value.trim();
-      const msg = document.getElementById("msg");
-      const btn = document.getElementById("calcBtn");
-
-      if (!pTxt || !dTxt) {
-        msg.textContent = "Preencha embarque e destino (ou toque nos dois pontos no mapa).";
-        return null;
-      }
-
-      btn.disabled = true;
-      btn.textContent = "Calculando...";
-      msg.textContent = "Buscando endereços e traçando rota...";
-      try {
-        const c1 = await geocodeAddress(pTxt, "embarque");
-        const c2 = await geocodeAddress(dTxt, "destino");
-        pickupMarker.setLatLng([c1.lat, c1.lon]);
-        dropoffMarker.setLatLng([c2.lat, c2.lon]);
-        await syncRouteAndPrice(fitView);
-        return lastRide;
-      } catch (e) {
-        msg.textContent = e.message || "Erro ao localizar endereços.";
-        return null;
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Calcular Corrida";
-      }
-    }
-
-    function useGPS() {
-      const st = document.getElementById("gpsStatus");
-      const msg = document.getElementById("msg");
-      if (!navigator.geolocation) {
-        st.textContent = "Sem GPS";
-        return;
-      }
-      st.textContent = "Buscando GPS...";
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const { latitude: lat, longitude: lon } = pos.coords;
-          st.textContent = "GPS ativo";
-          pickupMarker.setLatLng([lat, lon]);
-          map.setView([lat, lon], 14);
-          document.getElementById("pickup").value = await reverseAddress(lat, lon);
-          if (document.getElementById("dropoff").value.trim()) {
-            await syncRouteAndPrice(true);
-          } else {
-            msg.textContent = "Embarque preenchido pelo GPS. Informe ou toque no destino.";
-          }
-        },
-        () => {
-          st.textContent = "GPS manual";
-          msg.textContent = "Não foi possível ler o GPS. Digite o endereço ou toque no mapa.";
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
+    function dentroDeRioGrandeCassino(lat, lon) {
+      return (
+        lat >= LIMITS.minLat &&
+        lat <= LIMITS.maxLat &&
+        lon >= LIMITS.minLon &&
+        lon <= LIMITS.maxLon
       );
     }
 
-    async function sendWhats() {
-      const name = document.getElementById("pName").value.trim();
-      const phone = document.getElementById("pPhone").value.trim();
-      const pickup = document.getElementById("pickup").value.trim();
-      const dropoff = document.getElementById("dropoff").value.trim();
-      const msg = document.getElementById("msg");
+    function selecionarLocalPredefinido(campo, indice) {
+      const local = LOCAIS_CONHECIDOS[indice];
+      if (!local) return;
+      const input = document.getElementById(campo);
+      const digitado = input.value.trim();
 
-      if (!name || !phone || !pickup || !dropoff) {
-        msg.textContent = "Preencha nome, telefone, embarque e destino antes de enviar.";
-        return;
-      }
+      input.value = digitado ? `${local.nome} (${digitado})` : local.nome;
 
-      const ride = lastRide.ready ? lastRide : await syncFromInputs(true);
-      const kmTxt = ride && ride.ready ? `${ride.km.toFixed(2).replace(".", ",")} km` : "A confirmar";
-      const priceTxt = fmtBRL(ride ? ride.price : 7.99);
-
-      const text =
-        `*32 DRIVE — PEDIDO DE CORRIDA*\n` +
-        `Passageiro: ${name}\n` +
-        `Telefone: ${phone}\n` +
-        `Embarque: ${pickup}\n` +
-        `Destino: ${dropoff}\n` +
-        `Distância: ${kmTxt}\n` +
-        `Valor: ${priceTxt}\n` +
-        `Pix Banco Inter: ${PIX_KEY}`;
-
-      window.open(`https://wa.me/${DRIVER_WA}?text=${encodeURIComponent(text)}`, "_blank");
+      estado[campo] = {
+        lat: local.lat,
+        lon: local.lon
+      };
+      fecharSugestoes(campo);
+      esconderAviso();
     }
 
-    async function openWaze() {
-      const dropoff = document.getElementById("dropoff").value.trim();
-      if (!dropoff) {
-        document.getElementById("msg").textContent = "Informe o destino para abrir o Waze.";
-        return;
-      }
-      try {
-        const c2 = await geocodeAddress(dropoff, "destino");
-        window.open(`https://waze.com/ul?ll=${c2.lat},${c2.lon}&navigate=yes`, "_blank");
-      } catch {
-        const p2 = dropoffMarker.getLatLng();
-        window.open(`https://waze.com/ul?ll=${p2.lat},${p2.lng}&navigate=yes`, "_blank");
-      }
+    function limparCampo(campo) {
+      document.getElementById(campo).value = "";
+      estado[campo] = null;
+      fecharSugestoes(campo);
+      document.getElementById("card-resultado").style.display = "none";
+      esconderAviso();
     }
 
-    async function shareWaze() {
-      const pickup = document.getElementById("pickup").value.trim();
-      const dropoff = document.getElementById("dropoff").value.trim();
-      const out = document.getElementById("wazeOut");
-      if (!dropoff) {
-        out.textContent = "Informe o destino para gerar o link do Waze.";
-        return;
+    function fecharSugestoes(campo) {
+      const box = document.getElementById("sugestoes-" + campo);
+      box.style.display = "none";
+      box.innerHTML = "";
+    }
+
+    function mostrarAviso(msg) {
+      const el = document.getElementById("aviso");
+      el.textContent = msg;
+      el.style.display = "block";
+    }
+
+    function esconderAviso() {
+      const el = document.getElementById("aviso");
+      el.style.display = "none";
+    }
+
+    function extrairComplementoUsuario(textoOriginal) {
+      const partes = textoOriginal.split(",");
+      if (partes.length > 1) {
+        return partes.slice(1).join(",").trim();
       }
-      try {
-        const c2 = await geocodeAddress(dropoff, "destino");
-        let from = "";
-        if (pickup) {
-          const c1 = await geocodeAddress(pickup, "embarque");
-          from = `&from=${c1.lat},${c1.lon}`;
+      const matchNum = textoOriginal.match(/\b(n[ºo°]?\s*\d+|\d+|casa\s*\d+|fundos|esquina|perto|ao lado|em frente|prox|pr[oó]ximo).*$/i);
+      return matchNum ? matchNum[0].trim() : "";
+    }
+
+    async function buscarEnderecos(texto) {
+      const termoNorm = normalizarTexto(texto);
+      const resultados = [];
+
+      for (const local of LOCAIS_CONHECIDOS) {
+        const bateNome = normalizarTexto(local.nome).includes(termoNorm);
+        const bateApelido = local.apelidos.some(
+          (ap) => ap.includes(termoNorm) || termoNorm.includes(ap)
+        );
+        if (bateNome || bateApelido) {
+          resultados.push({
+            titulo: local.nome,
+            detalhe: local.detalhe,
+            lat: local.lat,
+            lon: local.lon
+          });
         }
-        const url = `https://waze.com/ul?ll=${c2.lat},${c2.lon}${from}&navigate=yes`;
-        out.innerHTML = `Link Waze: <a href="${url}" target="_blank" style="color:#93c5fd;">${url}</a>`;
-        if (navigator.clipboard) navigator.clipboard.writeText(url).catch(() => {});
-      } catch {
-        const p1 = pickupMarker.getLatLng();
-        const p2 = dropoffMarker.getLatLng();
-        const url = `https://waze.com/ul?ll=${p2.lat},${p2.lng}&from=${p1.lat},${p1.lng}&navigate=yes`;
-        out.innerHTML = `Link Waze: <a href="${url}" target="_blank" style="color:#93c5fd;">${url}</a>`;
+      }
+
+      let consultaLimpa = texto
+        .replace(/\b(balneario|balneário|chui|chuí|gibuti|jiguti|cassino)\b/gi, "")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+
+      if (!consultaLimpa) consultaLimpa = texto.trim();
+
+      const consulta = `${consultaLimpa}, Balneário Cassino, Rio Grande, RS, Brasil`;
+      const viewbox = `${LIMITS.minLon},${LIMITS.maxLat},${LIMITS.maxLon},${LIMITS.minLat}`;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=br&viewbox=${viewbox}&bounded=1&q=${encodeURIComponent(consulta)}`;
+
+      try {
+        const resp = await fetch(url, {
+          headers: { "Accept-Language": "pt-BR" }
+        });
+        const dados = await resp.json();
+
+        for (const item of dados) {
+          const lat = parseFloat(item.lat);
+          const lon = parseFloat(item.lon);
+          if (!dentroDeRioGrandeCassino(lat, lon)) continue;
+
+          const addr = item.address || {};
+          const rua = addr.road || item.display_name.split(",")[0];
+          const bairro = addr.suburb || addr.neighbourhood || "Balneário Cassino";
+
+          resultados.push({
+            titulo: rua,
+            detalhe: `${bairro} • Rio Grande - RS`,
+            lat,
+            lon
+          });
+        }
+      } catch (e) {}
+
+      return resultados;
+    }
+
+    let timers = {};
+    ["origem", "destino"].forEach((campo) => {
+      const input = document.getElementById(campo);
+      input.addEventListener("input", () => {
+        estado[campo] = null;
+        clearTimeout(timers[campo]);
+        const valor = input.value.trim();
+        if (valor.length < 3) {
+          fecharSugestoes(campo);
+          return;
+        }
+        timers[campo] = setTimeout(async () => {
+          const lista = await buscarEnderecos(valor);
+          renderizarSugestoes(campo, lista);
+        }, 400);
+      });
+    });
+
+    function renderizarSugestoes(campo, lista) {
+      const box = document.getElementById("sugestoes-" + campo);
+      box.innerHTML = "";
+      if (!lista.length) {
+        box.style.display = "none";
+        return;
+      }
+
+      lista.slice(0, 6).forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "sugestao-item";
+        div.innerHTML = `<strong>${item.titulo}</strong><small>${item.detalhe}</small>`;
+        div.onclick = () => {
+          const input = document.getElementById(campo);
+          const textoDigitado = input.value.trim();
+          const complemento = extrairComplementoUsuario(textoDigitado);
+
+          input.value = complemento ? `${item.titulo}, ${complemento}` : item.titulo;
+
+          estado[campo] = {
+            lat: item.lat,
+            lon: item.lon
+          };
+          fecharSugestoes(campo);
+          esconderAviso();
+        };
+        box.appendChild(div);
+      });
+
+      box.style.display = "block";
+    }
+
+    async function resolverPonto(campo) {
+      const texto = document.getElementById(campo).value.trim();
+      if (!texto) return null;
+
+      if (estado[campo] && estado[campo].lat && estado[campo].lon) {
+        return {
+          nome: texto,
+          lat: estado[campo].lat,
+          lon: estado[campo].lon
+        };
+      }
+
+      const lista = await buscarEnderecos(texto);
+      if (lista.length > 0) {
+        const complemento = extrairComplementoUsuario(texto);
+        const nomeFinal = complemento ? `${lista[0].titulo}, ${complemento}` : lista[0].titulo;
+        document.getElementById(campo).value = nomeFinal;
+        estado[campo] = { lat: lista[0].lat, lon: lista[0].lon };
+        return {
+          nome: nomeFinal,
+          lat: lista[0].lat,
+          lon: lista[0].lon
+        };
+      }
+      return null;
+    }
+
+    async function calcularCorrida() {
+      esconderAviso();
+      const btn = document.getElementById("btn-calcular");
+      btn.textContent = "Calculando rota...";
+      btn.disabled = true;
+
+      try {
+        const origem = await resolverPonto("origem");
+        const destino = await resolverPonto("destino");
+
+        if (!origem || !destino) {
+          mostrarAviso("Endereço não encontrado. Digite a rua e o número/referência ou toque em um dos botões rápidos.");
+          return;
+        }
+
+        if (!dentroDeRioGrandeCassino(origem.lat, origem.lon) || !dentroDeRioGrandeCassino(destino.lat, destino.lon)) {
+          mostrarAviso("Atendemos somente trechos dentro de Balneário Cassino e Rio Grande - RS.");
+          return;
+        }
+
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${origem.lon},${origem.lat};${destino.lon},${destino.lat}?overview=false`;
+        const resp = await fetch(osrmUrl);
+        const dados = await resp.json();
+
+        if (!dados.routes || !dados.routes.length) {
+          mostrarAviso("Não foi possível traçar a rota entre esses pontos. Verifique os endereços.");
+          return;
+        }
+
+        const rota = dados.routes[0];
+        const km = rota.distance / 1000;
+        const minutos = Math.max(2, Math.round(rota.duration / 60));
+
+        let valorBase = 0;
+        let descricaoFaixa = "";
+        if (km <= LIMITE_MINIMO_KM) {
+          valorBase = VALOR_ATE_3_5_KM;
+          descricaoFaixa = "Até 3,5 km (Fixo R$ 7,99)";
+        } else {
+          valorBase = km * VALOR_KM_ACIMA;
+          descricaoFaixa = `Acima de 3,5 km (${km.toFixed(1).replace(".", ",")} km × R$ 2,00)`;
+        }
+
+        const noturna = document.getElementById("taxa-noturna").checked;
+        const valorNoturna = noturna ? valorBase * ACRESCIMO_NOTURNO : 0;
+        const taxaExtra = Math.max(0, parseFloat(document.getElementById("taxa-extra").value) || 0);
+        const totalTaxas = valorNoturna + taxaExtra;
+        const totalFinal = valorBase + totalTaxas;
+
+        const nomePassageiro = document.getElementById("nome-passageiro").value.trim() || "Não informado";
+        const telPassageiro = document.getElementById("tel-passageiro").value.trim() || "Não informado";
+
+        estado.ultimoCalculo = {
+          nomePassageiro,
+          telPassageiro,
+          origem: origem.nome,
+          destino: destino.nome,
+          km: km.toFixed(1).replace(".", ","),
+          minutos,
+          descricaoFaixa,
+          noturna,
+          taxaExtra,
+          totalTaxas,
+          valor: totalFinal.toFixed(2).replace(".", ",")
+        };
+
+        document.getElementById("res-dist-tempo").textContent = `${estado.ultimoCalculo.km} km • ~${minutos} min`;
+        document.getElementById("res-faixa").textContent = descricaoFaixa;
+        document.getElementById("res-taxas").textContent = formatarMoeda(totalTaxas);
+        document.getElementById("res-valor").textContent = formatarMoeda(totalFinal);
+        document.getElementById("card-resultado").style.display = "block";
+      } catch (erro) {
+        mostrarAviso("Falha de conexão ao calcular a rota. Verifique sua internet e tente novamente.");
+      } finally {
+        btn.textContent = "Calcular Valor da Corrida";
+        btn.disabled = false;
       }
     }
 
-    function togglePix() {
-      const b = document.getElementById("pixBox");
-      b.style.display = b.style.display === "block" ? "none" : "block";
-    }
+    function enviarWhatsApp() {
+      if (!estado.ultimoCalculo) return;
+      const c = estado.ultimoCalculo;
+      const infoTaxa = c.totalTaxas > 0 ? `\n🧾 *Taxas / Noturno (+25%):* ${formatarMoeda(c.totalTaxas)}` : "";
 
-    function copyPix() {
-      navigator.clipboard.writeText(PIX_KEY).then(() => {
-        document.getElementById("msg").textContent = "Chave Pix do Banco Inter copiada!";
-      });
-    }
+      const msg =
+        `Olá! Quero pedir uma corrida pelo *32 Drive*:\n\n` +
+        `👤 *Passageiro:* ${c.nomePassageiro}\n` +
+        `📱 *Contato:* ${c.telPassageiro}\n` +
+        `📍 *Origem:* ${c.origem}\n` +
+        `🏁 *Destino:* ${c.destino}\n` +
+        `📏 *Distância:* ${c.km} km (~${c.minutos} min)` +
+        `${infoTaxa}\n` +
+        `💵 *Valor total:* R$ ${c.valor}`;
 
-    setTimeout(() => { map.invalidateSize(); }, 200);
+      const url = `https://wa.me/${WHATSAPP_MOTORISTA}?text=${encodeURIComponent(msg)}`;
+      window.open(url, "_blank");
+    }
   </script>
 </body>
 </html>
