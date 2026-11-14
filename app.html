@@ -12,7 +12,8 @@
     .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
     .badge { background: #f59e0b; color: #111; font-weight: 800; padding: 8px 12px; border-radius: 10px; font-size: 14px; }
     .pill { background: rgba(22,163,74,.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 10px; border-radius: 999px; font-size: 12px; white-space: nowrap; }
-    #map { width: 100%; height: 215px; border-radius: 12px; border: 1px solid #2e3444; margin-bottom: 12px; }
+    #map { width: 100%; height: 230px; border-radius: 12px; border: 1px solid #2e3444; margin-bottom: 8px; }
+    .map-hint { font-size: 12px; color: #9aa3b2; margin-bottom: 12px; }
     label { display: block; font-size: 12px; color: #9aa3b2; margin-bottom: 4px; }
     input { width: 100%; background: #222631; border: 1px solid #2e3444; color: #fff; border-radius: 10px; padding: 11px 12px; font-size: 14px; margin-bottom: 10px; }
     input:focus { outline: none; border-color: #f59e0b; }
@@ -22,9 +23,9 @@
     .btn-green { background: #16a34a; border-color: #16a34a; }
     .btn-waze { background: #f59e0b; border-color: #f59e0b; color: #111; }
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .res { background: #222631; border: 1px solid #2e3444; border-radius: 10px; padding: 11px 12px; margin-bottom: 10px; }
-    .res div { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; color: #cbd5e1; }
-    .total { font-size: 18px; font-weight: 800; color: #fbbf24; margin-bottom: 0 !important; }
+    .res { background: #222631; border: 1px solid #2e3444; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    .res div { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; color: #cbd5e1; }
+    .total { font-size: 19px; font-weight: 800; color: #fbbf24; margin-bottom: 0 !important; }
     .pix-box { display: none; background: #222631; border: 1px solid #2e3444; border-radius: 10px; padding: 11px; margin-top: 8px; }
     .pix-key { font-family: monospace; font-size: 12px; word-break: break-all; background: #0f1115; padding: 8px; border-radius: 8px; margin: 6px 0; color: #e2e8f0; }
     .msg { font-size: 12px; color: #9aa3b2; margin-top: 6px; line-height: 1.4; }
@@ -35,10 +36,11 @@
   <div class="card">
     <div class="top">
       <div class="badge">32 DRIVE • Rio Grande / Cassino</div>
-      <span class="pill" id="gpsStatus">GPS ativo</span>
+      <span class="pill" id="gpsStatus">Mapa sincronizado</span>
     </div>
 
     <div id="map"></div>
+    <div class="map-hint" id="mapHint">Toque no mapa ou arraste os pinos (verde = embarque, vermelho = destino) para atualizar o valor na hora.</div>
 
     <label for="pName">Nome do passageiro</label>
     <input id="pName" type="text" placeholder="Ex.: João Silva" />
@@ -46,19 +48,18 @@
     <label for="pPhone">Telefone do passageiro</label>
     <input id="pPhone" type="tel" placeholder="Ex.: 53 99999-9999" />
 
-    <label for="pickup">Linha 1 — Onde vai pegar (embarque)</label>
+    <label for="pickup">Onde vai pegar (embarque)</label>
     <input id="pickup" type="text" placeholder="Ex.: Av. Rio Grande, Cassino, Rio Grande" />
 
-    <label for="dropoff">Linha 2 — Para onde vai levar (destino)</label>
+    <label for="dropoff">Para onde vai levar (destino)</label>
     <input id="dropoff" type="text" placeholder="Ex.: Centro de Rio Grande" />
 
     <button type="button" class="btn-blue" onclick="useGPS()">Usar meu GPS</button>
-    <button type="button" class="btn-blue" onclick="calcRide()">Calcular Corrida</button>
+    <button type="button" class="btn-blue" onclick="syncFromInputs(true)">Calcular Corrida</button>
 
     <div class="res">
-      <div><span>Distância:</span><strong id="distTxt">— km</strong></div>
-      <div><span>Regra:</span><span>R$ 7,99 até 3,5 km | +R$ 2,50/km</span></div>
-      <div class="total"><span>Valor da corrida:</span><span id="priceTxt">R$ 7,99</span></div>
+      <div><span>Distância estimada:</span><strong id="distTxt">0,00 km</strong></div>
+      <div class="total"><span>Valor total:</span><span id="priceTxt">R$ 7,99</span></div>
     </div>
 
     <button type="button" class="btn-green" onclick="sendWhats()">Pedir Corrida no WhatsApp</button>
@@ -69,7 +70,7 @@
     </div>
 
     <div class="waze-link" id="wazeOut"></div>
-    <div class="msg" id="msg">Preencha passageiro, coleta e destino para calcular ou pedir.</div>
+    <div class="msg" id="msg">Preencha os campos ou toque no mapa para definir embarque e destino.</div>
   </div>
 
   <div class="card">
@@ -85,31 +86,52 @@
   <script>
     const DRIVER_WA = "5553991357231";
     const PIX_KEY = "45bd89b5-9dd7-4cda-8715-789257d06596";
-    // Limites restritos a Rio Grande / Balneário do Cassino para o mapa não buscar longe
     const VIEWBOX = "-52.65,-31.85,-51.95,-32.45";
-    const BASE_COORD = [-32.17235, -52.16878];
+    const BASE_PICKUP = [-32.17235, -52.16878];
+    const BASE_DROPOFF = [-32.03500, -52.09860];
 
-    const map = L.map("map").setView(BASE_COORD, 13);
+    const map = L.map("map").setView(BASE_PICKUP, 12);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "© OpenStreetMap"
     }).addTo(map);
 
-    let m1 = L.marker(BASE_COORD).addTo(map).bindPopup("Embarque");
-    let m2 = null;
-    let line = null;
-    let lastRide = { km: null, price: 7.99 };
+    function makePin(color) {
+      return L.divIcon({
+        className: "",
+        html: `<div style="width:18px;height:18px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 0 6px rgba(0,0,0,.7);"></div>`,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      });
+    }
+
+    const pickupMarker = L.marker(BASE_PICKUP, { draggable: true, icon: makePin("#22c55e") })
+      .addTo(map)
+      .bindPopup("Embarque");
+
+    const dropoffMarker = L.marker(BASE_DROPOFF, { draggable: true, icon: makePin("#ef4444") })
+      .addTo(map)
+      .bindPopup("Destino");
+
+    let routeLine = null;
+    let activeTarget = "dropoff";
+    let lastRide = { km: 0, price: 7.99, ready: false };
 
     const fmtBRL = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    const calcFare = (km) => (km <= 3.5 ? 7.99 : 7.99 + (km - 3.5) * 2.5);
 
-    const localQuery = (txt) => {
+    function calcFare(km) {
+      const cleanKm = Math.max(0, Number(km) || 0);
+      if (cleanKm <= 3.5) return 7.99;
+      return cleanKm * 2.0;
+    }
+
+    function localQuery(txt) {
       const t = txt.trim();
       const l = t.toLowerCase();
       if (l.includes("rio grande") || l.includes("cassino")) {
         return l.includes("rs") ? t : `${t}, Rio Grande, RS`;
       }
       return `${t}, Rio Grande, RS`;
-    };
+    }
 
     async function geocodeRG(txt) {
       const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&bounded=1&viewbox=${VIEWBOX}&q=${encodeURIComponent(localQuery(txt))}`;
@@ -121,77 +143,136 @@
       return { lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon) };
     }
 
+    async function reverseAddress(lat, lon) {
+      try {
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`, {
+          headers: { "Accept-Language": "pt-BR" }
+        });
+        const j = await r.json();
+        const a = j.address || {};
+        const street = a.road || a.pedestrian || a.footway || "Ponto no mapa";
+        const area = a.suburb || a.neighbourhood || a.village || a.town || "Rio Grande";
+        return `${street}, ${area}, Rio Grande, RS`;
+      } catch {
+        return `${lat.toFixed(5)}, ${lon.toFixed(5)}, Rio Grande, RS`;
+      }
+    }
+
+    async function syncRouteAndPrice(fitView = false) {
+      const p1 = pickupMarker.getLatLng();
+      const p2 = dropoffMarker.getLatLng();
+
+      let km = (p1.distanceTo(p2) / 1000) * 1.25;
+      let coords = [[p1.lat, p1.lng], [p2.lat, p2.lng]];
+
+      try {
+        const rr = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${p1.lng},${p1.lat};${p2.lng},${p2.lat}?overview=full&geometries=geojson`
+        );
+        const rj = await rr.json();
+        if (rj.routes && rj.routes[0]) {
+          km = rj.routes[0].distance / 1000;
+          coords = rj.routes[0].geometry.coordinates.map(([x, y]) => [y, x]);
+        }
+      } catch {}
+
+      if (routeLine) map.removeLayer(routeLine);
+      routeLine = L.polyline(coords, { color: "#f59e0b", weight: 5 }).addTo(map);
+      if (fitView) {
+        map.fitBounds(routeLine.getBounds(), { padding: [22, 22] });
+      }
+
+      const price = calcFare(km);
+      lastRide = { km, price, ready: true };
+      document.getElementById("distTxt").textContent = `${km.toFixed(2).replace(".", ",")} km`;
+      document.getElementById("priceTxt").textContent = fmtBRL(price);
+      document.getElementById("msg").textContent = `Valor da corrida calculado: ${fmtBRL(price)}.`;
+    }
+
+    pickupMarker.on("dragend", async () => {
+      const { lat, lng } = pickupMarker.getLatLng();
+      document.getElementById("msg").textContent = "Atualizando embarque...";
+      document.getElementById("pickup").value = await reverseAddress(lat, lng);
+      await syncRouteAndPrice(false);
+    });
+
+    dropoffMarker.on("dragend", async () => {
+      const { lat, lng } = dropoffMarker.getLatLng();
+      document.getElementById("msg").textContent = "Atualizando destino...";
+      document.getElementById("dropoff").value = await reverseAddress(lat, lng);
+      await syncRouteAndPrice(false);
+    });
+
+    map.on("click", async (e) => {
+      const { lat, lng } = e.latlng;
+      if (activeTarget === "pickup") {
+        pickupMarker.setLatLng([lat, lng]);
+        document.getElementById("pickup").value = await reverseAddress(lat, lng);
+        activeTarget = "dropoff";
+        document.getElementById("mapHint").textContent = "Embarque marcado. Toque no mapa para marcar o destino.";
+      } else {
+        dropoffMarker.setLatLng([lat, lng]);
+        document.getElementById("dropoff").value = await reverseAddress(lat, lng);
+        activeTarget = "pickup";
+        document.getElementById("mapHint").textContent = "Destino marcado. Toque no mapa ou arraste os pinos para ajustar.";
+      }
+      await syncRouteAndPrice(false);
+    });
+
+    document.getElementById("pickup").addEventListener("focus", () => { activeTarget = "pickup"; });
+    document.getElementById("dropoff").addEventListener("focus", () => { activeTarget = "dropoff"; });
+
+    async function syncFromInputs(fitView = true) {
+      const pTxt = document.getElementById("pickup").value.trim();
+      const dTxt = document.getElementById("dropoff").value.trim();
+      const msg = document.getElementById("msg");
+
+      if (!pTxt || !dTxt) {
+        msg.textContent = "Preencha embarque e destino (ou toque nos dois pontos no mapa).";
+        return null;
+      }
+
+      msg.textContent = "Sincronizando endereços, mapa e calculadora...";
+      try {
+        const c1 = await geocodeRG(pTxt);
+        const c2 = await geocodeRG(dTxt);
+        pickupMarker.setLatLng([c1.lat, c1.lon]);
+        dropoffMarker.setLatLng([c2.lat, c2.lon]);
+        await syncRouteAndPrice(fitView);
+        return lastRide;
+      } catch (e) {
+        msg.textContent = e.message || "Erro ao localizar endereços.";
+        return null;
+      }
+    }
+
     function useGPS() {
       const st = document.getElementById("gpsStatus");
+      const msg = document.getElementById("msg");
       if (!navigator.geolocation) {
         st.textContent = "Sem GPS";
         return;
       }
-      st.textContent = "Localizando...";
+      st.textContent = "Buscando GPS...";
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           const { latitude: lat, longitude: lon } = pos.coords;
           st.textContent = "GPS ativo";
-          m1.setLatLng([lat, lon]);
+          pickupMarker.setLatLng([lat, lon]);
           map.setView([lat, lon], 14);
-          try {
-            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-            const j = await r.json();
-            const a = j.address || {};
-            document.getElementById("pickup").value = `${a.road || "Ponto GPS"}, ${a.suburb || a.neighbourhood || "Rio Grande"}, Rio Grande, RS`;
-          } catch {
-            document.getElementById("pickup").value = `${lat.toFixed(5)}, ${lon.toFixed(5)}, Rio Grande, RS`;
+          document.getElementById("pickup").value = await reverseAddress(lat, lon);
+          if (document.getElementById("dropoff").value.trim()) {
+            await syncRouteAndPrice(true);
+          } else {
+            msg.textContent = "Embarque preenchido pelo GPS. Informe ou toque no destino.";
           }
         },
         () => {
           st.textContent = "GPS manual";
+          msg.textContent = "Não foi possível ler o GPS. Digite ou toque no mapa.";
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
-    }
-
-    async function calcRide() {
-      const p = document.getElementById("pickup").value.trim();
-      const d = document.getElementById("dropoff").value.trim();
-      const msg = document.getElementById("msg");
-      if (!p || !d) {
-        msg.textContent = "Preencha onde vai pegar e para onde vai levar.";
-        return null;
-      }
-      msg.textContent = "Calculando rota em Rio Grande / Cassino...";
-      try {
-        const c1 = await geocodeRG(p);
-        const c2 = await geocodeRG(d);
-        m1.setLatLng([c1.lat, c1.lon]);
-        if (m2) {
-          m2.setLatLng([c2.lat, c2.lon]);
-        } else {
-          m2 = L.marker([c2.lat, c2.lon]).addTo(map).bindPopup("Destino");
-        }
-
-        let km = (L.latLng(c1.lat, c1.lon).distanceTo([c2.lat, c2.lon]) / 1000) * 1.25;
-        try {
-          const rr = await fetch(`https://router.project-osrm.org/route/v1/driving/${c1.lon},${c1.lat};${c2.lon},${c2.lat}?overview=full&geometries=geojson`);
-          const rj = await rr.json();
-          if (rj.routes && rj.routes[0]) {
-            km = rj.routes[0].distance / 1000;
-            const coords = rj.routes[0].geometry.coordinates.map(([x, y]) => [y, x]);
-            if (line) map.removeLayer(line);
-            line = L.polyline(coords, { color: "#f59e0b", weight: 5 }).addTo(map);
-            map.fitBounds(line.getBounds(), { padding: [20, 20] });
-          }
-        } catch {}
-
-        const price = calcFare(km);
-        lastRide = { km, price };
-        document.getElementById("distTxt").textContent = `${km.toFixed(2)} km`;
-        document.getElementById("priceTxt").textContent = fmtBRL(price);
-        msg.textContent = "Rota calculada. Pronto para pedir no WhatsApp ou abrir o Waze.";
-        return lastRide;
-      } catch (e) {
-        msg.textContent = e.message || "Erro ao calcular rota.";
-        return null;
-      }
     }
 
     async function sendWhats() {
@@ -200,20 +281,26 @@
       const pickup = document.getElementById("pickup").value.trim();
       const dropoff = document.getElementById("dropoff").value.trim();
       const msg = document.getElementById("msg");
+
       if (!name || !phone || !pickup || !dropoff) {
-        msg.textContent = "Preencha nome, telefone, embarque e destino.";
+        msg.textContent = "Preencha nome, telefone, embarque e destino antes de enviar.";
         return;
       }
-      const ride = lastRide.km ? lastRide : await calcRide();
+
+      const ride = lastRide.ready ? lastRide : await syncFromInputs(true);
+      const kmTxt = ride && ride.ready ? `${ride.km.toFixed(2).replace(".", ",")} km` : "A confirmar";
+      const priceTxt = fmtBRL(ride ? ride.price : 7.99);
+
       const text =
-        `*32 DRIVE — NOVO PEDIDO DE CORRIDA*\n` +
+        `*32 DRIVE — PEDIDO DE CORRIDA*\n` +
         `Passageiro: ${name}\n` +
         `Telefone: ${phone}\n` +
-        `Coleta: ${pickup}\n` +
+        `Embarque: ${pickup}\n` +
         `Destino: ${dropoff}\n` +
-        `Distância: ${ride && ride.km ? ride.km.toFixed(2) + " km" : "A confirmar"}\n` +
-        `Valor: ${fmtBRL(ride ? ride.price : 7.99)}\n` +
+        `Distância: ${kmTxt}\n` +
+        `Valor: ${priceTxt}\n` +
         `Pix Banco Inter: ${PIX_KEY}`;
+
       window.open(`https://wa.me/${DRIVER_WA}?text=${encodeURIComponent(text)}`, "_blank");
     }
 
@@ -227,7 +314,8 @@
         const c2 = await geocodeRG(dropoff);
         window.open(`https://waze.com/ul?ll=${c2.lat},${c2.lon}&navigate=yes`, "_blank");
       } catch {
-        window.open(`https://waze.com/ul?q=${encodeURIComponent(localQuery(dropoff))}&navigate=yes`, "_blank");
+        const p2 = dropoffMarker.getLatLng();
+        window.open(`https://waze.com/ul?ll=${p2.lat},${p2.lng}&navigate=yes`, "_blank");
       }
     }
 
@@ -250,7 +338,9 @@
         out.innerHTML = `Link Waze: <a href="${url}" target="_blank" style="color:#93c5fd;">${url}</a>`;
         if (navigator.clipboard) navigator.clipboard.writeText(url).catch(() => {});
       } catch {
-        const url = `https://waze.com/ul?q=${encodeURIComponent(localQuery(dropoff))}&navigate=yes`;
+        const p1 = pickupMarker.getLatLng();
+        const p2 = dropoffMarker.getLatLng();
+        const url = `https://waze.com/ul?ll=${p2.lat},${p2.lng}&from=${p1.lat},${p1.lng}&navigate=yes`;
         out.innerHTML = `Link Waze: <a href="${url}" target="_blank" style="color:#93c5fd;">${url}</a>`;
       }
     }
