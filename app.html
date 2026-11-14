@@ -3,7 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f1115" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="32 Drive" />
   <title>32 Drive • Rio Grande & Cassino</title>
+  <link id="appIconLink" rel="icon" type="image/png" href="" />
+  <link id="appleIconLink" rel="apple-touch-icon" href="" />
+  <link id="manifestLink" rel="manifest" href="" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
@@ -84,6 +91,94 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
+    (function setupAppIcon() {
+      const canvas = document.createElement("canvas");
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext("2d");
+
+      function roundRect(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      }
+
+      // Fundo limpo do ícone (só o emblema 32 DRIVE)
+      ctx.fillStyle = "#181b22";
+      roundRect(0, 0, 512, 512, 96);
+      ctx.fill();
+
+      // Moldura metálica externa
+      ctx.strokeStyle = "#9ca3af";
+      ctx.lineWidth = 22;
+      roundRect(20, 20, 472, 472, 84);
+      ctx.stroke();
+
+      // Borda interna âmbar
+      ctx.strokeStyle = "#f59e0b";
+      ctx.lineWidth = 8;
+      roundRect(42, 42, 428, 428, 68);
+      ctx.stroke();
+
+      // Número 32 centralizado
+      ctx.fillStyle = "#f3f5f8";
+      ctx.font = "900 188px system-ui, -apple-system, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("32", 256, 174);
+
+      // Texto DRIVE
+      ctx.fillStyle = "#f59e0b";
+      ctx.font = "900 78px system-ui, -apple-system, sans-serif";
+      ctx.fillText("DRIVE", 256, 298);
+
+      // Linhas laterais e pin de localização
+      ctx.strokeStyle = "#d1d5db";
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(92, 382);
+      ctx.lineTo(212, 382);
+      ctx.moveTo(300, 382);
+      ctx.lineTo(420, 382);
+      ctx.stroke();
+
+      ctx.fillStyle = "#f59e0b";
+      ctx.beginPath();
+      ctx.arc(256, 374, 24, Math.PI, 0);
+      ctx.lineTo(256, 434);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "#181b22";
+      ctx.beginPath();
+      ctx.arc(256, 374, 9, 0, Math.PI * 2);
+      ctx.fill();
+
+      const pngUrl = canvas.toDataURL("image/png");
+      document.getElementById("appIconLink").href = pngUrl;
+      document.getElementById("appleIconLink").href = pngUrl;
+
+      const manifest = {
+        name: "32 Drive",
+        short_name: "32 Drive",
+        start_url: "./app.html",
+        display: "standalone",
+        background_color: "#0f1115",
+        theme_color: "#0f1115",
+        icons: [{ src: pngUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }]
+      };
+      const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+      document.getElementById("manifestLink").href = URL.createObjectURL(blob);
+    })();
+
     const DRIVER_WA = "5553991357231";
     const PIX_KEY = "45bd89b5-9dd7-4cda-8715-789257d06596";
     const VIEWBOX = "-52.65,-31.85,-51.95,-32.45";
