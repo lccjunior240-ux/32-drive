@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ffcc00">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>32 Drive - Mobilidade Urbana</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #121212; color: #ffffff; padding: 15px; display: flex; justify-content: center; }
+    .container { background: #1e1e1e; width: 100%; max-width: 450px; border-radius: 16px; box-shadow: 0 4px 25px rgba(255,204,0,0.25); overflow: hidden; border: 2px solid #ffcc00; }
+
+    .header { background-color: #000000; color: #ffcc00; text-align: center; padding: 22px 15px; border-bottom: 2px solid #ffcc00; }
+    .header h1 { font-size: 28px; text-transform: uppercase; letter-spacing: 2px; font-weight: 900; color: #ffcc00; }
+    .header .driver-info { font-size: 14px; margin-top: 8px; background: rgba(255,204,0,0.15); color: #ffcc00; padding: 6px 12px; border-radius: 6px; display: inline-block; font-weight: 700; border: 1px solid #ffcc00; }
+    .header p { font-size: 14px; margin-top: 8px; color: #ffffff; font-weight: 600; }
+
+    .btn-install {
+      display: none;
+      margin-top: 10px;
+      background: #ffcc00;
+      color: #000;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+
+    .content { padding: 22px; }
+
+    .form-group { margin-bottom: 16px; }
+    .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; }
+    label { font-size: 15px; font-weight: bold; color: #ffcc00; }
+    .btn-gps {
+      background: rgba(255,204,0,0.14);
+      color: #ffcc00;
+      border: 1px solid #ffcc00;
+      border-radius: 6px;
+      padding: 5px 9px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-gps:hover { background: rgba(255,204,0,0.24); }
+
+    input[type="text"], input[type="tel"] {
+      width: 100%;
+      padding: 13px;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: #ffffff;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+    }
+    input:focus { border-color: #ffcc00; background: #333333; }
+
+    .map-box {
+      margin-bottom: 16px;
+      border: 2px solid #ffcc00;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #141414;
+    }
+    #mapa32Drive {
+      width: 100%;
+      height: 220px;
+      z-index: 1;
+    }
+    .map-hint {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #cccccc;
+      background: #181818;
+      border-top: 1px solid #333;
+      text-align: center;
+    }
+
+    .price-box { background: #252525; border: 2px solid #ffcc00; padding: 16px; border-radius: 10px; text-align: center; margin-bottom: 18px; }
+    .price-title { font-size: 13px; color: #aaaaaa; text-transform: uppercase; font-weight: bold; }
+    .price-value { font-size: 32px; font-weight: 900; color: #ffcc00; margin: 6px 0; }
+    .price-note { font-size: 13px; color: #cccccc; line-height: 1.4; }
+
+    .btn-calc { background-color: #ffcc00; color: #000000; border: none; width: 100%; padding: 14px; font-size: 15px; font-weight: 900; border-radius: 8px; cursor: pointer; margin-bottom: 16px; text-transform: uppercase; }
+    .btn-calc:hover { background-color: #e6b800; }
+
+    .btn-main { background-color: #ffcc00; color: #000000; border: none; width: 100%; padding: 16px; font-size: 17px; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 15px rgba(255, 204, 0, 0.35); margin-bottom: 12px; }
+    .btn-main:hover { background-color: #e6b800; }
+
+    .btn-pix { background-color: #ff7f00; color: #ffffff; border: none; width: 100%; padding: 14px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 8px rgba(255,127,0,0.4); }
+    .btn-pix:hover { background-color: #e67200; }
+
+    .footer-info { font-size: 12px; color: #888888; text-align: center; margin-top: 18px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>32 Drive</h1>
+    <div class="driver-info">Motorista: Luíz Carlos Costa Jr.</div>
+    <p>VW Voyage • Placa: IQD8060</p>
+    <button type="button" id="btnInstalarApp" class="btn-install" onclick="instalarApp()">Instalar Aplicativo</button>
+  </div>
+
+  <div class="content">
+    <div class="form-group">
+      <label for="nomeCliente">Seu Nome:</label>
+      <input type="text" id="nomeCliente" placeholder="Ex: João da Silva">
+    </div>
+
+    <div class="form-group">
+      <label for="foneCliente">Seu WhatsApp / Telefone:</label>
+      <input type="tel" id="foneCliente" placeholder="Ex: (53) 99999-9999">
+    </div>
+
+    <div class="form-group">
+      <div class="label-row">
+        <label for="origem">Local de Embarque (Origem):</label>
+        <button type="button" class="btn-gps" onclick="usarGPS()">Usar meu GPS</button>
+      </div>
+      <input type="text" id="origem" placeholder="Ex: Rua Visconde de Paranaguá, Centro">
+    </div>
+
+    <div class="form-group">
+      <label for="destino">Destino:</label>
+      <input type="text" id="destino" placeholder="Ex: Rua Almirante Tamandaré, Cassino">
+    </div>
+
+    <div class="map-box">
+      <div id="mapa32Drive"></div>
+      <div class="map-hint" id="mapHint">Toque no mapa para ajustar o ponto ou use o GPS na origem.</div>
+    </div>
+
+    <button type="button" class="btn-calc" id="btnCalcular" onclick="calcularDireto()">Calcular Preço da Corrida</button>
+
+    <div class="price-box">
+      <div class="price-title">Valor Estimado da Corrida</div>
+      <div class="price-value" id="valor-total">--</div>
+      <div class="price-note" id="distancia-info">Até 3,5 km: R$ 7,99 • Acima de 3,5 km: R$ 2,00/km</div>
+    </div>
+
+    <button type="button" class="btn-main" onclick="enviarWhatsApp()">Pedir Corrida no WhatsApp</button>
+    <button type="button" class="btn-pix" onclick="copiarPix()">Copiar Chave Pix (Banco Inter)</button>
+
+    <div class="footer-info">
+      32 Drive • Mobilidade Urbana em Balneário do Cassino e Rio Grande.
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+  const CHAVE_PIX = "45bd89b5-9dd7-4cda-8715-789257d06596";
+  const TELEFONE_MOTORISTA = "5553999089980";
+
+  // Coordenadas centrais iniciais (Rio Grande / Cassino)
+  const CENTRO_PADRAO = [-32.0352, -52.0986];
+  let mapa = null;
+  let marcadorOrigem = null;
+  let marcadorDestino = null;
+  let linhaRota = null;
+
+  let coordsOrigem = null;
+  let coordsDestino = null;
+  let distanciaCalculadaKm = 0;
+  let modoToqueMapa = "origem";
+
+  // Regra exata: até 3,5 km = R$ 7,99; acima de 3,5 km = R$ 2,00/km (sem somar R$ 7,99)
+  function calcularValorRegra(km) {
+    if (km <= 3.5) {
+      return {
+        valor: 7.99,
+        regra: "Até 3,5 km: R$ 7,99 fixo"
+      };
+    }
+    return {
+      valor: km * 2.00,
+      regra: "Acima de 3,5 km: R$ 2,00/km (sem taxa de R$ 7,99)"
+    };
+  }
+
+  function iniciarMapa() {
+    if (typeof L === "undefined") return;
+    mapa = L.map("mapa32Drive").setView(CENTRO_PADRAO, 13);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap"
+    }).addTo(mapa);
+
+    mapa.on("click", function (e) {
+      const { lat, lng } = e.latlng;
+      if (modoToqueMapa === "origem") {
+        definirMarcadorOrigem(lat, lng, `Ponto no mapa (${lat.toFixed(5)}, ${lng.toFixed(5)})`, true);
+        modoToqueMapa = "destino";
+        document.getElementById("mapHint").innerText = "Origem marcada. Agora toque no mapa para marcar o Destino.";
+      } else {
+        definirMarcadorDestino(lat, lng, `Destino no mapa (${lat.toFixed(5)}, ${lng.toFixed(5)})`, true);
+        modoToqueMapa = "origem";
+        document.getElementById("mapHint").innerText = "Destino marcado. Clique em Calcular Preço da Corrida.";
+      }
+    });
+  }
+
+  function definirMarcadorOrigem(lat, lon, textoEndereco, preencherCampo) {
+    coordsOrigem = { lat, lon };
+    if (preencherCampo && textoEndereco) {
+      document.getElementById("origem").value = textoEndereco;
+    }
+    if (!mapa) return;
+    if (marcadorOrigem) {
+      marcadorOrigem.setLatLng([lat, lon]);
+    } else {
+      marcadorOrigem = L.marker([lat, lon]).addTo(mapa).bindPopup("Origem").openPopup();
+    }
+    mapa.setView([lat, lon], 14);
+  }
+
+  function definirMarcadorDestino(lat, lon, textoEndereco, preencherCampo) {
+    coordsDestino = { lat, lon };
+    if (preencherCampo && textoEndereco) {
+      document.getElementById("destino").value = textoEndereco;
+    }
+    if (!mapa) return;
+    if (marcadorDestino) {
+      marcadorDestino.setLatLng([lat, lon]);
+    } else {
+      marcadorDestino = L.marker([lat, lon]).addTo(mapa).bindPopup("Destino").openPopup();
+    }
+    if (coordsOrigem) {
+      const grupo = L.featureGroup([marcadorOrigem, marcadorDestino]);
+      mapa.fitBounds(grupo.getBounds().pad(0.25));
+    } else {
+      mapa.setView([lat, lon], 14);
+    }
+  }
+
+  function fetchComTimeout(url, ms = 5000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ms);
+    return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
+  }
+
+  async function buscarCoordenadasEndereco(texto) {
+    const base = texto.trim();
+    const tentativas = [
+      base,
+      `${base}, Rio Grande, RS, Brasil`,
+      `${base}, Balneário do Cassino, Rio Grande, RS, Brasil`
+    ];
+
+    for (const consulta of tentativas) {
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(consulta)}&limit=1`;
+        const res = await fetchComTimeout(url, 5000);
+        if (!res.ok) continue;
+        const dados = await res.json();
+        if (Array.isArray(dados) && dados.length > 0) {
+          return {
+            lat: parseFloat(dados[0].lat),
+            lon: parseFloat(dados[0].lon),
+            displayName: dados[0].display_name || base
+          };
+        }
+      } catch (_) {
+        // Tenta próxima variação
+      }
+    }
+    return null;
+  }
+
+  function distanciaHaversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  async function obterDistanciaRotaKm(o, d) {
+    try {
+      const url = `https://router.project-osrm.org/route/v1/driving/${o.lon},${o.lat};${d.lon},${d.lat}?overview=full&geometries=geojson`;
+      const res = await fetchComTimeout(url, 5000);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.routes && data.routes[0]) {
+          const kmRua = data.routes[0].distance / 1000;
+          const coordsGeo = data.routes[0].geometry.coordinates.map(p => [p[1], p[0]]);
+          desenharLinhaRota(coordsGeo);
+          return { km: kmRua, fonte: "Rota pelo mapa" };
+        }
+      }
+    } catch (_) {
+      // Cai para fallback matemático
+    }
+
+    const kmLinhaReta = distanciaHaversineKm(o.lat, o.lon, d.lat, d.lon) * 1.3;
+    desenharLinhaRota([[o.lat, o.lon], [d.lat, d.lon]]);
+    return { km: kmLinhaReta, fonte: "Estimativa de trajeto" };
+  }
+
+  function desenharLinhaRota(pontosLatLng) {
+    if (!mapa) return;
+    if (linhaRota) {
+      mapa.removeLayer(linhaRota);
+    }
+    linhaRota = L.polyline(pontosLatLng, { color: "#ffcc00", weight: 4 }).addTo(mapa);
+    mapa.fitBounds(linhaRota.getBounds().pad(0.25));
+  }
+
+  function usarGPS() {
+    if (!navigator.geolocation) {
+      document.getElementById("mapHint").innerText = "GPS indisponível neste navegador. Toque no mapa para marcar a origem.";
+      return;
+    }
+    document.getElementById("mapHint").innerText = "Buscando sua localização via GPS...";
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        definirMarcadorOrigem(lat, lon, `GPS (${lat.toFixed(5)}, ${lon.toFixed(5)})`, true);
+        document.getElementById("mapHint").innerText = "Origem definida pelo GPS! Agora informe o Destino.";
+      },
+      () => {
+        document.getElementById("mapHint").innerText = "Não foi possível ler o GPS. Digite o endereço ou toque no mapa.";
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  }
+
+  async function calcularDireto() {
+    const origemTxt = document.getElementById("origem").value.trim();
+    const destinoTxt = document.getElementById("destino").value.trim();
+    const btnCalc = document.getElementById("btnCalcular");
+
+    if (!origemTxt || !destinoTxt) {
+      alert("Por favor, preencha a Origem e o Destino!");
+      return;
+    }
+
+    btnCalc.disabled = true;
+    btnCalc.innerText = "Calculando...";
+    document.getElementById("valor-total").innerText = "Calculando...";
+    document.getElementById("distancia-info").innerText = "Localizando endereços no mapa...";
+
+    try {
+      const o = coordsOrigem && origemTxt.startsWith("GPS (")
+        ? coordsOrigem
+        : await buscarCoordenadasEndereco(origemTxt);
+
+      const d = coordsDestino && destinoTxt.startsWith("Destino no mapa")
+        ? coordsDestino
+        : await buscarCoordenadasEndereco(destinoTxt);
+
+      if (!o || !d) {
+        document.getElementById("valor-total").innerText = "--";
+        document.getElementById("distancia-info").innerText =
+          "Não encontramos um dos endereços. Toque no mapa para marcar Origem e Destino ou inclua o bairro.";
+        return;
+      }
+
+      definirMarcadorOrigem(o.lat, o.lon, null, false);
+      definirMarcadorDestino(d.lat, d.lon, null, false);
+
+      const resultadoRota = await obterDistanciaRotaKm(o, d);
+      distanciaCalculadaKm = Number(resultadoRota.km.toFixed(1));
+
+      const tarifa = calcularValorRegra(distanciaCalculadaKm);
+      document.getElementById("valor-total").innerText = `R$ ${tarifa.valor.toFixed(2).replace(".", ",")}`;
+      document.getElementById("distancia-info").innerText =
+        `${resultadoRota.fonte}: ${distanciaCalculadaKm.toFixed(1)} km • ${tarifa.regra}`;
+    } finally {
+      btnCalc.disabled = false;
+      btnCalc.innerText = "Calcular Preço da Corrida";
+    }
+  }
+
+  function copiarPix() {
+    navigator.clipboard.writeText(CHAVE_PIX).then(() => {
+      alert("Chave Pix copiada com sucesso!\n\nChave: " + CHAVE_PIX);
+    }).catch(() => {
+      prompt("Copie a chave Pix:", CHAVE_PIX);
+    });
+  }
+
+  function enviarWhatsApp() {
+    const nome = document.getElementById("nomeCliente").value.trim();
+    const fone = document.getElementById("foneCliente").value.trim();
+    const origem = document.getElementById("origem").value.trim();
+    const destino = document.getElementById("destino").value.trim();
+    const valor = document.getElementById("valor-total").innerText;
+
+    if (!nome || !fone || !origem || !destino) {
+      alert("Por favor, preencha todos os campos!");
+      return;
+    }
+    if (distanciaCalculadaKm <= 0 || valor === "--" || valor === "Calculando...") {
+      alert("Por favor, clique em 'Calcular Preço da Corrida' primeiro!");
+      return;
+    }
+
+    const destinoQuery = coordsDestino
+      ? `${coordsDestino.lat},${coordsDestino.lon}`
+      : `${destino}, Rio Grande, RS`;
+    const linkWaze = `https://waze.com/ul?q=${encodeURIComponent(destinoQuery)}&navigate=yes`;
+
+    const mensagem =
+      `NOVA CORRIDA - 32 DRIVE\n\n` +
+      `Passageiro: ${nome}\n` +
+      `Contato: ${fone}\n` +
+      `Origem: ${origem}\n` +
+      `Destino: ${destino}\n` +
+      `Distância: ${distanciaCalculadaKm.toFixed(1)} km\n` +
+      `Valor Calculado: ${valor}\n\n` +
+      `Abrir Rota no Waze:\n${linkWaze}`;
+
+    window.open(`https://wa.me/${TELEFONE_MOTORISTA}?text=${encodeURIComponent(mensagem)}`, "_blank");
+  }
+
+  let eventoInstalacao = null;
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    eventoInstalacao = e;
+    document.getElementById("btnInstalarApp").style.display = "inline-block";
+  });
+
+  function instalarApp() {
+    if (!eventoInstalacao) return;
+    eventoInstalacao.prompt();
+    eventoInstalacao.userChoice.finally(() => {
+      eventoInstalacao = null;
+      document.getElementById("btnInstalarApp").style.display = "none";
+    });
+  }
+
+  window.addEventListener("DOMContentLoaded", iniciarMapa);
+</script>
+</body>
+</html>
