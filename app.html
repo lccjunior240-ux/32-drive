@@ -37,7 +37,7 @@
   <div class="card">
     <div class="top">
       <span class="badge">32 DRIVE • Rio Grande & Cassino</span>
-      <span class="pill" id="gpsStatus">GPS pronto</span>
+      <span class="pill" id="gpsStatus">Cálculo automático</span>
     </div>
 
     <div id="map"></div>
@@ -48,17 +48,16 @@
     <label for="pPhone">Telefone do passageiro</label>
     <input id="pPhone" type="tel" placeholder="Ex.: 53 99999-9999" />
 
-    <label for="pickup">Origem (embarque / número / referência)</label>
-    <input id="pickup" type="text" placeholder="Ex.: Av. Rio Grande, Cassino" />
+    <label for="pickup">Origem (endereço, bairro ou referência)</label>
+    <input id="pickup" type="text" placeholder="Ex.: Cassino ou Av. Rio Grande" />
 
-    <label for="dropoff">Destino (entrega / número / referência)</label>
+    <label for="dropoff">Destino (endereço, bairro ou referência)</label>
     <input id="dropoff" type="text" placeholder="Ex.: Centro, Rio Grande" />
 
     <button type="button" class="btn-blue" onclick="usarGPS()">Usar meu GPS</button>
-    <button type="button" class="btn-blue" onclick="calcularCorrida()">Calcular corrida</button>
 
     <div class="resumo">
-      <div>Distância: <strong id="distVal">0,00 km</strong></div>
+      <div>Distância aprox.: <strong id="distVal">0,00 km</strong></div>
       <div>Faixa: <strong id="faixaVal">Até 3,5 km (R$ 7,99)</strong></div>
       <div class="total">Valor: <span id="valorVal">R$ 7,99</span></div>
     </div>
@@ -99,15 +98,17 @@
     let valorAtual = 7.99;
     let coordsOrigem = null;
 
-    const PONTOS_LOCAIS = [
-      { chaves: ["cassino", "av rio grande", "av. rio grande"], lat: -32.1835, lon: -52.1645 },
-      { chaves: ["centro", "silva paes", "getulio vargas", "marechal floriano"], lat: -32.0352, lon: -52.0986 },
-      { chaves: ["cidade nova"], lat: -32.0540, lon: -52.1180 },
-      { chaves: ["parque marinha"], lat: -32.0780, lon: -52.1350 },
-      { chaves: ["querencia", "querência"], lat: -32.0620, lon: -52.1420 },
-      { chaves: ["laranjeiras"], lat: -32.0880, lon: -52.1490 },
-      { chaves: ["bgv", "getulio"], lat: -32.0510, lon: -52.1090 },
-      { chaves: ["ilha dos marinheiros"], lat: -31.9950, lon: -52.1550 }
+    const SETORES_GEOGRAFICOS = [
+      { chaves: ["cassino", "balneario", "balneário", "av rio grande", "av. rio grande", "praia"], lat: -32.1835, lon: -52.1645, nome: "Cassino" },
+      { chaves: ["centro", "silva paes", "marechal floriano", "alfandega", "alfândega"], lat: -32.0352, lon: -52.0986, nome: "Centro Rio Grande" },
+      { chaves: ["cidade nova"], lat: -32.0540, lon: -52.1180, nome: "Cidade Nova" },
+      { chaves: ["getulio", "getúlio", "bgv"], lat: -32.0510, lon: -52.1090, nome: "Getúlio Vargas" },
+      { chaves: ["querencia", "querência"], lat: -32.0620, lon: -52.1420, nome: "Querência" },
+      { chaves: ["parque marinha", "marinha"], lat: -32.0780, lon: -52.1350, nome: "Parque Marinha" },
+      { chaves: ["laranjeiras"], lat: -32.0880, lon: -52.1490, nome: "Laranjeiras" },
+      { chaves: ["ilha dos marinheiros", "marinheiros"], lat: -31.9950, lon: -52.1550, nome: "Ilha dos Marinheiros" },
+      { chaves: ["quinta"], lat: -32.0050, lon: -52.2350, nome: "Quinta" },
+      { chaves: ["rio grande"], lat: -32.0420, lon: -52.1050, nome: "Rio Grande" }
     ];
 
     function setMsg(texto) {
@@ -115,7 +116,7 @@
     }
 
     function calcularTarifa(km) {
-      const limpo = Math.max(0.1, Number(km) || 0);
+      const limpo = Math.max(0.5, Number(km) || 0.5);
       let base = limpo <= 3.5 ? 7.99 : limpo * 2.0;
       const hora = new Date().getHours();
       const noturno = hora >= 20 || hora < 6;
@@ -140,7 +141,7 @@
       document.getElementById("valorVal").textContent = "R$ " + calc.valor.toFixed(2).replace(".", ",");
     }
 
-    function haversineKm(a, b) {
+    function distanciaLinhaRetaKm(a, b) {
       const R = 6371;
       const dLat = ((b.lat - a.lat) * Math.PI) / 180;
       const dLon = ((b.lon - a.lon) * Math.PI) / 180;
@@ -150,126 +151,78 @@
       return 2 * R * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
     }
 
-    function limparEnderecoParaBusca(texto) {
-      return texto
-        .replace(/\(.*?\)/g, " ")
-        .replace(/\b(n[úu]mero|n[ºo°]|prox|pr[óo]ximo|ao lado|frente|fundos|ref|refer[êe]ncia)\b.*$/i, " ")
-        .replace(/,\s*\d+\b/g, " ")
-        .replace(/\s+\d+\b/g, " ")
-        .replace(/[^\w\sÀ-ÿ-]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function hashCoordLocal(texto, baseLat, baseLon) {
-      let h = 0;
-      for (let i = 0; i < texto.length; i++) {
-        h = (h * 31 + texto.charCodeAt(i)) % 1000;
+    function resolverPontoGeografico(texto) {
+      const limpo = (texto || "").trim();
+      const matchGps = limpo.match(/GPS\s*\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/i);
+      if (matchGps) {
+        return {
+          lat: parseFloat(matchGps[1]),
+          lon: parseFloat(matchGps[2]),
+          nome: "GPS"
+        };
       }
-      const offsetLat = ((h % 50) - 25) * 0.0012;
-      const offsetLon = ((Math.floor(h / 50) % 50) - 25) * 0.0012;
+
+      const lower = limpo.toLowerCase();
+      for (const setor of SETORES_GEOGRAFICOS) {
+        if (setor.chaves.some(k => lower.includes(k))) {
+          let hash = 0;
+          for (let i = 0; i < lower.length; i++) {
+            hash = (hash * 31 + lower.charCodeAt(i)) % 997;
+          }
+          const dLat = ((hash % 40) - 20) * 0.0009;
+          const dLon = ((Math.floor(hash / 40) % 40) - 20) * 0.0009;
+          return {
+            lat: Number((setor.lat + dLat).toFixed(5)),
+            lon: Number((setor.lon + dLon).toFixed(5)),
+            nome: setor.nome
+          };
+        }
+      }
+
+      let hash = 0;
+      for (let i = 0; i < lower.length; i++) {
+        hash = (hash * 37 + lower.charCodeAt(i)) % 997;
+      }
+      const baseLat = lower.includes("cassino") ? -32.18 : -32.05;
+      const baseLon = lower.includes("cassino") ? -52.16 : -52.11;
       return {
-        lat: Number((baseLat + offsetLat).toFixed(5)),
-        lon: Number((baseLon + offsetLon).toFixed(5))
+        lat: Number((baseLat + ((hash % 60) - 30) * 0.0012).toFixed(5)),
+        lon: Number((baseLon + ((Math.floor(hash / 60) % 60) - 30) * 0.0012).toFixed(5)),
+        nome: limpo || "Ponto local"
       };
     }
 
-    async function buscarCoordenadas(texto) {
-      const original = texto.trim();
-      const matchGps = original.match(/GPS\s*\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/i);
-      if (matchGps) {
-        return { lat: parseFloat(matchGps[1]), lon: parseFloat(matchGps[2]) };
-      }
+    function calcularAutomatico() {
+      const origemTexto = document.getElementById("pickup").value.trim();
+      const destinoTexto = document.getElementById("dropoff").value.trim();
 
-      const lower = original.toLowerCase();
-      for (const item of PONTOS_LOCAIS) {
-        if (item.chaves.some(k => lower.includes(k))) {
-          return hashCoordLocal(lower, item.lat, item.lon);
-        }
-      }
-
-      const limpo = limparEnderecoParaBusca(original);
-      const consultas = [
-        `${limpo}, Rio Grande, RS, Brasil`,
-        `${limpo}, Cassino, Rio Grande, RS, Brasil`,
-        `${limpo}, Rio Grande do Sul, Brasil`
-      ];
-
-      for (const q of consultas) {
-        try {
-          const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
-          const resp = await fetch(url);
-          if (resp.ok) {
-            const dados = await resp.json();
-            if (Array.isArray(dados) && dados.length > 0) {
-              const lat = parseFloat(dados[0].lat);
-              const lon = parseFloat(dados[0].lon);
-              if (lat < -31.8 && lat > -32.4 && lon < -51.9 && lon > -52.5) {
-                return { lat, lon };
-              }
-            }
-          }
-        } catch (e) {
-          // tenta próximo fallback
-        }
-      }
-
-      return hashCoordLocal(lower, -32.045, -52.105);
-    }
-
-    async function calcularCorrida() {
-      const origem = document.getElementById("pickup").value.trim();
-      const destino = document.getElementById("dropoff").value.trim();
-      if (!origem || !destino) {
-        setMsg("Preencha origem e destino para calcular.");
+      if (!origemTexto || !destinoTexto) {
+        atualizarTela();
         return;
       }
 
-      setMsg("Calculando distância da rota...");
-      try {
-        const cOrigem = coordsOrigem || await buscarCoordenadas(origem);
-        const cDestino = await buscarCoordenadas(destino);
+      const pOrigem = coordsOrigem ? { ...coordsOrigem, nome: "GPS" } : resolverPontoGeografico(origemTexto);
+      const pDestino = resolverPontoGeografico(destinoTexto);
 
-        if (marcadorOrigem) map.removeLayer(marcadorOrigem);
-        if (marcadorDestino) map.removeLayer(marcadorDestino);
-        if (linhaRota) map.removeLayer(linhaRota);
+      if (marcadorOrigem) map.removeLayer(marcadorOrigem);
+      if (marcadorDestino) map.removeLayer(marcadorDestino);
+      if (linhaRota) map.removeLayer(linhaRota);
 
-        marcadorOrigem = L.marker([cOrigem.lat, cOrigem.lon]).addTo(map).bindPopup("Origem");
-        marcadorDestino = L.marker([cDestino.lat, cDestino.lon]).addTo(map).bindPopup("Destino");
+      marcadorOrigem = L.marker([pOrigem.lat, pOrigem.lon]).addTo(map).bindPopup(`Origem: ${pOrigem.nome}`);
+      marcadorDestino = L.marker([pDestino.lat, pDestino.lon]).addTo(map).bindPopup(`Destino: ${pDestino.nome}`);
 
-        let kmRota = null;
-        try {
-          const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${cOrigem.lon},${cOrigem.lat};${cDestino.lon},${cDestino.lat}?overview=full&geometries=geojson`;
-          const rResp = await fetch(osrmUrl);
-          if (rResp.ok) {
-            const rJson = await rResp.json();
-            if (rJson && Array.isArray(rJson.routes) && rJson.routes.length > 0) {
-              const metros = Number(rJson.routes[0].distance) || 0;
-              if (metros > 150) {
-                kmRota = metros / 1000;
-                const coordsGeo = rJson.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                linhaRota = L.polyline(coordsGeo, { color: "#0284c7", weight: 5 }).addTo(map);
-                map.fitBounds(linhaRota.getBounds(), { padding: [24, 24] });
-              }
-            }
-          }
-        } catch (errRota) {
-          kmRota = null;
-        }
+      linhaRota = L.polyline(
+        [[pOrigem.lat, pOrigem.lon], [pDestino.lat, pDestino.lon]],
+        { color: "#0284c7", weight: 5, dashArray: "8, 6" }
+      ).addTo(map);
 
-        if (!kmRota || kmRota <= 0.15) {
-          const reta = haversineKm(cOrigem, cDestino);
-          kmRota = Math.max(1.2, Number((reta * 1.28).toFixed(2)));
-          linhaRota = L.polyline([[cOrigem.lat, cOrigem.lon], [cDestino.lat, cDestino.lon]], { color: "#0284c7", weight: 4 }).addTo(map);
-          map.fitBounds(linhaRota.getBounds(), { padding: [24, 24] });
-        }
+      map.fitBounds(linhaRota.getBounds(), { padding: [28, 28] });
 
-        distanciaAtual = Number(kmRota.toFixed(2));
-        atualizarTela();
-        setMsg(`Rota atualizada: ${distanciaAtual.toFixed(2).replace(".", ",")} km.`);
-      } catch (e) {
-        setMsg("Não foi possível calcular agora. Tente novamente.");
-      }
+      const reta = distanciaLinhaRetaKm(pOrigem, pDestino);
+      const kmAproximado = Math.max(1.0, Number((reta * 1.25).toFixed(2)));
+      distanciaAtual = kmAproximado;
+      atualizarTela();
+      setMsg(`Linha reta ajustada (${pOrigem.nome} → ${pDestino.nome}): ${kmAproximado.toFixed(2).replace(".", ",")} km.`);
     }
 
     function usarGPS() {
@@ -283,15 +236,12 @@
           const { latitude, longitude } = pos.coords;
           coordsOrigem = { lat: latitude, lon: longitude };
           document.getElementById("gpsStatus").textContent = "GPS ativo";
-          map.setView([latitude, longitude], 15);
-          if (marcadorOrigem) map.removeLayer(marcadorOrigem);
-          marcadorOrigem = L.marker([latitude, longitude]).addTo(map);
           document.getElementById("pickup").value = `GPS (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`;
-          setMsg("Localização capturada. Agora informe o destino.");
+          calcularAutomatico();
         },
         () => {
-          document.getElementById("gpsStatus").textContent = "GPS bloqueado";
-          setMsg("Não foi possível ler o GPS. Digite o endereço manualmente.");
+          document.getElementById("gpsStatus").textContent = "GPS manual";
+          setMsg("GPS indisponível. Digite bairro ou rua que o cálculo sai automático.");
         }
       );
     }
@@ -310,7 +260,7 @@
         `Telefone: ${tel}`,
         `Origem: ${origem}`,
         `Destino: ${destino}`,
-        `Distância: ${distFmt}`,
+        `Distância aprox.: ${distFmt}`,
         `Valor: ${valorFmt}`,
         `Pix Inter: ${CHAVE_PIX_INTER}`
       ].join("\n");
@@ -342,6 +292,8 @@
       }
     }
 
+    document.getElementById("pickup").addEventListener("input", calcularAutomatico);
+    document.getElementById("dropoff").addEventListener("input", calcularAutomatico);
     atualizarTela();
   </script>
 </body>
