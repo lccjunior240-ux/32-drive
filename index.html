@@ -3,42 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#121212" />
+  <meta name="theme-color" content="#0f0f10" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="manifest" href="manifest-passageiro.json" />
   <link rel="icon" type="image/png" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-512.png" />
-  <title>32 Drive — Passageiro</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <title>32 Drive — Motorista</title>
   <style>
     :root {
-      --bg: #121212;
-      --card: #1e1e1e;
-      --border: #2a2a2a;
-      --text: #f5f5f5;
-      --muted: #a0a0a0;
+      --bg: #0f0f10;
+      --card: #1a1a1d;
+      --card-elevated: #222226;
+      --border: #2c2c32;
+      --text: #f5f5f7;
+      --muted: #a1a1aa;
       --accent: #f59e0b;
-      --accent-dark: #d97706;
       --green: #10b981;
+      --red: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
+      background: radial-gradient(circle at top, #1d1b16 0%, var(--bg) 55%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
     header {
-      background: var(--card);
+      background: rgba(26, 26, 29, 0.95);
       border-bottom: 1px solid var(--border);
       padding: 14px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     .brand {
       display: flex;
@@ -46,21 +48,21 @@
       gap: 10px;
     }
     .brand img {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       object-fit: cover;
+      border: 1px solid var(--border);
     }
     .badge {
       background: var(--accent);
       color: #111;
       font-weight: 800;
       font-size: 12px;
-      padding: 5px 9px;
-      border-radius: 8px;
-      letter-spacing: 0.4px;
+      padding: 6px 10px;
+      border-radius: 999px;
     }
-    h1 { font-size: 16px; font-weight: 700; }
+    h1 { font-size: 16px; font-weight: 800; }
     .subtitle { font-size: 12px; color: var(--muted); }
     main {
       flex: 1;
@@ -72,90 +74,190 @@
       width: 100%;
       margin: 0 auto;
     }
-    #map {
-      width: 100%;
-      height: 230px;
-      border-radius: 12px;
+    .hero-card {
+      background: linear-gradient(135deg, #231f16 0%, var(--card) 65%);
+      border: 1px solid #3a3220;
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .hero-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .hero-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    .hero-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .online-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.14);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+    .driver-box {
+      background: var(--card-elevated);
       border: 1px solid var(--border);
-      overflow: hidden;
+      border-radius: 12px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+    .driver-name { font-size: 15px; font-weight: 800; }
+    .driver-car { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .plate-box {
+      background: #f8fafc;
+      color: #0f172a;
+      border: 2px solid #0284c7;
+      border-radius: 8px;
+      padding: 6px 10px;
+      text-align: center;
+      font-weight: 900;
+      letter-spacing: 1px;
+      font-size: 13px;
+      min-width: 104px;
+    }
+    .plate-label {
+      display: block;
+      font-size: 8px;
+      font-weight: 800;
+      color: #0284c7;
+      letter-spacing: 0.8px;
+      margin-bottom: 1px;
     }
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 14px;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-    label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 4px;
-      display: block;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: #141414;
-      color: var(--text);
-      font-size: 14px;
-    }
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .resumo {
-      background: #151515;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
+    .section-head {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      gap: 8px;
     }
-    .valor {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--green);
-    }
-    .btn {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 10px;
+    .section-title {
       font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
+      font-weight: 800;
     }
-    .btn-primary {
-      background: var(--accent);
-      color: #111;
-    }
-    .btn-secondary {
-      background: #262626;
-      color: var(--text);
-    }
-    .status {
-      font-size: 13px;
-      color: var(--green);
-      min-height: 18px;
-      text-align: center;
+    .count-badge {
+      background: #252529;
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
     }
     .lista {
       display: flex;
       flex-direction: column;
+      gap: 10px;
+    }
+    .pedido-card {
+      background: #131316;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
       gap: 8px;
     }
-    .item {
-      background: #151515;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
+    .pedido-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .pedido-id {
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .pedido-valor {
+      font-weight: 900;
+      font-size: 17px;
+      color: var(--green);
+    }
+    .pedido-info {
       font-size: 13px;
+      line-height: 1.45;
+      color: var(--text);
+    }
+    .muted { color: var(--muted); }
+    .status-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(245, 158, 11, 0.14);
+      color: var(--accent);
+      width: fit-content;
+    }
+    .status-tag.aceita {
+      background: rgba(16, 185, 129, 0.14);
+      color: var(--green);
+    }
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .btn {
+      padding: 11px 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-aceitar {
+      background: var(--green);
+      color: #062117;
+    }
+    .btn-finalizar {
+      background: var(--accent);
+      color: #111;
+    }
+    .btn-limpar {
+      background: #252529;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-remover {
+      background: rgba(239, 68, 68, 0.14);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
   </style>
 </head>
@@ -164,187 +266,147 @@
     <div class="brand">
       <img src="icon-512.png" alt="32 Drive" />
       <div>
-        <h1>32 Drive — Passageiro</h1>
-        <div class="subtitle">Cassino &amp; Rio Grande</div>
+        <h1>32 Drive — Motorista</h1>
+        <div class="subtitle">Painel de Solicitações</div>
       </div>
     </div>
-    <span class="badge">R$ 7,99</span>
+    <span class="badge">PAINEL</span>
   </header>
 
   <main>
-    <div id="map"></div>
+    <section class="hero-card">
+      <div class="hero-top">
+        <div>
+          <div class="hero-title">32 DRIVE</div>
+          <div class="hero-sub">Mobilidade Urbana Local • Cassino &amp; Rio Grande</div>
+        </div>
+        <span class="online-pill"><span class="dot"></span>Em Operação</span>
+      </div>
+
+      <div class="driver-box">
+        <div>
+          <div class="driver-name">Luíz Carlos Costa Jr.</div>
+          <div class="driver-car">VW Voyage 2010</div>
+        </div>
+        <div class="plate-box">
+          <span class="plate-label">BRASIL</span>
+          IQD8060
+        </div>
+      </div>
+    </section>
 
     <div class="card">
-      <div>
-        <label for="nome">Seu nome</label>
-        <input id="nome" type="text" placeholder="Ex: Junior" />
+      <div class="section-head">
+        <div class="section-title">Corridas solicitadas</div>
+        <span class="count-badge" id="contador">0</span>
       </div>
-      <div>
-        <label for="origem">Ponto de embarque</label>
-        <input id="origem" type="text" placeholder="Ex: Av. Rio Grande, Cassino" />
-      </div>
-      <div>
-        <label for="destino">Destino</label>
-        <input id="destino" type="text" placeholder="Ex: Centro / Rua General Bacelar" />
-      </div>
-      <div class="row">
-        <div>
-          <label for="km">Distância estimada (km)</label>
-          <input id="km" type="number" step="0.1" min="0.1" placeholder="Ex: 3.5" oninput="atualizarValor()" />
-        </div>
-        <div>
-          <label for="pagamento">Pagamento</label>
-          <input id="pagamento" type="text" value="Pix / Dinheiro" />
-        </div>
-      </div>
-
-      <div class="resumo">
-        <div>
-          <div style="font-size:12px;color:var(--muted);">Valor estimado</div>
-          <div id="detalhe-tarifa" style="font-size:12px;color:var(--muted);">Até 3,5 km: R$ 7,99</div>
-        </div>
-        <div class="valor" id="valor-total">R$ 7,99</div>
-      </div>
-
-      <button class="btn btn-secondary" type="button" onclick="usarLocalizacao()">Usar minha localização atual</button>
-      <button class="btn btn-primary" type="button" onclick="enviarPedido()">Solicitar corrida agora</button>
-      <div class="status" id="status"></div>
-    </div>
-
-    <div class="card">
-      <div style="font-weight:700;font-size:14px;">Meus pedidos enviados</div>
-      <div class="lista" id="meus-pedidos"></div>
+      <div class="lista" id="lista-motorista"></div>
+      <button class="btn btn-limpar" type="button" id="btn-limpar-historico">Limpar histórico</button>
     </div>
   </main>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script>
-    const CHAVE_CORRIDAS = "32drive_corridas";
-    let coordsAtual = [-32.1833, -52.1667];
+    (function () {
+      const CHAVE_CORRIDAS = "32drive_corridas";
 
-    const map = L.map("map").setView(coordsAtual, 13);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap"
-    }).addTo(map);
-    let marcador = L.marker(coordsAtual).addTo(map).bindPopup("Ponto inicial").openPopup();
-
-    function calcularTarifa(km) {
-      const distancia = parseFloat(km);
-      if (!distancia || distancia <= 0) {
-        return { total: 7.99, texto: "Até 3,5 km: R$ 7,99" };
-      }
-      if (distancia <= 3.5) {
-        return { total: 7.99, texto: "Tarifa base até 3,5 km" };
-      }
-      const extraKm = distancia - 3.5;
-      const total = 7.99 + extraKm * 2.0;
-      return {
-        total,
-        texto: `R$ 7,99 + ${extraKm.toFixed(1).replace(".", ",")} km × R$ 2,00`
-      };
-    }
-
-    function formatarMoeda(valor) {
-      return "R$ " + valor.toFixed(2).replace(".", ",");
-    }
-
-    function atualizarValor() {
-      const km = document.getElementById("km").value;
-      const calc = calcularTarifa(km);
-      document.getElementById("valor-total").textContent = formatarMoeda(calc.total);
-      document.getElementById("detalhe-tarifa").textContent = calc.texto;
-    }
-
-    function usarLocalizacao() {
-      const status = document.getElementById("status");
-      if (!navigator.geolocation) {
-        status.textContent = "Geolocalização não disponível neste aparelho.";
-        return;
-      }
-      status.textContent = "Buscando localização...";
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          coordsAtual = [pos.coords.latitude, pos.coords.longitude];
-          map.setView(coordsAtual, 15);
-          marcador.setLatLng(coordsAtual).bindPopup("Você está aqui").openPopup();
-          document.getElementById("origem").value =
-            `Lat ${coordsAtual[0].toFixed(5)}, Lng ${coordsAtual[1].toFixed(5)}`;
-          status.textContent = "Localização capturada!";
-        },
-        () => {
-          status.textContent = "Não foi possível obter o GPS. Digite o endereço.";
+      function lerCorridas() {
+        try {
+          return JSON.parse(localStorage.getItem(CHAVE_CORRIDAS) || "[]");
+        } catch (e) {
+          return [];
         }
-      );
-    }
-
-    function lerCorridas() {
-      try {
-        return JSON.parse(localStorage.getItem(CHAVE_CORRIDAS) || "[]");
-      } catch {
-        return [];
-      }
-    }
-
-    function salvarCorridas(lista) {
-      localStorage.setItem(CHAVE_CORRIDAS, JSON.stringify(lista));
-    }
-
-    function enviarPedido() {
-      const nome = document.getElementById("nome").value.trim() || "Passageiro";
-      const origem = document.getElementById("origem").value.trim();
-      const destino = document.getElementById("destino").value.trim();
-      const km = parseFloat(document.getElementById("km").value) || 3.5;
-      const pagamento = document.getElementById("pagamento").value.trim() || "Pix / Dinheiro";
-      const status = document.getElementById("status");
-
-      if (!origem || !destino) {
-        status.textContent = "Preencha embarque e destino.";
-        return;
       }
 
-      const calc = calcularTarifa(km);
-      const novoPedido = {
-        id: "32D-" + Date.now().toString().slice(-5),
-        passageiro: nome,
-        origem,
-        destino,
-        km,
-        valor: formatarMoeda(calc.total),
-        pagamento,
-        status: "Aguardando motorista",
-        criadoEm: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
-      };
-
-      const lista = lerCorridas();
-      lista.unshift(novoPedido);
-      salvarCorridas(lista);
-
-      status.textContent = `Pedido ${novoPedido.id} enviado ao painel do motorista!`;
-      renderizarPedidos();
-    }
-
-    function renderizarPedidos() {
-      const container = document.getElementById("meus-pedidos");
-      const lista = lerCorridas();
-      if (!lista.length) {
-        container.innerHTML = `<div class="item" style="color:var(--muted);">Nenhum pedido enviado ainda.</div>`;
-        return;
+      function salvarCorridas(lista) {
+        localStorage.setItem(CHAVE_CORRIDAS, JSON.stringify(lista));
       }
-      container.innerHTML = lista
-        .slice(0, 5)
-        .map(
-          (p) => `
-          <div class="item">
-            <strong>${p.id}</strong> — ${p.valor} (${p.status})<br/>
-            <span style="color:var(--muted);">De:</span> ${p.origem}<br/>
-            <span style="color:var(--muted);">Para:</span> ${p.destino}
-          </div>`
-        )
-        .join("");
-    }
 
-    atualizarValor();
-    renderizarPedidos();
+      function atualizarStatus(id, novoStatus) {
+        const lista = lerCorridas().map(function (p) {
+          if (p.id === id) {
+            return Object.assign({}, p, { status: novoStatus });
+          }
+          return p;
+        });
+        salvarCorridas(lista);
+        renderizar();
+      }
+
+      function removerPedido(id) {
+        const lista = lerCorridas().filter(function (p) {
+          return p.id !== id;
+        });
+        salvarCorridas(lista);
+        renderizar();
+      }
+
+      function renderizar() {
+        const container = document.getElementById("lista-motorista");
+        const contador = document.getElementById("contador");
+        const lista = lerCorridas();
+
+        if (contador) contador.textContent = String(lista.length);
+        if (!container) return;
+
+        if (!lista.length) {
+          container.innerHTML =
+            '<div class="pedido-card"><span class="muted">Nenhuma corrida recebida no painel ainda.</span></div>';
+          return;
+        }
+
+        container.innerHTML = lista
+          .map(function (p) {
+            const isAceita = p.status && p.status !== "Aguardando motorista";
+            const badgeClass = isAceita ? "status-tag aceita" : "status-tag";
+            return (
+              '<div class="pedido-card">' +
+              '<div class="pedido-top">' +
+              '<span class="pedido-id">' + p.id + " • " + (p.passageiro || "Passageiro") + "</span>" +
+              '<span class="pedido-valor">' + p.valor + "</span>" +
+              "</div>" +
+              '<span class="' + badgeClass + '">' + (p.status || "Aguardando motorista") + "</span>" +
+              '<div class="pedido-info">' +
+              '<span class="muted">Embarque:</span> ' + p.origem + "<br/>" +
+              '<span class="muted">Destino:</span> ' + p.destino + "<br/>" +
+              '<span class="muted">Distância / Pagto:</span> ' + (p.km || "-") + " km • " + (p.pagamento || "Pix / Dinheiro") +
+              (p.criadoEm ? ' <span class="muted">(' + p.criadoEm + ")</span>" : "") +
+              "</div>" +
+              '<div class="actions">' +
+              '<button class="btn btn-aceitar" type="button" data-acao="aceitar" data-id="' + p.id + '">Aceitar corrida</button>' +
+              '<button class="btn btn-finalizar" type="button" data-acao="finalizar" data-id="' + p.id + '">Finalizar</button>' +
+              "</div>" +
+              '<button class="btn btn-remover" type="button" data-acao="remover" data-id="' + p.id + '">Remover pedido</button>' +
+              "</div>"
+            );
+          })
+          .join("");
+      }
+
+      document.addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button[data-acao]");
+        if (!btn) return;
+        const acao = btn.getAttribute("data-acao");
+        const id = btn.getAttribute("data-id");
+        if (acao === "aceitar") atualizarStatus(id, "Corrida aceita");
+        if (acao === "finalizar") atualizarStatus(id, "Corrida finalizada");
+        if (acao === "remover") removerPedido(id);
+      });
+
+      const btnLimpar = document.getElementById("btn-limpar-historico");
+      if (btnLimpar) {
+        btnLimpar.addEventListener("click", function () {
+          salvarCorridas([]);
+          renderizar();
+        });
+      }
+
+      window.addEventListener("storage", function (ev) {
+        if (ev.key === CHAVE_CORRIDAS) renderizar();
+      });
+
+      setInterval(renderizar, 2000);
+      renderizar();
+    })();
   </script>
 </body>
 </html>
