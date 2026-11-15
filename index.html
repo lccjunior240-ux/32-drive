@@ -1,258 +1,350 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest-passageiro.json">
-
-  <title>32 DRIVE · Pedir Corrida</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#121212" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest-passageiro.json" />
+  <link rel="icon" type="image/png" href="icon-512.png" />
+  <link rel="apple-touch-icon" href="icon-512.png" />
+  <title>32 Drive — Passageiro</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <style>
-    * { box-sizing: border-box; }
+    :root {
+      --bg: #121212;
+      --card: #1e1e1e;
+      --border: #2a2a2a;
+      --text: #f5f5f5;
+      --muted: #a0a0a0;
+      --accent: #f59e0b;
+      --accent-dark: #d97706;
+      --green: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: Arial, sans-serif;
-      background: #081220;
-      color: #ffffff;
-      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand img {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .badge {
+      background: var(--accent);
+      color: #111;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 5px 9px;
+      border-radius: 8px;
+      letter-spacing: 0.4px;
+    }
+    h1 { font-size: 16px; font-weight: 700; }
+    .subtitle { font-size: 12px; color: var(--muted); }
+    main {
+      flex: 1;
       padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 640px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    #map {
+      width: 100%;
+      height: 230px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
     }
     .card {
-      max-width: 450px;
-      margin: 0 auto;
-      background: #0f1d32;
-      border: 2px solid #ff7a00;
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-    }
-    .topo {
-      text-align: center;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255, 122, 0, 0.35);
-    }
-    .marca {
-      font-size: 1.5rem;
-      font-weight: 900;
-      letter-spacing: 1px;
-    }
-    .selo {
-      background: #ff7a00;
-      color: #ffffff;
-      padding: 3px 10px;
-      border-radius: 6px;
-      margin-right: 6px;
-    }
-    .sub {
-      font-size: 0.9rem;
-      color: #cbd5e1;
-      margin-top: 6px;
-    }
-    .status-box {
-      margin-top: 12px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 0.9rem;
-      text-align: center;
-      background: #14253e;
-      border: 1px solid #ff7a00;
-    }
-    .status-online {
-      background: rgba(34, 197, 94, 0.2);
-      border-color: #22c55e;
-      color: #86efac;
-    }
-    .status-offline {
-      background: rgba(239, 68, 68, 0.2);
-      border-color: #ef4444;
-      color: #fca5a5;
-    }
-    .motorista-box {
-      margin-top: 12px;
-      background: rgba(255, 255, 255, 0.06);
-      border-left: 4px solid #ff7a00;
-      border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 0.88rem;
-      line-height: 1.45;
-      color: #e2e8f0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
     label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
       display: block;
-      margin-top: 12px;
-      font-size: 0.88rem;
-      font-weight: bold;
-      color: #ff9d42;
     }
     input {
       width: 100%;
-      padding: 11px;
-      margin-top: 5px;
-      border-radius: 8px;
-      border: 1px solid #334155;
-      background: #081220;
-      color: #ffffff;
-      font-size: 0.96rem;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #141414;
+      color: var(--text);
+      font-size: 14px;
     }
-    input:focus {
-      outline: none;
-      border-color: #ff7a00;
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
-    .btn-gps {
-      width: 100%;
-      margin-top: 8px;
-      padding: 10px;
-      background: #1e293b;
-      color: #ffffff;
-      border: 1px solid #ff7a00;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-    .resumo-valor {
-      margin-top: 14px;
-      background: #081220;
-      border: 1px solid #ff7a00;
+    .resumo {
+      background: #151515;
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .valor-grande {
-      font-size: 1.35rem;
-      font-weight: 900;
-      color: #ff7a00;
+    .valor {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--green);
     }
-    .btn-chamar {
+    .btn {
       width: 100%;
-      margin-top: 14px;
       padding: 14px;
-      background: #ff7a00;
-      color: #ffffff;
       border: none;
       border-radius: 10px;
-      font-size: 1.05rem;
-      font-weight: 900;
+      font-size: 15px;
+      font-weight: 700;
       cursor: pointer;
     }
-    .btn-chamar:disabled {
-      background: #475569;
-      cursor: not-allowed;
+    .btn-primary {
+      background: var(--accent);
+      color: #111;
     }
-    .resposta-box {
-      margin-top: 14px;
-      padding: 12px;
+    .btn-secondary {
+      background: #262626;
+      color: var(--text);
+    }
+    .status {
+      font-size: 13px;
+      color: var(--green);
+      min-height: 18px;
+      text-align: center;
+    }
+    .lista {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .item {
+      background: #151515;
+      border: 1px solid var(--border);
       border-radius: 10px;
-      background: #081220;
-      border: 1px solid #ff7a00;
-      font-size: 0.9rem;
-      line-height: 1.45;
+      padding: 10px;
+      font-size: 13px;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="topo">
-      <div class="marca"><span class="selo">32</span>DRIVE</div>
-      <div class="sub">Pedir Corrida · Cassino / Rio Grande</div>
+  <header>
+    <div class="brand">
+      <img src="icon-512.png" alt="32 Drive" />
+      <div>
+        <h1>32 Drive — Passageiro</h1>
+        <div class="subtitle">Cassino &amp; Rio Grande</div>
+      </div>
+    </div>
+    <span class="badge">R$ 7,99</span>
+  </header>
+
+  <main>
+    <div id="map"></div>
+
+    <div class="card">
+      <div>
+        <label for="nome">Seu nome</label>
+        <input id="nome" type="text" placeholder="Ex: Junior" />
+      </div>
+      <div>
+        <label for="origem">Ponto de embarque</label>
+        <input id="origem" type="text" placeholder="Ex: Av. Rio Grande, Cassino" />
+      </div>
+      <div>
+        <label for="destino">Destino</label>
+        <input id="destino" type="text" placeholder="Ex: Centro / Rua General Bacelar" />
+      </div>
+      <div class="row">
+        <div>
+          <label for="km">Distância estimada (km)</label>
+          <input id="km" type="number" step="0.1" min="0.1" placeholder="Ex: 3.5" oninput="atualizarValor()" />
+        </div>
+        <div>
+          <label for="pagamento">Pagamento</label>
+          <input id="pagamento" type="text" value="Pix / Dinheiro" />
+        </div>
+      </div>
+
+      <div class="resumo">
+        <div>
+          <div style="font-size:12px;color:var(--muted);">Valor estimado</div>
+          <div id="detalhe-tarifa" style="font-size:12px;color:var(--muted);">Até 3,5 km: R$ 7,99</div>
+        </div>
+        <div class="valor" id="valor-total">R$ 7,99</div>
+      </div>
+
+      <button class="btn btn-secondary" type="button" onclick="usarLocalizacao()">Usar minha localização atual</button>
+      <button class="btn btn-primary" type="button" onclick="enviarPedido()">Solicitar corrida agora</button>
+      <div class="status" id="status"></div>
     </div>
 
-    <div id="statusCorrida" class="status-box status-online">
-      Motorista disponível para atendimento
+    <div class="card">
+      <div style="font-weight:700;font-size:14px;">Meus pedidos enviados</div>
+      <div class="lista" id="meus-pedidos"></div>
     </div>
+  </main>
 
-    <div class="motorista-box">
-      <strong>Motorista:</strong> Luiz Carlos Costa Junior<br>
-      <strong>Veículo:</strong> Voyage IQD 8060<br>
-      <strong>WhatsApp:</strong> (53) 99135-7231
-    </div>
-
-    <label for="origem">Onde você está? (Origem)</label>
-    <input id="origem" type="text" placeholder="Ex.: Av. Rio Grande, Cassino" oninput="atualizarValor()">
-    <button class="btn-gps" type="button" onclick="usarMeuGPS()">Usar meu GPS atual</button>
-
-    <label for="destino">Para onde você vai? (Destino)</label>
-    <input id="destino" type="text" placeholder="Ex.: Centro de Rio Grande" oninput="atualizarValor()">
-
-    <div class="resumo-valor">
-      <span>Valor estimado:</span>
-      <span id="valorEstimado" class="valor-grande">R$ 15,00</span>
-    </div>
-
-    <button id="btnChamar" class="btn-chamar" type="button" onclick="enviarPedidoWhatsApp()">
-      CHAMAR 32 DRIVE NO WHATSAPP
-    </button>
-
-    <div id="respostaBox" class="resposta-box">
-      Preencha a origem e o destino e toque no botão laranja para enviar o pedido direto ao motorista.
-    </div>
-  </div>
-
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script>
-    const WHATSAPP_MOTORISTA = "5553991357231";
+    const CHAVE_CORRIDAS = "32drive_corridas";
+    let coordsAtual = [-32.1833, -52.1667];
 
-    function atualizarValor() {
-      const origem = document.getElementById("origem").value.trim();
-      const destino = document.getElementById("destino").value.trim();
-      let valor = 15;
-      if (origem.length > 0 && destino.length > 0) {
-        valor = 20;
+    const map = L.map("map").setView(coordsAtual, 13);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap"
+    }).addTo(map);
+    let marcador = L.marker(coordsAtual).addTo(map).bindPopup("Ponto inicial").openPopup();
+
+    function calcularTarifa(km) {
+      const distancia = parseFloat(km);
+      if (!distancia || distancia <= 0) {
+        return { total: 7.99, texto: "Até 3,5 km: R$ 7,99" };
       }
-      document.getElementById("valorEstimado").textContent =
-        "R$ " + valor.toFixed(2).replace(".", ",");
+      if (distancia <= 3.5) {
+        return { total: 7.99, texto: "Tarifa base até 3,5 km" };
+      }
+      const extraKm = distancia - 3.5;
+      const total = 7.99 + extraKm * 2.0;
+      return {
+        total,
+        texto: `R$ 7,99 + ${extraKm.toFixed(1).replace(".", ",")} km × R$ 2,00`
+      };
     }
 
-    function usarMeuGPS() {
-      const caixa = document.getElementById("respostaBox");
+    function formatarMoeda(valor) {
+      return "R$ " + valor.toFixed(2).replace(".", ",");
+    }
+
+    function atualizarValor() {
+      const km = document.getElementById("km").value;
+      const calc = calcularTarifa(km);
+      document.getElementById("valor-total").textContent = formatarMoeda(calc.total);
+      document.getElementById("detalhe-tarifa").textContent = calc.texto;
+    }
+
+    function usarLocalizacao() {
+      const status = document.getElementById("status");
       if (!navigator.geolocation) {
-        caixa.textContent = "Seu aparelho não liberou o GPS automático. Digite o endereço.";
+        status.textContent = "Geolocalização não disponível neste aparelho.";
         return;
       }
-      caixa.textContent = "Buscando sua localização no GPS...";
+      status.textContent = "Buscando localização...";
       navigator.geolocation.getCurrentPosition(
-        function (pos) {
-          const lat = pos.coords.latitude.toFixed(5);
-          const lon = pos.coords.longitude.toFixed(5);
-          document.getElementById("origem").value = "GPS: " + lat + ", " + lon;
-          atualizarValor();
-          caixa.textContent = "Localização preenchida no campo de origem.";
+        (pos) => {
+          coordsAtual = [pos.coords.latitude, pos.coords.longitude];
+          map.setView(coordsAtual, 15);
+          marcador.setLatLng(coordsAtual).bindPopup("Você está aqui").openPopup();
+          document.getElementById("origem").value =
+            `Lat ${coordsAtual[0].toFixed(5)}, Lng ${coordsAtual[1].toFixed(5)}`;
+          status.textContent = "Localização capturada!";
         },
-        function () {
-          caixa.textContent = "Não foi possível ler o GPS agora. Pode digitar o endereço.";
+        () => {
+          status.textContent = "Não foi possível obter o GPS. Digite o endereço.";
         }
       );
     }
 
-    function enviarPedidoWhatsApp() {
+    function lerCorridas() {
+      try {
+        return JSON.parse(localStorage.getItem(CHAVE_CORRIDAS) || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function salvarCorridas(lista) {
+      localStorage.setItem(CHAVE_CORRIDAS, JSON.stringify(lista));
+    }
+
+    function enviarPedido() {
+      const nome = document.getElementById("nome").value.trim() || "Passageiro";
       const origem = document.getElementById("origem").value.trim();
       const destino = document.getElementById("destino").value.trim();
-      const valor = document.getElementById("valorEstimado").textContent;
-      const caixa = document.getElementById("respostaBox");
+      const km = parseFloat(document.getElementById("km").value) || 3.5;
+      const pagamento = document.getElementById("pagamento").value.trim() || "Pix / Dinheiro";
+      const status = document.getElementById("status");
 
       if (!origem || !destino) {
-        caixa.textContent = "Preencha a origem e o destino antes de chamar o 32 DRIVE.";
+        status.textContent = "Preencha embarque e destino.";
         return;
       }
 
-      const mensagem =
-        "Olá, 32 DRIVE! Quero pedir uma corrida.\n" +
-        "Origem: " + origem + "\n" +
-        "Destino: " + destino + "\n" +
-        "Valor estimado: " + valor;
+      const calc = calcularTarifa(km);
+      const novoPedido = {
+        id: "32D-" + Date.now().toString().slice(-5),
+        passageiro: nome,
+        origem,
+        destino,
+        km,
+        valor: formatarMoeda(calc.total),
+        pagamento,
+        status: "Aguardando motorista",
+        criadoEm: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+      };
 
-      const link =
-        "https://wa.me/" +
-        WHATSAPP_MOTORISTA +
-        "?text=" +
-        encodeURIComponent(mensagem);
+      const lista = lerCorridas();
+      lista.unshift(novoPedido);
+      salvarCorridas(lista);
 
-      caixa.textContent = "Abrindo o WhatsApp com o pedido pronto...";
-      window.location.href = link;
+      status.textContent = `Pedido ${novoPedido.id} enviado ao painel do motorista!`;
+      renderizarPedidos();
     }
+
+    function renderizarPedidos() {
+      const container = document.getElementById("meus-pedidos");
+      const lista = lerCorridas();
+      if (!lista.length) {
+        container.innerHTML = `<div class="item" style="color:var(--muted);">Nenhum pedido enviado ainda.</div>`;
+        return;
+      }
+      container.innerHTML = lista
+        .slice(0, 5)
+        .map(
+          (p) => `
+          <div class="item">
+            <strong>${p.id}</strong> — ${p.valor} (${p.status})<br/>
+            <span style="color:var(--muted);">De:</span> ${p.origem}<br/>
+            <span style="color:var(--muted);">Para:</span> ${p.destino}
+          </div>`
+        )
+        .join("");
+    }
+
+    atualizarValor();
+    renderizarPedidos();
   </script>
 </body>
 </html>
