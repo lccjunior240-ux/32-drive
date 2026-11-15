@@ -356,6 +356,7 @@
   <script>
     (function () {
       const CHAVE_CORRIDAS = "32drive_corridas";
+      const TOPICO_NUVEM = "32drive_cassino_jr_pedidos_v2";
       const PIX_INTER = "45bd89b5-9dd7-4cda-8715-789257d06596";
       const MOTORISTA_PADRAO = {
         nome: "Luíz Carlos Costa Jr.",
@@ -531,6 +532,13 @@
         localStorage.setItem(CHAVE_CORRIDAS, JSON.stringify(lista));
       }
 
+      function publicarNaNuvem(pedido) {
+        return fetch("https://ntfy.sh/" + TOPICO_NUVEM, {
+          method: "POST",
+          body: JSON.stringify(pedido)
+        }).catch(function () {});
+      }
+
       function renderizarPedidos() {
         const container = document.getElementById("meus-pedidos");
         if (!container) return;
@@ -585,8 +593,9 @@
         const lista = lerCorridas();
         lista.unshift(novoPedido);
         salvarCorridas(lista);
+        publicarNaNuvem(novoPedido);
 
-        if (status) status.textContent = "Pedido " + novoPedido.id + " enviado para o painel do motorista!";
+        if (status) status.textContent = "Pedido " + novoPedido.id + " enviado ao motorista!";
         renderizarPedidos();
       }
 
