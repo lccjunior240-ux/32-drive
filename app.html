@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0f0f10" />
+  <meta name="theme-color" content="#0b192c" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -14,7 +14,9 @@
     :root {
       --bg: #0f0f10;
       --card: #1a1a1d;
-      --card-elevated: #222226;
+      --navy-card: linear-gradient(145deg, #0b192c 0%, #13294b 65%, #0c1e38 100%);
+      --navy-border: #1e3f6e;
+      --card-elevated: rgba(255, 255, 255, 0.06);
       --border: #2c2c32;
       --text: #f5f5f7;
       --muted: #a1a1aa;
@@ -24,14 +26,14 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: radial-gradient(circle at top, #1d1b16 0%, var(--bg) 55%);
+      background: radial-gradient(circle at top, #13233b 0%, var(--bg) 55%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
     header {
-      background: rgba(26, 26, 29, 0.95);
+      background: rgba(15, 23, 42, 0.96);
       border-bottom: 1px solid var(--border);
       padding: 14px 16px;
       display: flex;
@@ -51,7 +53,7 @@
       height: 38px;
       border-radius: 10px;
       object-fit: cover;
-      border: 1px solid var(--border);
+      border: 1px solid var(--navy-border);
     }
     .badge {
       background: var(--accent);
@@ -74,13 +76,14 @@
       margin: 0 auto;
     }
     .hero-card {
-      background: linear-gradient(135deg, #231f16 0%, var(--card) 65%);
-      border: 1px solid #3a3220;
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
       border-radius: 16px;
       padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
     }
     .hero-top {
       display: flex;
@@ -89,22 +92,23 @@
       gap: 10px;
     }
     .hero-title {
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 900;
       color: var(--accent);
+      letter-spacing: 0.5px;
     }
     .hero-sub {
       font-size: 12px;
-      color: var(--muted);
+      color: #cbd5e1;
       margin-top: 2px;
     }
     .online-pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(16, 185, 129, 0.14);
+      background: rgba(16, 185, 129, 0.16);
       color: var(--green);
-      border: 1px solid rgba(16, 185, 129, 0.35);
+      border: 1px solid rgba(16, 185, 129, 0.4);
       padding: 5px 10px;
       border-radius: 999px;
       font-size: 11px;
@@ -119,7 +123,7 @@
     }
     .driver-box {
       background: var(--card-elevated);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(148, 163, 184, 0.22);
       border-radius: 12px;
       padding: 12px;
       display: grid;
@@ -127,8 +131,8 @@
       gap: 10px;
       align-items: center;
     }
-    .driver-name { font-size: 15px; font-weight: 800; }
-    .driver-car { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .driver-name { font-size: 15px; font-weight: 800; color: #ffffff; }
+    .driver-car { font-size: 13px; color: #cbd5e1; margin-top: 2px; }
     .plate-box {
       background: #f8fafc;
       color: #0f172a;
@@ -300,7 +304,6 @@
         <span class="count-badge" id="contador">0</span>
       </div>
       <div class="lista" id="lista-motorista"></div>
-      <button class="btn btn-limpar" type="button" id="btn-atualizar-agora">Atualizar agora</button>
       <button class="btn btn-limpar" type="button" id="btn-limpar-historico">Limpar histórico</button>
     </div>
   </main>
@@ -308,6 +311,8 @@
   <script>
     (function () {
       const CHAVE_CORRIDAS = "32drive_corridas";
+      const CHAVE_VISTOS = "32drive_vistos_nuvem";
+      const TOPICO_NUVEM = "32drive_cassino_jr_pedidos_v2";
 
       function lerCorridas() {
         try {
@@ -319,6 +324,37 @@
 
       function salvarCorridas(lista) {
         localStorage.setItem(CHAVE_CORRIDAS, JSON.stringify(lista));
+      }
+
+      function lerVistos() {
+        try {
+          return JSON.parse(localStorage.getItem(CHAVE_VISTOS) || "[]");
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function marcarVisto(id) {
+        const vistos = lerVistos();
+        if (!vistos.includes(id)) {
+          vistos.push(id);
+          localStorage.setItem(CHAVE_VISTOS, JSON.stringify(vistos.slice(-100)));
+        }
+      }
+
+      function adicionarPedidoSeNovo(pedido) {
+        if (!pedido || !pedido.id) return;
+        const vistos = lerVistos();
+        if (vistos.includes(pedido.id)) return;
+
+        const lista = lerCorridas();
+        const existe = lista.some(function (p) { return p.id === pedido.id; });
+        if (!existe) {
+          lista.unshift(pedido);
+          salvarCorridas(lista);
+          renderizar();
+        }
+        marcarVisto(pedido.id);
       }
 
       function atualizarStatus(id, novoStatus) {
@@ -333,6 +369,7 @@
       }
 
       function removerPedido(id) {
+        marcarVisto(id);
         const lista = lerCorridas().filter(function (p) {
           return p.id !== id;
         });
@@ -382,6 +419,27 @@
           .join("");
       }
 
+      function buscarDaNuvem() {
+        fetch("https://ntfy.sh/" + TOPICO_NUVEM + "/json?poll=1&since=10m")
+          .then(function (r) { return r.text(); })
+          .then(function (texto) {
+            if (!texto) return;
+            const linhas = texto.split("\n");
+            for (let i = 0; i < linhas.length; i++) {
+              const linha = linhas[i].trim();
+              if (!linha) continue;
+              try {
+                const msg = JSON.parse(linha);
+                if (msg && msg.event === "message" && msg.message) {
+                  const pedido = JSON.parse(msg.message);
+                  adicionarPedidoSeNovo(pedido);
+                }
+              } catch (e) {}
+            }
+          })
+          .catch(function () {});
+      }
+
       document.addEventListener("click", function (ev) {
         const btn = ev.target.closest("button[data-acao]");
         if (!btn) return;
@@ -392,14 +450,11 @@
         if (acao === "remover") removerPedido(id);
       });
 
-      const btnAtualizar = document.getElementById("btn-atualizar-agora");
-      if (btnAtualizar) {
-        btnAtualizar.addEventListener("click", renderizar);
-      }
-
       const btnLimpar = document.getElementById("btn-limpar-historico");
       if (btnLimpar) {
         btnLimpar.addEventListener("click", function () {
+          const atuais = lerCorridas();
+          atuais.forEach(function (p) { marcarVisto(p.id); });
           salvarCorridas([]);
           renderizar();
         });
@@ -409,6 +464,8 @@
         if (ev.key === CHAVE_CORRIDAS) renderizar();
       });
 
+      buscarDaNuvem();
+      setInterval(buscarDaNuvem, 3000);
       setInterval(renderizar, 1500);
       renderizar();
     })();
