@@ -194,6 +194,31 @@
       color: var(--green);
       white-space: nowrap;
     }
+    .pix-box {
+      background: #131316;
+      border: 1px solid #1e3f6e;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pix-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #0c0c0e;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .pix-key {
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffffff;
+      word-break: break-all;
+    }
     .btn {
       width: 100%;
       padding: 14px;
@@ -202,6 +227,14 @@
       font-size: 15px;
       font-weight: 800;
       cursor: pointer;
+    }
+    .btn-copy {
+      width: auto;
+      padding: 9px 14px;
+      font-size: 13px;
+      background: var(--green);
+      color: #062117;
+      white-space: nowrap;
     }
     .btn-secondary {
       background: #252529;
@@ -302,6 +335,14 @@
         <div class="valor" id="valor-total">—</div>
       </div>
 
+      <div class="pix-box">
+        <div style="font-size:12px;color:#cbd5e1;font-weight:700;">Pix Copia e Cola — Banco Inter (Chave Aleatória)</div>
+        <div class="pix-row">
+          <span class="pix-key" id="pix-chave-texto">45bd89b5-9dd7-4cda-8715-789257d06596</span>
+          <button class="btn btn-copy" type="button" id="btn-copiar-pix">Copiar Pix</button>
+        </div>
+      </div>
+
       <button class="btn btn-primary" type="button" id="btn-enviar">Enviar pedido para o motorista</button>
       <div class="status" id="status"></div>
     </div>
@@ -315,6 +356,7 @@
   <script>
     (function () {
       const CHAVE_CORRIDAS = "32drive_corridas";
+      const PIX_INTER = "45bd89b5-9dd7-4cda-8715-789257d06596";
       const MOTORISTA_PADRAO = {
         nome: "Luíz Carlos Costa Jr.",
         veiculo: "VW Voyage 2010",
@@ -335,6 +377,29 @@
 
       let coordsGps = null;
       let ultimoCalculo = null;
+
+      function copiarPix() {
+        const status = document.getElementById("status");
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(PIX_INTER).then(function () {
+            if (status) status.textContent = "Pix Copia e Cola (Banco Inter) copiado!";
+          }).catch(function () {
+            fallbackCopy(PIX_INTER, status);
+          });
+        } else {
+          fallbackCopy(PIX_INTER, status);
+        }
+      }
+
+      function fallbackCopy(texto, statusEl) {
+        const temp = document.createElement("textarea");
+        temp.value = texto;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+        if (statusEl) statusEl.textContent = "Pix Copia e Cola (Banco Inter) copiado!";
+      }
 
       function haversineKm(a, b) {
         const R = 6371;
@@ -427,7 +492,7 @@
 
         if (elTotal) elTotal.textContent = formatarMoeda(calc.total);
         if (elDetalhe) elDetalhe.textContent = calc.texto;
-        if (status) status.textContent = "Corrida calculada! Toque em Enviar pedido para o motorista.";
+        if (status) status.textContent = "Corrida calculada! Copie o Pix ou envie para o motorista.";
         return calc;
       }
 
@@ -511,6 +576,7 @@
           km: calc.kmUsado,
           valor: formatarMoeda(calc.total),
           pagamento: pagamento,
+          pix: PIX_INTER,
           motorista: MOTORISTA_PADRAO,
           status: "Aguardando motorista",
           criadoEm: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
@@ -528,6 +594,7 @@
       document.getElementById("destino").addEventListener("input", function () { ultimoCalculo = null; });
       document.getElementById("btn-gps").addEventListener("click", usarLocalizacao);
       document.getElementById("btn-calcular").addEventListener("click", calcularCorrida);
+      document.getElementById("btn-copiar-pix").addEventListener("click", copiarPix);
       document.getElementById("btn-enviar").addEventListener("click", enviarPedido);
 
       renderizarPedidos();
