@@ -1,713 +1,614 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0f172a" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>32 DRIVE • Cassino & Rio Grande</title>
-  <link rel="manifest" href="manifest.json" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1f3a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="32 DRIVE">
+  <title>32 DRIVE - Painel do Motorista</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
+    * { box-sizing: border-box; }
     body {
-      background-color: #f1f5f9;
-      color: #0f172a;
+      font-family: Arial, sans-serif;
+      background: #eef2f7;
+      margin: 0;
       padding: 14px;
-      display: flex;
-      justify-content: center;
+      color: #1b2430;
     }
-
-    .app-card {
-      width: 100%;
-      max-width: 440px;
+    .retangulo-principal {
+      max-width: 540px;
+      margin: 0 auto;
       background: #ffffff;
-      border-radius: 20px;
-      padding: 18px;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-      border: 1px solid #e2e8f0;
+      border: 3px solid #ff7a00;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(11, 31, 58, 0.14);
     }
-
-    .top-pill {
-      display: inline-block;
-      background-color: #0f172a;
+    .cabecalho-marinho {
+      background: #0b1f3a;
       color: #ffffff;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 7px 14px;
-      border-radius: 999px;
-      margin-bottom: 14px;
-      letter-spacing: 0.3px;
+      padding: 16px;
+      border-bottom: 4px solid #ff7a00;
     }
-
-    .driver-banner {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      color: #ffffff;
-      border-radius: 16px;
-      padding: 20px 16px;
-      margin-bottom: 18px;
-      text-align: center;
-      border: 1px solid #334155;
-      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.16);
-    }
-
-    .driver-brand {
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing: 1.5px;
-      color: #38bdf8;
-      margin-bottom: 10px;
-    }
-
-    .link-box {
-      background-color: rgba(15, 23, 42, 0.65);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      border-radius: 10px;
-      padding: 8px 10px;
-      margin-bottom: 10px;
-    }
-
-    .link-text {
-      display: block;
-      font-size: 11px;
-      color: #bae6fd;
-      word-break: break-all;
-      margin-bottom: 6px;
-      font-weight: 600;
-    }
-
-    .link-actions {
+    .linha-topo {
       display: flex;
-      gap: 6px;
-      justify-content: center;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
     }
-
-    .mini-btn {
-      border: none;
-      border-radius: 7px;
+    .titulo-32 {
+      font-size: 1.35rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .selo-32 {
+      background: #ff7a00;
+      color: #ffffff;
+      padding: 3px 9px;
+      border-radius: 6px;
+    }
+    .relogio-bsb {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 122, 0, 0.6);
+      color: #ffffff;
       padding: 6px 10px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-    }
-
-    .mini-btn-copy {
-      background-color: #38bdf8;
-      color: #0f172a;
-    }
-
-    .mini-btn-open {
-      background-color: #22c55e;
-      color: #052e16;
-    }
-
-    .driver-role {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #94a3b8;
-      margin-bottom: 4px;
-      font-weight: 600;
-    }
-
-    .driver-name {
-      font-size: 17px;
-      font-weight: 700;
-      color: #f8fafc;
-      margin-bottom: 10px;
-    }
-
-    .driver-car {
-      display: inline-block;
-      background-color: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      padding: 6px 12px;
       border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #e2e8f0;
+      font-size: 0.82rem;
+      font-weight: bold;
     }
-
-    .field-group {
-      margin-bottom: 13px;
+    .btn-status {
+      padding: 7px 12px;
+      border-radius: 8px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.85rem;
     }
-
+    .info-motorista-topo {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border-left: 4px solid #ff7a00;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+    .corpo-branco {
+      background: #ffffff;
+      padding: 16px;
+    }
+    .abas {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .aba-btn {
+      flex: 1;
+      padding: 11px;
+      border-radius: 8px;
+      border: 2px solid #0b1f3a;
+      background: #ffffff;
+      color: #0b1f3a;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.92rem;
+    }
+    .aba-btn.ativa {
+      background: #0b1f3a;
+      color: #ffffff;
+      border-color: #ff7a00;
+    }
+    .secao { display: none; }
+    .secao.ativa { display: block; }
     label {
       display: block;
-      font-size: 13px;
-      font-weight: 700;
-      color: #1e293b;
-      margin-bottom: 5px;
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 0.86rem;
+      color: #0b1f3a;
     }
-
     input {
       width: 100%;
-      padding: 12px 14px;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 12px;
-      font-size: 15px;
-      color: #0f172a;
-      background-color: #ffffff;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    input:focus {
-      border-color: #0284c7;
-    }
-
-    .hint-text {
-      font-size: 11px;
-      color: #64748b;
-      margin-top: 4px;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: opacity 0.2s, transform 0.1s;
-    }
-
-    .btn:active {
-      transform: scale(0.99);
-    }
-
-    .btn:disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-    }
-
-    .btn-gps {
-      background-color: #0f172a;
-      color: #ffffff;
-    }
-
-    .btn-calc {
-      background-color: #0284c7;
-      color: #ffffff;
-    }
-
-    .btn-whatsapp {
-      background-color: #16a34a;
-      color: #ffffff;
-    }
-
-    .btn-pix {
-      background-color: #ea580c;
-      color: #ffffff;
-    }
-
-    .status-msg {
-      margin-top: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      text-align: center;
-      color: #334155;
-      min-height: 18px;
-    }
-
-    .result-box {
-      display: none;
-      margin-top: 14px;
-      background-color: #f0f9ff;
-      border: 1.5px solid #7dd3fc;
-      border-radius: 14px;
-      padding: 14px;
-      text-align: center;
-    }
-
-    .result-box.visible {
-      display: block;
-    }
-
-    .result-distance {
-      font-size: 14px;
-      font-weight: 600;
-      color: #0369a1;
-      margin-bottom: 4px;
-    }
-
-    .result-price {
-      font-size: 26px;
-      font-weight: 800;
-      color: #0f172a;
-    }
-
-    .pix-feedback {
-      display: none;
-      margin-top: 10px;
-      background-color: #fff7ed;
-      border: 1px solid #fdba74;
-      color: #9a3412;
       padding: 10px;
-      border-radius: 10px;
-      font-size: 12px;
-      text-align: center;
-      word-break: break-all;
-      font-weight: 600;
+      margin-top: 4px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: Arial, sans-serif;
     }
-
-    .pix-feedback.visible {
-      display: block;
+    input:focus {
+      outline: none;
+      border-color: #ff7a00;
+    }
+    .btn-primario {
+      width: 100%;
+      margin-top: 14px;
+      padding: 13px;
+      background: #0b1f3a;
+      color: #ffffff;
+      border: 2px solid #ff7a00;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-laranja {
+      width: 100%;
+      margin-top: 8px;
+      padding: 11px;
+      background: #ff7a00;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-gps {
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px;
+      background: #0b1f3a;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .card-pedido {
+      border: 2px solid #ff7a00;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 14px;
+      background: #ffffff;
+    }
+    .badge-status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .st-pendente { background: #fff3cd; color: #856404; }
+    .st-aceito { background: #d4edda; color: #155724; }
+    .st-recusado { background: #f8d7da; color: #721c24; }
+    .linha-dado {
+      font-size: 0.9rem;
+      margin: 4px 0;
+      line-height: 1.4;
+    }
+    .chips-tempo {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .chip-t {
+      padding: 7px 11px;
+      border-radius: 6px;
+      border: 1px solid #0b1f3a;
+      background: #f1f5f9;
+      color: #0b1f3a;
+      font-weight: bold;
+      font-size: 0.84rem;
+      cursor: pointer;
+    }
+    .chip-t.selecionado {
+      background: #ff7a00;
+      border-color: #ff7a00;
+      color: #ffffff;
+    }
+    .botoes-resposta {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .btn-aceitar {
+      flex: 1;
+      padding: 10px;
+      background: #198754;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-recusar {
+      flex: 1;
+      padding: 10px;
+      background: #dc3545;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .resposta-registrada {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f1f5f9;
+      border-left: 4px solid #0b1f3a;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+    .box-local {
+      margin-top: 12px;
+      padding: 10px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.86rem;
+    }
+    .pix-box {
+      margin-top: 12px;
+      padding: 10px;
+      background: #fff5ec;
+      border: 1px solid #ffc085;
+      border-radius: 8px;
+    }
+    .aviso {
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .aviso-off { background: #f8d7da; color: #721c24; display: none; }
+    .aviso-ok { background: #d4edda; color: #155724; display: none; margin-top: 10px; }
+    .vazio {
+      text-align: center;
+      color: #52606d;
+      padding: 20px 10px;
+      font-size: 0.92rem;
     }
   </style>
 </head>
 <body>
-  <div class="app-card">
-    <div class="top-pill">32 DRIVE • Cassino &amp; Rio Grande</div>
-
-    <div class="driver-banner">
-      <div class="driver-brand">32 DRIVE</div>
-
-      <div class="link-box">
-        <span class="link-text" id="appUrlText">https://lccjunior240-ux.github.io/32-drive/app.html</span>
-        <div class="link-actions">
-          <button type="button" class="mini-btn mini-btn-copy" onclick="copyAppLink()">Copiar link</button>
-          <a class="mini-btn mini-btn-open" href="https://lccjunior240-ux.github.io/32-drive/app.html">Entrar</a>
+  <div class="retangulo-principal">
+    <div class="cabecalho-marinho">
+      <div class="linha-topo">
+        <div class="titulo-32">
+          <span class="selo-32">32</span>
+          <span>DRIVE</span>
         </div>
+        <div class="relogio-bsb" id="relogioBrasilia">Brasilia: --:--:--</div>
+        <button id="btnStatus" class="btn-status" type="button" onclick="alternarStatus()">ONLINE</button>
       </div>
 
-      <div class="driver-role">Motorista Credenciado</div>
-      <div class="driver-name">Luíz Carlos Costa Junior</div>
-      <div class="driver-car">Volkswagen Voyage • Placa IQD8060</div>
+      <div class="info-motorista-topo">
+        <div><strong>Motorista credenciado:</strong> Luiz Carlos Costa Junior</div>
+        <div><strong>Celular do motorista:</strong> 53991357231</div>
+        <div><strong>Veiculo:</strong> Voyage &middot; <strong>Placa:</strong> IQD 8060</div>
+      </div>
     </div>
 
-    <datalist id="locais-rg">
-      <option value="Cassino (Av. Rio Grande)">
-      <option value="Supermercado Guanabara - Cassino">
-      <option value="Supermercado Peruzzo - Cassino">
-      <option value="Querência - Cassino">
-      <option value="Parque Guanabara - Cassino">
-      <option value="Bairro ABC - Cassino">
-      <option value="Bolaxa - Rio Grande">
-      <option value="Senandes - Rio Grande">
-      <option value="Parque Marinha - Rio Grande">
-      <option value="Parque São Pedro - Rio Grande">
-      <option value="FURG - Campus Carreiros">
-      <option value="Centro - Rio Grande (Praça Tamandaré)">
-      <option value="Centro - Rua General Bacelar">
-      <option value="Centro - Rua Marechal Floriano">
-      <option value="Centro - Rua Benjamin Constant">
-      <option value="Centro - Rua Andradas">
-      <option value="Centro - Rua Duque de Caxias">
-      <option value="Centro - Rua Vinte e Quatro de Maio">
-      <option value="Centro - Rua Aquidaban">
-      <option value="Cidade Nova - Rio Grande">
-      <option value="Lar Gaúcho - Rio Grande">
-      <option value="Navegantes - Rio Grande">
-      <option value="Vila Santa Tereza - Rio Grande">
-      <option value="Quarta Seção da Barra - Rio Grande">
-      <option value="Tecon - Rio Grande">
-      <option value="Termasa - Rio Grande">
-      <option value="Tergrasa - Rio Grande">
-      <option value="Bianchini - Rio Grande">
-      <option value="Bunge - Rio Grande">
-      <option value="Porto do Rio Grande">
-      <option value="BGV / Getúlio Vargas - Rio Grande">
-      <option value="COHAB - Rio Grande">
-      <option value="Municipal - Rio Grande">
-      <option value="Vila Recreio - Rio Grande">
-      <option value="Vila Santa Rosa - Rio Grande">
-      <option value="Vila São João - Rio Grande">
-      <option value="Vila São Miguel - Rio Grande">
-      <option value="Vila Maria - Rio Grande">
-      <option value="Parque Coelho - Rio Grande">
-      <option value="Sepe - Rio Grande">
-    </datalist>
+    <div class="corpo-branco">
+      <div id="avisoOffline" class="aviso aviso-off">Voce esta OFFLINE. Fique ONLINE para aceitar pedidos.</div>
 
-    <div class="field-group">
-      <label for="passengerName">Nome do passageiro</label>
-      <input type="text" id="passengerName" placeholder="Ex.: João Silva" />
+      <div class="abas">
+        <button id="abaPainel" class="aba-btn ativa" type="button" onclick="trocarAba('painel')">Painel do Motorista (<span id="contPedidos">0</span>)</button>
+        <button id="abaCliente" class="aba-btn" type="button" onclick="trocarAba('cliente')">Simular Pedido (Cliente)</button>
+      </div>
+
+      <!-- ABA 1: PAINEL DO MOTORISTA -->
+      <div id="secPainel" class="secao ativa">
+        <div class="box-local">
+          <div><strong>Sua localizacao atual:</strong> <span id="textoLocalMotorista">Nao capturada ainda</span></div>
+          <button class="btn-gps" type="button" onclick="capturarLocalMotorista()">Usar Minha Localizacao (GPS)</button>
+          <a id="linkMapaMotorista" href="#" target="_blank" rel="noopener" style="display:none;margin-top:8px;font-weight:bold;color:#0b1f3a;">Ver minha posicao no Mapa Gratuito</a>
+        </div>
+
+        <div class="pix-box">
+          <div style="font-size:0.84rem;font-weight:bold;color:#0b1f3a;">Pix Copia e Cola - Banco Inter</div>
+          <input type="text" id="chavePixInter" value="45bd89b5-9dd7-4cda-8715-789257d06596" readonly>
+          <button class="btn-laranja" type="button" onclick="copiarPix()">Copiar Pix Banco Inter</button>
+          <div id="pixMsg" class="aviso aviso-ok">Chave Pix do Banco Inter copiada!</div>
+        </div>
+
+        <div style="margin-top:14px;" id="listaPedidos"></div>
+      </div>
+
+      <!-- ABA 2: SIMULADOR DO LINK DO PASSAGEIRO -->
+      <div id="secCliente" class="secao">
+        <div style="font-size:0.86rem;color:#52606d;margin-bottom:6px;">
+          Teste aqui como o pedido chega direto no seu painel sem passar pelo WhatsApp:
+        </div>
+
+        <label>Quem esta pedindo</label>
+        <input type="text" id="cliSolicitante" value="Mae (pedindo para Jr)">
+
+        <label>Nome do passageiro</label>
+        <input type="text" id="cliPassageiro" value="Luiz Carlos Junior">
+
+        <label>Celular do passageiro</label>
+        <input type="tel" id="cliCelular" value="53991357231">
+
+        <label>Onde pegar o passageiro</label>
+        <input type="text" id="cliOrigem" value="Rua Ijui, 654 - Cassino">
+
+        <label>Para onde levar</label>
+        <input type="text" id="cliDestino" value="FURG Predio 6 - Carreiros">
+
+        <label>Distancia (km)</label>
+        <input type="text" id="cliKm" inputmode="decimal" value="3,5">
+
+        <button class="btn-primario" type="button" onclick="enviarPedidoTeste()">Enviar Pedido para o Painel</button>
+        <div id="msgEnviado" class="aviso aviso-ok">Pedido enviado! Abrindo seu Painel do Motorista...</div>
+      </div>
     </div>
-
-    <div class="field-group">
-      <label for="passengerPhone">Telefone do passageiro</label>
-      <input type="tel" id="passengerPhone" placeholder="Ex.: 53 99999-9999" />
-    </div>
-
-    <div class="field-group">
-      <label for="origin">Origem (rua, bairro ou mercado)</label>
-      <input type="text" id="origin" list="locais-rg" placeholder="Ex.: Supermercado Guanabara, Bolaxa, Centro..." />
-      <div class="hint-text">Toque para escolher da lista ou digite o nome da rua e bairro.</div>
-    </div>
-
-    <div class="field-group">
-      <label for="destination">Destino (rua, bairro ou mercado)</label>
-      <input type="text" id="destination" list="locais-rg" placeholder="Ex.: Parque Marinha, Peruzzo, FURG, Rua Bacelar..." />
-    </div>
-
-    <button type="button" class="btn btn-gps" id="btnGps" onclick="useMyGPS()">
-      Usar meu GPS
-    </button>
-
-    <button type="button" class="btn btn-calc" id="btnCalc" onclick="calculateRide()">
-      Calcular corrida
-    </button>
-
-    <div class="status-msg" id="statusMsg"></div>
-
-    <div class="result-box" id="resultBox">
-      <div class="result-distance" id="resultDistance"></div>
-      <div class="result-price" id="resultPrice"></div>
-    </div>
-
-    <button type="button" class="btn btn-whatsapp" onclick="sendWhatsApp()">
-      Enviar corrida no WhatsApp
-    </button>
-
-    <button type="button" class="btn btn-pix" onclick="copyPixKey()">
-      Copiar chave Pix (Banco Inter)
-    </button>
-
-    <div class="pix-feedback" id="pixFeedback"></div>
   </div>
 
   <script>
-    const DRIVER_WHATSAPP = "5553991357231";
-    const PIX_KEY = "45bd89b5-9dd7-4cda-8715-789257d06596";
-    const APP_URL = "https://lccjunior240-ux.github.io/32-drive/app.html";
+    const KEY_STATUS = 'status_32_drive';
+    const KEY_PEDIDOS = 'pedidos_32_drive_v3';
+    const PIX_INTER = '45bd89b5-9dd7-4cda-8715-789257d06596';
+    const OPCOES_MINUTOS = [2, 3, 4, 5, 6, 8, 10, 15];
 
-    const LOCAL_DB = [
-      { keys: ["supermercado guanabara", "guanabara cassino"], lat: -32.1818, lon: -52.1643 },
-      { keys: ["supermercado peruzzo", "peruzzo cassino", "peruzzo"], lat: -32.1825, lon: -52.1631 },
-      { keys: ["cassino", "av rio grande", "avenida rio grande"], lat: -32.1835, lon: -52.1610 },
-      { keys: ["querencia"], lat: -32.1725, lon: -52.1760 },
-      { keys: ["parque guanabara"], lat: -32.1645, lon: -52.1835 },
-      { keys: ["bairro abc", "abc"], lat: -32.1795, lon: -52.1725 },
-      { keys: ["bolaxa", "bolacha"], lat: -32.1480, lon: -52.1865 },
-      { keys: ["senandes"], lat: -32.1265, lon: -52.1965 },
-      { keys: ["parque marinha"], lat: -32.0965, lon: -52.1815 },
-      { keys: ["parque sao pedro"], lat: -32.0895, lon: -52.1785 },
-      { keys: ["furg", "carreiros", "campus carreiros"], lat: -32.0735, lon: -52.1655 },
-      { keys: ["centro", "praca tamandare", "general bacelar", "marechal floriano", "benjamin constant", "andradas", "duque de caxias", "vinte e quatro de maio", "24 de maio", "aquidaban", "zalony", "luis lorea", "luiz lorea", "riachuelo", "ewbank", "dr nascimento"], lat: -32.0350, lon: -52.0986 },
-      { keys: ["cidade nova"], lat: -32.0445, lon: -52.1085 },
-      { keys: ["lar gaucho", "largaucho"], lat: -32.0475, lon: -52.1010 },
-      { keys: ["navegantes"], lat: -32.0490, lon: -52.0935 },
-      { keys: ["vila santa tereza", "santa tereza"], lat: -32.0545, lon: -52.0940 },
-      { keys: ["quarta secao da barra", "4 secao da barra", "barra"], lat: -32.1415, lon: -52.1045 },
-      { keys: ["tecon", "tercon"], lat: -32.1155, lon: -52.1065 },
-      { keys: ["termasa"], lat: -32.1055, lon: -52.1075 },
-      { keys: ["tergrasa"], lat: -32.0985, lon: -52.1080 },
-      { keys: ["bianchini"], lat: -32.0920, lon: -52.1095 },
-      { keys: ["bunge"], lat: -32.0865, lon: -52.1105 },
-      { keys: ["porto"], lat: -32.0785, lon: -52.1040 },
-      { keys: ["bgv", "getulio vargas"], lat: -32.0410, lon: -52.0895 },
-      { keys: ["cohab"], lat: -32.0595, lon: -52.1265 },
-      { keys: ["municipal"], lat: -32.0525, lon: -52.1185 },
-      { keys: ["vila recreio", "recreio"], lat: -32.0565, lon: -52.1325 },
-      { keys: ["vila santa rosa", "santa rosa"], lat: -32.0635, lon: -52.1385 },
-      { keys: ["vila sao joao", "sao joao"], lat: -32.0685, lon: -52.1445 },
-      { keys: ["vila sao miguel", "sao miguel"], lat: -32.0725, lon: -52.1495 },
-      { keys: ["vila maria"], lat: -32.0825, lon: -52.1695 },
-      { keys: ["parque coelho"], lat: -32.0855, lon: -52.1735 },
-      { keys: ["sepe"], lat: -32.1125, lon: -52.1895 }
-    ];
+    let localMotorista = null;
+    const tempoSelecionadoPorPedido = {};
 
-    let originCoords = null;
-    let calculatedDistanceKm = null;
-    let calculatedPrice = null;
-
-    function normalizeText(str) {
-      return str
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9\s]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function findInLocalDB(query) {
-      const clean = normalizeText(query);
-      for (const item of LOCAL_DB) {
-        for (const k of item.keys) {
-          if (clean.includes(k)) {
-            return { lat: item.lat, lon: item.lon };
-          }
-        }
-      }
-      return null;
-    }
-
-    function setStatus(text, isError = false) {
-      const el = document.getElementById("statusMsg");
-      el.textContent = text;
-      el.style.color = isError ? "#dc2626" : "#334155";
-    }
-
-    function formatBRL(value) {
-      return value.toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
+    function horaBrasilia() {
+      const agora = new Date();
+      const h = agora.toLocaleTimeString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
       });
+      document.getElementById('relogioBrasilia').textContent = 'Brasilia: ' + h;
+      return h;
+    }
+    horaBrasilia();
+    setInterval(horaBrasilia, 1000);
+
+    function aplicarStatus(st) {
+      const online = st !== 'OFFLINE';
+      const btn = document.getElementById('btnStatus');
+      btn.textContent = online ? 'ONLINE' : 'OFFLINE';
+      btn.style.background = online ? '#d4edda' : '#f8d7da';
+      btn.style.color = online ? '#155724' : '#721c24';
+      document.getElementById('avisoOffline').style.display = online ? 'none' : 'block';
     }
 
-    async function copyAppLink() {
-      try {
-        await navigator.clipboard.writeText(APP_URL);
-        setStatus("Link do 32 DRIVE copiado.");
-      } catch (e) {
-        const temp = document.createElement("input");
-        temp.value = APP_URL;
-        document.body.appendChild(temp);
-        temp.select();
-        document.execCommand("copy");
-        document.body.removeChild(temp);
-        setStatus("Link do 32 DRIVE copiado.");
-      }
+    function alternarStatus() {
+      const atual = localStorage.getItem(KEY_STATUS) || 'ONLINE';
+      const novo = atual === 'ONLINE' ? 'OFFLINE' : 'ONLINE';
+      localStorage.setItem(KEY_STATUS, novo);
+      aplicarStatus(novo);
     }
 
-    function useMyGPS() {
+    function trocarAba(qual) {
+      document.getElementById('abaPainel').classList.toggle('ativa', qual === 'painel');
+      document.getElementById('abaCliente').classList.toggle('ativa', qual === 'cliente');
+      document.getElementById('secPainel').classList.toggle('ativa', qual === 'painel');
+      document.getElementById('secCliente').classList.toggle('ativa', qual === 'cliente');
+      if (qual === 'painel') renderizarPedidos();
+    }
+
+    function capturarLocalMotorista() {
+      const elTexto = document.getElementById('textoLocalMotorista');
+      const elLink = document.getElementById('linkMapaMotorista');
+
       if (!navigator.geolocation) {
-        setStatus("GPS não suportado neste navegador.", true);
+        elTexto.textContent = 'GPS nao suportado neste navegador.';
         return;
       }
 
-      const btn = document.getElementById("btnGps");
-      btn.disabled = true;
-      setStatus("Obtendo sua localização atual...");
-
+      elTexto.textContent = 'Buscando sua localizacao...';
       navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
-          originCoords = { lat, lon };
-
-          try {
-            const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
-            const resp = await fetch(url);
-            const data = await resp.json();
-            const addr = data.address || {};
-            const road = addr.road || addr.pedestrian || "";
-            const suburb = addr.suburb || addr.neighbourhood || addr.city_district || "";
-            const city = addr.city || addr.town || "Rio Grande";
-
-            const formatted = [road, suburb, city].filter(Boolean).join(", ");
-            document.getElementById("origin").value = formatted || `GPS (${lat.toFixed(5)}, ${lon.toFixed(5)})`;
-            setStatus("Localização GPS preenchida na origem.");
-          } catch (e) {
-            document.getElementById("origin").value = `GPS (${lat.toFixed(5)}, ${lon.toFixed(5)})`;
-            setStatus("Coordenadas GPS capturadas.");
-          } finally {
-            btn.disabled = false;
-          }
+        function (pos) {
+          const lat = pos.coords.latitude.toFixed(6);
+          const lon = pos.coords.longitude.toFixed(6);
+          localMotorista = {
+            lat: lat,
+            lon: lon,
+            url: 'https://www.openstreetmap.org/?mlat=' + lat + '&mlon=' + lon + '#map=16/' + lat + '/' + lon
+          };
+          elTexto.textContent = 'Lat ' + lat + ', Lon ' + lon;
+          elLink.href = localMotorista.url;
+          elLink.style.display = 'inline-block';
         },
-        () => {
-          btn.disabled = false;
-          setStatus("Não foi possível acessar o GPS. Verifique a permissão de localização.", true);
+        function () {
+          elTexto.textContent = 'Permissao de GPS negada ou indisponivel.';
         },
-        { enableHighAccuracy: true, timeout: 12000 }
+        { enableHighAccuracy: true, timeout: 10000 }
       );
     }
 
-    async function geocodePlace(query) {
-      const viewbox = "-52.26,-32.23,-52.04,-32.00";
-      const attempts = [
-        `${query}, Rio Grande, RS, Brasil`,
-        `${query}, Cassino, Rio Grande, RS, Brasil`
-      ];
+    function selecionarMinutos(id, min) {
+      tempoSelecionadoPorPedido[id] = min;
+      const campo = document.getElementById('tempo_' + id);
+      if (campo) campo.value = min;
 
-      for (const q of attempts) {
-        try {
-          const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&bounded=1&viewbox=${viewbox}&q=${encodeURIComponent(q)}`;
-          const resp = await fetch(url);
-          const results = await resp.json();
-          if (results && results.length > 0) {
-            return {
-              lat: parseFloat(results[0].lat),
-              lon: parseFloat(results[0].lon)
-            };
-          }
-        } catch (e) {
-          // Segue para o banco interno
+      for (let i = 0; i < OPCOES_MINUTOS.length; i++) {
+        const m = OPCOES_MINUTOS[i];
+        const btn = document.getElementById('btn_t_' + id + '_' + m);
+        if (btn) {
+          btn.classList.toggle('selecionado', m === min);
         }
       }
-
-      return findInLocalDB(query);
     }
 
-    function haversineKm(c1, c2) {
-      const R = 6371;
-      const dLat = ((c2.lat - c1.lat) * Math.PI) / 180;
-      const dLon = ((c2.lon - c1.lon) * Math.PI) / 180;
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos((c1.lat * Math.PI) / 180) *
-          Math.cos((c2.lat * Math.PI) / 180) *
-          Math.sin(dLon / 2) *
-          Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    }
-
-    async function calculateRide() {
-      const originText = document.getElementById("origin").value.trim();
-      const destText = document.getElementById("destination").value.trim();
-      const resultBox = document.getElementById("resultBox");
-
-      if (!originText || !destText) {
-        setStatus("Preencha a origem e o destino para calcular.", true);
-        return;
+    function copiarPix() {
+      const el = document.getElementById('chavePixInter');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(PIX_INTER).catch(function () {});
+      } else {
+        el.select();
+        document.execCommand('copy');
       }
+      const msg = document.getElementById('pixMsg');
+      msg.style.display = 'block';
+      setTimeout(function () { msg.style.display = 'none'; }, 3000);
+    }
 
-      const btn = document.getElementById("btnCalc");
-      btn.disabled = true;
-      resultBox.classList.remove("visible");
-      setStatus("Calculando distância e valor da corrida...");
-
+    function lerPedidos() {
       try {
-        let start = originCoords;
-        if (!start || !originText.startsWith("GPS (")) {
-          start = await geocodePlace(originText);
-        }
-        const end = await geocodePlace(destText);
-
-        if (!start || !end) {
-          setStatus("Local não encontrado. Escolha um bairro da lista ou informe o bairro junto com a rua.", true);
-          btn.disabled = false;
-          return;
-        }
-
-        const straightKm = haversineKm(start, end);
-        const estimatedKm = Math.max(1.0, straightKm * 1.25);
-
-        let price = 7.99;
-        if (estimatedKm > 3.5) {
-          price = 7.99 + (estimatedKm - 3.5) * 2.0;
-        }
-
-        calculatedDistanceKm = estimatedKm;
-        calculatedPrice = price;
-
-        document.getElementById("resultDistance").textContent =
-          `Distância estimada: ${estimatedKm.toFixed(1).replace(".", ",")} km`;
-        document.getElementById("resultPrice").textContent = formatBRL(price);
-
-        resultBox.classList.add("visible");
-        setStatus("Corrida calculada com sucesso.");
-      } catch (err) {
-        setStatus("Erro ao calcular rota. Verifique sua conexão.", true);
-      } finally {
-        btn.disabled = false;
-      }
-    }
-
-    function sendWhatsApp() {
-      const name = document.getElementById("passengerName").value.trim() || "Não informado";
-      const phone = document.getElementById("passengerPhone").value.trim() || "Não informado";
-      const origin = document.getElementById("origin").value.trim();
-      const destination = document.getElementById("destination").value.trim();
-
-      if (!origin || !destination) {
-        setStatus("Informe a origem e o destino antes de enviar no WhatsApp.", true);
-        return;
-      }
-
-      let valorTexto = "A calcular";
-      let distanciaTexto = "";
-      if (calculatedPrice !== null && calculatedDistanceKm !== null) {
-        distanciaTexto = `\n*Distância estimada:* ${calculatedDistanceKm.toFixed(1).replace(".", ",")} km`;
-        valorTexto = formatBRL(calculatedPrice);
-      }
-
-      const message =
-        `*SOLICITAÇÃO DE CORRIDA - 32 DRIVE*\n\n` +
-        `*Passageiro:* ${name}\n` +
-        `*Telefone:* ${phone}\n` +
-        `*Origem:* ${origin}\n` +
-        `*Destino:* ${destination}` +
-        `${distanciaTexto}\n` +
-        `*Valor estimado:* ${valorTexto}\n\n` +
-        `*Chave Pix (Banco Inter):* ${PIX_KEY}`;
-
-      const whatsappUrl = `https://wa.me/${DRIVER_WHATSAPP}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, "_blank");
-    }
-
-    async function copyPixKey() {
-      const feedback = document.getElementById("pixFeedback");
-      try {
-        await navigator.clipboard.writeText(PIX_KEY);
-        feedback.textContent = `Chave Pix copiada: ${PIX_KEY}`;
-        feedback.classList.add("visible");
-        setStatus("Chave Pix do Banco Inter copiada para a área de transferência.");
+        return JSON.parse(localStorage.getItem(KEY_PEDIDOS)) || [];
       } catch (e) {
-        const tempInput = document.createElement("input");
-        tempInput.value = PIX_KEY;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
-        feedback.textContent = `Chave Pix copiada: ${PIX_KEY}`;
-        feedback.classList.add("visible");
-        setStatus("Chave Pix do Banco Inter copiada.");
+        return [];
       }
     }
 
-    document.getElementById("origin").addEventListener("input", () => {
-      originCoords = null;
-    });
-  </script><script>
-(function () {
-  const STATUS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKQWN8xTJcpHMXlLEQ30fsKAaA4fYheQaktlo8qEzIdtLaSxu3qJ3Emyo2g-kYVm6Zob6f4AKS3Xra/pub?output=csv";
-
-  async function syncDriverStatus() {
-    const btnCalc = document.getElementById("btnCalc");
-    const statusEl =
-      document.getElementById("driverStatus") ||
-      document.getElementById("statusBadge") ||
-      document.getElementById("statusText");
-
-    try {
-      const response = await fetch(STATUS_CSV_URL + "&t=" + Date.now(), {
-        cache: "no-store"
-      });
-      if (!response.ok) return;
-
-      const text = await response.text();
-      const firstLine = text.split(/\r?\n/)[0] || "";
-      const cellA1 = firstLine.split(",")[0].replace(/^"|"$/g, "").trim().toUpperCase();
-
-      const isOnline = cellA1 === "ONLINE";
-
-      if (statusEl) {
-        statusEl.textContent = isOnline ? "ONLINE" : "OFFLINE";
-        statusEl.dataset.status = isOnline ? "ONLINE" : "OFFLINE";
-      }
-
-      if (btnCalc) {
-        btnCalc.disabled = !isOnline;
-      }
-
-      if (!isOnline && typeof setStatus === "function") {
-        setStatus("Motorista OFFLINE no momento.", true);
-      }
-    } catch (err) {
-      // Mantém o comportamento padrão se a planilha não responder
+    function salvarPedidos(lista) {
+      localStorage.setItem(KEY_PEDIDOS, JSON.stringify(lista));
     }
-  }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", syncDriverStatus);
-  } else {
-    syncDriverStatus();
-  }
-})();
-</script>
+    function enviarPedidoTeste() {
+      const solicitante = document.getElementById('cliSolicitante').value.trim() || 'Cliente';
+      const passageiro = document.getElementById('cliPassageiro').value.trim() || 'Nao informado';
+      const celular = document.getElementById('cliCelular').value.trim() || 'Nao informado';
+      const origem = document.getElementById('cliOrigem').value.trim();
+      const destino = document.getElementById('cliDestino').value.trim();
+      const kmStr = document.getElementById('cliKm').value.replace(',', '.').trim();
 
+      if (!origem || !destino) {
+        alert('Preencha origem e destino para testar.');
+        return;
+      }
+
+      const km = parseFloat(kmStr) || 3.5;
+      // Regra: ate 3,5 km = R$ 7,90; acima disso R$ 2,00/km
+      const valor = km <= 3.5 ? 7.90 : km * 2.0;
+
+      const pedido = {
+        id: Date.now(),
+        hora: horaBrasilia(),
+        solicitante: solicitante,
+        passageiro: passageiro,
+        celular: celular,
+        origem: origem,
+        destino: destino,
+        km: km.toFixed(1).replace('.', ','),
+        valor: valor.toFixed(2).replace('.', ','),
+        status: 'PENDENTE',
+        resposta: '',
+        localUrl: ''
+      };
+
+      const lista = lerPedidos();
+      lista.unshift(pedido);
+      salvarPedidos(lista);
+
+      const ok = document.getElementById('msgEnviado');
+      ok.style.display = 'block';
+      setTimeout(function () {
+        ok.style.display = 'none';
+        trocarAba('painel');
+      }, 600);
+    }
+
+    function responderPedido(id, acao) {
+      const statusMotorista = localStorage.getItem(KEY_STATUS) || 'ONLINE';
+      if (acao === 'ACEITO' && statusMotorista === 'OFFLINE') {
+        alert('Mude seu status para ONLINE no topo antes de aceitar a corrida.');
+        return;
+      }
+
+      const campoTempo = document.getElementById('tempo_' + id);
+      const campoMsg = document.getElementById('resp_' + id);
+      const minutos = campoTempo ? campoTempo.value.trim() : (tempoSelecionadoPorPedido[id] || '');
+      const textoLivre = campoMsg ? campoMsg.value.trim() : '';
+
+      const lista = lerPedidos();
+      for (let i = 0; i < lista.length; i++) {
+        if (lista[i].id === id) {
+          lista[i].status = acao;
+          lista[i].localUrl = localMotorista ? localMotorista.url : '';
+          if (acao === 'ACEITO') {
+            const tempoTexto = minutos ? 'Chego em ' + minutos + ' min. ' : '';
+            const extra = textoLivre ? textoLivre + ' ' : '';
+            lista[i].resposta =
+              'Corrida aceita! Motorista Luiz Carlos Costa Junior (Voyage IQD 8060). ' +
+              tempoTexto + extra + 'Pix Banco Inter: ' + PIX_INTER;
+          } else {
+            lista[i].resposta = textoLivre || 'Motorista indisponivel no momento.';
+          }
+          break;
+        }
+      }
+      salvarPedidos(lista);
+      renderizarPedidos();
+    }
+
+    function limparHistorico() {
+      salvarPedidos([]);
+      renderizarPedidos();
+    }
+
+    function renderizarPedidos() {
+      const lista = lerPedidos();
+      document.getElementById('contPedidos').textContent = lista.length;
+      const box = document.getElementById('listaPedidos');
+
+      if (lista.length === 0) {
+        box.innerHTML =
+          '<div class="vazio">' +
+          'Nenhum pedido no painel ainda.<br>' +
+          'Toque em <strong>Simular Pedido (Cliente)</strong> acima para fazer um teste agora.' +
+          '</div>';
+        return;
+      }
+
+      let html = '';
+      for (let i = 0; i < lista.length; i++) {
+        const p = lista[i];
+        const classeBadge = p.status === 'ACEITO' ? 'st-aceito' : (p.status === 'RECUSADO' ? 'st-recusado' : 'st-pendente');
+        const minAtual = tempoSelecionadoPorPedido[p.id] || '';
+
+        html += '<div class="card-pedido">';
+        html += '<span class="badge-status ' + classeBadge + '">' + p.status + ' &middot; ' + p.hora + '</span>';
+        html += '<div class="linha-dado"><strong>Solicitado por:</strong> ' + p.solicitante + '</div>';
+        html += '<div class="linha-dado"><strong>Passageiro:</strong> ' + p.passageiro + ' (' + p.celular + ')</div>';
+        html += '<div class="linha-dado"><strong>Pegar em:</strong> ' + p.origem + '</div>';
+        html += '<div class="linha-dado"><strong>Levar para:</strong> ' + p.destino + '</div>';
+        html += '<div class="linha-dado"><strong>Distancia:</strong> ' + p.km + ' km | <strong>Valor:</strong> R$ ' + p.valor + ' (ate 3,5 km = R$ 7,90)</div>';
+
+        if (p.status === 'PENDENTE') {
+          html += '<label>Tempo para chegar ao local (min):</label>';
+          html += '<input type="number" id="tempo_' + p.id + '" value="' + minAtual + '" placeholder="Ex: 5">';
+
+          html += '<div class="chips-tempo">';
+          for (let j = 0; j < OPCOES_MINUTOS.length; j++) {
+            const m = OPCOES_MINUTOS[j];
+            const sel = (minAtual === m) ? ' selecionado' : '';
+            html += '<button type="button" id="btn_t_' + p.id + '_' + m + '" class="chip-t' + sel + '" onclick="selecionarMinutos(' + p.id + ', ' + m + ')">' + m + ' min</button>';
+          }
+          html += '</div>';
+
+          html += '<label>Observacao adicional (opcional):</label>';
+          html += '<input type="text" id="resp_' + p.id + '" placeholder="Ex: Estou na esquina da padaria">';
+
+          html += '<div class="botoes-resposta">';
+          html += '<button class="btn-aceitar" type="button" onclick="responderPedido(' + p.id + ', \'ACEITO\')">Aceitar e Responder</button>';
+          html += '<button class="btn-recusar" type="button" onclick="responderPedido(' + p.id + ', \'RECUSADO\')">Recusar</button>';
+          html += '</div>';
+        } else {
+          html += '<div class="resposta-registrada"><strong>Resposta enviada no painel:</strong><br>' + p.resposta;
+          if (p.localUrl) {
+            html += '<br><a href="' + p.localUrl + '" target="_blank" rel="noopener" style="color:#0b1f3a;font-weight:bold;">Localizacao do motorista no Mapa Gratuito</a>';
+          }
+          html += '</div>';
+        }
+
+        html += '</div>';
+      }
+
+      html += '<button type="button" onclick="limparHistorico()" style="width:100%;padding:9px;border:1px solid #cbd5e1;background:#f8fafc;border-radius:6px;cursor:pointer;font-size:0.85rem;">Limpar testes do painel</button>';
+      box.innerHTML = html;
+    }
+
+    aplicarStatus(localStorage.getItem(KEY_STATUS) || 'ONLINE');
+    renderizarPedidos();
+  </script>
 </body>
 </html>
