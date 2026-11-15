@@ -4,611 +4,278 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0b1f3a">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="32 DRIVE">
+  <meta name="apple-mobile-web-app-title" content="32 DRIVE Motorista">
   <title>32 DRIVE - Painel do Motorista</title>
   <style>
     * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
-      background: #eef2f7;
+      background: #081220;
+      color: #ffffff;
       margin: 0;
       padding: 14px;
-      color: #1b2430;
     }
-    .retangulo-principal {
-      max-width: 540px;
+    .card {
+      max-width: 520px;
       margin: 0 auto;
-      background: #ffffff;
-      border: 3px solid #ff7a00;
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 6px 18px rgba(11, 31, 58, 0.14);
+      background: #0f1d33;
+      border: 2px solid #ff7a00;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
     }
-    .cabecalho-marinho {
-      background: #0b1f3a;
-      color: #ffffff;
-      padding: 16px;
-      border-bottom: 4px solid #ff7a00;
+    .topo {
+      text-align: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 122, 0, 0.35);
     }
-    .linha-topo {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .titulo-32 {
-      font-size: 1.35rem;
+    .marca {
+      font-size: 1.6rem;
       font-weight: 900;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      letter-spacing: 1px;
     }
-    .selo-32 {
+    .selo {
       background: #ff7a00;
       color: #ffffff;
-      padding: 3px 9px;
-      border-radius: 6px;
+      padding: 3px 10px;
+      border-radius: 7px;
+      margin-right: 6px;
     }
-    .relogio-bsb {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 122, 0, 0.6);
-      color: #ffffff;
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 0.82rem;
-      font-weight: bold;
-    }
-    .btn-status {
-      padding: 7px 12px;
-      border-radius: 8px;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
+    .sub {
       font-size: 0.85rem;
-    }
-    .info-motorista-topo {
-      margin-top: 12px;
-      padding: 10px 12px;
-      background: rgba(255, 255, 255, 0.08);
-      border-left: 4px solid #ff7a00;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      line-height: 1.45;
-    }
-    .corpo-branco {
-      background: #ffffff;
-      padding: 16px;
-    }
-    .abas {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-    .aba-btn {
-      flex: 1;
-      padding: 11px;
-      border-radius: 8px;
-      border: 2px solid #0b1f3a;
-      background: #ffffff;
-      color: #0b1f3a;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 0.92rem;
-    }
-    .aba-btn.ativa {
-      background: #0b1f3a;
-      color: #ffffff;
-      border-color: #ff7a00;
-    }
-    .secao { display: none; }
-    .secao.ativa { display: block; }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-      font-size: 0.86rem;
-      color: #0b1f3a;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 4px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      font-family: Arial, sans-serif;
-    }
-    input:focus {
-      outline: none;
-      border-color: #ff7a00;
-    }
-    .btn-primario {
-      width: 100%;
-      margin-top: 14px;
-      padding: 13px;
-      background: #0b1f3a;
-      color: #ffffff;
-      border: 2px solid #ff7a00;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .btn-laranja {
-      width: 100%;
-      margin-top: 8px;
-      padding: 11px;
-      background: #ff7a00;
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .btn-gps {
-      width: 100%;
-      margin-top: 8px;
-      padding: 10px;
-      background: #0b1f3a;
-      color: #ffffff;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .card-pedido {
-      border: 2px solid #ff7a00;
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 14px;
-      background: #ffffff;
-    }
-    .badge-status {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.78rem;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-    .st-pendente { background: #fff3cd; color: #856404; }
-    .st-aceito { background: #d4edda; color: #155724; }
-    .st-recusado { background: #f8d7da; color: #721c24; }
-    .linha-dado {
-      font-size: 0.9rem;
-      margin: 4px 0;
-      line-height: 1.4;
-    }
-    .chips-tempo {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
+      color: #cbd5e1;
       margin-top: 6px;
     }
-    .chip-t {
-      padding: 7px 11px;
-      border-radius: 6px;
-      border: 1px solid #0b1f3a;
-      background: #f1f5f9;
-      color: #0b1f3a;
+    .status-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .btn-status {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      font-weight: 900;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    .btn-online {
+      background: #14532d;
+      color: #dcfce7;
+      border-color: #22c55e;
+    }
+    .btn-offline {
+      background: #7f1d1d;
+      color: #fee2e2;
+      border-color: #ef4444;
+    }
+    .aviso-offline {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.18);
+      border: 1px solid #ef4444;
+      color: #fecaca;
+      font-size: 0.85rem;
+      text-align: center;
+      display: none;
+    }
+    .secao-titulo {
+      margin-top: 18px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: #ff9d42;
+      border-bottom: 1px solid rgba(255, 122, 0, 0.25);
+      padding-bottom: 6px;
+    }
+    .pedido-card {
+      margin-top: 12px;
+      background: #081220;
+      border: 1px solid #ff7a00;
+      border-radius: 12px;
+      padding: 12px;
+      line-height: 1.45;
+      font-size: 0.88rem;
+    }
+    .min-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .btn-min {
+      padding: 9px 4px;
+      background: #ff7a00;
+      color: #ffffff;
+      border: none;
+      border-radius: 7px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.84rem;
+    }
+    .btn-recusar {
+      width: 100%;
+      margin-top: 8px;
+      padding: 8px;
+      background: #1e293b;
+      color: #fca5a5;
+      border: 1px solid #ef4444;
+      border-radius: 7px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .util-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .btn-util {
+      flex: 1;
+      padding: 10px;
+      background: #1e293b;
+      color: #ffffff;
+      border: 1px solid #ff7a00;
+      border-radius: 8px;
       font-weight: bold;
       font-size: 0.84rem;
       cursor: pointer;
     }
-    .chip-t.selecionado {
-      background: #ff7a00;
-      border-color: #ff7a00;
-      color: #ffffff;
-    }
-    .botoes-resposta {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .btn-aceitar {
-      flex: 1;
-      padding: 10px;
-      background: #198754;
-      color: #ffffff;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .btn-recusar {
-      flex: 1;
-      padding: 10px;
-      background: #dc3545;
-      color: #ffffff;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .resposta-registrada {
-      margin-top: 10px;
-      padding: 10px;
-      background: #f1f5f9;
-      border-left: 4px solid #0b1f3a;
-      border-radius: 6px;
-      font-size: 0.88rem;
-      line-height: 1.45;
-    }
-    .box-local {
-      margin-top: 12px;
-      padding: 10px;
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 0.86rem;
-    }
-    .pix-box {
-      margin-top: 12px;
-      padding: 10px;
-      background: #fff5ec;
-      border: 1px solid #ffc085;
-      border-radius: 8px;
-    }
-    .aviso {
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 0.88rem;
-      font-weight: bold;
-      margin-bottom: 10px;
-      text-align: center;
-    }
-    .aviso-off { background: #f8d7da; color: #721c24; display: none; }
-    .aviso-ok { background: #d4edda; color: #155724; display: none; margin-top: 10px; }
-    .vazio {
-      text-align: center;
-      color: #52606d;
-      padding: 20px 10px;
-      font-size: 0.92rem;
-    }
   </style>
 </head>
 <body>
-  <div class="retangulo-principal">
-    <div class="cabecalho-marinho">
-      <div class="linha-topo">
-        <div class="titulo-32">
-          <span class="selo-32">32</span>
-          <span>DRIVE</span>
-        </div>
-        <div class="relogio-bsb" id="relogioBrasilia">Brasilia: --:--:--</div>
-        <button id="btnStatus" class="btn-status" type="button" onclick="alternarStatus()">ONLINE</button>
-      </div>
-
-      <div class="info-motorista-topo">
-        <div><strong>Motorista credenciado:</strong> Luiz Carlos Costa Junior</div>
-        <div><strong>Celular do motorista:</strong> 53991357231</div>
-        <div><strong>Veiculo:</strong> Voyage &middot; <strong>Placa:</strong> IQD 8060</div>
-      </div>
+  <div class="card">
+    <div class="topo">
+      <div class="marca"><span class="selo">32</span>DRIVE</div>
+      <div class="sub">Painel do Motorista &middot; Luiz Carlos Costa Junior &middot; Voyage IQD 8060</div>
     </div>
 
-    <div class="corpo-branco">
-      <div id="avisoOffline" class="aviso aviso-off">Voce esta OFFLINE. Fique ONLINE para aceitar pedidos.</div>
+    <div class="status-row">
+      <button type="button" class="btn-status btn-online" onclick="definirStatus('ONLINE')">FICAR ONLINE</button>
+      <button type="button" class="btn-status btn-offline" onclick="definirStatus('OFFLINE')">FICAR OFFLINE</button>
+    </div>
+    <div id="statusAtual" style="text-align:center;margin-top:8px;font-size:0.88rem;color:#cbd5e1;">Status: carregando...</div>
+    <div id="avisoOffline" class="aviso-offline">Voce esta OFFLINE — passageiros veem indisponivel.</div>
 
-      <div class="abas">
-        <button id="abaPainel" class="aba-btn ativa" type="button" onclick="trocarAba('painel')">Painel do Motorista (<span id="contPedidos">0</span>)</button>
-        <button id="abaCliente" class="aba-btn" type="button" onclick="trocarAba('cliente')">Simular Pedido (Cliente)</button>
-      </div>
+    <div class="secao-titulo">Pedidos dos Passageiros (Tempo Real)</div>
+    <div id="listaPedidos">
+      <div style="margin-top:10px;color:#94a3b8;font-size:0.86rem;">Nenhum pedido pendente no momento.</div>
+    </div>
 
-      <!-- ABA 1: PAINEL DO MOTORISTA -->
-      <div id="secPainel" class="secao ativa">
-        <div class="box-local">
-          <div><strong>Sua localizacao atual:</strong> <span id="textoLocalMotorista">Nao capturada ainda</span></div>
-          <button class="btn-gps" type="button" onclick="capturarLocalMotorista()">Usar Minha Localizacao (GPS)</button>
-          <a id="linkMapaMotorista" href="#" target="_blank" rel="noopener" style="display:none;margin-top:8px;font-weight:bold;color:#0b1f3a;">Ver minha posicao no Mapa Gratuito</a>
-        </div>
-
-        <div class="pix-box">
-          <div style="font-size:0.84rem;font-weight:bold;color:#0b1f3a;">Pix Copia e Cola - Banco Inter</div>
-          <input type="text" id="chavePixInter" value="45bd89b5-9dd7-4cda-8715-789257d06596" readonly>
-          <button class="btn-laranja" type="button" onclick="copiarPix()">Copiar Pix Banco Inter</button>
-          <div id="pixMsg" class="aviso aviso-ok">Chave Pix do Banco Inter copiada!</div>
-        </div>
-
-        <div style="margin-top:14px;" id="listaPedidos"></div>
-      </div>
-
-      <!-- ABA 2: SIMULADOR DO LINK DO PASSAGEIRO -->
-      <div id="secCliente" class="secao">
-        <div style="font-size:0.86rem;color:#52606d;margin-bottom:6px;">
-          Teste aqui como o pedido chega direto no seu painel sem passar pelo WhatsApp:
-        </div>
-
-        <label>Quem esta pedindo</label>
-        <input type="text" id="cliSolicitante" value="Mae (pedindo para Jr)">
-
-        <label>Nome do passageiro</label>
-        <input type="text" id="cliPassageiro" value="Luiz Carlos Junior">
-
-        <label>Celular do passageiro</label>
-        <input type="tel" id="cliCelular" value="53991357231">
-
-        <label>Onde pegar o passageiro</label>
-        <input type="text" id="cliOrigem" value="Rua Ijui, 654 - Cassino">
-
-        <label>Para onde levar</label>
-        <input type="text" id="cliDestino" value="FURG Predio 6 - Carreiros">
-
-        <label>Distancia (km)</label>
-        <input type="text" id="cliKm" inputmode="decimal" value="3,5">
-
-        <button class="btn-primario" type="button" onclick="enviarPedidoTeste()">Enviar Pedido para o Painel</button>
-        <div id="msgEnviado" class="aviso aviso-ok">Pedido enviado! Abrindo seu Painel do Motorista...</div>
-      </div>
+    <div class="util-row">
+      <button type="button" class="btn-util" onclick="meuGps()">Meu GPS</button>
+      <button type="button" class="btn-util" onclick="copiarPix()">Copiar Pix Inter</button>
     </div>
   </div>
 
   <script>
-    const KEY_STATUS = 'status_32_drive';
-    const KEY_PEDIDOS = 'pedidos_32_drive_v3';
-    const PIX_INTER = '45bd89b5-9dd7-4cda-8715-789257d06596';
-    const OPCOES_MINUTOS = [2, 3, 4, 5, 6, 8, 10, 15];
+    const DB_URL = 'https://drive-4745f-default-rtdb.firebaseio.com'.replace(/\/+$/, '');
+    const PIX = '45bd89b5-9dd7-4cda-8715-789257d06596';
+    const MINUTOS_OPCOES = [2, 3, 4, 5, 6, 8, 10, 15];
 
-    let localMotorista = null;
-    const tempoSelecionadoPorPedido = {};
-
-    function horaBrasilia() {
-      const agora = new Date();
-      const h = agora.toLocaleTimeString('pt-BR', {
-        timeZone: 'America/Sao_Paulo',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
+    async function definirStatus(novoStatus) {
+      await fetch(DB_URL + '/status.json', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: novoStatus })
       });
-      document.getElementById('relogioBrasilia').textContent = 'Brasilia: ' + h;
-      return h;
-    }
-    horaBrasilia();
-    setInterval(horaBrasilia, 1000);
-
-    function aplicarStatus(st) {
-      const online = st !== 'OFFLINE';
-      const btn = document.getElementById('btnStatus');
-      btn.textContent = online ? 'ONLINE' : 'OFFLINE';
-      btn.style.background = online ? '#d4edda' : '#f8d7da';
-      btn.style.color = online ? '#155724' : '#721c24';
-      document.getElementById('avisoOffline').style.display = online ? 'none' : 'block';
+      atualizarTelaStatus(novoStatus);
     }
 
-    function alternarStatus() {
-      const atual = localStorage.getItem(KEY_STATUS) || 'ONLINE';
-      const novo = atual === 'ONLINE' ? 'OFFLINE' : 'ONLINE';
-      localStorage.setItem(KEY_STATUS, novo);
-      aplicarStatus(novo);
+    function atualizarTelaStatus(st) {
+      document.getElementById('statusAtual').textContent = 'Status atual: ' + st;
+      document.getElementById('avisoOffline').style.display = st === 'OFFLINE' ? 'block' : 'none';
     }
 
-    function trocarAba(qual) {
-      document.getElementById('abaPainel').classList.toggle('ativa', qual === 'painel');
-      document.getElementById('abaCliente').classList.toggle('ativa', qual === 'cliente');
-      document.getElementById('secPainel').classList.toggle('ativa', qual === 'painel');
-      document.getElementById('secCliente').classList.toggle('ativa', qual === 'cliente');
-      if (qual === 'painel') renderizarPedidos();
+    async function responderPedido(id, statusResp, min) {
+      await fetch(DB_URL + '/corridas/' + encodeURIComponent(id) + '.json', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: statusResp,
+          minutos: min ? String(min) : ''
+        })
+      });
+      carregarPedidos();
     }
 
-    function capturarLocalMotorista() {
-      const elTexto = document.getElementById('textoLocalMotorista');
-      const elLink = document.getElementById('linkMapaMotorista');
+    async function carregarPedidos() {
+      try {
+        const resSt = await fetch(DB_URL + '/status.json');
+        if (resSt.ok) {
+          const stObj = await resSt.json();
+          if (stObj && stObj.status) {
+            atualizarTelaStatus(stObj.status);
+          }
+        }
 
+        const res = await fetch(DB_URL + '/corridas.json');
+        if (!res.ok) return;
+        const dados = await res.json();
+        const container = document.getElementById('listaPedidos');
+
+        if (!dados) {
+          container.innerHTML = '<div style="margin-top:10px;color:#94a3b8;font-size:0.86rem;">Nenhum pedido pendente no momento.</div>';
+          return;
+        }
+
+        const pendentes = Object.values(dados).filter(function (p) {
+          return p && p.status === 'pendente';
+        });
+
+        if (pendentes.length === 0) {
+          container.innerHTML = '<div style="margin-top:10px;color:#94a3b8;font-size:0.86rem;">Nenhum pedido pendente no momento.</div>';
+          return;
+        }
+
+        container.innerHTML = pendentes.map(function (p) {
+          const botoesMin = MINUTOS_OPCOES.map(function (m) {
+            return '<button type="button" class="btn-min" onclick="responderPedido(\'' + p.id + '\', \'aceito\', ' + m + ')">' + m + ' min</button>';
+          }).join('');
+
+          const linkMapa = p.gps
+            ? '<br><a href="' + p.gps + '" target="_blank" style="color:#ff9d42;">Abrir GPS do passageiro</a>'
+            : '';
+
+          return (
+            '<div class="pedido-card">' +
+              '<strong>Passageiro:</strong> ' + p.passageiro + ' (' + p.criadoEm + ')<br>' +
+              '<strong>Origem:</strong> ' + p.origem + linkMapa + '<br>' +
+              '<strong>Destino:</strong> ' + p.destino + '<br>' +
+              '<strong>Distancia / Valor:</strong> ' + p.km + ' km &middot; <span style="color:#ff9d42;font-weight:bold;">' + p.valor + '</span>' +
+              '<div class="min-grid">' + botoesMin + '</div>' +
+              '<button type="button" class="btn-recusar" onclick="responderPedido(\'' + p.id + '\', \'recusado\', \'\')">Recusar / Indisponivel</button>' +
+            '</div>'
+          );
+        }).join('');
+      } catch (e) {
+        console.log('Erro ao carregar pedidos:', e);
+      }
+    }
+
+    function meuGps() {
       if (!navigator.geolocation) {
-        elTexto.textContent = 'GPS nao suportado neste navegador.';
+        alert('GPS nao disponivel.');
         return;
       }
-
-      elTexto.textContent = 'Buscando sua localizacao...';
-      navigator.geolocation.getCurrentPosition(
-        function (pos) {
-          const lat = pos.coords.latitude.toFixed(6);
-          const lon = pos.coords.longitude.toFixed(6);
-          localMotorista = {
-            lat: lat,
-            lon: lon,
-            url: 'https://www.openstreetmap.org/?mlat=' + lat + '&mlon=' + lon + '#map=16/' + lat + '/' + lon
-          };
-          elTexto.textContent = 'Lat ' + lat + ', Lon ' + lon;
-          elLink.href = localMotorista.url;
-          elLink.style.display = 'inline-block';
-        },
-        function () {
-          elTexto.textContent = 'Permissao de GPS negada ou indisponivel.';
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    }
-
-    function selecionarMinutos(id, min) {
-      tempoSelecionadoPorPedido[id] = min;
-      const campo = document.getElementById('tempo_' + id);
-      if (campo) campo.value = min;
-
-      for (let i = 0; i < OPCOES_MINUTOS.length; i++) {
-        const m = OPCOES_MINUTOS[i];
-        const btn = document.getElementById('btn_t_' + id + '_' + m);
-        if (btn) {
-          btn.classList.toggle('selecionado', m === min);
-        }
-      }
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lon = pos.coords.longitude.toFixed(6);
+        window.open('https://www.openstreetmap.org/?mlat=' + lat + '&mlon=' + lon + '#map=16/' + lat + '/' + lon, '_blank');
+      });
     }
 
     function copiarPix() {
-      const el = document.getElementById('chavePixInter');
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(PIX_INTER).catch(function () {});
-      } else {
-        el.select();
-        document.execCommand('copy');
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(PIX).catch(function () {});
       }
-      const msg = document.getElementById('pixMsg');
-      msg.style.display = 'block';
-      setTimeout(function () { msg.style.display = 'none'; }, 3000);
+      alert('Chave Pix do Banco Inter copiada!');
     }
 
-    function lerPedidos() {
-      try {
-        return JSON.parse(localStorage.getItem(KEY_PEDIDOS)) || [];
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function salvarPedidos(lista) {
-      localStorage.setItem(KEY_PEDIDOS, JSON.stringify(lista));
-    }
-
-    function enviarPedidoTeste() {
-      const solicitante = document.getElementById('cliSolicitante').value.trim() || 'Cliente';
-      const passageiro = document.getElementById('cliPassageiro').value.trim() || 'Nao informado';
-      const celular = document.getElementById('cliCelular').value.trim() || 'Nao informado';
-      const origem = document.getElementById('cliOrigem').value.trim();
-      const destino = document.getElementById('cliDestino').value.trim();
-      const kmStr = document.getElementById('cliKm').value.replace(',', '.').trim();
-
-      if (!origem || !destino) {
-        alert('Preencha origem e destino para testar.');
-        return;
-      }
-
-      const km = parseFloat(kmStr) || 3.5;
-      // Regra: ate 3,5 km = R$ 7,90; acima disso R$ 2,00/km
-      const valor = km <= 3.5 ? 7.90 : km * 2.0;
-
-      const pedido = {
-        id: Date.now(),
-        hora: horaBrasilia(),
-        solicitante: solicitante,
-        passageiro: passageiro,
-        celular: celular,
-        origem: origem,
-        destino: destino,
-        km: km.toFixed(1).replace('.', ','),
-        valor: valor.toFixed(2).replace('.', ','),
-        status: 'PENDENTE',
-        resposta: '',
-        localUrl: ''
-      };
-
-      const lista = lerPedidos();
-      lista.unshift(pedido);
-      salvarPedidos(lista);
-
-      const ok = document.getElementById('msgEnviado');
-      ok.style.display = 'block';
-      setTimeout(function () {
-        ok.style.display = 'none';
-        trocarAba('painel');
-      }, 600);
-    }
-
-    function responderPedido(id, acao) {
-      const statusMotorista = localStorage.getItem(KEY_STATUS) || 'ONLINE';
-      if (acao === 'ACEITO' && statusMotorista === 'OFFLINE') {
-        alert('Mude seu status para ONLINE no topo antes de aceitar a corrida.');
-        return;
-      }
-
-      const campoTempo = document.getElementById('tempo_' + id);
-      const campoMsg = document.getElementById('resp_' + id);
-      const minutos = campoTempo ? campoTempo.value.trim() : (tempoSelecionadoPorPedido[id] || '');
-      const textoLivre = campoMsg ? campoMsg.value.trim() : '';
-
-      const lista = lerPedidos();
-      for (let i = 0; i < lista.length; i++) {
-        if (lista[i].id === id) {
-          lista[i].status = acao;
-          lista[i].localUrl = localMotorista ? localMotorista.url : '';
-          if (acao === 'ACEITO') {
-            const tempoTexto = minutos ? 'Chego em ' + minutos + ' min. ' : '';
-            const extra = textoLivre ? textoLivre + ' ' : '';
-            lista[i].resposta =
-              'Corrida aceita! Motorista Luiz Carlos Costa Junior (Voyage IQD 8060). ' +
-              tempoTexto + extra + 'Pix Banco Inter: ' + PIX_INTER;
-          } else {
-            lista[i].resposta = textoLivre || 'Motorista indisponivel no momento.';
-          }
-          break;
-        }
-      }
-      salvarPedidos(lista);
-      renderizarPedidos();
-    }
-
-    function limparHistorico() {
-      salvarPedidos([]);
-      renderizarPedidos();
-    }
-
-    function renderizarPedidos() {
-      const lista = lerPedidos();
-      document.getElementById('contPedidos').textContent = lista.length;
-      const box = document.getElementById('listaPedidos');
-
-      if (lista.length === 0) {
-        box.innerHTML =
-          '<div class="vazio">' +
-          'Nenhum pedido no painel ainda.<br>' +
-          'Toque em <strong>Simular Pedido (Cliente)</strong> acima para fazer um teste agora.' +
-          '</div>';
-        return;
-      }
-
-      let html = '';
-      for (let i = 0; i < lista.length; i++) {
-        const p = lista[i];
-        const classeBadge = p.status === 'ACEITO' ? 'st-aceito' : (p.status === 'RECUSADO' ? 'st-recusado' : 'st-pendente');
-        const minAtual = tempoSelecionadoPorPedido[p.id] || '';
-
-        html += '<div class="card-pedido">';
-        html += '<span class="badge-status ' + classeBadge + '">' + p.status + ' &middot; ' + p.hora + '</span>';
-        html += '<div class="linha-dado"><strong>Solicitado por:</strong> ' + p.solicitante + '</div>';
-        html += '<div class="linha-dado"><strong>Passageiro:</strong> ' + p.passageiro + ' (' + p.celular + ')</div>';
-        html += '<div class="linha-dado"><strong>Pegar em:</strong> ' + p.origem + '</div>';
-        html += '<div class="linha-dado"><strong>Levar para:</strong> ' + p.destino + '</div>';
-        html += '<div class="linha-dado"><strong>Distancia:</strong> ' + p.km + ' km | <strong>Valor:</strong> R$ ' + p.valor + ' (ate 3,5 km = R$ 7,90)</div>';
-
-        if (p.status === 'PENDENTE') {
-          html += '<label>Tempo para chegar ao local (min):</label>';
-          html += '<input type="number" id="tempo_' + p.id + '" value="' + minAtual + '" placeholder="Ex: 5">';
-
-          html += '<div class="chips-tempo">';
-          for (let j = 0; j < OPCOES_MINUTOS.length; j++) {
-            const m = OPCOES_MINUTOS[j];
-            const sel = (minAtual === m) ? ' selecionado' : '';
-            html += '<button type="button" id="btn_t_' + p.id + '_' + m + '" class="chip-t' + sel + '" onclick="selecionarMinutos(' + p.id + ', ' + m + ')">' + m + ' min</button>';
-          }
-          html += '</div>';
-
-          html += '<label>Observacao adicional (opcional):</label>';
-          html += '<input type="text" id="resp_' + p.id + '" placeholder="Ex: Estou na esquina da padaria">';
-
-          html += '<div class="botoes-resposta">';
-          html += '<button class="btn-aceitar" type="button" onclick="responderPedido(' + p.id + ', \'ACEITO\')">Aceitar e Responder</button>';
-          html += '<button class="btn-recusar" type="button" onclick="responderPedido(' + p.id + ', \'RECUSADO\')">Recusar</button>';
-          html += '</div>';
-        } else {
-          html += '<div class="resposta-registrada"><strong>Resposta enviada no painel:</strong><br>' + p.resposta;
-          if (p.localUrl) {
-            html += '<br><a href="' + p.localUrl + '" target="_blank" rel="noopener" style="color:#0b1f3a;font-weight:bold;">Localizacao do motorista no Mapa Gratuito</a>';
-          }
-          html += '</div>';
-        }
-
-        html += '</div>';
-      }
-
-      html += '<button type="button" onclick="limparHistorico()" style="width:100%;padding:9px;border:1px solid #cbd5e1;background:#f8fafc;border-radius:6px;cursor:pointer;font-size:0.85rem;">Limpar testes do painel</button>';
-      box.innerHTML = html;
-    }
-
-    aplicarStatus(localStorage.getItem(KEY_STATUS) || 'ONLINE');
-    renderizarPedidos();
+    carregarPedidos();
+    setInterval(carregarPedidos, 2500);
   </script>
 </body>
 </html>
