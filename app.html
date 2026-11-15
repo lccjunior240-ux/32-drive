@@ -22,6 +22,7 @@
       --muted: #a1a1aa;
       --accent: #f59e0b;
       --green: #10b981;
+      --red: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -115,11 +116,19 @@
       font-weight: 700;
       white-space: nowrap;
     }
+    .online-pill.offline {
+      background: rgba(239, 68, 68, 0.16);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
     .dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
       background: var(--green);
+    }
+    .online-pill.offline .dot {
+      background: var(--red);
     }
     .driver-box {
       background: var(--card-elevated);
@@ -230,6 +239,10 @@
       background: rgba(16, 185, 129, 0.14);
       color: var(--green);
     }
+    .status-tag.recusada {
+      background: rgba(239, 68, 68, 0.14);
+      color: #fca5a5;
+    }
     .eta-box {
       display: flex;
       flex-wrap: wrap;
@@ -262,21 +275,31 @@
     }
     .actions {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
       margin-top: 4px;
     }
     .btn {
-      padding: 11px 12px;
+      padding: 11px 10px;
       border: none;
       border-radius: 10px;
       font-size: 13px;
       font-weight: 800;
       cursor: pointer;
     }
+    .btn-status-toggle {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
     .btn-aceitar {
       background: var(--green);
       color: #062117;
+    }
+    .btn-recusar {
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
     }
     .btn-finalizar {
       background: var(--accent);
@@ -291,6 +314,19 @@
       background: rgba(239, 68, 68, 0.14);
       color: #fca5a5;
       border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .offline-notice {
+      display: none;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #fecaca;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .offline-notice.visivel {
+      display: block;
     }
   </style>
 </head>
@@ -313,7 +349,7 @@
           <div class="hero-title">32 DRIVE</div>
           <div class="hero-sub">Mobilidade Urbana Local • Cassino &amp; Rio Grande</div>
         </div>
-        <span class="online-pill"><span class="dot"></span>Em Operação</span>
+        <span class="online-pill" id="status-pill"><span class="dot"></span><span id="status-pill-text">Em Operação</span></span>
       </div>
 
       <div class="driver-box">
@@ -325,6 +361,11 @@
           <span class="plate-label">BRASIL</span>
           IQD8060
         </div>
+      </div>
+
+      <button class="btn btn-status-toggle" type="button" id="btn-alternar-online">Ficar Offline</button>
+      <div class="offline-notice" id="offline-notice">
+        Você está Offline. Novos pedidos da nuvem estão pausados até você voltar para Online.
       </div>
     </section>
 
@@ -342,9 +383,38 @@
     (function () {
       const CHAVE_CORRIDAS = "32drive_corridas";
       const CHAVE_VISTOS = "32drive_vistos_nuvem";
+      const CHAVE_ONLINE = "32drive_motorista_online";
       const TOPICO_PEDIDOS = "32drive_cassino_jr_pedidos_v2";
       const TOPICO_RESPOSTAS = "32drive_cassino_jr_respostas_v2";
       const temposSelecionados = {};
+
+      let estaOnline = localStorage.getItem(CHAVE_ONLINE) !== "false";
+
+      function atualizarEstadoOnlineUI() {
+        const pill = document.getElementById("status-pill");
+        const pillText = document.getElementById("status-pill-text");
+        const btnToggle = document.getElementById("btn-alternar-online");
+        const notice = document.getElementById("offline-notice");
+
+        if (pill) {
+          pill.classList.toggle("offline", !estaOnline);
+        }
+        if (pillText) {
+          pillText.textContent = estaOnline ? "Em Operação" : "Offline";
+        }
+        if (btnToggle) {
+          btnToggle.textContent = estaOnline ? "Ficar Offline" : "Ficar Online";
+        }
+        if (notice) {
+          notice.classList.toggle("visivel", !estaOnline);
+        }
+      }
+
+      function alternarOnline() {
+        estaOnline = !estaOnline;
+        localStorage.setItem(CHAVE_ONLINE, String(estaOnline));
+        atualizarEstadoOnlineUI();
+      }
 
       function lerCorridas() {
         try {
@@ -382,6 +452,7 @@
       }
 
       function adicionarPedidoSeNovo(pedido) {
+        if (!estaOnline) return;
         if (!pedido || !pedido.id) return;
         const vistos = lerVistos();
         if (vistos.includes(pedido.id)) return;
@@ -417,6 +488,26 @@
           id: id,
           status: "Corrida aceita",
           tempoChegada: tempoChegada
+        });
+      }
+
+      function recusarCorrida(id) {
+        const lista = lerCorridas().map(function (p) {
+          if (p.id === id) {
+            return Object.assign({}, p, {
+              status: "Corrida recusada",
+              tempoChegada: null
+            });
+          }
+          return p;
+        });
+        salvarCorridas(lista);
+        renderizar();
+
+        publicarRespostaNaNuvem({
+          id: id,
+          status: "Corrida recusada",
+          tempoChegada: null
         });
       }
 
@@ -461,8 +552,10 @@
 
         container.innerHTML = lista
           .map(function (p) {
-            const isAceita = p.status && p.status !== "Aguardando motorista";
-            const badgeClass = isAceita ? "status-tag aceita" : "status-tag";
+            const statusAtual = p.status || "Aguardando motorista";
+            const isAceita = statusAtual === "Corrida aceita" || statusAtual === "Corrida finalizada";
+            const isRecusada = statusAtual === "Corrida recusada";
+            const badgeClass = isAceita ? "status-tag aceita" : (isRecusada ? "status-tag recusada" : "status-tag");
             const etaAtual = temposSelecionados[p.id] || p.tempoChegada || "5";
             const etaInfo = p.tempoChegada
               ? '<br/><strong style="color:var(--green);">Chegada informada: ' + p.tempoChegada + " min</strong>"
@@ -474,7 +567,7 @@
               '<span class="pedido-id">' + p.id + " • " + (p.passageiro || "Passageiro") + "</span>" +
               '<span class="pedido-valor">' + p.valor + "</span>" +
               "</div>" +
-              '<span class="' + badgeClass + '">' + (p.status || "Aguardando motorista") + "</span>" +
+              '<span class="' + badgeClass + '">' + statusAtual + "</span>" +
               '<div class="pedido-info">' +
               '<span class="muted">Embarque:</span> ' + p.origem + "<br/>" +
               '<span class="muted">Destino:</span> ' + p.destino + "<br/>" +
@@ -491,7 +584,8 @@
               '<input class="eta-input" id="eta-input-' + p.id + '" type="number" min="1" max="60" value="' + etaAtual + '" aria-label="Minutos" />' +
               "</div>" +
               '<div class="actions">' +
-              '<button class="btn btn-aceitar" type="button" data-acao="aceitar" data-id="' + p.id + '">Aceitar corrida</button>' +
+              '<button class="btn btn-aceitar" type="button" data-acao="aceitar" data-id="' + p.id + '">Aceitar</button>' +
+              '<button class="btn btn-recusar" type="button" data-acao="recusar" data-id="' + p.id + '">Recusar</button>' +
               '<button class="btn btn-finalizar" type="button" data-acao="finalizar" data-id="' + p.id + '">Finalizar</button>' +
               "</div>" +
               '<button class="btn btn-remover" type="button" data-acao="remover" data-id="' + p.id + '">Remover pedido</button>' +
@@ -502,6 +596,7 @@
       }
 
       function buscarDaNuvem() {
+        if (!estaOnline) return;
         fetch("https://ntfy.sh/" + TOPICO_PEDIDOS + "/json?poll=1&since=10m")
           .then(function (r) { return r.text(); })
           .then(function (texto) {
@@ -535,9 +630,15 @@
           renderizar();
         }
         if (acao === "aceitar") aceitarCorrida(id);
+        if (acao === "recusar") recusarCorrida(id);
         if (acao === "finalizar") atualizarStatus(id, "Corrida finalizada");
         if (acao === "remover") removerPedido(id);
       });
+
+      const btnOnline = document.getElementById("btn-alternar-online");
+      if (btnOnline) {
+        btnOnline.addEventListener("click", alternarOnline);
+      }
 
       const btnLimpar = document.getElementById("btn-limpar-historico");
       if (btnLimpar) {
@@ -551,8 +652,13 @@
 
       window.addEventListener("storage", function (ev) {
         if (ev.key === CHAVE_CORRIDAS) renderizar();
+        if (ev.key === CHAVE_ONLINE) {
+          estaOnline = localStorage.getItem(CHAVE_ONLINE) !== "false";
+          atualizarEstadoOnlineUI();
+        }
       });
 
+      atualizarEstadoOnlineUI();
       buscarDaNuvem();
       setInterval(buscarDaNuvem, 2500);
       setInterval(renderizar, 1500);
