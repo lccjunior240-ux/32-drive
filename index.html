@@ -153,10 +153,14 @@
     }
     #map {
       width: 100%;
-      height: 200px;
+      height: 230px;
       border-radius: 12px;
       border: 1px solid var(--border);
       overflow: hidden;
+    }
+    .map-hint {
+      font-size: 12px;
+      color: var(--muted);
     }
     .card {
       background: var(--card);
@@ -282,6 +286,7 @@
       </div>
 
       <div id="map"></div>
+      <div class="map-hint" id="map-hint">Toque no mapa: 1º toque marca Embarque, 2º toque marca Destino e já calcula.</div>
     </section>
 
     <div class="card">
@@ -291,20 +296,20 @@
       </div>
       <div>
         <label for="origem">Ponto de embarque</label>
-        <input id="origem" type="text" placeholder="Ex: Av. Rio Grande, Cassino, Rio Grande" />
+        <input id="origem" type="text" placeholder="Ex: Av. Rio Grande, Cassino" />
       </div>
       <div>
         <label for="destino">Destino</label>
         <input id="destino" type="text" placeholder="Ex: Centro, Rio Grande" />
       </div>
 
-      <button class="btn btn-secondary" type="button" id="btn-gps">Usar minha localização no embarque</button>
+      <button class="btn btn-secondary" type="button" id="btn-gps">Usar meu GPS no embarque</button>
       <button class="btn btn-calc" type="button" id="btn-calcular">Calcular rota e valor</button>
 
       <div class="row">
         <div>
-          <label for="km">Distância calculada (km)</label>
-          <input id="km" type="text" inputmode="decimal" placeholder="Calculado no mapa" />
+          <label for="km">Distância (km)</label>
+          <input id="km" type="text" inputmode="decimal" placeholder="Ex: 4,2" />
         </div>
         <div>
           <label for="pagamento">Pagamento</label>
@@ -348,13 +353,18 @@
       let coordsOrigem = null;
       let coordsDestino = null;
 
-      if (window.L) {
-        try {
-          map = L.map("map").setView(centroCassino, 13);
-          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: "&copy; OpenStreetMap"
-          }).addTo(map);
-        } catch (e) {}
+      function haversineKm(a, b) {
+        const R = 6371;
+        const toRad = function (deg) { return (deg * Math.PI) / 180; };
+        const dLat = toRad(b[0] - a[0]);
+        const dLng = toRad(b[1] - a[1]);
+        const lat1 = toRad(a[0]);
+        const lat2 = toRad(b[0]);
+        const x =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+        return R * c * 1.25;
       }
 
       function parseKm(raw) {
@@ -405,123 +415,81 @@
         return calc;
       }
 
-      function atualizarMapa(origemCoords, destinoCoords, rotaCoords) {
+      function desenharPontos() {
         if (!map || !window.L) return;
-        if (origemCoords) {
+        if (coordsOrigem) {
           if (!marcadorOrigem) {
-            marcadorOrigem = L.marker(origemCoords).addTo(map).bindPopup("Embarque");
+            marcadorOrigem = L.marker(coordsOrigem).addTo(map).bindPopup("Embarque");
           } else {
-            marcadorOrigem.setLatLng(origemCoords);
+            marcadorOrigem.setLatLng(coordsOrigem);
           }
         }
-        if (destinoCoords) {
+        if (coordsDestino) {
           if (!marcadorDestino) {
-            marcadorDestino = L.marker(destinoCoords).addTo(map).bindPopup("Destino");
+            marcadorDestino = L.marker(coordsDestino).addTo(map).bindPopup("Destino");
           } else {
-            marcadorDestino.setLatLng(destinoCoords);
+            marcadorDestino.setLatLng(coordsDestino);
           }
         }
         if (linhaRota) {
           map.removeLayer(linhaRota);
           linhaRota = null;
         }
-        if (rotaCoords && rotaCoords.length) {
-          linhaRota = L.polyline(rotaCoords, { color: "#f59e0b", weight: 4 }).addTo(map);
+        if (coordsOrigem && coordsDestino) {
+          linhaRota = L.polyline([coordsOrigem, coordsDestino], { color: "#f59e0b", weight: 4 }).addTo(map);
           map.fitBounds(linhaRota.getBounds(), { padding: [24, 24] });
-        } else if (origemCoords && destinoCoords) {
-          map.fitBounds([origemCoords, destinoCoords], { padding: [24, 24] });
-        } else if (origemCoords) {
-          map.setView(origemCoords, 15);
+          const kmCalc = Number(haversineKm(coordsOrigem, coordsDestino).toFixed(1));
+          const inputKm = document.getElementById("km");
+          if (inputKm) inputKm.value = String(kmCalc).replace(".", ",");
+          atualizarValor();
+        } else if (coordsOrigem) {
+          map.setView(coordsOrigem, 14);
         }
       }
 
-      function buscarCoordenadas(endereco) {
-        const termo = endereco.toLowerCase().includes("rio grande")
-          ? endereco
-          : endereco + ", Rio Grande, RS, Brasil";
-        const url =
-          "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" +
-          encodeURIComponent(termo);
-        return fetch(url, {
-          headers: { "Accept": "application/json" }
-        })
-          .then(function (r) { return r.json(); })
-          .then(function (dados) {
-            if (!Array.isArray(dados) || !dados.length) {
-              throw new Error("Endereço não encontrado");
+      if (window.L) {
+        try {
+          map = L.map("map").setView(centroCassino, 13);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "&copy; OpenStreetMap"
+          }).addTo(map);
+
+          map.on("click", function (ev) {
+            const latlng = [ev.latlng.lat, ev.latlng.lng];
+            const hint = document.getElementById("map-hint");
+            if (!coordsOrigem || (coordsOrigem && coordsDestino)) {
+              coordsOrigem = latlng;
+              coordsDestino = null;
+              if (marcadorDestino) {
+                map.removeLayer(marcadorDestino);
+                marcadorDestino = null;
+              }
+              if (linhaRota) {
+                map.removeLayer(linhaRota);
+                linhaRota = null;
+              }
+              const origem = document.getElementById("origem");
+              if (origem && !origem.value.trim()) {
+                origem.value = "Ponto no mapa (" + latlng[0].toFixed(4) + ", " + latlng[1].toFixed(4) + ")";
+              }
+              if (hint) hint.textContent = "Embarque marcado! Agora toque no mapa para marcar o Destino.";
+            } else {
+              coordsDestino = latlng;
+              const destino = document.getElementById("destino");
+              if (destino && !destino.value.trim()) {
+                destino.value = "Destino no mapa (" + latlng[0].toFixed(4) + ", " + latlng[1].toFixed(4) + ")";
+              }
+              if (hint) hint.textContent = "Rota e valor calculados! Toque no mapa novamente para refazer.";
             }
-            return [parseFloat(dados[0].lat), parseFloat(dados[0].lon)];
+            desenharPontos();
           });
-      }
-
-      function buscarRotaOSRM(p1, p2) {
-        const url =
-          "https://router.project-osrm.org/route/v1/driving/" +
-          p1[1] + "," + p1[0] + ";" + p2[1] + "," + p2[0] +
-          "?overview=full&geometries=geojson";
-        return fetch(url)
-          .then(function (r) { return r.json(); })
-          .then(function (data) {
-            if (!data.routes || !data.routes.length) {
-              throw new Error("Rota indisponível");
-            }
-            const rota = data.routes[0];
-            const km = rota.distance / 1000;
-            const coords = rota.geometry.coordinates.map(function (c) {
-              return [c[1], c[0]];
-            });
-            return { km: Number(km.toFixed(1)), coords: coords };
-          });
-      }
-
-      function calcularRotaAutomatica() {
-        const origemTxt = (document.getElementById("origem").value || "").trim();
-        const destinoTxt = (document.getElementById("destino").value || "").trim();
-        const status = document.getElementById("status");
-
-        if (!origemTxt || !destinoTxt) {
-          if (status) status.textContent = "Preencha embarque e destino para calcular a rota.";
-          return;
-        }
-
-        if (status) status.textContent = "Calculando rota no mapa...";
-
-        const promessaOrigem = coordsOrigem
-          ? Promise.resolve(coordsOrigem)
-          : buscarCoordenadas(origemTxt);
-
-        const promessaDestino = coordsDestino
-          ? Promise.resolve(coordsDestino)
-          : buscarCoordenadas(destinoTxt);
-
-        Promise.all([promessaOrigem, promessaDestino])
-          .then(function (pontos) {
-            coordsOrigem = pontos[0];
-            coordsDestino = pontos[1];
-            return buscarRotaOSRM(coordsOrigem, coordsDestino);
-          })
-          .then(function (resultado) {
-            atualizarMapa(coordsOrigem, coordsDestino, resultado.coords);
-            const inputKm = document.getElementById("km");
-            if (inputKm) inputKm.value = String(resultado.km).replace(".", ",");
-            atualizarValor();
-            if (status) {
-              status.textContent =
-                "Rota calculada: " + String(resultado.km).replace(".", ",") + " km.";
-            }
-          })
-          .catch(function () {
-            if (status) {
-              status.textContent =
-                "Não foi possível traçar a rota automática. Você pode digitar os km no campo ao lado.";
-            }
-          });
+        } catch (e) {}
       }
 
       function usarLocalizacao() {
         const status = document.getElementById("status");
         if (!navigator.geolocation) {
-          if (status) status.textContent = "Geolocalização não disponível neste aparelho.";
+          if (status) status.textContent = "GPS indisponível. Toque no mapa para marcar o embarque.";
           return;
         }
         if (status) status.textContent = "Buscando localização...";
@@ -530,15 +498,15 @@
             coordsOrigem = [pos.coords.latitude, pos.coords.longitude];
             const origem = document.getElementById("origem");
             if (origem) {
-              origem.value =
-                "Lat " + coordsOrigem[0].toFixed(5) + ", Lng " + coordsOrigem[1].toFixed(5);
+              origem.value = "GPS (" + coordsOrigem[0].toFixed(5) + ", " + coordsOrigem[1].toFixed(5) + ")";
             }
-            atualizarMapa(coordsOrigem, coordsDestino, null);
-            if (status) status.textContent = "Localização definida no embarque!";
+            desenharPontos();
+            if (status) status.textContent = "Embarque marcado via GPS! Toque no mapa no destino.";
           },
           function () {
-            if (status) status.textContent = "Não foi possível obter o GPS. Digite o endereço.";
-          }
+            if (status) status.textContent = "Sem sinal de GPS. Toque no mapa para marcar embarque e destino.";
+          },
+          { enableHighAccuracy: true, timeout: 8000 }
         );
       }
 
@@ -578,69 +546,15 @@
 
       function enviarPedido() {
         const nome = (document.getElementById("nome").value || "").trim() || "Passageiro";
-        const origem = (document.getElementById("origem").value || "").trim();
-        const destino = (document.getElementById("destino").value || "").trim();
+        const origem = (document.getElementById("origem").value || "").trim() || "Embarque no mapa";
+        const destino = (document.getElementById("destino").value || "").trim() || "Destino no mapa";
         const pagamento = (document.getElementById("pagamento").value || "").trim() || "Pix / Dinheiro";
         const status = document.getElementById("status");
 
-        if (!origem || !destino) {
-          if (status) status.textContent = "Preencha embarque e destino.";
-          return;
-        }
-
         const calc = atualizarValor();
         if (!calc) {
-          if (status) status.textContent = "Toque em Calcular rota e valor antes de enviar.";
+          if (status) status.textContent = "Marque embarque e destino no mapa ou informe os km.";
           return;
         }
 
         const novoPedido = {
-          id: "32D-" + Date.now().toString().slice(-5),
-          passageiro: nome,
-          origem: origem,
-          destino: destino,
-          km: calc.kmUsado,
-          valor: formatarMoeda(calc.total),
-          pagamento: pagamento,
-          motorista: MOTORISTA_PADRAO,
-          status: "Aguardando motorista",
-          criadoEm: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
-        };
-
-        const lista = lerCorridas();
-        lista.unshift(novoPedido);
-        salvarCorridas(lista);
-
-        if (status) status.textContent = "Pedido " + novoPedido.id + " enviado ao painel do motorista!";
-        renderizarPedidos();
-      }
-
-      const inputOrigem = document.getElementById("origem");
-      if (inputOrigem) {
-        inputOrigem.addEventListener("input", function () { coordsOrigem = null; });
-      }
-
-      const inputDestino = document.getElementById("destino");
-      if (inputDestino) {
-        inputDestino.addEventListener("input", function () { coordsDestino = null; });
-      }
-
-      const inputKm = document.getElementById("km");
-      if (inputKm) {
-        inputKm.addEventListener("input", atualizarValor);
-      }
-
-      const btnGps = document.getElementById("btn-gps");
-      if (btnGps) btnGps.addEventListener("click", usarLocalizacao);
-
-      const btnCalc = document.getElementById("btn-calcular");
-      if (btnCalc) btnCalc.addEventListener("click", calcularRotaAutomatica);
-
-      const btnEnviar = document.getElementById("btn-enviar");
-      if (btnEnviar) btnEnviar.addEventListener("click", enviarPedido);
-
-      renderizarPedidos();
-    })();
-  </script>
-</body>
-</html>
