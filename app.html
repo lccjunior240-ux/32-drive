@@ -308,47 +308,19 @@
 
   <script>
     (function () {
-      const CHAVE_CORRIDAS = "32drive_corridas_v6";
-      const CHAVE_MSG_VISTAS = "32drive_motorista_msg_vistas_v6";
-      const CHAVE_ONLINE = "32drive_motorista_online_v6";
-      const TOPICO_PEDIDOS = "32drive_cassino_jr_pedidos_v6";
-      const TOPICO_RESPOSTAS = "32drive_cassino_jr_respostas_v6";
-      const TOPICO_STATUS = "32drive_cassino_jr_status_v6";
+      const CHAVE_CORRIDAS = "32drive_corridas";
+      const CHAVE_ONLINE = "32drive_motorista_online";
+      const TOPICO_PEDIDOS = "32drive_cassino_jr_pedidos_v3";
+      const TOPICO_RESPOSTAS = "32drive_cassino_jr_respostas_v3";
+      const TOPICO_STATUS = "32drive_cassino_jr_status_v3";
       const temposSelecionados = {};
 
       let estaOnline = localStorage.getItem(CHAVE_ONLINE) !== "false";
 
-      function lerVistas() {
-        try {
-          return JSON.parse(localStorage.getItem(CHAVE_MSG_VISTAS) || "[]");
-        } catch (e) {
-          return [];
-        }
-      }
-
-      function jaViuMsg(msgId) {
-        if (!msgId) return false;
-        return lerVistas().indexOf(msgId) !== -1;
-      }
-
-      function marcarMsgVista(msgId) {
-        if (!msgId) return;
-        const vistas = lerVistas();
-        if (vistas.indexOf(msgId) === -1) {
-          vistas.push(msgId);
-          localStorage.setItem(CHAVE_MSG_VISTAS, JSON.stringify(vistas.slice(-200)));
-        }
-      }
-
       function publicarStatusNaNuvem(online) {
         return fetch("https://ntfy.sh/" + TOPICO_STATUS, {
           method: "POST",
-          headers: { "Title": "32Drive Status" },
-          body: JSON.stringify({
-            msgId: "ST-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6),
-            online: Boolean(online),
-            atualizadoEm: Date.now()
-          })
+          body: JSON.stringify({ online: Boolean(online), atualizadoEm: Date.now() })
         }).catch(function () {});
       }
 
@@ -384,20 +356,15 @@
       }
 
       function publicarRespostaNaNuvem(resposta) {
-        const payload = Object.assign({
-          msgId: "RES-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6)
-        }, resposta);
         return fetch("https://ntfy.sh/" + TOPICO_RESPOSTAS, {
           method: "POST",
-          headers: { "Title": "32Drive Resposta " + resposta.id },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(resposta)
         }).catch(function () {});
       }
 
       function adicionarPedidoSeNovo(pedido) {
         if (!estaOnline) return;
         if (!pedido || !pedido.id) return;
-        if (pedido.msgId && jaViuMsg(pedido.msgId)) return;
 
         const lista = lerCorridas();
         const existe = lista.some(function (p) { return p.id === pedido.id; });
@@ -406,7 +373,6 @@
           salvarCorridas(lista);
           renderizar();
         }
-        if (pedido.msgId) marcarMsgVista(pedido.msgId);
       }
 
       function aceitarCorrida(id) {
@@ -514,25 +480,6 @@
           .join("");
       }
 
-      function escutarTopicoSSE(topico, aoReceber) {
-        if (!window.EventSource) return null;
-        try {
-          const es = new EventSource("https://ntfy.sh/" + topico + "/sse");
-          es.onmessage = function (ev) {
-            if (!ev || !ev.data) return;
-            try {
-              const envelope = JSON.parse(ev.data);
-              if (envelope && envelope.event === "message" && envelope.message) {
-                aoReceber(JSON.parse(envelope.message));
-              }
-            } catch (e) {}
-          };
-          return es;
-        } catch (e) {
-          return null;
-        }
-      }
-
       function buscarDaNuvem() {
         if (!estaOnline) return;
         fetch("https://ntfy.sh/" + TOPICO_PEDIDOS + "/json?poll=1&since=60m", { cache: "no-store" })
@@ -593,7 +540,6 @@
 
       atualizarEstadoOnlineUI();
       publicarStatusNaNuvem(estaOnline);
-      escutarTopicoSSE(TOPICO_PEDIDOS, adicionarPedidoSeNovo);
       buscarDaNuvem();
       setInterval(buscarDaNuvem, 2000);
       setInterval(renderizar, 1500);
