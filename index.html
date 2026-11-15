@@ -7,9 +7,10 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest-passageiro.json" />
   <link rel="icon" type="image/png" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-512.png" />
-  <title>32 Drive — Motorista</title>
+  <title>32 Drive — Passageiro</title>
   <style>
     :root {
       --bg: #0f0f10;
@@ -20,7 +21,6 @@
       --muted: #a1a1aa;
       --accent: #f59e0b;
       --green: #10b981;
-      --red: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -159,105 +159,79 @@
       flex-direction: column;
       gap: 10px;
     }
-    .section-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .section-title {
-      font-size: 15px;
-      font-weight: 800;
-    }
-    .count-badge {
-      background: #252529;
-      border: 1px solid var(--border);
-      color: var(--accent);
+    label {
       font-size: 12px;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 999px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: block;
     }
-    .lista {
-      display: flex;
-      flex-direction: column;
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #121215;
+      color: var(--text);
+      font-size: 15px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
-    .pedido-card {
+    .resumo {
       background: #131316;
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 12px;
       display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .pedido-top {
-      display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
-    .pedido-id {
-      font-weight: 800;
-      font-size: 14px;
-    }
-    .pedido-valor {
+    .valor {
+      font-size: 21px;
       font-weight: 900;
-      font-size: 17px;
       color: var(--green);
-    }
-    .pedido-info {
-      font-size: 13px;
-      line-height: 1.45;
-      color: var(--text);
-    }
-    .muted { color: var(--muted); }
-    .status-tag {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: rgba(245, 158, 11, 0.14);
-      color: var(--accent);
-      width: fit-content;
-    }
-    .status-tag.aceita {
-      background: rgba(16, 185, 129, 0.14);
-      color: var(--green);
-    }
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 4px;
+      white-space: nowrap;
     }
     .btn {
-      padding: 11px 12px;
+      width: 100%;
+      padding: 14px;
       border: none;
-      border-radius: 10px;
-      font-size: 13px;
+      border-radius: 12px;
+      font-size: 15px;
       font-weight: 800;
       cursor: pointer;
     }
-    .btn-aceitar {
-      background: var(--green);
-      color: #062117;
+    .btn-calc {
+      background: #2b2b30;
+      color: var(--accent);
+      border: 1px solid var(--accent);
     }
-    .btn-finalizar {
+    .btn-primary {
       background: var(--accent);
       color: #111;
     }
-    .btn-limpar {
-      background: #252529;
-      color: var(--text);
-      border: 1px solid var(--border);
+    .status {
+      font-size: 13px;
+      color: var(--green);
+      min-height: 18px;
+      text-align: center;
+      font-weight: 600;
     }
-    .btn-remover {
-      background: rgba(239, 68, 68, 0.14);
-      color: #fca5a5;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+    .lista {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .item {
+      background: #131316;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 13px;
+      line-height: 1.45;
     }
   </style>
 </head>
@@ -266,11 +240,11 @@
     <div class="brand">
       <img src="icon-512.png" alt="32 Drive" />
       <div>
-        <h1>32 Drive — Motorista</h1>
-        <div class="subtitle">Painel de Solicitações</div>
+        <h1>32 Drive — Passageiro</h1>
+        <div class="subtitle">Cassino &amp; Rio Grande</div>
       </div>
     </div>
-    <span class="badge">PAINEL</span>
+    <span class="badge">R$ 7,99</span>
   </header>
 
   <main>
@@ -280,7 +254,7 @@
           <div class="hero-title">32 DRIVE</div>
           <div class="hero-sub">Mobilidade Urbana Local • Cassino &amp; Rio Grande</div>
         </div>
-        <span class="online-pill"><span class="dot"></span>Em Operação</span>
+        <span class="online-pill"><span class="dot"></span>Ativo</span>
       </div>
 
       <div class="driver-box">
@@ -296,18 +270,106 @@
     </section>
 
     <div class="card">
-      <div class="section-head">
-        <div class="section-title">Corridas solicitadas</div>
-        <span class="count-badge" id="contador">0</span>
+      <div>
+        <label for="nome">Seu nome</label>
+        <input id="nome" type="text" placeholder="Ex: Junior" />
       </div>
-      <div class="lista" id="lista-motorista"></div>
-      <button class="btn btn-limpar" type="button" id="btn-limpar-historico">Limpar histórico</button>
+      <div>
+        <label for="origem">Ponto de embarque</label>
+        <input id="origem" type="text" placeholder="Ex: Av. Rio Grande, Cassino" />
+      </div>
+      <div>
+        <label for="destino">Destino</label>
+        <input id="destino" type="text" placeholder="Ex: Centro / Rua General Bacelar" />
+      </div>
+      <div class="row">
+        <div>
+          <label for="km">Distância (km)</label>
+          <input id="km" type="text" inputmode="decimal" placeholder="Ex: 5" />
+        </div>
+        <div>
+          <label for="pagamento">Pagamento</label>
+          <input id="pagamento" type="text" value="Pix / Dinheiro" />
+        </div>
+      </div>
+
+      <button class="btn btn-calc" type="button" id="btn-calcular">Calcular corrida</button>
+
+      <div class="resumo">
+        <div>
+          <div style="font-size:12px;color:var(--muted);">Valor da corrida</div>
+          <div id="detalhe-tarifa" style="font-size:12px;color:var(--muted);">Informe os km e toque em Calcular</div>
+        </div>
+        <div class="valor" id="valor-total">—</div>
+      </div>
+
+      <button class="btn btn-primary" type="button" id="btn-enviar">Enviar pedido para o motorista</button>
+      <div class="status" id="status"></div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700;font-size:14px;">Meus pedidos enviados</div>
+      <div class="lista" id="meus-pedidos"></div>
     </div>
   </main>
 
   <script>
     (function () {
       const CHAVE_CORRIDAS = "32drive_corridas";
+      const MOTORISTA_PADRAO = {
+        nome: "Luíz Carlos Costa Jr.",
+        veiculo: "VW Voyage 2010",
+        placa: "IQD8060"
+      };
+
+      function parseKm(raw) {
+        if (raw === null || raw === undefined) return NaN;
+        const limpo = String(raw).trim().replace(",", ".");
+        if (!limpo) return NaN;
+        const n = Number(limpo);
+        return Number.isFinite(n) && n > 0 ? n : NaN;
+      }
+
+      function calcularTarifa(rawKm) {
+        const distancia = parseKm(rawKm);
+        if (!Number.isFinite(distancia)) {
+          return null;
+        }
+        if (distancia <= 3.5) {
+          return {
+            total: 7.99,
+            texto: "Até 3,5 km: R$ 7,99",
+            kmUsado: distancia
+          };
+        }
+        const extraKm = distancia - 3.5;
+        const total = 7.99 + extraKm * 2.0;
+        return {
+          total,
+          texto: "R$ 7,99 + " + extraKm.toFixed(1).replace(".", ",") + " km × R$ 2,00",
+          kmUsado: distancia
+        };
+      }
+
+      function formatarMoeda(valor) {
+        return "R$ " + Number(valor).toFixed(2).replace(".", ",");
+      }
+
+      function atualizarValor() {
+        const inputKm = document.getElementById("km");
+        const elTotal = document.getElementById("valor-total");
+        const elDetalhe = document.getElementById("detalhe-tarifa");
+        const calc = calcularTarifa(inputKm ? inputKm.value : "");
+
+        if (!calc) {
+          if (elTotal) elTotal.textContent = "—";
+          if (elDetalhe) elDetalhe.textContent = "Informe os km e toque em Calcular";
+          return null;
+        }
+        if (elTotal) elTotal.textContent = formatarMoeda(calc.total);
+        if (elDetalhe) elDetalhe.textContent = calc.texto;
+        return calc;
+      }
 
       function lerCorridas() {
         try {
@@ -321,91 +383,74 @@
         localStorage.setItem(CHAVE_CORRIDAS, JSON.stringify(lista));
       }
 
-      function atualizarStatus(id, novoStatus) {
-        const lista = lerCorridas().map(function (p) {
-          if (p.id === id) {
-            return Object.assign({}, p, { status: novoStatus });
-          }
-          return p;
-        });
-        salvarCorridas(lista);
-        renderizar();
-      }
-
-      function removerPedido(id) {
-        const lista = lerCorridas().filter(function (p) {
-          return p.id !== id;
-        });
-        salvarCorridas(lista);
-        renderizar();
-      }
-
-      function renderizar() {
-        const container = document.getElementById("lista-motorista");
-        const contador = document.getElementById("contador");
-        const lista = lerCorridas();
-
-        if (contador) contador.textContent = String(lista.length);
+      function renderizarPedidos() {
+        const container = document.getElementById("meus-pedidos");
         if (!container) return;
-
+        const lista = lerCorridas();
         if (!lista.length) {
-          container.innerHTML =
-            '<div class="pedido-card"><span class="muted">Nenhuma corrida recebida no painel ainda.</span></div>';
+          container.innerHTML = '<div class="item" style="color:var(--muted);">Nenhum pedido enviado ainda.</div>';
           return;
         }
-
         container.innerHTML = lista
+          .slice(0, 5)
           .map(function (p) {
-            const isAceita = p.status && p.status !== "Aguardando motorista";
-            const badgeClass = isAceita ? "status-tag aceita" : "status-tag";
             return (
-              '<div class="pedido-card">' +
-              '<div class="pedido-top">' +
-              '<span class="pedido-id">' + p.id + " • " + (p.passageiro || "Passageiro") + "</span>" +
-              '<span class="pedido-valor">' + p.valor + "</span>" +
-              "</div>" +
-              '<span class="' + badgeClass + '">' + (p.status || "Aguardando motorista") + "</span>" +
-              '<div class="pedido-info">' +
-              '<span class="muted">Embarque:</span> ' + p.origem + "<br/>" +
-              '<span class="muted">Destino:</span> ' + p.destino + "<br/>" +
-              '<span class="muted">Distância / Pagto:</span> ' + (p.km || "-") + " km • " + (p.pagamento || "Pix / Dinheiro") +
-              (p.criadoEm ? ' <span class="muted">(' + p.criadoEm + ")</span>" : "") +
-              "</div>" +
-              '<div class="actions">' +
-              '<button class="btn btn-aceitar" type="button" data-acao="aceitar" data-id="' + p.id + '">Aceitar corrida</button>' +
-              '<button class="btn btn-finalizar" type="button" data-acao="finalizar" data-id="' + p.id + '">Finalizar</button>' +
-              "</div>" +
-              '<button class="btn btn-remover" type="button" data-acao="remover" data-id="' + p.id + '">Remover pedido</button>' +
+              '<div class="item">' +
+              "<strong>" + p.id + "</strong> — " + p.valor + " (" + p.status + ")<br/>" +
+              '<span style="color:var(--muted);">De:</span> ' + p.origem + "<br/>" +
+              '<span style="color:var(--muted);">Para:</span> ' + p.destino +
               "</div>"
             );
           })
           .join("");
       }
 
-      document.addEventListener("click", function (ev) {
-        const btn = ev.target.closest("button[data-acao]");
-        if (!btn) return;
-        const acao = btn.getAttribute("data-acao");
-        const id = btn.getAttribute("data-id");
-        if (acao === "aceitar") atualizarStatus(id, "Corrida aceita");
-        if (acao === "finalizar") atualizarStatus(id, "Corrida finalizada");
-        if (acao === "remover") removerPedido(id);
-      });
+      function enviarPedido() {
+        const nome = (document.getElementById("nome").value || "").trim() || "Passageiro";
+        const origem = (document.getElementById("origem").value || "").trim();
+        const destino = (document.getElementById("destino").value || "").trim();
+        const pagamento = (document.getElementById("pagamento").value || "").trim() || "Pix / Dinheiro";
+        const status = document.getElementById("status");
 
-      const btnLimpar = document.getElementById("btn-limpar-historico");
-      if (btnLimpar) {
-        btnLimpar.addEventListener("click", function () {
-          salvarCorridas([]);
-          renderizar();
-        });
+        if (!origem || !destino) {
+          if (status) status.textContent = "Preencha embarque e destino.";
+          return;
+        }
+
+        const calc = atualizarValor();
+        if (!calc) {
+          if (status) status.textContent = "Informe a distância em km e toque em Calcular corrida.";
+          return;
+        }
+
+        const novoPedido = {
+          id: "32D-" + Date.now().toString().slice(-5),
+          passageiro: nome,
+          origem: origem,
+          destino: destino,
+          km: calc.kmUsado,
+          valor: formatarMoeda(calc.total),
+          pagamento: pagamento,
+          motorista: MOTORISTA_PADRAO,
+          status: "Aguardando motorista",
+          criadoEm: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+        };
+
+        const lista = lerCorridas();
+        lista.unshift(novoPedido);
+        salvarCorridas(lista);
+
+        if (status) status.textContent = "Pedido " + novoPedido.id + " enviado ao painel do motorista!";
+        renderizarPedidos();
       }
 
-      window.addEventListener("storage", function (ev) {
-        if (ev.key === CHAVE_CORRIDAS) renderizar();
-      });
+      const btnCalc = document.getElementById("btn-calcular");
+      if (btnCalc) btnCalc.addEventListener("click", atualizarValor);
 
-      setInterval(renderizar, 2000);
-      renderizar();
+      const btnEnviar = document.getElementById("btn-enviar");
+      if (btnEnviar) btnEnviar.addEventListener("click", enviarPedido);
+
+      renderizarPedidos();
     })();
   </script>
 </body>
