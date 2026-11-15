@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0b192c" />
+  <meta name="theme-color" content="#000000" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <link rel="manifest" href="manifest-passageiro.json" />
   <link rel="icon" type="image/png" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-512.png" />
   <title>32 Drive — Passageiro</title>
   <style>
     :root {
-      --bg: #ffffff;
-      --card: #ffffff;
+      --bg: #000000;
+      --card: #0b0f17;
       --navy-card: linear-gradient(145deg, #0b192c 0%, #13294b 65%, #0c1e38 100%);
       --navy-border: #1e3f6e;
-      --card-elevated: rgba(255, 255, 255, 0.1);
-      --border: #cbd5e1;
-      --text: #0f172a;
-      --muted: #475569;
+      --card-elevated: rgba(255, 255, 255, 0.08);
+      --border: #273244;
+      --text: #f8fafc;
+      --muted: #94a3b8;
       --accent: #f59e0b;
-      --green: #059669;
+      --green: #10b981;
       --whatsapp: #16a34a;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,12 +37,12 @@
       line-height: 1.45;
     }
     header {
-      background: #ffffff;
-      border-bottom: 2px solid var(--border);
+      background: #05070b;
+      border-bottom: 1px solid var(--border);
       padding: 16px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       gap: 10px;
       position: sticky;
       top: 0;
@@ -56,16 +56,7 @@
       object-fit: cover;
       border: 1px solid var(--border);
     }
-    .badge {
-      background: var(--accent);
-      color: #0f172a;
-      font-weight: 800;
-      font-size: 14px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      white-space: nowrap;
-    }
-    h1 { font-size: 19px; font-weight: 900; color: #0f172a; }
+    h1 { font-size: 19px; font-weight: 900; color: #ffffff; }
     .subtitle { font-size: 15px; color: var(--muted); }
     main {
       flex: 1;
@@ -85,7 +76,7 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
       color: #ffffff;
     }
     .hero-top {
@@ -99,7 +90,7 @@
     .hero-sub { font-size: 15px; color: #dbeafe; margin-top: 3px; }
     .driver-box {
       background: var(--card-elevated);
-      border: 1px solid rgba(148, 163, 184, 0.3);
+      border: 1px solid rgba(148, 163, 184, 0.25);
       border-radius: 14px;
       padding: 14px;
       display: grid;
@@ -131,18 +122,18 @@
     }
     .card {
       background: var(--card);
-      border: 2px solid var(--border);
+      border: 1px solid var(--border);
       border-radius: 16px;
       padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 14px;
-      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
     }
     label {
       font-size: 15px;
       font-weight: 700;
-      color: #1e293b;
+      color: #e2e8f0;
       margin-bottom: 6px;
       display: block;
     }
@@ -150,15 +141,15 @@
       width: 100%;
       padding: 15px;
       border-radius: 12px;
-      border: 2px solid var(--border);
-      background: #ffffff;
-      color: #0f172a;
+      border: 1px solid #334155;
+      background: #020617;
+      color: #ffffff;
       font-size: 18px;
     }
-    input:focus { outline: none; border-color: #0284c7; }
+    input:focus { outline: none; border-color: var(--accent); }
     .resumo {
-      background: #f8fafc;
-      border: 2px solid var(--border);
+      background: #020617;
+      border: 1px solid var(--border);
       border-radius: 14px;
       padding: 14px;
       display: flex;
@@ -169,8 +160,8 @@
     }
     .valor { font-size: 26px; font-weight: 900; color: var(--green); white-space: nowrap; }
     .pix-box {
-      background: #0f172a;
-      border: 2px solid #1e3f6e;
+      background: #020617;
+      border: 1px solid #1e3f6e;
       border-radius: 14px;
       padding: 14px;
       display: flex;
@@ -183,7 +174,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      background: #020617;
+      background: #000000;
       border: 1px solid #334155;
       border-radius: 12px;
       padding: 12px;
@@ -207,26 +198,26 @@
       color: #052e16;
       white-space: nowrap;
     }
-    .btn-secondary { background: #f1f5f9; color: #0f172a; border: 2px solid #cbd5e1; }
-    .btn-calc { background: #fef3c7; color: #92400e; border: 2px solid #f59e0b; }
-    .btn-install { background: #0f172a; color: #ffffff; }
+    .btn-secondary { background: #111827; color: #f8fafc; border: 1px solid #334155; }
+    .btn-calc { background: var(--accent); color: #000000; }
+    .btn-install { background: #1e293b; color: #ffffff; border: 1px solid #475569; }
     .btn-whatsapp { background: var(--whatsapp); color: #ffffff; }
     .status {
       font-size: 16px;
-      color: #047857;
+      color: #34d399;
       min-height: 22px;
       text-align: center;
       font-weight: 700;
     }
     .lista { display: flex; flex-direction: column; gap: 10px; }
     .item {
-      background: #f8fafc;
+      background: #020617;
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 12px;
       font-size: 16px;
       line-height: 1.5;
-      color: #0f172a;
+      color: #f8fafc;
     }
   </style>
 </head>
@@ -239,7 +230,6 @@
         <div class="subtitle">Cassino &amp; Rio Grande</div>
       </div>
     </div>
-    <span class="badge">R$ 7,99 mín.</span>
   </header>
 
   <main>
@@ -314,7 +304,7 @@
 
   <script>
     (function () {
-      const CHAVE_CORRIDAS = "32drive_passageiro_branco";
+      const CHAVE_CORRIDAS = "32drive_passageiro_preto";
       const PIX_INTER = "45bd89b5-9dd7-4cda-8715-789257d06596";
       const VALOR_KM = 2.0;
       const WHATSAPP_NUMERO = "5553991357231";
