@@ -661,6 +661,53 @@
     document.getElementById("origin").addEventListener("input", () => {
       originCoords = null;
     });
-  </script>
+  </script><script>
+(function () {
+  const STATUS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKQWN8xTJcpHMXlLEQ30fsKAaA4fYheQaktlo8qEzIdtLaSxu3qJ3Emyo2g-kYVm6Zob6f4AKS3Xra/pub?output=csv";
+
+  async function syncDriverStatus() {
+    const btnCalc = document.getElementById("btnCalc");
+    const statusEl =
+      document.getElementById("driverStatus") ||
+      document.getElementById("statusBadge") ||
+      document.getElementById("statusText");
+
+    try {
+      const response = await fetch(STATUS_CSV_URL + "&t=" + Date.now(), {
+        cache: "no-store"
+      });
+      if (!response.ok) return;
+
+      const text = await response.text();
+      const firstLine = text.split(/\r?\n/)[0] || "";
+      const cellA1 = firstLine.split(",")[0].replace(/^"|"$/g, "").trim().toUpperCase();
+
+      const isOnline = cellA1 === "ONLINE";
+
+      if (statusEl) {
+        statusEl.textContent = isOnline ? "ONLINE" : "OFFLINE";
+        statusEl.dataset.status = isOnline ? "ONLINE" : "OFFLINE";
+      }
+
+      if (btnCalc) {
+        btnCalc.disabled = !isOnline;
+      }
+
+      if (!isOnline && typeof setStatus === "function") {
+        setStatus("Motorista OFFLINE no momento.", true);
+      }
+    } catch (err) {
+      // Mantém o comportamento padrão se a planilha não responder
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", syncDriverStatus);
+  } else {
+    syncDriverStatus();
+  }
+})();
+</script>
+
 </body>
 </html>
