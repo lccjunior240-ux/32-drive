@@ -154,6 +154,32 @@
       letter-spacing: 0.8px;
       margin-bottom: 1px;
     }
+    .live-banner {
+      display: none;
+      background: rgba(16, 185, 129, 0.16);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      border-radius: 14px;
+      padding: 14px;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .live-banner.visivel {
+      display: flex;
+    }
+    .live-title {
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--green);
+    }
+    .live-eta {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .live-sub {
+      font-size: 12px;
+      color: #cbd5e1;
+    }
     .card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -306,6 +332,12 @@
       </div>
     </section>
 
+    <section class="live-banner" id="live-banner">
+      <div class="live-title" id="live-title">Corrida aceita!</div>
+      <div class="live-eta" id="live-eta">Tempo estimado de chegada: —</div>
+      <div class="live-sub" id="live-sub">Motorista: Luíz Carlos Costa Jr. • VW Voyage 2010 • IQD8060</div>
+    </section>
+
     <div class="card">
       <div>
         <label for="nome">Seu nome</label>
@@ -356,7 +388,8 @@
   <script>
     (function () {
       const CHAVE_CORRIDAS = "32drive_corridas";
-      const TOPICO_NUVEM = "32drive_cassino_jr_pedidos_v2";
+      const TOPICO_PEDIDOS = "32drive_cassino_jr_pedidos_v2";
+      const TOPICO_RESPOSTAS = "32drive_cassino_jr_respostas_v2";
       const PIX_INTER = "45bd89b5-9dd7-4cda-8715-789257d06596";
       const MOTORISTA_PADRAO = {
         nome: "Luíz Carlos Costa Jr.",
@@ -533,10 +566,39 @@
       }
 
       function publicarNaNuvem(pedido) {
-        return fetch("https://ntfy.sh/" + TOPICO_NUVEM, {
+        return fetch("https://ntfy.sh/" + TOPICO_PEDIDOS, {
           method: "POST",
           body: JSON.stringify(pedido)
         }).catch(function () {});
+      }
+
+      function atualizarBannerAceite(pedido) {
+        const banner = document.getElementById("live-banner");
+        const title = document.getElementById("live-title");
+        const eta = document.getElementById("live-eta");
+        const sub = document.getElementById("live-sub");
+        if (!banner) return;
+
+        if (!pedido) {
+          banner.classList.remove("visivel");
+          return;
+        }
+
+        banner.classList.add("visivel");
+        if (title) {
+          title.textContent = (pedido.status || "Corrida aceita") + " (" + pedido.id + ")";
+        }
+        if (eta) {
+          eta.textContent = pedido.tempoChegada
+            ? "Tempo para chegar ao seu embarque: " + pedido.tempoChegada + " min"
+            : "Aguardando confirmação e tempo de chegada do motorista...";
+        }
+        if (sub) {
+          sub.textContent =
+            "Motorista: " + MOTORISTA_PADRAO.nome +
+            " • " + MOTORISTA_PADRAO.veiculo +
+            " • Placa " + MOTORISTA_PADRAO.placa;
+        }
       }
 
       function renderizarPedidos() {
@@ -545,20 +607,71 @@
         const lista = lerCorridas();
         if (!lista.length) {
           container.innerHTML = '<div class="item" style="color:var(--muted);">Nenhum pedido enviado ainda.</div>';
+          atualizarBannerAceite(null);
           return;
         }
+        atualizarBannerAceite(lista[0]);
         container.innerHTML = lista
           .slice(0, 5)
           .map(function (p) {
+            const extraEta = p.tempoChegada
+              ? '<br/><strong style="color:var(--green);">Chegada estimada: ' + p.tempoChegada + " min</strong>"
+              : "";
             return (
               '<div class="item">' +
-              "<strong>" + p.id + "</strong> — " + p.valor + " (" + p.status + ")<br/>" +
+              "<strong>" + p.id + "</strong> — " + p.valor + " (" + p.status + ")" + extraEta + "<br/>" +
               '<span style="color:var(--muted);">De:</span> ' + p.origem + "<br/>" +
               '<span style="color:var(--muted);">Para:</span> ' + p.destino +
               "</div>"
             );
           })
           .join("");
+      }
+
+      function aplicarRespostaMotorista(resposta) {
+        if (!resposta || !resposta.id) return;
+        const lista = lerCorridas();
+        let alterou = false;
+        const atualizada = lista.map(function (p) {
+          if (p.id === resposta.id) {
+            alterou = true;
+            return Object.assign({}, p, {
+              status: resposta.status || "Corrida aceita",
+              tempoChegada: resposta.tempoChegada || p.tempoChegada || null
+            });
+          }
+          return p;
+        });
+        if (alterou) {
+          salvarCorridas(atualizada);
+          renderizarPedidos();
+          const status = document.getElementById("status");
+          if (status && resposta.tempoChegada) {
+            status.textContent =
+              "Corrida aceita! Motorista chega em " + resposta.tempoChegada + " min.";
+          }
+        }
+      }
+
+      function buscarRespostasMotorista() {
+        fetch("https://ntfy.sh/" + TOPICO_RESPOSTAS + "/json?poll=1&since=30m")
+          .then(function (r) { return r.text(); })
+          .then(function (texto) {
+            if (!texto) return;
+            const linhas = texto.split("\n");
+            for (let i = 0; i < linhas.length; i++) {
+              const linha = linhas[i].trim();
+              if (!linha) continue;
+              try {
+                const msg = JSON.parse(linha);
+                if (msg && msg.event === "message" && msg.message) {
+                  const resposta = JSON.parse(msg.message);
+                  aplicarRespostaMotorista(resposta);
+                }
+              } catch (e) {}
+            }
+          })
+          .catch(function () {});
       }
 
       function enviarPedido() {
@@ -587,6 +700,7 @@
           pix: PIX_INTER,
           motorista: MOTORISTA_PADRAO,
           status: "Aguardando motorista",
+          tempoChegada: null,
           criadoEm: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
         };
 
@@ -595,7 +709,7 @@
         salvarCorridas(lista);
         publicarNaNuvem(novoPedido);
 
-        if (status) status.textContent = "Pedido " + novoPedido.id + " enviado ao motorista!";
+        if (status) status.textContent = "Pedido " + novoPedido.id + " enviado! Aguardando aceite do motorista...";
         renderizarPedidos();
       }
 
@@ -606,6 +720,13 @@
       document.getElementById("btn-copiar-pix").addEventListener("click", copiarPix);
       document.getElementById("btn-enviar").addEventListener("click", enviarPedido);
 
+      window.addEventListener("storage", function (ev) {
+        if (ev.key === CHAVE_CORRIDAS) renderizarPedidos();
+      });
+
+      buscarRespostasMotorista();
+      setInterval(buscarRespostasMotorista, 2000);
+      setInterval(renderizarPedidos, 1500);
       renderizarPedidos();
     })();
   </script>
