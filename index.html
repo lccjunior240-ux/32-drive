@@ -3,310 +3,95 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0b192c" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="manifest" href="manifest-passageiro.json" />
-  <link rel="icon" type="image/png" href="icon-512.png" />
-  <link rel="apple-touch-icon" href="icon-512.png" />
   <title>32 Drive — Passageiro</title>
   <style>
-    :root {
-      --bg: #ffffff;
-      --card: #ffffff;
-      --navy-card: linear-gradient(145deg, #0b192c 0%, #13294b 65%, #0c1e38 100%);
-      --navy-border: #1e3f6e;
-      --card-elevated: rgba(255, 255, 255, 0.1);
-      --border: #cbd5e1;
-      --text: #0f172a;
-      --muted: #475569;
-      --accent: #f59e0b;
-      --green: #059669;
-      --red: #dc2626;
-    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      background: #ffffff;
+      color: #0f172a;
+      padding: 16px;
       font-size: 17px;
       line-height: 1.45;
     }
-    header {
-      background: #ffffff;
-      border-bottom: 2px solid var(--border);
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand img {
-      width: 46px;
-      height: 46px;
-      border-radius: 11px;
-      object-fit: cover;
-      border: 1px solid var(--border);
-    }
-    .badge {
-      background: var(--accent);
-      color: #0f172a;
-      font-weight: 800;
-      font-size: 14px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      white-space: nowrap;
-    }
-    h1 { font-size: 19px; font-weight: 900; color: #0f172a; }
-    .subtitle { font-size: 15px; color: var(--muted); }
-    main {
-      flex: 1;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-width: 680px;
-      width: 100%;
+    .wrap {
+      max-width: 560px;
       margin: 0 auto;
-    }
-    .hero-card {
-      background: var(--navy-card);
-      border: 1px solid var(--navy-border);
-      border-radius: 18px;
-      padding: 18px;
       display: flex;
       flex-direction: column;
       gap: 14px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
-      color: #ffffff;
     }
-    .hero-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .hero-title { font-size: 24px; font-weight: 900; color: var(--accent); letter-spacing: 0.5px; }
-    .hero-sub { font-size: 15px; color: #dbeafe; margin-top: 3px; }
-    .online-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(16, 185, 129, 0.2);
-      color: #6ee7b7;
-      border: 1px solid rgba(110, 231, 183, 0.45);
-      padding: 7px 13px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-    .online-pill.offline {
-      background: rgba(239, 68, 68, 0.22);
-      color: #fecaca;
-      border-color: rgba(252, 165, 165, 0.5);
-    }
-    .dot { width: 9px; height: 9px; border-radius: 50%; background: #34d399; }
-    .online-pill.offline .dot { background: #f87171; }
-    .driver-box {
-      background: var(--card-elevated);
-      border: 1px solid rgba(148, 163, 184, 0.3);
+    h1 { font-size: 22px; font-weight: 900; }
+    .sub { font-size: 15px; color: #475569; }
+    .card {
+      border: 2px solid #cbd5e1;
       border-radius: 14px;
       padding: 14px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: center;
-    }
-    .driver-name { font-size: 19px; font-weight: 800; color: #ffffff; }
-    .driver-car { font-size: 16px; color: #dbeafe; margin-top: 3px; }
-    .plate-box {
-      background: #ffffff;
-      color: #0f172a;
-      border: 2px solid #0284c7;
-      border-radius: 10px;
-      padding: 8px 12px;
-      text-align: center;
-      font-weight: 900;
-      letter-spacing: 1px;
-      font-size: 16px;
-      min-width: 118px;
-    }
-    .plate-label {
-      display: block;
-      font-size: 10px;
-      font-weight: 800;
-      color: #0284c7;
-      letter-spacing: 0.8px;
-      margin-bottom: 2px;
-    }
-    .live-banner {
-      display: none;
-      background: #ecfdf5;
-      border: 2px solid #10b981;
-      border-radius: 16px;
-      padding: 16px;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .live-banner.visivel { display: flex; }
-    .live-banner.recusada { background: #fef2f2; border-color: #ef4444; }
-    .live-title { font-size: 19px; font-weight: 900; color: #065f46; }
-    .live-banner.recusada .live-title { color: #991b1b; }
-    .live-eta { font-size: 18px; font-weight: 800; color: #0f172a; }
-    .live-sub { font-size: 15px; color: #334155; }
-    .card {
-      background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+      gap: 12px;
+      background: #ffffff;
     }
     label {
+      display: block;
       font-size: 15px;
       font-weight: 700;
+      margin-bottom: 4px;
       color: #1e293b;
-      margin-bottom: 6px;
-      display: block;
     }
     input {
       width: 100%;
-      padding: 15px;
-      border-radius: 12px;
-      border: 2px solid var(--border);
-      background: #ffffff;
+      padding: 14px;
+      border: 2px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 17px;
       color: #0f172a;
-      font-size: 18px;
+      background: #ffffff;
     }
-    input:focus { outline: none; border-color: #0284c7; }
-    .resumo {
-      background: #f8fafc;
-      border: 2px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .valor { font-size: 26px; font-weight: 900; color: var(--green); white-space: nowrap; }
-    .pix-box {
-      background: #0f172a;
-      border: 2px solid #1e3f6e;
-      border-radius: 14px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      color: #ffffff;
-    }
-    .pix-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      background: #020617;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 12px;
-      flex-wrap: wrap;
-    }
-    .pix-key { font-size: 15px; font-weight: 700; color: #ffffff; word-break: break-all; }
     .btn {
       width: 100%;
-      padding: 16px;
+      padding: 15px;
       border: none;
-      border-radius: 14px;
-      font-size: 18px;
+      border-radius: 12px;
+      font-size: 17px;
       font-weight: 800;
       cursor: pointer;
     }
-    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-    .btn-copy {
-      width: auto;
-      padding: 11px 16px;
-      font-size: 16px;
-      background: #10b981;
-      color: #052e16;
-      white-space: nowrap;
-    }
-    .btn-secondary { background: #f1f5f9; color: #0f172a; border: 2px solid #cbd5e1; }
     .btn-calc { background: #fef3c7; color: #92400e; border: 2px solid #f59e0b; }
-    .btn-primary { background: #f59e0b; color: #0f172a; }
-    .status {
-      font-size: 16px;
-      color: #047857;
-      min-height: 22px;
-      text-align: center;
-      font-weight: 700;
-    }
-    .lista { display: flex; flex-direction: column; gap: 10px; }
-    .item {
+    .btn-send { background: #f59e0b; color: #0f172a; }
+    .resumo {
       background: #f8fafc;
-      border: 1px solid var(--border);
+      border: 2px solid #cbd5e1;
       border-radius: 12px;
       padding: 12px;
+    }
+    .valor {
+      font-size: 24px;
+      font-weight: 900;
+      color: #059669;
+      margin-top: 4px;
+    }
+    .status {
       font-size: 16px;
-      line-height: 1.5;
-      color: #0f172a;
+      font-weight: 700;
+      color: #047857;
+      min-height: 22px;
+    }
+    .item {
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px;
+      background: #f8fafc;
+      font-size: 15px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="brand">
-      <img src="icon-512.png" alt="32 Drive" />
-      <div>
-        <h1>32 Drive — Passageiro</h1>
-        <div class="subtitle">Cassino &amp; Rio Grande</div>
-      </div>
+  <div class="wrap">
+    <div>
+      <h1>32 Drive — Passageiro</h1>
+      <div class="sub">Cassino &amp; Rio Grande • Mínima R$ 7,99 (até 3,5 km) • R$ 2,00/km</div>
     </div>
-    <span class="badge">R$ 7,99 mín.</span>
-  </header>
-
-  <main>
-    <section class="hero-card">
-      <div class="hero-top">
-        <div>
-          <div class="hero-title">32 DRIVE</div>
-          <div class="hero-sub">Mobilidade Urbana Local • Cassino &amp; Rio Grande</div>
-        </div>
-        <span class="online-pill" id="passageiro-status-pill">
-          <span class="dot"></span>
-          <span id="passageiro-status-text">Em Operação</span>
-        </span>
-      </div>
-
-      <div class="driver-box">
-        <div>
-          <div class="driver-name">Luíz Carlos Costa Jr.</div>
-          <div class="driver-car">VW Voyage 2010</div>
-        </div>
-        <div class="plate-box">
-          <span class="plate-label">BRASIL</span>
-          IQD8060
-        </div>
-      </div>
-    </section>
-
-    <section class="live-banner" id="live-banner">
-      <div class="live-title" id="live-title">Corrida aceita!</div>
-      <div class="live-eta" id="live-eta">Tempo estimado de chegada: —</div>
-      <div class="live-sub" id="live-sub">Motorista: Luíz Carlos Costa Jr. • VW Voyage 2010 • IQD8060</div>
-    </section>
 
     <div class="card">
       <div>
@@ -326,53 +111,35 @@
         <input id="pagamento" type="text" value="Pix / Dinheiro" />
       </div>
 
-      <button class="btn btn-secondary" type="button" id="btn-gps">Usar meu GPS no embarque</button>
       <button class="btn btn-calc" type="button" id="btn-calcular">Calcular corrida</button>
 
       <div class="resumo">
-        <div>
-          <div style="font-size:15px;color:var(--muted);">Valor da corrida</div>
-          <div id="detalhe-tarifa" style="font-size:15px;color:var(--muted);">Até 3,5 km: R$ 7,99 | Acima: R$ 2,00/km</div>
-        </div>
-        <div class="valor" id="valor-total">—</div>
+        <div id="detalhe-calc" class="sub">Km e valor calculados automaticamente ao informar embarque e destino.</div>
+        <div class="valor" id="valor-total">R$ 0,00</div>
       </div>
 
-      <div class="pix-box">
-        <div style="font-size:16px;color:#dbeafe;font-weight:700;">Pix Copia e Cola — Banco Inter (Chave Aleatória)</div>
-        <div class="pix-row">
-          <span class="pix-key" id="pix-chave-texto">45bd89b5-9dd7-4cda-8715-789257d06596</span>
-          <button class="btn btn-copy" type="button" id="btn-copiar-pix">Copiar Pix</button>
-        </div>
-      </div>
-
-      <button class="btn btn-primary" type="button" id="btn-enviar">Enviar pedido para o motorista</button>
+      <button class="btn btn-send" type="button" id="btn-enviar">Enviar pedido</button>
       <div class="status" id="status"></div>
     </div>
 
     <div class="card">
-      <div style="font-weight:800;font-size:18px;">Meus pedidos enviados</div>
-      <div class="lista" id="meus-pedidos"></div>
+      <strong>Pedidos enviados</strong>
+      <div id="lista-pedidos" style="display:flex;flex-direction:column;gap:8px;"></div>
     </div>
-  </main>
+  </div>
 
   <script>
     (function () {
-      const CHAVE_CORRIDAS = "32drive_corridas";
+      const CHAVE = "32drive_pedidos_simples";
       const TOPICO_PEDIDOS = "32drive_cassino_jr_pedidos_v3";
       const TOPICO_RESPOSTAS = "32drive_cassino_jr_respostas_v3";
-      const TOPICO_STATUS = "32drive_cassino_jr_status_v3";
-      const PIX_INTER = "45bd89b5-9dd7-4cda-8715-789257d06596";
-      const MOTORISTA_PADRAO = {
-        nome: "Luíz Carlos Costa Jr.",
-        veiculo: "VW Voyage 2010",
-        placa: "IQD8060"
-      };
+      const VALOR_KM = 2.0;
 
-      const PONTOS_REFERENCIA = [
+      const PONTOS = [
         { chaves: ["ijui", "ijuí", "654"], coords: [-32.1865, -52.1642] },
         { chaves: ["guanabara"], coords: [-32.1798, -52.1685] },
-        { chaves: ["cassino", "av. rio grande", "avenida rio grande"], coords: [-32.1833, -52.1667] },
-        { chaves: ["centro", "general bacelar", "henrique pancada"], coords: [-32.0350, -52.0986] },
+        { chaves: ["cassino"], coords: [-32.1833, -52.1667] },
+        { chaves: ["centro"], coords: [-32.0350, -52.0986] },
         { chaves: ["furg", "carreiros"], coords: [-32.0750, -52.1630] },
         { chaves: ["navegantes"], coords: [-32.0420, -52.1150] },
         { chaves: ["cidade nova"], coords: [-32.0520, -52.1180] },
@@ -380,289 +147,193 @@
         { chaves: ["santa tereza"], coords: [-32.0490, -52.0920] }
       ];
 
-      let coordsGps = null;
       let ultimoCalculo = null;
-      let motoristaDisponivel = true;
 
-      function atualizarStatusPassageiroUI() {
-        const pill = document.getElementById("passageiro-status-pill");
-        const text = document.getElementById("passageiro-status-text");
-        const btnEnviar = document.getElementById("btn-enviar");
-        const status = document.getElementById("status");
-
-        if (pill) pill.classList.toggle("offline", !motoristaDisponivel);
-        if (text) text.textContent = motoristaDisponivel ? "Em Operação" : "Offline";
-        if (btnEnviar) btnEnviar.disabled = !motoristaDisponivel;
-        if (!motoristaDisponivel && status && !status.textContent.includes("32D-")) {
-          status.textContent = "Motorista Offline no momento.";
-        }
-      }
-
-      function buscarStatusMotorista() {
-        fetch("https://ntfy.sh/" + TOPICO_STATUS + "/json?poll=1&since=60m", { cache: "no-store" })
-          .then(function (r) { return r.text(); })
-          .then(function (texto) {
-            if (!texto) return;
-            const linhas = texto.split("\n");
-            let ultimoStatus = null;
-            for (let i = 0; i < linhas.length; i++) {
-              const linha = linhas[i].trim();
-              if (!linha) continue;
-              try {
-                const msg = JSON.parse(linha);
-                if (msg && msg.event === "message" && msg.message) {
-                  const payload = JSON.parse(msg.message);
-                  if (payload && typeof payload.online === "boolean") {
-                    ultimoStatus = payload;
-                  }
-                }
-              } catch (e) {}
-            }
-            if (ultimoStatus !== null) {
-              motoristaDisponivel = ultimoStatus.online;
-              atualizarStatusPassageiroUI();
-            }
-          })
-          .catch(function () {});
-      }
-
-      function copiarPix() {
-        const status = document.getElementById("status");
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(PIX_INTER).then(function () {
-            if (status) status.textContent = "Pix Copia e Cola (Banco Inter) copiado!";
-          }).catch(function () {
-            fallbackCopy(PIX_INTER, status);
-          });
-        } else {
-          fallbackCopy(PIX_INTER, status);
-        }
-      }
-
-      function fallbackCopy(texto, statusEl) {
-        const temp = document.createElement("textarea");
-        temp.value = texto;
-        document.body.appendChild(temp);
-        temp.select();
-        document.execCommand("copy");
-        document.body.removeChild(temp);
-        if (statusEl) statusEl.textContent = "Pix Copia e Cola (Banco Inter) copiado!";
-      }
-
-      function haversineKm(a, b) {
-        const R = 6371;
-        const toRad = function (deg) { return (deg * Math.PI) / 180; };
-        const dLat = toRad(b[0] - a[0]);
-        const dLng = toRad(b[1] - a[1]);
-        const lat1 = toRad(a[0]);
-        const lat2 = toRad(b[0]);
-        const x =
-          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-        const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-        return R * c * 1.3;
-      }
-
-      function acharPontoLocal(texto) {
-        const lower = String(texto || "").toLowerCase();
-        for (let i = 0; i < PONTOS_REFERENCIA.length; i++) {
-          const item = PONTOS_REFERENCIA[i];
-          for (let j = 0; j < item.chaves.length; j++) {
-            if (lower.includes(item.chaves[j])) return item.coords;
+      function acharCoords(texto) {
+        const t = String(texto || "").toLowerCase();
+        for (let i = 0; i < PONTOS.length; i++) {
+          for (let j = 0; j < PONTOS[i].chaves.length; j++) {
+            if (t.includes(PONTOS[i].chaves[j])) return PONTOS[i].coords;
           }
         }
         return null;
       }
 
-      function estimarDistancia(origem, destino) {
-        const p1 = coordsGps || acharPontoLocal(origem);
-        const p2 = acharPontoLocal(destino);
-        if (p1 && p2) {
-          return Math.max(1.0, Number(haversineKm(p1, p2).toFixed(1)));
-        }
-        const o = String(origem || "").toLowerCase();
-        const d = String(destino || "").toLowerCase();
-        const oCassino = o.includes("cassino") || o.includes("ijui") || o.includes("ijuí");
-        const dCassino = d.includes("cassino") || d.includes("guanabara");
+      function haversineKm(a, b) {
+        const R = 6371;
+        const rad = function (g) { return (g * Math.PI) / 180; };
+        const dLat = rad(b[0] - a[0]);
+        const dLng = rad(b[1] - a[1]);
+        const x =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        return R * (2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x))) * 1.3;
+      }
+
+      function estimarKm(origem, destino) {
+        const c1 = acharCoords(origem);
+        const c2 = acharCoords(destino);
+        if (c1 && c2) return Math.max(1.0, Number(haversineKm(c1, c2).toFixed(1)));
+        const oCassino = String(origem).toLowerCase().includes("cassino") || String(origem).toLowerCase().includes("ijui") || String(origem).toLowerCase().includes("ijuí");
+        const dCassino = String(destino).toLowerCase().includes("cassino") || String(destino).toLowerCase().includes("guanabara");
         if (oCassino && dCassino) return 2.8;
-        if ((oCassino && !dCassino) || (!oCassino && dCassino)) return 18.0;
+        if (oCassino !== dCassino) return 18.0;
         return 4.5;
       }
 
-      function calcularTarifa(distancia) {
-        if (!Number.isFinite(distancia) || distancia <= 0) return null;
-        if (distancia <= 3.5) {
-          return {
-            kmUsado: distancia,
-            total: 7.99,
-            texto: distancia.toFixed(1).replace(".", ",") + " km • Tarifa mínima (até 3,5 km): R$ 7,99"
-          };
-        }
-        return {
-          kmUsado: distancia,
-          total: distancia * 2.0,
-          texto: distancia.toFixed(1).replace(".", ",") + " km × R$ 2,00/km"
-        };
+      function formatarReal(v) {
+        return "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
       }
 
-      function formatarMoeda(valor) {
-        return "R$ " + Number(valor).toFixed(2).replace(".", ",");
-      }
-
-      function calcularCorrida() {
-        const origem = (document.getElementById("origem").value || "").trim();
-        const destino = (document.getElementById("destino").value || "").trim();
+      function calcular() {
+        const origem = document.getElementById("origem").value.trim();
+        const destino = document.getElementById("destino").value.trim();
         const status = document.getElementById("status");
-        const elTotal = document.getElementById("valor-total");
-        const elDetalhe = document.getElementById("detalhe-tarifa");
 
         if (!origem || !destino) {
-          if (status) status.textContent = "Preencha ponto de embarque e destino.";
+          ultimoCalculo = null;
+          document.getElementById("detalhe-calc").textContent = "Km e valor calculados automaticamente ao informar embarque e destino.";
+          document.getElementById("valor-total").textContent = "R$ 0,00";
           return null;
         }
 
-        const km = estimarDistancia(origem, destino);
-        const calc = calcularTarifa(km);
-        ultimoCalculo = calc;
+        const km = estimarKm(origem, destino);
+        const total = km <= 3.5 ? 7.99 : Number((km * VALOR_KM).toFixed(2));
+        const regra = km <= 3.5
+          ? km.toFixed(1).replace(".", ",") + " km automático • Mínima (até 3,5 km): R$ 7,99"
+          : km.toFixed(1).replace(".", ",") + " km automático × R$ 2,00/km";
 
-        if (elTotal) elTotal.textContent = formatarMoeda(calc.total);
-        if (elDetalhe) elDetalhe.textContent = calc.texto;
-        if (status) status.textContent = "Corrida calculada! Copie o Pix ou envie para o motorista.";
-        return calc;
+        ultimoCalculo = { km: km, valorKm: VALOR_KM, total: total, regra: regra };
+        document.getElementById("detalhe-calc").textContent = regra;
+        document.getElementById("valor-total").textContent = formatarReal(total);
+        status.textContent = "Cálculo automático pronto (" + km.toFixed(1).replace(".", ",") + " km).";
+        return ultimoCalculo;
       }
 
-      function usarLocalizacao() {
-        const status = document.getElementById("status");
-        if (!navigator.geolocation) {
-          if (status) status.textContent = "GPS indisponível neste aparelho.";
-          return;
-        }
-        if (status) status.textContent = "Obtendo GPS...";
-        navigator.geolocation.getCurrentPosition(
-          function (pos) {
-            coordsGps = [pos.coords.latitude, pos.coords.longitude];
-            const origem = document.getElementById("origem");
-            if (origem && !origem.value.trim()) origem.value = "Localização atual (GPS)";
-            if (status) status.textContent = "GPS capturado no embarque!";
-          },
-          function () {
-            if (status) status.textContent = "Não foi possível ler o GPS. Use o endereço digitado.";
-          },
-          { enableHighAccuracy: true, timeout: 8000 }
-        );
-      }
-
-      function lerCorridas() {
+      function lerLista() {
         try {
-          return JSON.parse(localStorage.getItem(CHAVE_CORRIDAS) || "[]");
+          return JSON.parse(localStorage.getItem(CHAVE) || "[]");
         } catch (e) {
           return [];
         }
       }
 
-      function salvarCorridas(lista) {
-        localStorage.setItem(CHAVE_CORRIDAS, JSON.stringify(lista));
+      function salvarLista(lista) {
+        localStorage.setItem(CHAVE, JSON.stringify(lista));
       }
 
-      function publicarNaNuvem(pedido) {
-        return fetch("https://ntfy.sh/" + TOPICO_PEDIDOS, {
-          method: "POST",
-          body: JSON.stringify(pedido)
-        }).catch(function () {});
-      }
-
-      function atualizarBannerAceite(pedido) {
-        const banner = document.getElementById("live-banner");
-        const title = document.getElementById("live-title");
-        const eta = document.getElementById("live-eta");
-        const sub = document.getElementById("live-sub");
-        if (!banner) return;
-
-        if (!pedido) {
-          banner.classList.remove("visivel");
-          banner.classList.remove("recusada");
-          return;
-        }
-
-        banner.classList.add("visivel");
-        const isRecusada = pedido.status === "Corrida recusada";
-        banner.classList.toggle("recusada", isRecusada);
-
-        if (title) title.textContent = (pedido.status || "Corrida aceita") + " (" + pedido.id + ")";
-        if (eta) {
-          eta.textContent = isRecusada
-            ? "O motorista recusou este pedido."
-            : (pedido.tempoChegada
-              ? "Tempo para chegar ao seu embarque: " + pedido.tempoChegada + " min"
-              : "Aguardando confirmação e tempo de chegada do motorista...");
-        }
-        if (sub) {
-          sub.textContent =
-            "Motorista: " + MOTORISTA_PADRAO.nome +
-            " • " + MOTORISTA_PADRAO.veiculo +
-            " • Placa " + MOTORISTA_PADRAO.placa;
-        }
-      }
-
-      function renderizarPedidos() {
-        const container = document.getElementById("meus-pedidos");
-        if (!container) return;
-        const lista = lerCorridas();
+      function renderLista() {
+        const box = document.getElementById("lista-pedidos");
+        const lista = lerLista();
         if (!lista.length) {
-          container.innerHTML = '<div class="item" style="color:var(--muted);">Nenhum pedido enviado ainda.</div>';
-          atualizarBannerAceite(null);
+          box.innerHTML = '<div class="item">Nenhum pedido enviado ainda.</div>';
           return;
         }
-        atualizarBannerAceite(lista[0]);
-        container.innerHTML = lista
-          .slice(0, 5)
-          .map(function (p) {
-            const extraEta = p.tempoChegada
-              ? '<br/><strong style="color:#047857;">Chegada estimada: ' + p.tempoChegada + " min</strong>"
-              : "";
-            return (
-              '<div class="item">' +
-              "<strong>" + p.id + "</strong> — " + p.valor + " (" + p.status + ")" + extraEta + "<br/>" +
-              '<span style="color:var(--muted);">De:</span> ' + p.origem + "<br/>" +
-              '<span style="color:var(--muted);">Para:</span> ' + p.destino +
-              "</div>"
-            );
-          })
-          .join("");
+        box.innerHTML = lista.slice(0, 5).map(function (p) {
+          const chegada = p.tempoChegada ? "<br/><strong>Chegada: " + p.tempoChegada + " min</strong>" : "";
+          return (
+            '<div class="item">' +
+            "<strong>" + p.id + "</strong> • " + p.valor + " (" + p.status + ")" + chegada + "<br/>" +
+            p.origem + " → " + p.destino + " (" + p.km + " km)" +
+            "</div>"
+          );
+        }).join("");
       }
 
-      function aplicarRespostaMotorista(resposta) {
-        if (!resposta || !resposta.id) return;
-        const lista = lerCorridas();
-        let alterou = false;
-        const atualizada = lista.map(function (p) {
-          if (p.id === resposta.id) {
-            alterou = true;
-            return Object.assign({}, p, {
-              status: resposta.status || "Corrida aceita",
-              tempoChegada: resposta.tempoChegada || null
-            });
-          }
-          return p;
-        });
-        if (alterou) {
-          salvarCorridas(atualizada);
-          renderizarPedidos();
-          const status = document.getElementById("status");
-          if (status) {
-            if (resposta.status === "Corrida recusada") {
-              status.textContent = "A corrida " + resposta.id + " foi recusada pelo motorista.";
-            } else if (resposta.tempoChegada) {
-              status.textContent = "Corrida aceita! Motorista chega em " + resposta.tempoChegada + " min.";
-            }
-          }
+      function enviar() {
+        const status = document.getElementById("status");
+        const nome = document.getElementById("nome").value.trim() || "Passageiro";
+        const origem = document.getElementById("origem").value.trim();
+        const destino = document.getElementById("destino").value.trim();
+        const pagamento = document.getElementById("pagamento").value.trim() || "Pix / Dinheiro";
+        const calc = ultimoCalculo || calcular();
+
+        if (!origem || !destino || !calc) {
+          status.textContent = "Preencha embarque e destino.";
+          return;
         }
+
+        const pedido = {
+          id: "32D-" + Date.now().toString().slice(-5),
+          passageiro: nome,
+          origem: origem,
+          destino: destino,
+          km: calc.km,
+          valorKm: calc.valorKm,
+          valor: formatarReal(calc.total),
+          pagamento: pagamento,
+          status: "Aguardando motorista",
+          tempoChegada: null
+        };
+
+        const lista = lerLista();
+        lista.unshift(pedido);
+        salvarLista(lista);
+        renderLista();
+
+        status.textContent = "Enviando " + pedido.id + "...";
+        fetch("https://ntfy.sh/" + TOPICO_PEDIDOS, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
+          body: JSON.stringify(pedido)
+        }).then(function () {
+          status.textContent = "Pedido " + pedido.id + " enviado ao motorista!";
+        }).catch(function () {
+          status.textContent = "Salvo no aparelho; tentando reenviar...";
+        });
       }
 
-      function buscarRespostasMotorista() {
+      function buscarRespostas() {
         fetch("https://ntfy.sh/" + TOPICO_RESPOSTAS + "/json?poll=1&since=60m", { cache: "no-store" })
           .then(function (r) { return r.text(); })
           .then(function (texto) {
             if (!texto) return;
             const linhas = texto.split("\n");
-            
+            const lista = lerLista();
+            let mudou = false;
+
+            for (let i = 0; i < linhas.length; i++) {
+              const linha = linhas[i].trim();
+              if (!linha) continue;
+              try {
+                const env = JSON.parse(linha);
+                if (env && env.event === "message" && env.message) {
+                  const res = JSON.parse(env.message);
+                  for (let j = 0; j < lista.length; j++) {
+                    if (lista[j].id === res.id) {
+                      if (lista[j].status !== res.status || lista[j].tempoChegada !== res.tempoChegada) {
+                        lista[j].status = res.status || lista[j].status;
+                        lista[j].tempoChegada = res.tempoChegada || null;
+                        mudou = true;
+                      }
+                    }
+                  }
+                }
+              } catch (e) {}
+            }
+
+            if (mudou) {
+              salvarLista(lista);
+              renderLista();
+              const topo = lista[0];
+              if (topo) {
+                document.getElementById("status").textContent =
+                  topo.id + ": " + topo.status + (topo.tempoChegada ? " (" + topo.tempoChegada + " min)" : "");
+              }
+            }
+          })
+          .catch(function () {});
+      }
+
+      document.getElementById("origem").addEventListener("input", calcular);
+      document.getElementById("destino").addEventListener("input", calcular);
+      document.getElementById("btn-calcular").addEventListener("click", calcular);
+      document.getElementById("btn-enviar").addEventListener("click", enviar);
+
+      renderLista();
+      buscarRespostas();
+      setInterval(buscarRespostas, 2500);
+    })();
+  </script>
+</body>
+</html>
