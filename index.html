@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b1f3a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="32 DRIVE">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
-  <title>32 DRIVE - Pedir Corrida</title>
+  <title>32 DRIVE · Pedir Corrida</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -19,9 +18,9 @@
       padding: 14px;
     }
     .card {
-      max-width: 480px;
+      max-width: 450px;
       margin: 0 auto;
-      background: #0f1d33;
+      background: #0f1d32;
       border: 2px solid #ff7a00;
       border-radius: 16px;
       padding: 18px;
@@ -33,7 +32,7 @@
       border-bottom: 1px solid rgba(255, 122, 0, 0.35);
     }
     .marca {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       font-weight: 900;
       letter-spacing: 1px;
     }
@@ -41,31 +40,31 @@
       background: #ff7a00;
       color: #ffffff;
       padding: 3px 10px;
-      border-radius: 7px;
+      border-radius: 6px;
       margin-right: 6px;
     }
     .sub {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: #cbd5e1;
       margin-top: 6px;
     }
-    .status-bar {
+    .status-box {
       margin-top: 12px;
       padding: 10px 12px;
       border-radius: 10px;
       font-weight: bold;
       font-size: 0.9rem;
       text-align: center;
-      background: #1e293b;
-      border: 1px solid #475569;
+      background: #14253e;
+      border: 1px solid #ff7a00;
     }
     .status-online {
-      background: rgba(22, 163, 74, 0.2);
+      background: rgba(34, 197, 94, 0.2);
       border-color: #22c55e;
       color: #86efac;
     }
     .status-offline {
-      background: rgba(220, 38, 38, 0.2);
+      background: rgba(239, 68, 68, 0.2);
       border-color: #ef4444;
       color: #fca5a5;
     }
@@ -75,14 +74,14 @@
       border-left: 4px solid #ff7a00;
       border-radius: 8px;
       padding: 10px 12px;
-      font-size: 0.86rem;
+      font-size: 0.88rem;
       line-height: 1.45;
       color: #e2e8f0;
     }
     label {
       display: block;
       margin-top: 12px;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       font-weight: bold;
       color: #ff9d42;
     }
@@ -109,7 +108,7 @@
       border: 1px solid #ff7a00;
       border-radius: 8px;
       font-weight: bold;
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       cursor: pointer;
     }
     .resumo-valor {
@@ -149,5 +148,110 @@
       border-radius: 10px;
       background: #081220;
       border: 1px solid #ff7a00;
-      font-size: 0
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="topo">
+      <div class="marca"><span class="selo">32</span>DRIVE</div>
+      <div class="sub">Pedir Corrida · Cassino / Rio Grande</div>
+    </div>
 
+    <div id="statusCorrida" class="status-box status-online">
+      Motorista disponível para atendimento
+    </div>
+
+    <div class="motorista-box">
+      <strong>Motorista:</strong> Luiz Carlos Costa Junior<br>
+      <strong>Veículo:</strong> Voyage IQD 8060<br>
+      <strong>WhatsApp:</strong> (53) 99135-7231
+    </div>
+
+    <label for="origem">Onde você está? (Origem)</label>
+    <input id="origem" type="text" placeholder="Ex.: Av. Rio Grande, Cassino" oninput="atualizarValor()">
+    <button class="btn-gps" type="button" onclick="usarMeuGPS()">Usar meu GPS atual</button>
+
+    <label for="destino">Para onde você vai? (Destino)</label>
+    <input id="destino" type="text" placeholder="Ex.: Centro de Rio Grande" oninput="atualizarValor()">
+
+    <div class="resumo-valor">
+      <span>Valor estimado:</span>
+      <span id="valorEstimado" class="valor-grande">R$ 15,00</span>
+    </div>
+
+    <button id="btnChamar" class="btn-chamar" type="button" onclick="enviarPedidoWhatsApp()">
+      CHAMAR 32 DRIVE NO WHATSAPP
+    </button>
+
+    <div id="respostaBox" class="resposta-box">
+      Preencha a origem e o destino e toque no botão laranja para enviar o pedido direto ao motorista.
+    </div>
+  </div>
+
+  <script>
+    const WHATSAPP_MOTORISTA = "5553991357231";
+
+    function atualizarValor() {
+      const origem = document.getElementById("origem").value.trim();
+      const destino = document.getElementById("destino").value.trim();
+      let valor = 15;
+      if (origem.length > 0 && destino.length > 0) {
+        valor = 20;
+      }
+      document.getElementById("valorEstimado").textContent =
+        "R$ " + valor.toFixed(2).replace(".", ",");
+    }
+
+    function usarMeuGPS() {
+      const caixa = document.getElementById("respostaBox");
+      if (!navigator.geolocation) {
+        caixa.textContent = "Seu aparelho não liberou o GPS automático. Digite o endereço.";
+        return;
+      }
+      caixa.textContent = "Buscando sua localização no GPS...";
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          const lat = pos.coords.latitude.toFixed(5);
+          const lon = pos.coords.longitude.toFixed(5);
+          document.getElementById("origem").value = "GPS: " + lat + ", " + lon;
+          atualizarValor();
+          caixa.textContent = "Localização preenchida no campo de origem.";
+        },
+        function () {
+          caixa.textContent = "Não foi possível ler o GPS agora. Pode digitar o endereço.";
+        }
+      );
+    }
+
+    function enviarPedidoWhatsApp() {
+      const origem = document.getElementById("origem").value.trim();
+      const destino = document.getElementById("destino").value.trim();
+      const valor = document.getElementById("valorEstimado").textContent;
+      const caixa = document.getElementById("respostaBox");
+
+      if (!origem || !destino) {
+        caixa.textContent = "Preencha a origem e o destino antes de chamar o 32 DRIVE.";
+        return;
+      }
+
+      const mensagem =
+        "Olá, 32 DRIVE! Quero pedir uma corrida.\n" +
+        "Origem: " + origem + "\n" +
+        "Destino: " + destino + "\n" +
+        "Valor estimado: " + valor;
+
+      const link =
+        "https://wa.me/" +
+        WHATSAPP_MOTORISTA +
+        "?text=" +
+        encodeURIComponent(mensagem);
+
+      caixa.textContent = "Abrindo o WhatsApp com o pedido pronto...";
+      window.location.href = link;
+    }
+  </script>
+</body>
+</html>
