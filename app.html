@@ -19,7 +19,7 @@
       --card-elevated: rgba(255, 255, 255, 0.06);
       --border: #2c2c32;
       --text: #f5f5f7;
-      --muted: #a1a1aa;
+      --muted: #b4b4be;
       --accent: #f59e0b;
       --green: #10b981;
       --red: #ef4444;
@@ -32,14 +32,17 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      font-size: 17px;
+      line-height: 1.45;
     }
     header {
       background: rgba(15, 23, 42, 0.96);
       border-bottom: 1px solid var(--border);
-      padding: 14px 16px;
+      padding: 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 10px;
       position: sticky;
       top: 0;
       z-index: 10;
@@ -47,12 +50,12 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
     .brand img {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
+      width: 46px;
+      height: 46px;
+      border-radius: 11px;
       object-fit: cover;
       border: 1px solid var(--navy-border);
     }
@@ -60,30 +63,31 @@
       background: var(--accent);
       color: #111;
       font-weight: 800;
-      font-size: 12px;
-      padding: 6px 10px;
+      font-size: 14px;
+      padding: 8px 12px;
       border-radius: 999px;
+      white-space: nowrap;
     }
-    h1 { font-size: 16px; font-weight: 800; }
-    .subtitle { font-size: 12px; color: var(--muted); }
+    h1 { font-size: 19px; font-weight: 900; }
+    .subtitle { font-size: 15px; color: var(--muted); }
     main {
       flex: 1;
-      padding: 14px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      max-width: 640px;
+      gap: 16px;
+      max-width: 680px;
       width: 100%;
       margin: 0 auto;
     }
     .hero-card {
       background: var(--navy-card);
       border: 1px solid var(--navy-border);
-      border-radius: 16px;
-      padding: 16px;
+      border-radius: 18px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
     }
     .hero-top {
@@ -91,29 +95,30 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
+      flex-wrap: wrap;
     }
     .hero-title {
-      font-size: 19px;
+      font-size: 24px;
       font-weight: 900;
       color: var(--accent);
       letter-spacing: 0.5px;
     }
     .hero-sub {
-      font-size: 12px;
-      color: #cbd5e1;
-      margin-top: 2px;
+      font-size: 15px;
+      color: #dbeafe;
+      margin-top: 3px;
     }
     .online-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       background: rgba(16, 185, 129, 0.16);
       color: var(--green);
       border: 1px solid rgba(16, 185, 129, 0.4);
-      padding: 5px 10px;
+      padding: 7px 13px;
       border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
+      font-size: 14px;
+      font-weight: 800;
       white-space: nowrap;
     }
     .online-pill.offline {
@@ -122,8 +127,8 @@
       border-color: rgba(239, 68, 68, 0.4);
     }
     .dot {
-      width: 7px;
-      height: 7px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       background: var(--green);
     }
@@ -133,37 +138,70 @@
     .driver-box {
       background: var(--card-elevated);
       border: 1px solid rgba(148, 163, 184, 0.22);
-      border-radius: 12px;
-      padding: 12px;
+      border-radius: 14px;
+      padding: 14px;
       display: grid;
       grid-template-columns: 1fr auto;
-      gap: 10px;
+      gap: 12px;
       align-items: center;
     }
-    .driver-name { font-size: 15px; font-weight: 800; color: #ffffff; }
-    .driver-car { font-size: 13px; color: #cbd5e1; margin-top: 2px; }
+    .driver-name { font-size: 19px; font-weight: 800; color: #ffffff; }
+    .driver-car { font-size: 16px; color: #dbeafe; margin-top: 3px; }
     .plate-box {
       background: #f8fafc;
       color: #0f172a;
       border: 2px solid #0284c7;
-      border-radius: 8px;
-      padding: 6px 10px;
+      border-radius: 10px;
+      padding: 8px 12px;
       text-align: center;
       font-weight: 900;
       letter-spacing: 1px;
-      font-size: 13px;
-      min-width: 104px;
+      font-size: 16px;
+      min-width: 118px;
     }
     .plate-label {
       display: block;
-      font-size: 8px;
+      font-size: 10px;
       font-weight: 800;
       color: #0284c7;
       letter-spacing: 0.8px;
-      margin-bottom: 1px;
+      margin-bottom: 2px;
     }
     .card {
       background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .section-title {
+      font-size: 19px;
+      font-weight: 800;
+    }
+    .count-badge {
+      background: #252529;
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 15px;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 999px;
+    }
+    .lista {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .pedido-card {
+      background: #131316;
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 14px;
@@ -171,65 +209,33 @@
       flex-direction: column;
       gap: 10px;
     }
-    .section-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .section-title {
-      font-size: 15px;
-      font-weight: 800;
-    }
-    .count-badge {
-      background: #252529;
-      border: 1px solid var(--border);
-      color: var(--accent);
-      font-size: 12px;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 999px;
-    }
-    .lista {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .pedido-card {
-      background: #131316;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
     .pedido-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
     .pedido-id {
       font-weight: 800;
-      font-size: 14px;
+      font-size: 18px;
     }
     .pedido-valor {
       font-weight: 900;
-      font-size: 17px;
+      font-size: 22px;
       color: var(--green);
     }
     .pedido-info {
-      font-size: 13px;
-      line-height: 1.45;
+      font-size: 17px;
+      line-height: 1.5;
       color: var(--text);
     }
     .muted { color: var(--muted); }
     .status-tag {
       display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 8px;
+      font-size: 14px;
+      font-weight: 800;
+      padding: 6px 11px;
       border-radius: 999px;
       background: rgba(245, 158, 11, 0.14);
       color: var(--accent);
@@ -246,17 +252,17 @@
     .eta-box {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 8px;
       align-items: center;
     }
     .eta-chip {
-      padding: 6px 10px;
-      border-radius: 8px;
+      padding: 9px 13px;
+      border-radius: 10px;
       border: 1px solid var(--border);
       background: #1e1e24;
       color: var(--text);
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 15px;
+      font-weight: 800;
       cursor: pointer;
     }
     .eta-chip.ativo {
@@ -265,25 +271,25 @@
       border-color: var(--green);
     }
     .eta-input {
-      width: 90px;
-      padding: 6px 8px;
-      border-radius: 8px;
+      width: 104px;
+      padding: 9px 10px;
+      border-radius: 10px;
       border: 1px solid var(--border);
       background: #0f0f12;
       color: var(--text);
-      font-size: 12px;
+      font-size: 16px;
     }
     .actions {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
+      gap: 10px;
       margin-top: 4px;
     }
     .btn {
-      padding: 11px 10px;
+      padding: 15px 12px;
       border: none;
-      border-radius: 10px;
-      font-size: 13px;
+      border-radius: 12px;
+      font-size: 17px;
       font-weight: 800;
       cursor: pointer;
     }
@@ -320,9 +326,9 @@
       background: rgba(239, 68, 68, 0.12);
       border: 1px solid rgba(239, 68, 68, 0.35);
       color: #fecaca;
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 12px;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 15px;
       font-weight: 600;
     }
     .offline-notice.visivel {
@@ -365,7 +371,7 @@
 
       <button class="btn btn-status-toggle" type="button" id="btn-alternar-online">Ficar Offline</button>
       <div class="offline-notice" id="offline-notice">
-        Você está Offline. Novos pedidos da nuvem estão pausados até você voltar para Online.
+        Você está Offline. O painel do passageiro também foi avisado e novos pedidos estão pausados.
       </div>
     </section>
 
@@ -386,9 +392,20 @@
       const CHAVE_ONLINE = "32drive_motorista_online";
       const TOPICO_PEDIDOS = "32drive_cassino_jr_pedidos_v2";
       const TOPICO_RESPOSTAS = "32drive_cassino_jr_respostas_v2";
+      const TOPICO_STATUS = "32drive_cassino_jr_status_v2";
       const temposSelecionados = {};
 
       let estaOnline = localStorage.getItem(CHAVE_ONLINE) !== "false";
+
+      function publicarStatusNaNuvem(online) {
+        return fetch("https://ntfy.sh/" + TOPICO_STATUS, {
+          method: "POST",
+          body: JSON.stringify({
+            online: Boolean(online),
+            atualizadoEm: Date.now()
+          })
+        }).catch(function () {});
+      }
 
       function atualizarEstadoOnlineUI() {
         const pill = document.getElementById("status-pill");
@@ -414,6 +431,7 @@
         estaOnline = !estaOnline;
         localStorage.setItem(CHAVE_ONLINE, String(estaOnline));
         atualizarEstadoOnlineUI();
+        publicarStatusNaNuvem(estaOnline);
       }
 
       function lerCorridas() {
@@ -576,7 +594,7 @@
               etaInfo +
               "</div>" +
               '<div class="eta-box">' +
-              '<span class="muted" style="font-size:12px;">Tempo de chegada:</span>' +
+              '<span class="muted" style="font-size:15px;">Tempo de chegada:</span>' +
               ["3", "5", "8", "12"].map(function (min) {
                 const ativo = String(etaAtual) === min ? " eta-chip ativo" : " eta-chip";
                 return '<button class="' + ativo + '" type="button" data-acao="set-eta" data-id="' + p.id + '" data-min="' + min + '">' + min + " min</button>";
@@ -659,6 +677,7 @@
       });
 
       atualizarEstadoOnlineUI();
+      publicarStatusNaNuvem(estaOnline);
       buscarDaNuvem();
       setInterval(buscarDaNuvem, 2500);
       setInterval(renderizar, 1500);
