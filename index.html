@@ -48,11 +48,7 @@
       top: 0;
       z-index: 10;
     }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .brand { display: flex; align-items: center; gap: 12px; }
     .brand img {
       width: 46px;
       height: 46px;
@@ -99,17 +95,8 @@
       gap: 10px;
       flex-wrap: wrap;
     }
-    .hero-title {
-      font-size: 24px;
-      font-weight: 900;
-      color: var(--accent);
-      letter-spacing: 0.5px;
-    }
-    .hero-sub {
-      font-size: 15px;
-      color: #dbeafe;
-      margin-top: 3px;
-    }
+    .hero-title { font-size: 24px; font-weight: 900; color: var(--accent); letter-spacing: 0.5px; }
+    .hero-sub { font-size: 15px; color: #dbeafe; margin-top: 3px; }
     .online-pill {
       display: inline-flex;
       align-items: center;
@@ -128,15 +115,8 @@
       color: #fecaca;
       border-color: rgba(252, 165, 165, 0.5);
     }
-    .dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: #34d399;
-    }
-    .online-pill.offline .dot {
-      background: #f87171;
-    }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #34d399; }
+    .online-pill.offline .dot { background: #f87171; }
     .driver-box {
       background: var(--card-elevated);
       border: 1px solid rgba(148, 163, 184, 0.3);
@@ -178,30 +158,12 @@
       flex-direction: column;
       gap: 8px;
     }
-    .live-banner.visivel {
-      display: flex;
-    }
-    .live-banner.recusada {
-      background: #fef2f2;
-      border-color: #ef4444;
-    }
-    .live-title {
-      font-size: 19px;
-      font-weight: 900;
-      color: #065f46;
-    }
-    .live-banner.recusada .live-title {
-      color: #991b1b;
-    }
-    .live-eta {
-      font-size: 18px;
-      font-weight: 800;
-      color: #0f172a;
-    }
-    .live-sub {
-      font-size: 15px;
-      color: #334155;
-    }
+    .live-banner.visivel { display: flex; }
+    .live-banner.recusada { background: #fef2f2; border-color: #ef4444; }
+    .live-title { font-size: 19px; font-weight: 900; color: #065f46; }
+    .live-banner.recusada .live-title { color: #991b1b; }
+    .live-eta { font-size: 18px; font-weight: 800; color: #0f172a; }
+    .live-sub { font-size: 15px; color: #334155; }
     .card {
       background: var(--card);
       border: 2px solid var(--border);
@@ -228,10 +190,7 @@
       color: #0f172a;
       font-size: 18px;
     }
-    input:focus {
-      outline: none;
-      border-color: #0284c7;
-    }
+    input:focus { outline: none; border-color: #0284c7; }
     .resumo {
       background: #f8fafc;
       border: 2px solid var(--border);
@@ -243,12 +202,7 @@
       gap: 12px;
       flex-wrap: wrap;
     }
-    .valor {
-      font-size: 26px;
-      font-weight: 900;
-      color: var(--green);
-      white-space: nowrap;
-    }
+    .valor { font-size: 26px; font-weight: 900; color: var(--green); white-space: nowrap; }
     .pix-box {
       background: #0f172a;
       border: 2px solid #1e3f6e;
@@ -270,12 +224,7 @@
       padding: 12px;
       flex-wrap: wrap;
     }
-    .pix-key {
-      font-size: 15px;
-      font-weight: 700;
-      color: #ffffff;
-      word-break: break-all;
-    }
+    .pix-key { font-size: 15px; font-weight: 700; color: #ffffff; word-break: break-all; }
     .btn {
       width: 100%;
       padding: 16px;
@@ -285,10 +234,7 @@
       font-weight: 800;
       cursor: pointer;
     }
-    .btn:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
     .btn-copy {
       width: auto;
       padding: 11px 16px;
@@ -297,20 +243,9 @@
       color: #052e16;
       white-space: nowrap;
     }
-    .btn-secondary {
-      background: #f1f5f9;
-      color: #0f172a;
-      border: 2px solid #cbd5e1;
-    }
-    .btn-calc {
-      background: #fef3c7;
-      color: #92400e;
-      border: 2px solid #f59e0b;
-    }
-    .btn-primary {
-      background: #f59e0b;
-      color: #0f172a;
-    }
+    .btn-secondary { background: #f1f5f9; color: #0f172a; border: 2px solid #cbd5e1; }
+    .btn-calc { background: #fef3c7; color: #92400e; border: 2px solid #f59e0b; }
+    .btn-primary { background: #f59e0b; color: #0f172a; }
     .status {
       font-size: 16px;
       color: #047857;
@@ -318,11 +253,7 @@
       text-align: center;
       font-weight: 700;
     }
-    .lista {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    .lista { display: flex; flex-direction: column; gap: 10px; }
     .item {
       background: #f8fafc;
       border: 1px solid var(--border);
@@ -427,9 +358,9 @@
   <script>
     (function () {
       const CHAVE_CORRIDAS = "32drive_corridas";
-      const TOPICO_PEDIDOS = "32drive_cassino_jr_pedidos_v2";
-      const TOPICO_RESPOSTAS = "32drive_cassino_jr_respostas_v2";
-      const TOPICO_STATUS = "32drive_cassino_jr_status_v2";
+      const TOPICO_PEDIDOS = "32drive_cassino_jr_pedidos_v3";
+      const TOPICO_RESPOSTAS = "32drive_cassino_jr_respostas_v3";
+      const TOPICO_STATUS = "32drive_cassino_jr_status_v3";
       const PIX_INTER = "45bd89b5-9dd7-4cda-8715-789257d06596";
       const MOTORISTA_PADRAO = {
         nome: "Luíz Carlos Costa Jr.",
@@ -459,22 +390,16 @@
         const btnEnviar = document.getElementById("btn-enviar");
         const status = document.getElementById("status");
 
-        if (pill) {
-          pill.classList.toggle("offline", !motoristaDisponivel);
-        }
-        if (text) {
-          text.textContent = motoristaDisponivel ? "Em Operação" : "Offline";
-        }
-        if (btnEnviar) {
-          btnEnviar.disabled = !motoristaDisponivel;
-        }
+        if (pill) pill.classList.toggle("offline", !motoristaDisponivel);
+        if (text) text.textContent = motoristaDisponivel ? "Em Operação" : "Offline";
+        if (btnEnviar) btnEnviar.disabled = !motoristaDisponivel;
         if (!motoristaDisponivel && status && !status.textContent.includes("Pedido")) {
           status.textContent = "Motorista Offline no momento.";
         }
       }
 
       function buscarStatusMotorista() {
-        fetch("https://ntfy.sh/" + TOPICO_STATUS + "/json?poll=1&since=60m")
+        fetch("https://ntfy.sh/" + TOPICO_STATUS + "/json?poll=1&since=5m")
           .then(function (r) { return r.text(); })
           .then(function (texto) {
             if (!texto) return;
@@ -543,9 +468,7 @@
         for (let i = 0; i < PONTOS_REFERENCIA.length; i++) {
           const item = PONTOS_REFERENCIA[i];
           for (let j = 0; j < item.chaves.length; j++) {
-            if (lower.includes(item.chaves[j])) {
-              return item.coords;
-            }
+            if (lower.includes(item.chaves[j])) return item.coords;
           }
         }
         return null;
@@ -554,30 +477,20 @@
       function estimarDistancia(origem, destino) {
         const p1 = coordsGps || acharPontoLocal(origem);
         const p2 = acharPontoLocal(destino);
-
         if (p1 && p2) {
-          const dist = Number(haversineKm(p1, p2).toFixed(1));
-          return Math.max(1.0, dist);
+          return Math.max(1.0, Number(haversineKm(p1, p2).toFixed(1)));
         }
-
         const o = String(origem || "").toLowerCase();
         const d = String(destino || "").toLowerCase();
         const oCassino = o.includes("cassino") || o.includes("ijui") || o.includes("ijuí");
         const dCassino = d.includes("cassino") || d.includes("guanabara");
-
-        if (oCassino && dCassino) {
-          return 2.8;
-        }
-        if ((oCassino && !dCassino) || (!oCassino && dCassino)) {
-          return 18.0;
-        }
+        if (oCassino && dCassino) return 2.8;
+        if ((oCassino && !dCassino) || (!oCassino && dCassino)) return 18.0;
         return 4.5;
       }
 
       function calcularTarifa(distancia) {
-        if (!Number.isFinite(distancia) || distancia <= 0) {
-          return null;
-        }
+        if (!Number.isFinite(distancia) || distancia <= 0) return null;
         if (distancia <= 3.5) {
           return {
             kmUsado: distancia,
@@ -585,10 +498,9 @@
             texto: distancia.toFixed(1).replace(".", ",") + " km • Tarifa mínima (até 3,5 km): R$ 7,99"
           };
         }
-        const total = distancia * 2.0;
         return {
           kmUsado: distancia,
-          total,
+          total: distancia * 2.0,
           texto: distancia.toFixed(1).replace(".", ",") + " km × R$ 2,00/km"
         };
       }
@@ -630,9 +542,7 @@
           function (pos) {
             coordsGps = [pos.coords.latitude, pos.coords.longitude];
             const origem = document.getElementById("origem");
-            if (origem && !origem.value.trim()) {
-              origem.value = "Localização atual (GPS)";
-            }
+            if (origem && !origem.value.trim()) origem.value = "Localização atual (GPS)";
             if (status) status.textContent = "GPS capturado no embarque!";
           },
           function () {
@@ -657,6 +567,7 @@
       function publicarNaNuvem(pedido) {
         return fetch("https://ntfy.sh/" + TOPICO_PEDIDOS, {
           method: "POST",
+          headers: { "Title": "32Drive Pedido " + pedido.id },
           body: JSON.stringify(pedido)
         }).catch(function () {});
       }
@@ -678,17 +589,13 @@
         const isRecusada = pedido.status === "Corrida recusada";
         banner.classList.toggle("recusada", isRecusada);
 
-        if (title) {
-          title.textContent = (pedido.status || "Corrida aceita") + " (" + pedido.id + ")";
-        }
+        if (title) title.textContent = (pedido.status || "Corrida aceita") + " (" + pedido.id + ")";
         if (eta) {
-          if (isRecusada) {
-            eta.textContent = "O motorista recusou este pedido.";
-          } else {
-            eta.textContent = pedido.tempoChegada
+          eta.textContent = isRecusada
+            ? "O motorista recusou este pedido."
+            : (pedido.tempoChegada
               ? "Tempo para chegar ao seu embarque: " + pedido.tempoChegada + " min"
-              : "Aguardando confirmação e tempo de chegada do motorista...";
-          }
+              : "Aguardando confirmação e tempo de chegada do motorista...");
         }
         if (sub) {
           sub.textContent =
@@ -747,15 +654,14 @@
             if (resposta.status === "Corrida recusada") {
               status.textContent = "A corrida " + resposta.id + " foi recusada pelo motorista.";
             } else if (resposta.tempoChegada) {
-              status.textContent =
-                "Corrida aceita! Motorista chega em " + resposta.tempoChegada + " min.";
+              status.textContent = "Corrida aceita! Motorista chega em " + resposta.tempoChegada + " min.";
             }
           }
         }
       }
 
       function buscarRespostasMotorista() {
-        fetch("https://ntfy.sh/" + TOPICO_RESPOSTAS + "/json?poll=1&since=30m")
+        fetch("https://ntfy.sh/" + TOPICO_RESPOSTAS + "/json?poll=1&since=5m")
           .then(function (r) { return r.text(); })
           .then(function (texto) {
             if (!texto) return;
@@ -766,8 +672,7 @@
               try {
                 const msg = JSON.parse(linha);
                 if (msg && msg.event === "message" && msg.message) {
-                  const resposta = JSON.parse(msg.message);
-                  aplicarRespostaMotorista(resposta);
+                  aplicarRespostaMotorista(JSON.parse(msg.message));
                 }
               } catch (e) {}
             }
@@ -777,11 +682,6 @@
 
       function enviarPedido() {
         const status = document.getElementById("status");
-        if (!motoristaDisponivel) {
-          if (status) status.textContent = "Motorista está Offline no momento.";
-          return;
-        }
-
         const nome = (document.getElementById("nome").value || "").trim() || "Passageiro";
         const origem = (document.getElementById("origem").value || "").trim();
         const destino = (document.getElementById("destino").value || "").trim();
@@ -815,7 +715,7 @@
         salvarCorridas(lista);
         publicarNaNuvem(novoPedido);
 
-        if (status) status.textContent = "Pedido " + novoPedido.id + " enviado! Aguardando aceite do motorista...";
+        if (status) status.textContent = "Pedido " + novoPedido.id + " enviado! Aguardando motorista...";
         renderizarPedidos();
       }
 
