@@ -357,10 +357,11 @@
 
   <script>
     (function () {
-      const CHAVE_CORRIDAS = "32drive_corridas";
-      const TOPICO_PEDIDOS = "32drive_cassino_jr_pedidos_v3";
-      const TOPICO_RESPOSTAS = "32drive_cassino_jr_respostas_v3";
-      const TOPICO_STATUS = "32drive_cassino_jr_status_v3";
+      const CHAVE_CORRIDAS = "32drive_corridas_v6";
+      const CHAVE_MSG_VISTAS = "32drive_msg_vistas_v6";
+      const TOPICO_PEDIDOS = "32drive_cassino_jr_pedidos_v6";
+      const TOPICO_RESPOSTAS = "32drive_cassino_jr_respostas_v6";
+      const TOPICO_STATUS = "32drive_cassino_jr_status_v6";
       const PIX_INTER = "45bd89b5-9dd7-4cda-8715-789257d06596";
       const MOTORISTA_PADRAO = {
         nome: "Luíz Carlos Costa Jr.",
@@ -384,6 +385,28 @@
       let ultimoCalculo = null;
       let motoristaDisponivel = true;
 
+      function lerVistas() {
+        try {
+          return JSON.parse(localStorage.getItem(CHAVE_MSG_VISTAS) || "[]");
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function jaViuMsg(msgId) {
+        if (!msgId) return false;
+        return lerVistas().indexOf(msgId) !== -1;
+      }
+
+      function marcarMsgVista(msgId) {
+        if (!msgId) return;
+        const vistas = lerVistas();
+        if (vistas.indexOf(msgId) === -1) {
+          vistas.push(msgId);
+          localStorage.setItem(CHAVE_MSG_VISTAS, JSON.stringify(vistas.slice(-200)));
+        }
+      }
+
       function atualizarStatusPassageiroUI() {
         const pill = document.getElementById("passageiro-status-pill");
         const text = document.getElementById("passageiro-status-text");
@@ -393,34 +416,51 @@
         if (pill) pill.classList.toggle("offline", !motoristaDisponivel);
         if (text) text.textContent = motoristaDisponivel ? "Em Operação" : "Offline";
         if (btnEnviar) btnEnviar.disabled = !motoristaDisponivel;
-        if (!motoristaDisponivel && status && !status.textContent.includes("Pedido")) {
+        if (!motoristaDisponivel && status && !status.textContent.includes("32D-")) {
           status.textContent = "Motorista Offline no momento.";
         }
       }
 
-      function buscarStatusMotorista() {
-        fetch("https://ntfy.sh/" + TOPICO_STATUS + "/json?poll=1&since=5m")
+      function processarPayloadStatus(payload) {
+        if (!payload || typeof payload.online !== "boolean") return;
+        motoristaDisponivel = payload.online;
+        atualizarStatusPassageiroUI();
+      }
+
+      function escutarTopicoSSE(topico, aoReceber) {
+        if (!window.EventSource) return null;
+        try {
+          const es = new EventSource("https://ntfy.sh/" + topico + "/sse");
+          es.onmessage = function (ev) {
+            if (!ev || !ev.data) return;
+            try {
+              const envelope = JSON.parse(ev.data);
+              if (envelope && envelope.event === "message" && envelope.message) {
+                aoReceber(JSON.parse(envelope.message));
+              }
+            } catch (e) {}
+          };
+          return es;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function buscarTopicoJson(topico, aoReceber) {
+        fetch("https://ntfy.sh/" + topico + "/json?poll=1&since=60m", { cache: "no-store" })
           .then(function (r) { return r.text(); })
           .then(function (texto) {
             if (!texto) return;
             const linhas = texto.split("\n");
-            let ultimoStatus = null;
             for (let i = 0; i < linhas.length; i++) {
               const linha = linhas[i].trim();
               if (!linha) continue;
               try {
                 const msg = JSON.parse(linha);
                 if (msg && msg.event === "message" && msg.message) {
-                  const payload = JSON.parse(msg.message);
-                  if (payload && typeof payload.online === "boolean") {
-                    ultimoStatus = payload;
-                  }
+                  aoReceber(JSON.parse(msg.message));
                 }
               } catch (e) {}
-            }
-            if (ultimoStatus !== null) {
-              motoristaDisponivel = ultimoStatus.online;
-              atualizarStatusPassageiroUI();
             }
           })
           .catch(function () {});
@@ -634,6 +674,8 @@
 
       function aplicarRespostaMotorista(resposta) {
         if (!resposta || !resposta.id) return;
+        if (resposta.msgId && jaViuMsg(resposta.msgId)) return;
+
         const lista = lerCorridas();
         let alterou = false;
         const atualizada = lista.map(function (p) {
@@ -646,7 +688,9 @@
           }
           return p;
         });
+
         if (alterou) {
+          if (resposta.msgId) marcarMsgVista(resposta.msgId);
           salvarCorridas(atualizada);
           renderizarPedidos();
           const status = document.getElementById("status");
@@ -655,29 +699,11 @@
               status.textContent = "A corrida " + resposta.id + " foi recusada pelo motorista.";
             } else if (resposta.tempoChegada) {
               status.textContent = "Corrida aceita! Motorista chega em " + resposta.tempoChegada + " min.";
+            } else {
+              status.textContent = resposta.id + " • " + (resposta.status || "Atualizado");
             }
           }
         }
-      }
-
-      function buscarRespostasMotorista() {
-        fetch("https://ntfy.sh/" + TOPICO_RESPOSTAS + "/json?poll=1&since=5m")
-          .then(function (r) { return r.text(); })
-          .then(function (texto) {
-            if (!texto) return;
-            const linhas = texto.split("\n");
-            for (let i = 0; i < linhas.length; i++) {
-              const linha = linhas[i].trim();
-              if (!linha) continue;
-              try {
-                const msg = JSON.parse(linha);
-                if (msg && msg.event === "message" && msg.message) {
-                  aplicarRespostaMotorista(JSON.parse(msg.message));
-                }
-              } catch (e) {}
-            }
-          })
-          .catch(function () {});
       }
 
       function enviarPedido() {
@@ -695,8 +721,10 @@
         const calc = ultimoCalculo || calcularCorrida();
         if (!calc) return;
 
+        const agora = Date.now();
         const novoPedido = {
-          id: "32D-" + Date.now().toString().slice(-5),
+          msgId: "PED-" + agora + "-" + Math.random().toString(36).slice(2, 6),
+          id: "32D-" + String(agora).slice(-5),
           passageiro: nome,
           origem: origem,
           destino: destino,
@@ -710,6 +738,7 @@
           criadoEm: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
         };
 
+        marcarMsgVista(novoPedido.msgId);
         const lista = lerCorridas();
         lista.unshift(novoPedido);
         salvarCorridas(lista);
@@ -731,10 +760,14 @@
       });
 
       atualizarStatusPassageiroUI();
-      buscarStatusMotorista();
-      buscarRespostasMotorista();
-      setInterval(buscarStatusMotorista, 2000);
-      setInterval(buscarRespostasMotorista, 2000);
+      escutarTopicoSSE(TOPICO_STATUS, processarPayloadStatus);
+      escutarTopicoSSE(TOPICO_RESPOSTAS, aplicarRespostaMotorista);
+      buscarTopicoJson(TOPICO_STATUS, processarPayloadStatus);
+      buscarTopicoJson(TOPICO_RESPOSTAS, aplicarRespostaMotorista);
+      setInterval(function () {
+        buscarTopicoJson(TOPICO_STATUS, processarPayloadStatus);
+        buscarTopicoJson(TOPICO_RESPOSTAS, aplicarRespostaMotorista);
+      }, 2000);
       setInterval(renderizarPedidos, 1500);
       renderizarPedidos();
     })();
