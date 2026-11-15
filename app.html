@@ -1,281 +1,417 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b1f3a">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="32 DRIVE Motorista">
-  <title>32 DRIVE - Painel do Motorista</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f0f10" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="icon" type="image/png" href="icon-512.png" />
+  <link rel="apple-touch-icon" href="icon-512.png" />
+  <title>32 Drive — Motorista</title>
   <style>
-    * { box-sizing: border-box; }
+    :root {
+      --bg: #0f0f10;
+      --card: #1a1a1d;
+      --card-elevated: #222226;
+      --border: #2c2c32;
+      --text: #f5f5f7;
+      --muted: #a1a1aa;
+      --accent: #f59e0b;
+      --green: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: Arial, sans-serif;
-      background: #081220;
-      color: #ffffff;
-      margin: 0;
-      padding: 14px;
-    }
-    .card {
-      max-width: 520px;
-      margin: 0 auto;
-      background: #0f1d33;
-      border: 2px solid #ff7a00;
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-    }
-    .topo {
-      text-align: center;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255, 122, 0, 0.35);
-    }
-    .marca {
-      font-size: 1.6rem;
-      font-weight: 900;
-      letter-spacing: 1px;
-    }
-    .selo {
-      background: #ff7a00;
-      color: #ffffff;
-      padding: 3px 10px;
-      border-radius: 7px;
-      margin-right: 6px;
-    }
-    .sub {
-      font-size: 0.85rem;
-      color: #cbd5e1;
-      margin-top: 6px;
-    }
-    .status-row {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at top, #1d1b16 0%, var(--bg) 55%);
+      color: var(--text);
+      min-height: 100vh;
       display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: rgba(26, 26, 29, 0.95);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
       gap: 10px;
-      margin-top: 14px;
     }
-    .btn-status {
-      flex: 1;
-      padding: 12px;
+    .brand img {
+      width: 38px;
+      height: 38px;
       border-radius: 10px;
-      border: 2px solid transparent;
+      object-fit: cover;
+      border: 1px solid var(--border);
+    }
+    .badge {
+      background: var(--accent);
+      color: #111;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+    }
+    h1 { font-size: 16px; font-weight: 800; }
+    .subtitle { font-size: 12px; color: var(--muted); }
+    main {
+      flex: 1;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 640px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .hero-card {
+      background: linear-gradient(135deg, #231f16 0%, var(--card) 65%);
+      border: 1px solid #3a3220;
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .hero-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .hero-title {
+      font-size: 18px;
       font-weight: 900;
-      font-size: 0.95rem;
-      cursor: pointer;
+      color: var(--accent);
     }
-    .btn-online {
-      background: #14532d;
-      color: #dcfce7;
-      border-color: #22c55e;
+    .hero-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
     }
-    .btn-offline {
-      background: #7f1d1d;
-      color: #fee2e2;
-      border-color: #ef4444;
+    .online-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.14);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
     }
-    .aviso-offline {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      background: rgba(239, 68, 68, 0.18);
-      border: 1px solid #ef4444;
-      color: #fecaca;
-      font-size: 0.85rem;
-      text-align: center;
-      display: none;
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
     }
-    .secao-titulo {
-      margin-top: 18px;
-      font-size: 0.95rem;
-      font-weight: bold;
-      color: #ff9d42;
-      border-bottom: 1px solid rgba(255, 122, 0, 0.25);
-      padding-bottom: 6px;
-    }
-    .pedido-card {
-      margin-top: 12px;
-      background: #081220;
-      border: 1px solid #ff7a00;
+    .driver-box {
+      background: var(--card-elevated);
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 12px;
-      line-height: 1.45;
-      font-size: 0.88rem;
-    }
-    .min-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-top: 10px;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
     }
-    .btn-min {
-      padding: 9px 4px;
-      background: #ff7a00;
-      color: #ffffff;
-      border: none;
-      border-radius: 7px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 0.84rem;
-    }
-    .btn-recusar {
-      width: 100%;
-      margin-top: 8px;
-      padding: 8px;
-      background: #1e293b;
-      color: #fca5a5;
-      border: 1px solid #ef4444;
-      border-radius: 7px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .util-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .btn-util {
-      flex: 1;
-      padding: 10px;
-      background: #1e293b;
-      color: #ffffff;
-      border: 1px solid #ff7a00;
+    .driver-name { font-size: 15px; font-weight: 800; }
+    .driver-car { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .plate-box {
+      background: #f8fafc;
+      color: #0f172a;
+      border: 2px solid #0284c7;
       border-radius: 8px;
-      font-weight: bold;
-      font-size: 0.84rem;
+      padding: 6px 10px;
+      text-align: center;
+      font-weight: 900;
+      letter-spacing: 1px;
+      font-size: 13px;
+      min-width: 104px;
+    }
+    .plate-label {
+      display: block;
+      font-size: 8px;
+      font-weight: 800;
+      color: #0284c7;
+      letter-spacing: 0.8px;
+      margin-bottom: 1px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 800;
+    }
+    .count-badge {
+      background: #252529;
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+    .lista {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .pedido-card {
+      background: #131316;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pedido-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .pedido-id {
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .pedido-valor {
+      font-weight: 900;
+      font-size: 17px;
+      color: var(--green);
+    }
+    .pedido-info {
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--text);
+    }
+    .muted { color: var(--muted); }
+    .status-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(245, 158, 11, 0.14);
+      color: var(--accent);
+      width: fit-content;
+    }
+    .status-tag.aceita {
+      background: rgba(16, 185, 129, 0.14);
+      color: var(--green);
+    }
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .btn {
+      padding: 11px 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 800;
       cursor: pointer;
+    }
+    .btn-aceitar {
+      background: var(--green);
+      color: #062117;
+    }
+    .btn-finalizar {
+      background: var(--accent);
+      color: #111;
+    }
+    .btn-limpar {
+      background: #252529;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-remover {
+      background: rgba(239, 68, 68, 0.14);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="topo">
-      <div class="marca"><span class="selo">32</span>DRIVE</div>
-      <div class="sub">Painel do Motorista &middot; Luiz Carlos Costa Junior &middot; Voyage IQD 8060</div>
+  <header>
+    <div class="brand">
+      <img src="icon-512.png" alt="32 Drive" />
+      <div>
+        <h1>32 Drive — Motorista</h1>
+        <div class="subtitle">Painel de Solicitações</div>
+      </div>
     </div>
+    <span class="badge">PAINEL</span>
+  </header>
 
-    <div class="status-row">
-      <button type="button" class="btn-status btn-online" onclick="definirStatus('ONLINE')">FICAR ONLINE</button>
-      <button type="button" class="btn-status btn-offline" onclick="definirStatus('OFFLINE')">FICAR OFFLINE</button>
-    </div>
-    <div id="statusAtual" style="text-align:center;margin-top:8px;font-size:0.88rem;color:#cbd5e1;">Status: carregando...</div>
-    <div id="avisoOffline" class="aviso-offline">Voce esta OFFLINE — passageiros veem indisponivel.</div>
+  <main>
+    <section class="hero-card">
+      <div class="hero-top">
+        <div>
+          <div class="hero-title">32 DRIVE</div>
+          <div class="hero-sub">Mobilidade Urbana Local • Cassino &amp; Rio Grande</div>
+        </div>
+        <span class="online-pill"><span class="dot"></span>Em Operação</span>
+      </div>
 
-    <div class="secao-titulo">Pedidos dos Passageiros (Tempo Real)</div>
-    <div id="listaPedidos">
-      <div style="margin-top:10px;color:#94a3b8;font-size:0.86rem;">Nenhum pedido pendente no momento.</div>
-    </div>
+      <div class="driver-box">
+        <div>
+          <div class="driver-name">Luíz Carlos Costa Jr.</div>
+          <div class="driver-car">VW Voyage 2010</div>
+        </div>
+        <div class="plate-box">
+          <span class="plate-label">BRASIL</span>
+          IQD8060
+        </div>
+      </div>
+    </section>
 
-    <div class="util-row">
-      <button type="button" class="btn-util" onclick="meuGps()">Meu GPS</button>
-      <button type="button" class="btn-util" onclick="copiarPix()">Copiar Pix Inter</button>
+    <div class="card">
+      <div class="section-head">
+        <div class="section-title">Corridas solicitadas</div>
+        <span class="count-badge" id="contador">0</span>
+      </div>
+      <div class="lista" id="lista-motorista"></div>
+      <button class="btn btn-limpar" type="button" id="btn-atualizar-agora">Atualizar agora</button>
+      <button class="btn btn-limpar" type="button" id="btn-limpar-historico">Limpar histórico</button>
     </div>
-  </div>
+  </main>
 
   <script>
-    const DB_URL = 'https://drive-4745f-default-rtdb.firebaseio.com'.replace(/\/+$/, '');
-    const PIX = '45bd89b5-9dd7-4cda-8715-789257d06596';
-    const MINUTOS_OPCOES = [2, 3, 4, 5, 6, 8, 10, 15];
+    (function () {
+      const CHAVE_CORRIDAS = "32drive_corridas";
 
-    async function definirStatus(novoStatus) {
-      await fetch(DB_URL + '/status.json', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: novoStatus })
-      });
-      atualizarTelaStatus(novoStatus);
-    }
+      function lerCorridas() {
+        try {
+          return JSON.parse(localStorage.getItem(CHAVE_CORRIDAS) || "[]");
+        } catch (e) {
+          return [];
+        }
+      }
 
-    function atualizarTelaStatus(st) {
-      document.getElementById('statusAtual').textContent = 'Status atual: ' + st;
-      document.getElementById('avisoOffline').style.display = st === 'OFFLINE' ? 'block' : 'none';
-    }
+      function salvarCorridas(lista) {
+        localStorage.setItem(CHAVE_CORRIDAS, JSON.stringify(lista));
+      }
 
-    async function responderPedido(id, statusResp, min) {
-      await fetch(DB_URL + '/corridas/' + encodeURIComponent(id) + '.json', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: statusResp,
-          minutos: min ? String(min) : ''
-        })
-      });
-      carregarPedidos();
-    }
-
-    async function carregarPedidos() {
-      try {
-        const resSt = await fetch(DB_URL + '/status.json');
-        if (resSt.ok) {
-          const stObj = await resSt.json();
-          if (stObj && stObj.status) {
-            atualizarTelaStatus(stObj.status);
+      function atualizarStatus(id, novoStatus) {
+        const lista = lerCorridas().map(function (p) {
+          if (p.id === id) {
+            return Object.assign({}, p, { status: novoStatus });
           }
-        }
-
-        const res = await fetch(DB_URL + '/corridas.json');
-        if (!res.ok) return;
-        const dados = await res.json();
-        const container = document.getElementById('listaPedidos');
-
-        if (!dados) {
-          container.innerHTML = '<div style="margin-top:10px;color:#94a3b8;font-size:0.86rem;">Nenhum pedido pendente no momento.</div>';
-          return;
-        }
-
-        const pendentes = Object.values(dados).filter(function (p) {
-          return p && p.status === 'pendente';
+          return p;
         });
+        salvarCorridas(lista);
+        renderizar();
+      }
 
-        if (pendentes.length === 0) {
-          container.innerHTML = '<div style="margin-top:10px;color:#94a3b8;font-size:0.86rem;">Nenhum pedido pendente no momento.</div>';
+      function removerPedido(id) {
+        const lista = lerCorridas().filter(function (p) {
+          return p.id !== id;
+        });
+        salvarCorridas(lista);
+        renderizar();
+      }
+
+      function renderizar() {
+        const container = document.getElementById("lista-motorista");
+        const contador = document.getElementById("contador");
+        const lista = lerCorridas();
+
+        if (contador) contador.textContent = String(lista.length);
+        if (!container) return;
+
+        if (!lista.length) {
+          container.innerHTML =
+            '<div class="pedido-card"><span class="muted">Nenhuma corrida recebida no painel ainda.</span></div>';
           return;
         }
 
-        container.innerHTML = pendentes.map(function (p) {
-          const botoesMin = MINUTOS_OPCOES.map(function (m) {
-            return '<button type="button" class="btn-min" onclick="responderPedido(\'' + p.id + '\', \'aceito\', ' + m + ')">' + m + ' min</button>';
-          }).join('');
-
-          const linkMapa = p.gps
-            ? '<br><a href="' + p.gps + '" target="_blank" style="color:#ff9d42;">Abrir GPS do passageiro</a>'
-            : '';
-
-          return (
-            '<div class="pedido-card">' +
-              '<strong>Passageiro:</strong> ' + p.passageiro + ' (' + p.criadoEm + ')<br>' +
-              '<strong>Origem:</strong> ' + p.origem + linkMapa + '<br>' +
-              '<strong>Destino:</strong> ' + p.destino + '<br>' +
-              '<strong>Distancia / Valor:</strong> ' + p.km + ' km &middot; <span style="color:#ff9d42;font-weight:bold;">' + p.valor + '</span>' +
-              '<div class="min-grid">' + botoesMin + '</div>' +
-              '<button type="button" class="btn-recusar" onclick="responderPedido(\'' + p.id + '\', \'recusado\', \'\')">Recusar / Indisponivel</button>' +
-            '</div>'
-          );
-        }).join('');
-      } catch (e) {
-        console.log('Erro ao carregar pedidos:', e);
+        container.innerHTML = lista
+          .map(function (p) {
+            const isAceita = p.status && p.status !== "Aguardando motorista";
+            const badgeClass = isAceita ? "status-tag aceita" : "status-tag";
+            return (
+              '<div class="pedido-card">' +
+              '<div class="pedido-top">' +
+              '<span class="pedido-id">' + p.id + " • " + (p.passageiro || "Passageiro") + "</span>" +
+              '<span class="pedido-valor">' + p.valor + "</span>" +
+              "</div>" +
+              '<span class="' + badgeClass + '">' + (p.status || "Aguardando motorista") + "</span>" +
+              '<div class="pedido-info">' +
+              '<span class="muted">Embarque:</span> ' + p.origem + "<br/>" +
+              '<span class="muted">Destino:</span> ' + p.destino + "<br/>" +
+              '<span class="muted">Distância / Pagto:</span> ' + (p.km || "-") + " km • " + (p.pagamento || "Pix / Dinheiro") +
+              (p.criadoEm ? ' <span class="muted">(' + p.criadoEm + ")</span>" : "") +
+              "</div>" +
+              '<div class="actions">' +
+              '<button class="btn btn-aceitar" type="button" data-acao="aceitar" data-id="' + p.id + '">Aceitar corrida</button>' +
+              '<button class="btn btn-finalizar" type="button" data-acao="finalizar" data-id="' + p.id + '">Finalizar</button>' +
+              "</div>" +
+              '<button class="btn btn-remover" type="button" data-acao="remover" data-id="' + p.id + '">Remover pedido</button>' +
+              "</div>"
+            );
+          })
+          .join("");
       }
-    }
 
-    function meuGps() {
-      if (!navigator.geolocation) {
-        alert('GPS nao disponivel.');
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(function (pos) {
-        const lat = pos.coords.latitude.toFixed(6);
-        const lon = pos.coords.longitude.toFixed(6);
-        window.open('https://www.openstreetmap.org/?mlat=' + lat + '&mlon=' + lon + '#map=16/' + lat + '/' + lon, '_blank');
+      document.addEventListener("click", function (ev) {
+        const btn = ev.target.closest("button[data-acao]");
+        if (!btn) return;
+        const acao = btn.getAttribute("data-acao");
+        const id = btn.getAttribute("data-id");
+        if (acao === "aceitar") atualizarStatus(id, "Corrida aceita");
+        if (acao === "finalizar") atualizarStatus(id, "Corrida finalizada");
+        if (acao === "remover") removerPedido(id);
       });
-    }
 
-    function copiarPix() {
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(PIX).catch(function () {});
+      const btnAtualizar = document.getElementById("btn-atualizar-agora");
+      if (btnAtualizar) {
+        btnAtualizar.addEventListener("click", renderizar);
       }
-      alert('Chave Pix do Banco Inter copiada!');
-    }
 
-    carregarPedidos();
-    setInterval(carregarPedidos, 2500);
+      const btnLimpar = document.getElementById("btn-limpar-historico");
+      if (btnLimpar) {
+        btnLimpar.addEventListener("click", function () {
+          salvarCorridas([]);
+          renderizar();
+        });
+      }
+
+      window.addEventListener("storage", function (ev) {
+        if (ev.key === CHAVE_CORRIDAS) renderizar();
+      });
+
+      setInterval(renderizar, 1500);
+      renderizar();
+    })();
   </script>
 </body>
 </html>
