@@ -230,6 +230,36 @@
       background: rgba(16, 185, 129, 0.14);
       color: var(--green);
     }
+    .eta-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .eta-chip {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #1e1e24;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .eta-chip.ativo {
+      background: var(--green);
+      color: #062117;
+      border-color: var(--green);
+    }
+    .eta-input {
+      width: 90px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0f0f12;
+      color: var(--text);
+      font-size: 12px;
+    }
     .actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -312,7 +342,9 @@
     (function () {
       const CHAVE_CORRIDAS = "32drive_corridas";
       const CHAVE_VISTOS = "32drive_vistos_nuvem";
-      const TOPICO_NUVEM = "32drive_cassino_jr_pedidos_v2";
+      const TOPICO_PEDIDOS = "32drive_cassino_jr_pedidos_v2";
+      const TOPICO_RESPOSTAS = "32drive_cassino_jr_respostas_v2";
+      const temposSelecionados = {};
 
       function lerCorridas() {
         try {
@@ -342,6 +374,13 @@
         }
       }
 
+      function publicarRespostaNaNuvem(resposta) {
+        return fetch("https://ntfy.sh/" + TOPICO_RESPOSTAS, {
+          method: "POST",
+          body: JSON.stringify(resposta)
+        }).catch(function () {});
+      }
+
       function adicionarPedidoSeNovo(pedido) {
         if (!pedido || !pedido.id) return;
         const vistos = lerVistos();
@@ -357,6 +396,30 @@
         marcarVisto(pedido.id);
       }
 
+      function aceitarCorrida(id) {
+        const inputMin = document.getElementById("eta-input-" + id);
+        const digitado = inputMin ? String(inputMin.value || "").trim() : "";
+        const tempoChegada = digitado || temposSelecionados[id] || "5";
+
+        const lista = lerCorridas().map(function (p) {
+          if (p.id === id) {
+            return Object.assign({}, p, {
+              status: "Corrida aceita",
+              tempoChegada: tempoChegada
+            });
+          }
+          return p;
+        });
+        salvarCorridas(lista);
+        renderizar();
+
+        publicarRespostaNaNuvem({
+          id: id,
+          status: "Corrida aceita",
+          tempoChegada: tempoChegada
+        });
+      }
+
       function atualizarStatus(id, novoStatus) {
         const lista = lerCorridas().map(function (p) {
           if (p.id === id) {
@@ -366,6 +429,11 @@
         });
         salvarCorridas(lista);
         renderizar();
+
+        publicarRespostaNaNuvem({
+          id: id,
+          status: novoStatus
+        });
       }
 
       function removerPedido(id) {
@@ -395,6 +463,11 @@
           .map(function (p) {
             const isAceita = p.status && p.status !== "Aguardando motorista";
             const badgeClass = isAceita ? "status-tag aceita" : "status-tag";
+            const etaAtual = temposSelecionados[p.id] || p.tempoChegada || "5";
+            const etaInfo = p.tempoChegada
+              ? '<br/><strong style="color:var(--green);">Chegada informada: ' + p.tempoChegada + " min</strong>"
+              : "";
+
             return (
               '<div class="pedido-card">' +
               '<div class="pedido-top">' +
@@ -407,6 +480,15 @@
               '<span class="muted">Destino:</span> ' + p.destino + "<br/>" +
               '<span class="muted">Distância / Pagto:</span> ' + (p.km || "-") + " km • " + (p.pagamento || "Pix / Dinheiro") +
               (p.criadoEm ? ' <span class="muted">(' + p.criadoEm + ")</span>" : "") +
+              etaInfo +
+              "</div>" +
+              '<div class="eta-box">' +
+              '<span class="muted" style="font-size:12px;">Tempo de chegada:</span>' +
+              ["3", "5", "8", "12"].map(function (min) {
+                const ativo = String(etaAtual) === min ? " eta-chip ativo" : " eta-chip";
+                return '<button class="' + ativo + '" type="button" data-acao="set-eta" data-id="' + p.id + '" data-min="' + min + '">' + min + " min</button>";
+              }).join("") +
+              '<input class="eta-input" id="eta-input-' + p.id + '" type="number" min="1" max="60" value="' + etaAtual + '" aria-label="Minutos" />' +
               "</div>" +
               '<div class="actions">' +
               '<button class="btn btn-aceitar" type="button" data-acao="aceitar" data-id="' + p.id + '">Aceitar corrida</button>' +
@@ -420,7 +502,7 @@
       }
 
       function buscarDaNuvem() {
-        fetch("https://ntfy.sh/" + TOPICO_NUVEM + "/json?poll=1&since=10m")
+        fetch("https://ntfy.sh/" + TOPICO_PEDIDOS + "/json?poll=1&since=10m")
           .then(function (r) { return r.text(); })
           .then(function (texto) {
             if (!texto) return;
@@ -445,7 +527,14 @@
         if (!btn) return;
         const acao = btn.getAttribute("data-acao");
         const id = btn.getAttribute("data-id");
-        if (acao === "aceitar") atualizarStatus(id, "Corrida aceita");
+        if (acao === "set-eta") {
+          const min = btn.getAttribute("data-min");
+          temposSelecionados[id] = min;
+          const inp = document.getElementById("eta-input-" + id);
+          if (inp) inp.value = min;
+          renderizar();
+        }
+        if (acao === "aceitar") aceitarCorrida(id);
         if (acao === "finalizar") atualizarStatus(id, "Corrida finalizada");
         if (acao === "remover") removerPedido(id);
       });
@@ -465,7 +554,7 @@
       });
 
       buscarDaNuvem();
-      setInterval(buscarDaNuvem, 3000);
+      setInterval(buscarDaNuvem, 2500);
       setInterval(renderizar, 1500);
       renderizar();
     })();
