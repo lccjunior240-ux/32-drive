@@ -50,7 +50,7 @@
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
       color: #ffffff;
       border-radius: 16px;
-      padding: 22px 18px;
+      padding: 20px 16px;
       margin-bottom: 18px;
       text-align: center;
       border: 1px solid #334155;
@@ -63,6 +63,50 @@
       letter-spacing: 1.5px;
       color: #38bdf8;
       margin-bottom: 10px;
+    }
+
+    .link-box {
+      background-color: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+    }
+
+    .link-text {
+      display: block;
+      font-size: 11px;
+      color: #bae6fd;
+      word-break: break-all;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .link-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .mini-btn {
+      border: none;
+      border-radius: 7px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .mini-btn-copy {
+      background-color: #38bdf8;
+      color: #0f172a;
+    }
+
+    .mini-btn-open {
+      background-color: #22c55e;
+      color: #052e16;
     }
 
     .driver-role {
@@ -118,6 +162,12 @@
 
     input:focus {
       border-color: #0284c7;
+    }
+
+    .hint-text {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
     }
 
     .btn {
@@ -222,41 +272,61 @@
 
     <div class="driver-banner">
       <div class="driver-brand">32 DRIVE</div>
+
+      <div class="link-box">
+        <span class="link-text" id="appUrlText">https://lccjunior240-ux.github.io/32-drive/app.html</span>
+        <div class="link-actions">
+          <button type="button" class="mini-btn mini-btn-copy" onclick="copyAppLink()">Copiar link</button>
+          <a class="mini-btn mini-btn-open" href="https://lccjunior240-ux.github.io/32-drive/app.html">Entrar</a>
+        </div>
+      </div>
+
       <div class="driver-role">Motorista Credenciado</div>
       <div class="driver-name">Luíz Carlos Costa Junior</div>
       <div class="driver-car">Volkswagen Voyage • Placa IQD8060</div>
     </div>
 
-    <datalist id="bairros-rg">
-      <option value="Cassino, Rio Grande">
-      <option value="Querência, Cassino, Rio Grande">
-      <option value="Parque Guanabara, Cassino, Rio Grande">
-      <option value="Quarta Seção da Barra, Rio Grande">
-      <option value="Tecon, Rio Grande">
-      <option value="Termasa, Rio Grande">
-      <option value="Tergrasa, Rio Grande">
-      <option value="Bianchini, Rio Grande">
-      <option value="Bunge, Rio Grande">
-      <option value="Porto do Rio Grande, Rio Grande">
-      <option value="Vila Santa Tereza, Rio Grande">
-      <option value="Lar Gaúcho, Rio Grande">
-      <option value="Navegantes, Rio Grande">
-      <option value="Centro, Rio Grande">
-      <option value="Cidade Nova, Rio Grande">
-      <option value="Municipal, Rio Grande">
-      <option value="COHAB, Rio Grande">
-      <option value="Vila Recreio, Rio Grande">
-      <option value="Vila Santa Rosa, Rio Grande">
-      <option value="Vila São João, Rio Grande">
-      <option value="Vila São Miguel, Rio Grande">
-      <option value="BGV, Getúlio Vargas, Rio Grande">
-      <option value="Parque Marinha, Rio Grande">
-      <option value="Vila Maria, Rio Grande">
-      <option value="Parque Coelho, Rio Grande">
-      <option value="Parque São Pedro, Rio Grande">
-      <option value="FURG Carreiros, Rio Grande">
-      <option value="Sepe, Rio Grande">
-      <option value="Bolaxa, Rio Grande">
+    <datalist id="locais-rg">
+      <option value="Cassino (Av. Rio Grande)">
+      <option value="Supermercado Guanabara - Cassino">
+      <option value="Supermercado Peruzzo - Cassino">
+      <option value="Querência - Cassino">
+      <option value="Parque Guanabara - Cassino">
+      <option value="Bairro ABC - Cassino">
+      <option value="Bolaxa - Rio Grande">
+      <option value="Senandes - Rio Grande">
+      <option value="Parque Marinha - Rio Grande">
+      <option value="Parque São Pedro - Rio Grande">
+      <option value="FURG - Campus Carreiros">
+      <option value="Centro - Rio Grande (Praça Tamandaré)">
+      <option value="Centro - Rua General Bacelar">
+      <option value="Centro - Rua Marechal Floriano">
+      <option value="Centro - Rua Benjamin Constant">
+      <option value="Centro - Rua Andradas">
+      <option value="Centro - Rua Duque de Caxias">
+      <option value="Centro - Rua Vinte e Quatro de Maio">
+      <option value="Centro - Rua Aquidaban">
+      <option value="Cidade Nova - Rio Grande">
+      <option value="Lar Gaúcho - Rio Grande">
+      <option value="Navegantes - Rio Grande">
+      <option value="Vila Santa Tereza - Rio Grande">
+      <option value="Quarta Seção da Barra - Rio Grande">
+      <option value="Tecon - Rio Grande">
+      <option value="Termasa - Rio Grande">
+      <option value="Tergrasa - Rio Grande">
+      <option value="Bianchini - Rio Grande">
+      <option value="Bunge - Rio Grande">
+      <option value="Porto do Rio Grande">
+      <option value="BGV / Getúlio Vargas - Rio Grande">
+      <option value="COHAB - Rio Grande">
+      <option value="Municipal - Rio Grande">
+      <option value="Vila Recreio - Rio Grande">
+      <option value="Vila Santa Rosa - Rio Grande">
+      <option value="Vila São João - Rio Grande">
+      <option value="Vila São Miguel - Rio Grande">
+      <option value="Vila Maria - Rio Grande">
+      <option value="Parque Coelho - Rio Grande">
+      <option value="Sepe - Rio Grande">
     </datalist>
 
     <div class="field-group">
@@ -270,13 +340,14 @@
     </div>
 
     <div class="field-group">
-      <label for="origin">Origem (bairro, empresa ou referência)</label>
-      <input type="text" id="origin" list="bairros-rg" placeholder="Ex.: Cassino, Querência, Parque Guanabara" />
+      <label for="origin">Origem (rua, bairro ou mercado)</label>
+      <input type="text" id="origin" list="locais-rg" placeholder="Ex.: Supermercado Guanabara, Bolaxa, Centro..." />
+      <div class="hint-text">Toque para escolher da lista ou digite o nome da rua e bairro.</div>
     </div>
 
     <div class="field-group">
-      <label for="destination">Destino (bairro, empresa ou referência)</label>
-      <input type="text" id="destination" list="bairros-rg" placeholder="Ex.: Parque Marinha, Cidade Nova, Lar Gaúcho" />
+      <label for="destination">Destino (rua, bairro ou mercado)</label>
+      <input type="text" id="destination" list="locais-rg" placeholder="Ex.: Parque Marinha, Peruzzo, FURG, Rua Bacelar..." />
     </div>
 
     <button type="button" class="btn btn-gps" id="btnGps" onclick="useMyGPS()">
@@ -308,10 +379,69 @@
   <script>
     const DRIVER_WHATSAPP = "5553991357231";
     const PIX_KEY = "45bd89b5-9dd7-4cda-8715-789257d06596";
+    const APP_URL = "https://lccjunior240-ux.github.io/32-drive/app.html";
+
+    const LOCAL_DB = [
+      { keys: ["supermercado guanabara", "guanabara cassino"], lat: -32.1818, lon: -52.1643 },
+      { keys: ["supermercado peruzzo", "peruzzo cassino", "peruzzo"], lat: -32.1825, lon: -52.1631 },
+      { keys: ["cassino", "av rio grande", "avenida rio grande"], lat: -32.1835, lon: -52.1610 },
+      { keys: ["querencia"], lat: -32.1725, lon: -52.1760 },
+      { keys: ["parque guanabara"], lat: -32.1645, lon: -52.1835 },
+      { keys: ["bairro abc", "abc"], lat: -32.1795, lon: -52.1725 },
+      { keys: ["bolaxa", "bolacha"], lat: -32.1480, lon: -52.1865 },
+      { keys: ["senandes"], lat: -32.1265, lon: -52.1965 },
+      { keys: ["parque marinha"], lat: -32.0965, lon: -52.1815 },
+      { keys: ["parque sao pedro"], lat: -32.0895, lon: -52.1785 },
+      { keys: ["furg", "carreiros", "campus carreiros"], lat: -32.0735, lon: -52.1655 },
+      { keys: ["centro", "praca tamandare", "general bacelar", "marechal floriano", "benjamin constant", "andradas", "duque de caxias", "vinte e quatro de maio", "24 de maio", "aquidaban", "zalony", "luis lorea", "luiz lorea", "riachuelo", "ewbank", "dr nascimento"], lat: -32.0350, lon: -52.0986 },
+      { keys: ["cidade nova"], lat: -32.0445, lon: -52.1085 },
+      { keys: ["lar gaucho", "largaucho"], lat: -32.0475, lon: -52.1010 },
+      { keys: ["navegantes"], lat: -32.0490, lon: -52.0935 },
+      { keys: ["vila santa tereza", "santa tereza"], lat: -32.0545, lon: -52.0940 },
+      { keys: ["quarta secao da barra", "4 secao da barra", "barra"], lat: -32.1415, lon: -52.1045 },
+      { keys: ["tecon", "tercon"], lat: -32.1155, lon: -52.1065 },
+      { keys: ["termasa"], lat: -32.1055, lon: -52.1075 },
+      { keys: ["tergrasa"], lat: -32.0985, lon: -52.1080 },
+      { keys: ["bianchini"], lat: -32.0920, lon: -52.1095 },
+      { keys: ["bunge"], lat: -32.0865, lon: -52.1105 },
+      { keys: ["porto"], lat: -32.0785, lon: -52.1040 },
+      { keys: ["bgv", "getulio vargas"], lat: -32.0410, lon: -52.0895 },
+      { keys: ["cohab"], lat: -32.0595, lon: -52.1265 },
+      { keys: ["municipal"], lat: -32.0525, lon: -52.1185 },
+      { keys: ["vila recreio", "recreio"], lat: -32.0565, lon: -52.1325 },
+      { keys: ["vila santa rosa", "santa rosa"], lat: -32.0635, lon: -52.1385 },
+      { keys: ["vila sao joao", "sao joao"], lat: -32.0685, lon: -52.1445 },
+      { keys: ["vila sao miguel", "sao miguel"], lat: -32.0725, lon: -52.1495 },
+      { keys: ["vila maria"], lat: -32.0825, lon: -52.1695 },
+      { keys: ["parque coelho"], lat: -32.0855, lon: -52.1735 },
+      { keys: ["sepe"], lat: -32.1125, lon: -52.1895 }
+    ];
 
     let originCoords = null;
     let calculatedDistanceKm = null;
     let calculatedPrice = null;
+
+    function normalizeText(str) {
+      return str
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function findInLocalDB(query) {
+      const clean = normalizeText(query);
+      for (const item of LOCAL_DB) {
+        for (const k of item.keys) {
+          if (clean.includes(k)) {
+            return { lat: item.lat, lon: item.lon };
+          }
+        }
+      }
+      return null;
+    }
 
     function setStatus(text, isError = false) {
       const el = document.getElementById("statusMsg");
@@ -324,6 +454,21 @@
         style: "currency",
         currency: "BRL"
       });
+    }
+
+    async function copyAppLink() {
+      try {
+        await navigator.clipboard.writeText(APP_URL);
+        setStatus("Link do 32 DRIVE copiado.");
+      } catch (e) {
+        const temp = document.createElement("input");
+        temp.value = APP_URL;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+        setStatus("Link do 32 DRIVE copiado.");
+      }
     }
 
     function useMyGPS() {
@@ -370,17 +515,29 @@
     }
 
     async function geocodePlace(query) {
-      const fullQuery = `${query}, Rio Grande, Rio Grande do Sul, Brasil`;
-      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(fullQuery)}`;
-      const resp = await fetch(url);
-      const results = await resp.json();
-      if (!results || results.length === 0) {
-        return null;
+      const viewbox = "-52.26,-32.23,-52.04,-32.00";
+      const attempts = [
+        `${query}, Rio Grande, RS, Brasil`,
+        `${query}, Cassino, Rio Grande, RS, Brasil`
+      ];
+
+      for (const q of attempts) {
+        try {
+          const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&bounded=1&viewbox=${viewbox}&q=${encodeURIComponent(q)}`;
+          const resp = await fetch(url);
+          const results = await resp.json();
+          if (results && results.length > 0) {
+            return {
+              lat: parseFloat(results[0].lat),
+              lon: parseFloat(results[0].lon)
+            };
+          }
+        } catch (e) {
+          // Segue para o banco interno
+        }
       }
-      return {
-        lat: parseFloat(results[0].lat),
-        lon: parseFloat(results[0].lon)
-      };
+
+      return findInLocalDB(query);
     }
 
     function haversineKm(c1, c2) {
@@ -420,13 +577,13 @@
         const end = await geocodePlace(destText);
 
         if (!start || !end) {
-          setStatus("Endereço não encontrado. Tente colocar bairro ou ponto de referência mais conhecido.", true);
+          setStatus("Local não encontrado. Escolha um bairro da lista ou informe o bairro junto com a rua.", true);
           btn.disabled = false;
           return;
         }
 
         const straightKm = haversineKm(start, end);
-        const estimatedKm = Math.max(0.8, straightKm * 1.25);
+        const estimatedKm = Math.max(1.0, straightKm * 1.25);
 
         let price = 7.99;
         if (estimatedKm > 3.5) {
@@ -443,7 +600,7 @@
         resultBox.classList.add("visible");
         setStatus("Corrida calculada com sucesso.");
       } catch (err) {
-        setStatus("Erro ao calcular rota. Verifique sua conexão com a internet.", true);
+        setStatus("Erro ao calcular rota. Verifique sua conexão.", true);
       } finally {
         btn.disabled = false;
       }
