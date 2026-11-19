@@ -7,16 +7,16 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest-passageiro.json" />
   <link rel="icon" type="image/png" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-512.png" />
-  <title>32 Drive — Motorista</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <title>32 Drive — Passageiro</title>
   <style>
     :root {
       --bg: #ffffff;
       --card: #ffffff;
-      --navy-card: linear-gradient(145deg, #0b192c 0%, #13294b 65%, #0c1e38 100%);
-      --navy-border: #1e3f6e;
-      --card-elevated: rgba(255, 255, 255, 0.1);
+      --navy-header: linear-gradient(145deg, #0b192c 0%, #13294b 70%, #0c1e38 100%);
       --border: #cbd5e1;
       --text: #0f172a;
       --muted: #475569;
@@ -32,102 +32,101 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      font-size: 17px;
-      line-height: 1.45;
+      font-size: 18px;
+      line-height: 1.5;
     }
     header {
-      background: #ffffff;
-      border-bottom: 2px solid var(--border);
-      padding: 16px;
+      background: var(--navy-header);
+      border-bottom: 3px solid var(--accent);
+      padding: 18px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 12px;
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 1000;
+      color: #ffffff;
     }
     .brand { display: flex; align-items: center; gap: 12px; }
     .brand img {
-      width: 46px;
-      height: 46px;
-      border-radius: 11px;
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
       object-fit: cover;
-      border: 1px solid var(--border);
+      border: 2px solid var(--accent);
+      background: #ffffff;
     }
-    .badge {
-      background: var(--accent);
-      color: #0f172a;
-      font-weight: 800;
-      font-size: 14px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      white-space: nowrap;
-    }
-    h1 { font-size: 19px; font-weight: 900; color: #0f172a; }
-    .subtitle { font-size: 15px; color: var(--muted); }
-    main {
-      flex: 1;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-width: 680px;
-      width: 100%;
-      margin: 0 auto;
-    }
-    .hero-card {
-      background: var(--navy-card);
-      border: 1px solid var(--navy-border);
-      border-radius: 18px;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
-      color: #ffffff;
-    }
-    .hero-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .hero-title { font-size: 24px; font-weight: 900; color: var(--accent); letter-spacing: 0.5px; }
-    .hero-sub { font-size: 15px; color: #dbeafe; margin-top: 3px; }
+    h1 { font-size: 22px; font-weight: 900; color: var(--accent); letter-spacing: 0.4px; }
+    .subtitle { font-size: 16px; color: #dbeafe; font-weight: 600; }
     .online-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(16, 185, 129, 0.2);
+      background: rgba(16, 185, 129, 0.22);
       color: #6ee7b7;
-      border: 1px solid rgba(110, 231, 183, 0.45);
-      padding: 7px 13px;
+      border: 1px solid rgba(110, 231, 183, 0.5);
+      padding: 8px 14px;
       border-radius: 999px;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 800;
       white-space: nowrap;
     }
     .online-pill.offline {
-      background: rgba(239, 68, 68, 0.22);
+      background: rgba(239, 68, 68, 0.25);
       color: #fecaca;
-      border-color: rgba(252, 165, 165, 0.5);
+      border-color: rgba(252, 165, 165, 0.55);
     }
-    .dot { width: 9px; height: 9px; border-radius: 50%; background: #34d399; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: #34d399; }
     .online-pill.offline .dot { background: #f87171; }
-    .driver-box {
-      background: var(--card-elevated);
-      border: 1px solid rgba(148, 163, 184, 0.3);
+    main {
+      flex: 1;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-width: 680px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .dinamica-banner {
+      display: none;
+      background: #fffbeb;
+      border: 2px solid #f59e0b;
+      color: #92400e;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 17px;
+      font-weight: 800;
+    }
+    .dinamica-banner.visivel { display: block; }
+    .live-banner {
+      display: none;
+      background: #ecfdf5;
+      border: 2px solid #10b981;
+      border-radius: 16px;
+      padding: 18px;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .live-banner.visivel { display: flex; }
+    .live-banner.recusada { background: #fef2f2; border-color: #ef4444; }
+    .live-title { font-size: 21px; font-weight: 900; color: #065f46; }
+    .live-banner.recusada .live-title { color: #991b1b; }
+    .live-eta { font-size: 19px; font-weight: 800; color: #0f172a; }
+    .driver-accepted-card {
+      display: none;
+      background: #0b192c;
+      color: #ffffff;
       border-radius: 14px;
       padding: 14px;
-      display: grid;
       grid-template-columns: 1fr auto;
       gap: 12px;
       align-items: center;
     }
-    .driver-name { font-size: 19px; font-weight: 800; color: #ffffff; }
-    .driver-car { font-size: 16px; color: #dbeafe; margin-top: 3px; }
+    .driver-accepted-card.visivel { display: grid; }
+    .driver-name { font-size: 20px; font-weight: 800; color: #ffffff; }
+    .driver-car { font-size: 17px; color: #dbeafe; margin-top: 2px; }
     .plate-box {
       background: #ffffff;
       color: #0f172a;
@@ -137,8 +136,8 @@
       text-align: center;
       font-weight: 900;
       letter-spacing: 1px;
-      font-size: 16px;
-      min-width: 118px;
+      font-size: 17px;
+      min-width: 120px;
     }
     .plate-label {
       display: block;
@@ -148,113 +147,139 @@
       letter-spacing: 0.8px;
       margin-bottom: 2px;
     }
+    #mapa-32drive {
+      width: 100%;
+      height: 240px;
+      border-radius: 14px;
+      border: 2px solid var(--border);
+      z-index: 1;
+    }
     .card {
       background: var(--card);
       border: 2px solid var(--border);
       border-radius: 16px;
-      padding: 16px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
       box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
     }
-    .section-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .section-title { font-size: 19px; font-weight: 800; color: #0f172a; }
-    .count-badge {
-      background: #fef3c7;
-      border: 1px solid #f59e0b;
-      color: #92400e;
-      font-size: 15px;
+    label {
+      font-size: 18px;
       font-weight: 800;
-      padding: 5px 12px;
-      border-radius: 999px;
+      color: #0f172a;
+      margin-bottom: 6px;
+      display: block;
     }
-    .lista { display: flex; flex-direction: column; gap: 12px; }
-    .pedido-card {
+    input, select {
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      border: 2px solid #94a3b8;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 19px;
+      font-weight: 600;
+    }
+    input:focus, select:focus { outline: none; border-color: #0b192c; }
+    .clima-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #f8fafc;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      flex-wrap: wrap;
+    }
+    .clima-label { font-size: 17px; font-weight: 700; color: #0f172a; }
+    .btn-clima {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 2px solid #0284c7;
+      background: #e0f2fe;
+      color: #0369a1;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-clima.ativo {
+      background: #0284c7;
+      color: #ffffff;
+    }
+    .resumo {
       background: #f8fafc;
       border: 2px solid var(--border);
       border-radius: 14px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      color: #0f172a;
-    }
-    .pedido-top {
+      padding: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
     }
-    .pedido-id { font-weight: 800; font-size: 18px; color: #0f172a; }
-    .pedido-valor { font-weight: 900; font-size: 22px; color: var(--green); }
-    .pedido-info { font-size: 17px; line-height: 1.5; color: #0f172a; }
-    .muted { color: var(--muted); }
-    .status-tag {
-      display: inline-block;
-      font-size: 14px;
-      font-weight: 800;
-      padding: 6px 11px;
-      border-radius: 999px;
-      background: #fef3c7;
-      color: #92400e;
-      width: fit-content;
-    }
-    .status-tag.aceita { background: #d1fae5; color: #065f46; }
-    .status-tag.recusada { background: #fee2e2; color: #991b1b; }
-    .eta-box { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-    .eta-chip {
-      padding: 9px 13px;
-      border-radius: 10px;
-      border: 2px solid var(--border);
-      background: #ffffff;
-      color: #0f172a;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    .eta-chip.ativo { background: #10b981; color: #052e16; border-color: #059669; }
-    .eta-input {
-      width: 104px;
-      padding: 9px 10px;
-      border-radius: 10px;
-      border: 2px solid var(--border);
-      background: #ffffff;
-      color: #0f172a;
-      font-size: 16px;
-    }
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+    .valor { font-size: 30px; font-weight: 900; color: var(--green); white-space: nowrap; }
+    .pix-box {
+      background: #0b192c;
+      border: 2px solid #1e3f6e;
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
       gap: 10px;
-      margin-top: 4px;
+      color: #ffffff;
     }
-    .btn {
-      padding: 15px 12px;
-      border: none;
+    .pix-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #020617;
+      border: 1px solid #334155;
       border-radius: 12px;
-      font-size: 17px;
+      padding: 12px;
+      flex-wrap: wrap;
+    }
+    .pix-key { font-size: 16px; font-weight: 700; color: #ffffff; word-break: break-all; }
+    .btn {
+      width: 100%;
+      padding: 17px;
+      border: none;
+      border-radius: 14px;
+      font-size: 19px;
       font-weight: 800;
       cursor: pointer;
     }
-    .btn-status-toggle { background: #ffffff; color: #0f172a; border: 2px solid #93c5fd; }
-    .btn-aceitar { background: #10b981; color: #052e16; }
-    .btn-recusar { background: #fee2e2; color: #991b1b; border: 2px solid #f87171; }
-    .btn-finalizar { background: #f59e0b; color: #0f172a; }
-    .btn-limpar { background: #f1f5f9; color: #0f172a; border: 2px solid #cbd5e1; }
-    .btn-remover { background: #fef2f2; color: #991b1b; border: 2px solid #fecaca; }
-    .offline-notice {
-      display: none;
-      background: #fef2f2;
-      border: 2px solid #f87171;
-      color: #991b1b;
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 15px;
-      font-weight: 700;
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-copy {
+      width: auto;
+      padding: 12px 16px;
+      font-size: 17px;
+      background: #10b981;
+      color: #052e16;
+      white-space: nowrap;
     }
-    .offline-notice.visivel { display: block; }
+    .btn-secondary { background: #f1f5f9; color: #0f172a; border: 2px solid #94a3b8; }
+    .btn-calc { background: #fef3c7; color: #92400e; border: 2px solid #f59e0b; }
+    .btn-primary { background: #f59e0b; color: #0f172a; }
+    .status {
+      font-size: 18px;
+      color: #047857;
+      min-height: 24px;
+      text-align: center;
+      font-weight: 800;
+    }
+    .lista { display: flex; flex-direction: column; gap: 12px; }
+    .item {
+      background: #f8fafc;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 17px;
+      line-height: 1.5;
+      color: #0f172a;
+    }
   </style>
 </head>
 <body>
@@ -262,289 +287,585 @@
     <div class="brand">
       <img src="icon-512.png" alt="32 Drive" />
       <div>
-        <h1>32 Drive — Motorista</h1>
-        <div class="subtitle">Painel de Solicitações</div>
+        <h1>32 DRIVE</h1>
+        <div class="subtitle">Cassino &amp; Rio Grande</div>
       </div>
     </div>
-    <span class="badge">PAINEL</span>
+    <span class="online-pill" id="passageiro-status-pill">
+      <span class="dot"></span>
+      <span id="passageiro-status-text">Conectando...</span>
+    </span>
   </header>
 
   <main>
-    <section class="hero-card">
-      <div class="hero-top">
-        <div>
-          <div class="hero-title">32 DRIVE</div>
-          <div class="hero-sub">Mobilidade Urbana Local • Cassino &amp; Rio Grande</div>
-        </div>
-        <span class="online-pill" id="status-pill"><span class="dot"></span><span id="status-pill-text">Em Operação</span></span>
-      </div>
+    <div class="dinamica-banner" id="dinamica-banner"></div>
 
-      <div class="driver-box">
+    <section class="live-banner" id="live-banner">
+      <div class="live-title" id="live-title">Aguardando motorista...</div>
+      <div class="live-eta" id="live-eta">Buscando motorista liberado na região...</div>
+
+      <!-- Só aparece depois que um motorista cadastrado aceitar a corrida -->
+      <div class="driver-accepted-card" id="driver-accepted-card">
         <div>
-          <div class="driver-name">Luíz Carlos Costa Jr.</div>
-          <div class="driver-car">VW Voyage 2010</div>
+          <div class="driver-name" id="accepted-driver-name">—</div>
+          <div class="driver-car" id="accepted-driver-car">—</div>
         </div>
         <div class="plate-box">
           <span class="plate-label">BRASIL</span>
-          IQD8060
+          <span id="accepted-driver-plate">—</span>
         </div>
-      </div>
-
-      <button class="btn btn-status-toggle" type="button" id="btn-alternar-online">Ficar Offline</button>
-      <div class="offline-notice" id="offline-notice">
-        Você está Offline. O painel do passageiro também foi avisado e novos pedidos estão pausados.
       </div>
     </section>
 
     <div class="card">
-      <div class="section-head">
-        <div class="section-title">Corridas solicitadas</div>
-        <span class="count-badge" id="contador">0</span>
+      <div>
+        <label for="nome">Seu nome</label>
+        <input id="nome" type="text" placeholder="Ex: Maria" />
       </div>
-      <div class="lista" id="lista-motorista"></div>
-      <button class="btn btn-limpar" type="button" id="btn-limpar-historico">Limpar histórico</button>
+      <div>
+        <label for="origem">Ponto de embarque</label>
+        <input id="origem" type="text" placeholder="Ex: Rua Ijuí, 654, Cassino" />
+      </div>
+      <div>
+        <label for="destino">Destino</label>
+        <input id="destino" type="text" placeholder="Ex: Supermercado Guanabara, Cassino" />
+      </div>
+      <div>
+        <label for="pagamento">Forma de pagamento</label>
+        <select id="pagamento">
+          <option value="Pix">Pix</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão">Cartão (Gateway / Maquininha)</option>
+        </select>
+      </div>
+
+      <div class="clima-box">
+        <span class="clima-label">Condição climática: <strong id="texto-clima">Normal</strong></span>
+        <button class="btn-clima" type="button" id="btn-chuva">Ativar modo chuva (+25%)</button>
+      </div>
+
+      <button class="btn btn-secondary" type="button" id="btn-gps">Usar meu GPS no embarque</button>
+      <button class="btn btn-calc" type="button" id="btn-calcular">Calcular corrida</button>
+
+      <div id="mapa-32drive" aria-label="Mapa da corrida"></div>
+
+      <div class="resumo">
+        <div>
+          <div style="font-size:17px;font-weight:700;color:#0f172a;">Valor estimado da corrida</div>
+          <div id="detalhe-tarifa" style="font-size:16px;color:var(--muted);">Até 3,50 km: R$ 7,99 | A partir de 3,55 km: R$ 2,00/km</div>
+        </div>
+        <div class="valor" id="valor-total">—</div>
+      </div>
+
+      <div class="pix-box">
+        <div style="font-size:17px;color:#dbeafe;font-weight:700;" id="pix-titulo">Pix do Motorista / Operação</div>
+        <div class="pix-row">
+          <span class="pix-key" id="pix-chave-texto">45bd89b5-9dd7-4cda-8715-789257d06596</span>
+          <button class="btn btn-copy" type="button" id="btn-copiar-pix">Copiar Pix</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" type="button" id="btn-enviar">Solicitar corrida agora</button>
+      <div class="status" id="status"></div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;font-size:20px;">Minhas corridas</div>
+      <div class="lista" id="meus-pedidos"></div>
     </div>
   </main>
 
-  <script>
-    (function () {
-      const CHAVE_CORRIDAS = "32drive_corridas";
-      const CHAVE_ONLINE = "32drive_motorista_online";
-      const TOPICO_PEDIDOS = "32drive_cassino_jr_pedidos_v3";
-      const TOPICO_RESPOSTAS = "32drive_cassino_jr_respostas_v3";
-      const TOPICO_STATUS = "32drive_cassino_jr_status_v3";
-      const temposSelecionados = {};
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module">
+    import { db } from "./firebase-config.js";
+    import {
+      collection,
+      addDoc,
+      doc,
+      onSnapshot,
+      query,
+      where,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-      let estaOnline = localStorage.getItem(CHAVE_ONLINE) !== "false";
+    const CHAVE_CLIENTE_ID = "32drive_cliente_uid";
+    const PIX_PADRAO = "45bd89b5-9dd7-4cda-8715-789257d06596";
 
-      function publicarStatusNaNuvem(online) {
-        return fetch("https://ntfy.sh/" + TOPICO_STATUS, {
-          method: "POST",
-          body: JSON.stringify({ online: Boolean(online), atualizadoEm: Date.now() })
-        }).catch(function () {});
+    const PONTOS_REFERENCIA = [
+      { chaves: ["ijui", "ijuí", "654"], coords: [-32.1865, -52.1642] },
+      { chaves: ["guanabara"], coords: [-32.1798, -52.1685] },
+      { chaves: ["cassino", "av. rio grande", "avenida rio grande"], coords: [-32.1833, -52.1667] },
+      { chaves: ["centro", "general bacelar", "henrique pancada"], coords: [-32.0350, -52.0986] },
+      { chaves: ["furg", "carreiros"], coords: [-32.0750, -52.1630] },
+      { chaves: ["navegantes"], coords: [-32.0420, -52.1150] },
+      { chaves: ["cidade nova"], coords: [-32.0520, -52.1180] },
+      { chaves: ["porto novo"], coords: [-32.0450, -52.0950] },
+      { chaves: ["santa tereza"], coords: [-32.0490, -52.0920] }
+    ];
+
+    let coordsGps = null;
+    let ultimoCalculo = null;
+    let motoristasOnlineQtd = 0;
+    let modoChuvaLocal = false;
+    let modoChuvaGlobal = false;
+    let mapa = null;
+    let camadaRota = null;
+    let listaCorridas = [];
+
+    function obterClienteUid() {
+      let uid = localStorage.getItem(CHAVE_CLIENTE_ID);
+      if (!uid) {
+        uid = "CLI-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7);
+        localStorage.setItem(CHAVE_CLIENTE_ID, uid);
+      }
+      return uid;
+    }
+
+    function iniciarMapa() {
+      if (!window.L || !document.getElementById("mapa-32drive")) return;
+      mapa = L.map("mapa-32drive").setView([-32.1833, -52.1667], 13);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap"
+      }).addTo(mapa);
+      camadaRota = L.layerGroup().addTo(mapa);
+    }
+
+    function atualizarMapaRota(p1, p2) {
+      if (!mapa || !camadaRota) return;
+      camadaRota.clearLayers();
+      const pontos = [];
+      if (p1) {
+        pontos.push(p1);
+        L.marker(p1).addTo(camadaRota).bindPopup("Embarque");
+      }
+      if (p2) {
+        pontos.push(p2);
+        L.marker(p2).addTo(camadaRota).bindPopup("Destino");
+      }
+      if (p1 && p2) {
+        const linha = L.polyline([p1, p2], { color: "#0b192c", weight: 4 }).addTo(camadaRota);
+        mapa.fitBounds(linha.getBounds(), { padding: [24, 24] });
+      } else if (pontos.length === 1) {
+        mapa.setView(pontos[0], 14);
+      }
+    }
+
+    function obterFatorDinamico() {
+      const agora = new Date();
+      const minDia = agora.getHours() * 60 + agora.getMinutes();
+
+      let fator = 1.0;
+      const motivos = [];
+
+      const picoManha = minDia >= 420 && minDia <= 540;
+      const picoTarde = minDia >= 1050 && minDia <= 1200;
+      const madrugada = minDia >= 1380 || minDia <= 300;
+
+      if (madrugada) {
+        fator += 0.25;
+        motivos.push("Tarifa madrugada (+25%)");
+      } else if (picoManha || picoTarde) {
+        fator += 0.20;
+        motivos.push("Horário de pico (+20%)");
       }
 
-      function atualizarEstadoOnlineUI() {
-        const pill = document.getElementById("status-pill");
-        const pillText = document.getElementById("status-pill-text");
-        const btnToggle = document.getElementById("btn-alternar-online");
-        const notice = document.getElementById("offline-notice");
-
-        if (pill) pill.classList.toggle("offline", !estaOnline);
-        if (pillText) pillText.textContent = estaOnline ? "Em Operação" : "Offline";
-        if (btnToggle) btnToggle.textContent = estaOnline ? "Ficar Offline" : "Ficar Online";
-        if (notice) notice.classList.toggle("visivel", !estaOnline);
+      if (modoChuvaLocal || modoChuvaGlobal) {
+        fator += 0.25;
+        motivos.push("Chuva / clima adverso (+25%)");
       }
 
-      function alternarOnline() {
-        estaOnline = !estaOnline;
-        localStorage.setItem(CHAVE_ONLINE, String(estaOnline));
-        atualizarEstadoOnlineUI();
-        publicarStatusNaNuvem(estaOnline);
+      return {
+        fator: Number(fator.toFixed(2)),
+        ativo: fator > 1.0,
+        descricao: motivos.join(" + ")
+      };
+    }
+
+    function atualizarBannerDinamica() {
+      const banner = document.getElementById("dinamica-banner");
+      const din = obterFatorDinamico();
+      if (!banner) return;
+      if (din.ativo) {
+        banner.classList.add("visivel");
+        banner.textContent = "Tarifa dinâmica ativa: " + din.descricao;
+      } else {
+        banner.classList.remove("visivel");
+        banner.textContent = "";
+      }
+    }
+
+    function atualizarClimaUI() {
+      const ativo = modoChuvaLocal || modoChuvaGlobal;
+      const btn = document.getElementById("btn-chuva");
+      const txt = document.getElementById("texto-clima");
+      if (btn) {
+        btn.classList.toggle("ativo", ativo);
+        btn.textContent = modoChuvaGlobal
+          ? "Chuva ativada pela central (+25%)"
+          : ativo
+          ? "Chuva ativa (+25%) — Desativar"
+          : "Ativar modo chuva (+25%)";
+        btn.disabled = modoChuvaGlobal;
+      }
+      if (txt) txt.textContent = ativo ? "Chuva (+25%)" : "Normal";
+      atualizarBannerDinamica();
+    }
+
+    function alternarChuva() {
+      if (modoChuvaGlobal) return;
+      modoChuvaLocal = !modoChuvaLocal;
+      atualizarClimaUI();
+      if (document.getElementById("origem").value.trim() && document.getElementById("destino").value.trim()) {
+        calcularCorrida();
+      }
+    }
+
+    function atualizarDisponibilidadeUI() {
+      const pill = document.getElementById("passageiro-status-pill");
+      const text = document.getElementById("passageiro-status-text");
+      const btnEnviar = document.getElementById("btn-enviar");
+      const disponivel = motoristasOnlineQtd > 0;
+
+      if (pill) pill.classList.toggle("offline", !disponivel);
+      if (text) {
+        text.textContent = disponivel
+          ? motoristasOnlineQtd + (motoristasOnlineQtd === 1 ? " motorista online" : " motoristas online")
+          : "Sem motorista online";
+      }
+      if (btnEnviar) btnEnviar.disabled = !disponivel;
+    }
+
+    function copiarPix() {
+      const status = document.getElementById("status");
+      const chaveAtual = document.getElementById("pix-chave-texto").textContent.trim();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(chaveAtual).then(() => {
+          if (status) status.textContent = "Chave Pix copiada!";
+        });
+      }
+    }
+
+    function haversineKm(a, b) {
+      const R = 6371;
+      const toRad = (deg) => (deg * Math.PI) / 180;
+      const dLat = toRad(b[0] - a[0]);
+      const dLng = toRad(b[1] - a[1]);
+      const lat1 = toRad(a[0]);
+      const lat2 = toRad(b[0]);
+      const x =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+      return R * c * 1.3;
+    }
+
+    function acharPontoLocal(texto) {
+      const lower = String(texto || "").toLowerCase();
+      for (const item of PONTOS_REFERENCIA) {
+        for (const chave of item.chaves) {
+          if (lower.includes(chave)) return item.coords;
+        }
+      }
+      return null;
+    }
+
+    function estimarDistancia(origem, destino) {
+      const p1 = coordsGps || acharPontoLocal(origem);
+      const p2 = acharPontoLocal(destino);
+      atualizarMapaRota(p1, p2);
+      if (p1 && p2) {
+        return Math.max(1.0, Number(haversineKm(p1, p2).toFixed(2)));
+      }
+      const o = String(origem || "").toLowerCase();
+      const d = String(destino || "").toLowerCase();
+      const oCassino = o.includes("cassino") || o.includes("ijui") || o.includes("ijuí");
+      const dCassino = d.includes("cassino") || d.includes("guanabara");
+      if (oCassino && dCassino) return 2.8;
+      if ((oCassino && !dCassino) || (!oCassino && dCassino)) return 18.0;
+      return 4.5;
+    }
+
+    function calcularTarifa(distancia) {
+      if (!Number.isFinite(distancia) || distancia <= 0) return null;
+      const din = obterFatorDinamico();
+      let valorBase = 0;
+      let regraTexto = "";
+
+      if (distancia < 3.55) {
+        valorBase = 7.99;
+        regraTexto = distancia.toFixed(2).replace(".", ",") + " km • Tarifa mínima (até 3,50 km): R$ 7,99";
+      } else {
+        valorBase = distancia * 2.0;
+        regraTexto = distancia.toFixed(2).replace(".", ",") + " km × R$ 2,00/km";
       }
 
-      function lerCorridas() {
-        try {
-          return JSON.parse(localStorage.getItem(CHAVE_CORRIDAS) || "[]");
-        } catch (e) {
-          return [];
+      const totalFinal = Number((valorBase * din.fator).toFixed(2));
+      if (din.ativo) {
+        regraTexto += " • " + din.descricao;
+      }
+
+      return {
+        kmUsado: distancia,
+        total: totalFinal,
+        dinamica: din.ativo ? din.descricao : null,
+        texto: regraTexto
+      };
+    }
+
+    function formatarMoeda(valor) {
+      return "R$ " + Number(valor).toFixed(2).replace(".", ",");
+    }
+
+    function calcularCorrida() {
+      const origem = (document.getElementById("origem").value || "").trim();
+      const destino = (document.getElementById("destino").value || "").trim();
+      const status = document.getElementById("status");
+      const elTotal = document.getElementById("valor-total");
+      const elDetalhe = document.getElementById("detalhe-tarifa");
+
+      if (!origem || !destino) {
+        if (status) status.textContent = "Preencha ponto de embarque e destino.";
+        return null;
+      }
+
+      const km = estimarDistancia(origem, destino);
+      const calc = calcularTarifa(km);
+      ultimoCalculo = calc;
+
+      if (elTotal) elTotal.textContent = formatarMoeda(calc.total);
+      if (elDetalhe) elDetalhe.textContent = calc.texto;
+      if (status) status.textContent = "Valor calculado! Toque em Solicitar corrida agora.";
+      return calc;
+    }
+
+    function usarLocalizacao() {
+      const status = document.getElementById("status");
+      if (!navigator.geolocation) {
+        if (status) status.textContent = "GPS indisponível neste aparelho.";
+        return;
+      }
+      if (status) status.textContent = "Obtendo GPS...";
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          coordsGps = [pos.coords.latitude, pos.coords.longitude];
+          atualizarMapaRota(coordsGps, acharPontoLocal(document.getElementById("destino").value));
+          const origem = document.getElementById("origem");
+          if (origem && !origem.value.trim()) origem.value = "Localização atual (GPS)";
+          if (status) status.textContent = "GPS capturado no embarque!";
+        },
+        () => {
+          if (status) status.textContent = "Não foi possível ler o GPS. Digite o endereço.";
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
+
+    function atualizarBannerAceite(pedido) {
+      const banner = document.getElementById("live-banner");
+      const title = document.getElementById("live-title");
+      const eta = document.getElementById("live-eta");
+      const cardMotorista = document.getElementById("driver-accepted-card");
+      const elNome = document.getElementById("accepted-driver-name");
+      const elCarro = document.getElementById("accepted-driver-car");
+      const elPlaca = document.getElementById("accepted-driver-plate");
+      const elPixChave = document.getElementById("pix-chave-texto");
+      const elPixTitulo = document.getElementById("pix-titulo");
+
+      if (!banner) return;
+
+      if (!pedido) {
+        banner.classList.remove("visivel", "recusada");
+        if (cardMotorista) cardMotorista.classList.remove("visivel");
+        return;
+      }
+
+      banner.classList.add("visivel");
+      const isRecusada = pedido.status === "Corrida recusada";
+      const isAceita = pedido.status === "Corrida aceita" || pedido.status === "Corrida finalizada";
+      banner.classList.toggle("recusada", isRecusada);
+
+      if (title) title.textContent = (pedido.status || "Aguardando motorista") + " (" + pedido.codigo + ")";
+      if (eta) {
+        if (isRecusada) {
+          eta.textContent = "Solicitação recusada. Tente solicitar novamente.";
+        } else if (isAceita) {
+          eta.textContent = pedido.tempoChegada
+            ? "Tempo estimado de chegada: " + pedido.tempoChegada + " min"
+            : "Motorista a caminho do ponto de embarque.";
+        } else {
+          eta.textContent = "Aguardando um motorista liberado aceitar a corrida...";
         }
       }
 
-      function salvarCorridas(lista) {
-        localStorage.setItem(CHAVE_CORRIDAS, JSON.stringify(lista));
-      }
-
-      function publicarRespostaNaNuvem(resposta) {
-        return fetch("https://ntfy.sh/" + TOPICO_RESPOSTAS, {
-          method: "POST",
-          body: JSON.stringify(resposta)
-        }).catch(function () {});
-      }
-
-      function adicionarPedidoSeNovo(pedido) {
-        if (!estaOnline) return;
-        if (!pedido || !pedido.id) return;
-
-        const lista = lerCorridas();
-        const existe = lista.some(function (p) { return p.id === pedido.id; });
-        if (!existe) {
-          lista.unshift(pedido);
-          salvarCorridas(lista);
-          renderizar();
+      // Dados do motorista e chave Pix dele aparecem SOMENTE após o aceite
+      if (cardMotorista) {
+        if (isAceita && pedido.motorista) {
+          cardMotorista.classList.add("visivel");
+          if (elNome) elNome.textContent = pedido.motorista.nome || "Motorista 32 Drive";
+          if (elCarro) elCarro.textContent = pedido.motorista.veiculo || "Veículo credenciado";
+          if (elPlaca) elPlaca.textContent = pedido.motorista.placa || "—";
+          if (pedido.motorista.chavePix && elPixChave) {
+            elPixChave.textContent = pedido.motorista.chavePix;
+            if (elPixTitulo) elPixTitulo.textContent = "Pix direto do Motorista (" + pedido.motorista.nome + ")";
+          }
+        } else {
+          cardMotorista.classList.remove("visivel");
+          if (elPixChave) elPixChave.textContent = PIX_PADRAO;
+          if (elPixTitulo) elPixTitulo.textContent = "Pix Operação 32 Drive";
         }
       }
+    }
 
-      function aceitarCorrida(id) {
-        const inputMin = document.getElementById("eta-input-" + id);
-        const digitado = inputMin ? String(inputMin.value || "").trim() : "";
-        const tempoChegada = digitado || temposSelecionados[id] || "5";
+    function renderizarPedidos() {
+      const container = document.getElementById("meus-pedidos");
+      if (!container) return;
 
-        const lista = lerCorridas().map(function (p) {
-          if (p.id === id) {
-            return Object.assign({}, p, { status: "Corrida aceita", tempoChegada: tempoChegada });
-          }
-          return p;
-        });
-        salvarCorridas(lista);
-        renderizar();
-        publicarRespostaNaNuvem({ id: id, status: "Corrida aceita", tempoChegada: tempoChegada });
+      if (!listaCorridas.length) {
+        container.innerHTML = '<div class="item" style="color:var(--muted);">Nenhuma corrida solicitada ainda.</div>';
+        atualizarBannerAceite(null);
+        return;
       }
 
-      function recusarCorrida(id) {
-        const lista = lerCorridas().map(function (p) {
-          if (p.id === id) {
-            return Object.assign({}, p, { status: "Corrida recusada", tempoChegada: null });
-          }
-          return p;
-        });
-        salvarCorridas(lista);
-        renderizar();
-        publicarRespostaNaNuvem({ id: id, status: "Corrida recusada", tempoChegada: null });
-      }
-
-      function atualizarStatus(id, novoStatus) {
-        const lista = lerCorridas().map(function (p) {
-          if (p.id === id) {
-            return Object.assign({}, p, { status: novoStatus });
-          }
-          return p;
-        });
-        salvarCorridas(lista);
-        renderizar();
-        publicarRespostaNaNuvem({ id: id, status: novoStatus });
-      }
-
-      function removerPedido(id) {
-        const lista = lerCorridas().filter(function (p) { return p.id !== id; });
-        salvarCorridas(lista);
-        renderizar();
-      }
-
-      function renderizar() {
-        const container = document.getElementById("lista-motorista");
-        const contador = document.getElementById("contador");
-        const lista = lerCorridas();
-
-        if (contador) contador.textContent = String(lista.length);
-        if (!container) return;
-
-        if (!lista.length) {
-          container.innerHTML =
-            '<div class="pedido-card"><span class="muted">Nenhuma corrida recebida no painel ainda.</span></div>';
-          return;
-        }
-
-        container.innerHTML = lista
-          .map(function (p) {
-            const statusAtual = p.status || "Aguardando motorista";
-            const isAceita = statusAtual === "Corrida aceita" || statusAtual === "Corrida finalizada";
-            const isRecusada = statusAtual === "Corrida recusada";
-            const badgeClass = isAceita ? "status-tag aceita" : (isRecusada ? "status-tag recusada" : "status-tag");
-            const etaAtual = temposSelecionados[p.id] || p.tempoChegada || "5";
-            const etaInfo = p.tempoChegada
-              ? '<br/><strong style="color:#047857;">Chegada informada: ' + p.tempoChegada + " min</strong>"
+      atualizarBannerAceite(listaCorridas[0]);
+      container.innerHTML = listaCorridas
+        .slice(0, 5)
+        .map((p) => {
+          const extraEta = p.tempoChegada
+            ? '<br/><strong style="color:#047857;">Chegada estimada: ' + p.tempoChegada + " min</strong>"
+            : "";
+          const extraMotorista =
+            (p.status === "Corrida aceita" || p.status === "Corrida finalizada") && p.motorista
+              ? "<br/><strong>Motorista:</strong> " +
+                p.motorista.nome +
+                " • " +
+                p.motorista.veiculo +
+                " (" +
+                p.motorista.placa +
+                ")"
               : "";
+          return (
+            '<div class="item">' +
+            "<strong>" + p.codigo + "</strong> — " + p.valorFormatado + " (" + p.status + ")" +
+            extraEta + extraMotorista + "<br/>" +
+            '<span style="color:var(--muted);">De:</span> ' + p.origem + "<br/>" +
+            '<span style="color:var(--muted);">Para:</span> ' + p.destino +
+            "</div>"
+          );
+        })
+        .join("");
+    }
 
-            return (
-              '<div class="pedido-card">' +
-              '<div class="pedido-top">' +
-              '<span class="pedido-id">' + p.id + " • " + (p.passageiro || "Passageiro") + "</span>" +
-              '<span class="pedido-valor">' + p.valor + "</span>" +
-              "</div>" +
-              '<span class="' + badgeClass + '">' + statusAtual + "</span>" +
-              '<div class="pedido-info">' +
-              '<span class="muted">Embarque:</span> ' + p.origem + "<br/>" +
-              '<span class="muted">Destino:</span> ' + p.destino + "<br/>" +
-              '<span class="muted">Distância / Pagto:</span> ' + (p.km || "-") + " km • " + (p.pagamento || "Pix / Dinheiro") +
-              (p.criadoEm ? ' <span class="muted">(' + p.criadoEm + ")</span>" : "") +
-              etaInfo +
-              "</div>" +
-              '<div class="eta-box">' +
-              '<span class="muted" style="font-size:15px;">Tempo de chegada:</span>' +
-              ["3", "5", "8", "12"].map(function (min) {
-                const ativo = String(etaAtual) === min ? " eta-chip ativo" : " eta-chip";
-                return '<button class="' + ativo + '" type="button" data-acao="set-eta" data-id="' + p.id + '" data-min="' + min + '">' + min + " min</button>";
-              }).join("") +
-              '<input class="eta-input" id="eta-input-' + p.id + '" type="number" min="1" max="60" value="' + etaAtual + '" aria-label="Minutos" />' +
-              "</div>" +
-              '<div class="actions">' +
-              '<button class="btn btn-aceitar" type="button" data-acao="aceitar" data-id="' + p.id + '">Aceitar</button>' +
-              '<button class="btn btn-recusar" type="button" data-acao="recusar" data-id="' + p.id + '">Recusar</button>' +
-              '<button class="btn btn-finalizar" type="button" data-acao="finalizar" data-id="' + p.id + '">Finalizar</button>' +
-              "</div>" +
-              '<button class="btn btn-remover" type="button" data-acao="remover" data-id="' + p.id + '">Remover pedido</button>' +
-              "</div>"
-            );
-          })
-          .join("");
+    async function enviarPedido() {
+      const status = document.getElementById("status");
+      const btnEnviar = document.getElementById("btn-enviar");
+      const nome = (document.getElementById("nome").value || "").trim() || "Passageiro";
+      const origem = (document.getElementById("origem").value || "").trim();
+      const destino = (document.getElementById("destino").value || "").trim();
+      const pagamento = (document.getElementById("pagamento").value || "").trim() || "Pix";
+
+      if (!origem || !destino) {
+        if (status) status.textContent = "Preencha ponto de embarque e destino.";
+        return;
       }
 
-      function buscarDaNuvem() {
-        if (!estaOnline) return;
-        fetch("https://ntfy.sh/" + TOPICO_PEDIDOS + "/json?poll=1&since=60m", { cache: "no-store" })
-          .then(function (r) { return r.text(); })
-          .then(function (texto) {
-            if (!texto) return;
-            const linhas = texto.split("\n");
-            for (let i = 0; i < linhas.length; i++) {
-              const linha = linhas[i].trim();
-              if (!linha) continue;
-              try {
-                const msg = JSON.parse(linha);
-                if (msg && msg.event === "message" && msg.message) {
-                  adicionarPedidoSeNovo(JSON.parse(msg.message));
-                }
-              } catch (e) {}
-            }
-          })
-          .catch(function () {});
-      }
+      const calc = ultimoCalculo || calcularCorrida();
+      if (!calc) return;
 
-      document.addEventListener("click", function (ev) {
-        const btn = ev.target.closest("button[data-acao]");
-        if (!btn) return;
-        const acao = btn.getAttribute("data-acao");
-        const id = btn.getAttribute("data-id");
-        if (acao === "set-eta") {
-          const min = btn.getAttribute("data-min");
-          temposSelecionados[id] = min;
-          const inp = document.getElementById("eta-input-" + id);
-          if (inp) inp.value = min;
-          renderizar();
-        }
-        if (acao === "aceitar") aceitarCorrida(id);
-        if (acao === "recusar") recusarCorrida(id);
-        if (acao === "finalizar") atualizarStatus(id, "Corrida finalizada");
-        if (acao === "remover") removerPedido(id);
-      });
+      const valorBruto = calc.total;
+      const taxaPlataforma15 = Number((valorBruto * 0.15).toFixed(2));
+      const repasseMotorista85 = Number((valorBruto - taxaPlataforma15).toFixed(2));
+      const codigo = "32D-" + Date.now().toString().slice(-5);
 
-      const btnOnline = document.getElementById("btn-alternar-online");
-      if (btnOnline) btnOnline.addEventListener("click", alternarOnline);
+      try {
+        btnEnviar.disabled = true;
+        if (status) status.textContent = "Enviando solicitação para a nuvem...";
 
-      const btnLimpar = document.getElementById("btn-limpar-historico");
-      if (btnLimpar) {
-        btnLimpar.addEventListener("click", function () {
-          salvarCorridas([]);
-          renderizar();
+        await addDoc(collection(db, "corridas"), {
+          codigo: codigo,
+          clienteUid: obterClienteUid(),
+          passageiro: nome,
+          origem: origem,
+          destino: destino,
+          km: calc.kmUsado,
+          valorBruto: valorBruto,
+          valorFormatado: formatarMoeda(valorBruto),
+          dinamica: calc.dinamica || null,
+          pagamento: pagamento,
+          pagamentoDetalhes: {
+            modalidade: pagamento,
+            statusPagamento: pagamento === "Cartão" ? "AGUARDANDO_GATEWAY_FUTURO" : "PAGAMENTO_NO_ATENDIMENTO",
+            repasseModelo: "POS_CORRIDA",
+            valorMotorista85: repasseMotorista85,
+            taxaPlataforma15: taxaPlataforma15
+          },
+          motorista: null,
+          motoristaId: null,
+          status: "Aguardando motorista",
+          tempoChegada: null,
+          criadoEmTimestamp: Date.now(),
+          criadoEmServer: serverTimestamp()
         });
-      }
 
-      window.addEventListener("storage", function (ev) {
-        if (ev.key === CHAVE_CORRIDAS) renderizar();
-        if (ev.key === CHAVE_ONLINE) {
-          estaOnline = localStorage.getItem(CHAVE_ONLINE) !== "false";
-          atualizarEstadoOnlineUI();
+        if (status) status.textContent = "Pedido " + codigo + " enviado! Aguardando motorista aceitar...";
+      } catch (erro) {
+        console.error(erro);
+        if (status) status.textContent = "Erro ao conectar no Firebase. Verifique o firebase-config.js.";
+      } finally {
+        atualizarDisponibilidadeUI();
+      }
+    }
+
+    // 1. Escuta em tempo real as corridas deste passageiro no Firestore
+    function iniciarOuvinteCorridas() {
+      const q = query(collection(db, "corridas"), where("clienteUid", "==", obterClienteUid()));
+      onSnapshot(q, (snapshot) => {
+        const itens = [];
+        snapshot.forEach((docSnap) => {
+          itens.push({ docId: docSnap.id, ...docSnap.data() });
+        });
+        itens.sort((a, b) => (b.criadoEmTimestamp || 0) - (a.criadoEmTimestamp || 0));
+        listaCorridas = itens;
+        renderizarPedidos();
+      });
+    }
+
+    // 2. Escuta motoristas liberados E online em tempo real
+    function iniciarOuvinteMotoristasOnline() {
+      const q = query(
+        collection(db, "motoristas"),
+        where("liberado", "==", true),
+        where("online", "==", true)
+      );
+      onSnapshot(q, (snapshot) => {
+        motoristasOnlineQtd = snapshot.size;
+        atualizarDisponibilidadeUI();
+      });
+    }
+
+    // 3. Escuta configuração global de clima (Modo Chuva) definida pelo Admin
+    function iniciarOuvinteConfigGlobal() {
+      onSnapshot(doc(db, "config", "geral"), (docSnap) => {
+        if (docSnap.exists()) {
+          modoChuvaGlobal = Boolean(docSnap.data().chuva);
+          atualizarClimaUI();
         }
       });
+    }
 
-      atualizarEstadoOnlineUI();
-      publicarStatusNaNuvem(estaOnline);
-      buscarDaNuvem();
-      setInterval(buscarDaNuvem, 2000);
-      setInterval(renderizar, 1500);
-      renderizar();
-    })();
+    document.getElementById("origem").addEventListener("input", () => { ultimoCalculo = null; });
+    document.getElementById("destino").addEventListener("input", () => { ultimoCalculo = null; });
+    document.getElementById("btn-chuva").addEventListener("click", alternarChuva);
+    document.getElementById("btn-gps").addEventListener("click", usarLocalizacao);
+    document.getElementById("btn-calcular").addEventListener("click", calcularCorrida);
+    document.getElementById("btn-copiar-pix").addEventListener("click", copiarPix);
+    document.getElementById("btn-enviar").addEventListener("click", enviarPedido);
+
+    iniciarMapa();
+    atualizarClimaUI();
+    iniciarOuvinteCorridas();
+    iniciarOuvinteMotoristasOnline();
+    iniciarOuvinteConfigGlobal();
+    setInterval(atualizarBannerDinamica, 30000);
   </script>
 </body>
 </html>
