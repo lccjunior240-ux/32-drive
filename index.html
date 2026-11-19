@@ -73,16 +73,6 @@
       width: 100%;
       margin: 0 auto;
     }
-    .aviso-chuva {
-      display: none;
-      background: #e0f2fe;
-      border: 2px solid #0284c7;
-      color: #0c4a6e;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 15px;
-      font-weight: 800;
-    }
     .aviso-firebase {
       display: none;
       background: #fffbeb;
@@ -116,6 +106,27 @@
       font-weight: 600;
     }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .chuva-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #f0f9ff;
+      border: 2px solid #7dd3fc;
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+    .chuva-toggle.ativo {
+      background: #0284c7;
+      border-color: #0369a1;
+      color: #ffffff;
+    }
+    .chuva-toggle input {
+      width: 22px;
+      height: 22px;
+      accent-color: #0b192c;
+    }
     .estimativa-box {
       background: #f1f5f9;
       border: 2px solid var(--border);
@@ -126,8 +137,8 @@
       align-items: center;
       gap: 10px;
     }
-    .estimativa-lbl { font-size: 15px; font-weight: 700; color: var(--muted); }
-    .estimativa-val { font-size: 24px; font-weight: 900; color: var(--green); }
+    .estimativa-lbl { font-size: 15px; font-weight: 800; color: #0f172a; }
+    .estimativa-val { font-size: 26px; font-weight: 900; color: var(--green); }
     .btn {
       width: 100%;
       padding: 15px;
@@ -137,7 +148,6 @@
       font-weight: 800;
       cursor: pointer;
     }
-    .btn-primary { background: #0b192c; color: #ffffff; }
     .btn-accent { background: var(--accent); color: #0f172a; }
     .status-msg { font-size: 16px; font-weight: 800; color: #047857; text-align: center; min-height: 20px; }
     .corrida-box {
@@ -164,9 +174,6 @@
   </header>
 
   <main>
-    <div class="aviso-chuva" id="aviso-chuva">
-      Modo Chuva ativo (+25% aplicado na estimativa).
-    </div>
     <div class="aviso-firebase" id="aviso-firebase"></div>
 
     <section class="card">
@@ -189,8 +196,8 @@
 
       <div class="grid-2">
         <div>
-          <label for="pas-distancia">Distância Estimada (km)</label>
-          <input id="pas-distancia" type="number" min="1" max="100" step="0.5" value="5" />
+          <label for="pas-distancia">Distância (km)</label>
+          <input id="pas-distancia" type="number" min="0.5" max="150" step="0.1" value="3.5" />
         </div>
         <div>
           <label for="pas-pagamento">Pagamento</label>
@@ -202,12 +209,20 @@
         </div>
       </div>
 
+      <label class="chuva-toggle" id="box-chuva-toggle" for="pas-chuva">
+        <div>
+          <strong>Adicional Dia de Chuva (+25%)</strong>
+          <div style="font-size:14px;opacity:0.9;" id="txt-chuva-status">Desativado (tarifa normal)</div>
+        </div>
+        <input id="pas-chuva" type="checkbox" />
+      </label>
+
       <div class="estimativa-box">
         <div>
-          <div class="estimativa-lbl">Valor Estimado</div>
-          <div id="detalhe-tarifa" style="font-size:14px;color:var(--muted);">Base + km</div>
+          <div class="estimativa-lbl">Valor da Corrida</div>
+          <div id="detalhe-tarifa" style="font-size:14px;color:var(--muted);">Até 3,5 km: fixo R$ 7,99</div>
         </div>
-        <div class="estimativa-val" id="pas-valor-estimado">R$ 14,00</div>
+        <div class="estimativa-val" id="pas-valor-estimado">R$ 7,99</div>
       </div>
 
       <button class="btn btn-accent" type="button" id="btn-solicitar-corrida">
@@ -226,17 +241,18 @@
 
   <script type="module">
     const badgePassageiro = document.getElementById("badge-passageiro");
-    const avisoChuva = document.getElementById("aviso-chuva");
     const avisoFirebase = document.getElementById("aviso-firebase");
     const msgPassageiro = document.getElementById("msg-passageiro");
     const boxCorridaAtiva = document.getElementById("box-corrida-ativa");
     const elDistancia = document.getElementById("pas-distancia");
+    const elChuva = document.getElementById("pas-chuva");
+    const boxChuvaToggle = document.getElementById("box-chuva-toggle");
+    const txtChuvaStatus = document.getElementById("txt-chuva-status");
     const elValorEstimado = document.getElementById("pas-valor-estimado");
     const elDetalheTarifa = document.getElementById("detalhe-tarifa");
 
     let db = null;
     let fs = null;
-    let modoChuva = false;
     let corridaAtualId = localStorage.getItem("32drive_corrida_id") || "";
 
     function mostrarAvisoFirebase(texto) {
@@ -249,17 +265,38 @@
       return "R$ " + Number(valor || 0).toFixed(2).replace(".", ",");
     }
 
+    function atualizarVisualChuva(ativo) {
+      elChuva.checked = Boolean(ativo);
+      boxChuvaToggle.classList.toggle("ativo", Boolean(ativo));
+      txtChuvaStatus.textContent = ativo
+        ? "Ativo: +25% aplicado no valor"
+        : "Desativado (tarifa normal)";
+    }
+
     function calcularEstimativa() {
-      const km = Math.max(1, Number(elDistancia.value || 1));
-      const base = 6.5;
-      const porKm = 1.5;
-      let total = base + km * porKm;
-      if (modoChuva) total = total * 1.25;
+      const textoKm = String(elDistancia.value || "").replace(",", ".");
+      const km = Math.max(0.1, Number(textoKm) || 0);
+      const chuvaAtiva = Boolean(elChuva.checked);
+
+      let baseValor = 0;
+      let regraTexto = "";
+
+      if (km <= 3.5) {
+        baseValor = 7.99;
+        regraTexto = km.toFixed(1).replace(".", ",") + " km • Fixo até 3,5 km";
+      } else {
+        baseValor = km * 2.0;
+        regraTexto = km.toFixed(1).replace(".", ",") + " km × R$ 2,00/km";
+      }
+
+      const total = chuvaAtiva ? baseValor * 1.25 : baseValor;
       const arredondado = Number(total.toFixed(2));
+
       elValorEstimado.textContent = formatarMoeda(arredondado);
-      elDetalheTarifa.textContent = modoChuva
-        ? km + " km • Inclui +25% chuva"
-        : km + " km • Tarifa padrão";
+      elDetalheTarifa.textContent = chuvaAtiva
+        ? regraTexto + " + 25% chuva"
+        : regraTexto;
+
       return arredondado;
     }
 
@@ -300,6 +337,7 @@
         destino,
         pagamento,
         valorBruto,
+        chuva: Boolean(elChuva.checked),
         status: "Aguardando motorista",
         motorista: null,
         criadoEmTimestamp: Date.now()
@@ -338,7 +376,14 @@
     }
 
     elDistancia.addEventListener("input", calcularEstimativa);
+    elDistancia.addEventListener("change", calcularEstimativa);
+    elChuva.addEventListener("change", () => {
+      atualizarVisualChuva(elChuva.checked);
+      calcularEstimativa();
+    });
     document.getElementById("btn-solicitar-corrida").addEventListener("click", solicitarCorrida);
+
+    atualizarVisualChuva(false);
     calcularEstimativa();
 
     try {
@@ -351,8 +396,8 @@
       mostrarAvisoFirebase("");
 
       fs.onSnapshot(fs.doc(db, "config", "geral"), (snap) => {
-        modoChuva = snap.exists() ? Boolean(snap.data().chuva) : false;
-        avisoChuva.style.display = modoChuva ? "block" : "none";
+        const chuvaGlobal = snap.exists() ? Boolean(snap.data().chuva) : false;
+        atualizarVisualChuva(chuvaGlobal);
         calcularEstimativa();
       });
 
