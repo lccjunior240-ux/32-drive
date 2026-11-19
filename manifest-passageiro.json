@@ -1,20 +1,16 @@
 {
-  "id": "/32-drive/passageiro",
-  "name": "32 DRIVE Passageiro",
-  "short_name": "32 Passageiro",
-  "start_url": "/32-drive/index.html",
-  "scope": "/32-drive/index.html",
+  "name": "32 Drive Passageiro",
+  "short_name": "32 Drive",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#081220",
-  "theme_color": "#ff7a00",
+  "background_color": "#0b192c",
+  "theme_color": "#0b192c",
   "icons": [
     {
-      "src": "/32-drive/icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
-
