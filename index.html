@@ -196,7 +196,7 @@
 
       <div>
         <label for="pas-destino">Para onde vai? (Destino)</label>
-        <input id="pas-destino" type="text" placeholder="Ex: Centro, Rio Grande" />
+        <input id="pas-destino" type="text" placeholder="Ex: FURG, Centro, Shopping Praça..." />
       </div>
 
       <div>
@@ -265,6 +265,58 @@
     let calculoTimer = null;
     let corridaAtualId = localStorage.getItem("32drive_corrida_id") || "";
 
+    // Pontos de referência conhecidos em Rio Grande e Balneário Cassino
+    const PONTOS_CONHECIDOS = [
+      { chaves: ["furg", "campus carreiros", "universidade federal"], lat: -32.0736, lon: -52.1674, nome: "FURG — Campus Carreiros, Rio Grande" },
+      { chaves: ["furg saude", "area academica", "hu furg", "hospital universitario"], lat: -32.0375, lon: -52.1045, nome: "Área Acadêmica da Saúde / HU-FURG, Rio Grande" },
+      { chaves: ["shopping praca", "praca rio grande"], lat: -32.0628, lon: -52.1489, nome: "Shopping Praça Rio Grande" },
+      { chaves: ["partage", "partage shopping"], lat: -32.0592, lon: -52.1387, nome: "Partage Shopping Rio Grande" },
+      { chaves: ["rodoviaria", "estacao rodoviaria"], lat: -32.0369, lon: -52.1072, nome: "Estação Rodoviária de Rio Grande" },
+      { chaves: ["santa casa"], lat: -32.0357, lon: -52.1021, nome: "Santa Casa do Rio Grande" },
+      { chaves: ["centro", "centro rio grande", "largo barbosa coelho"], lat: -32.0349, lon: -52.0986, nome: "Centro — Rio Grande" },
+      { chaves: ["cassino", "balneario cassino", "av rio grande cassino"], lat: -32.1829, lon: -52.1592, nome: "Balneário Cassino — Av. Rio Grande" },
+      { chaves: ["querencia"], lat: -32.1685, lon: -52.1642, nome: "Bairro Querência — Cassino" },
+      { chaves: ["molhes", "molhes da barra"], lat: -32.1614, lon: -52.0968, nome: "Molhes da Barra — Cassino" },
+      { chaves: ["cidade nova"], lat: -32.0434, lon: -52.1095, nome: "Bairro Cidade Nova — Rio Grande" },
+      { chaves: ["vila militar"], lat: -32.0462, lon: -52.1189, nome: "Vila Militar — Rio Grande" },
+      { chaves: ["parque marinha"], lat: -32.0672, lon: -52.1563, nome: "Parque Marinha — Rio Grande" },
+      { chaves: ["junção", "juncao"], lat: -32.0548, lon: -52.1311, nome: "Junção — Rio Grande" }
+    ];
+
+    function normalizarTexto(txt) {
+      return String(txt || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function buscarPontoConhecido(endereco) {
+      const norm = normalizarTexto(endereco);
+      if (!norm) return null;
+      for (const ponto of PONTOS_CONHECIDOS) {
+        for (const chave of ponto.chaves) {
+          if (norm === chave || norm.startsWith(chave + " ") || norm.endsWith(" " + chave)) {
+            return { lat: ponto.lat, lon: ponto.lon, nome: ponto.nome };
+          }
+        }
+      }
+      return null;
+    }
+
+    function expandirAbreviacoes(endereco) {
+      return String(endereco || "")
+        .replace(/\bav\.?\b/gi, "Avenida")
+        .replace(/\br\.?\b/gi, "Rua")
+        .replace(/\bpres\.?\b/gi, "Presidente")
+        .replace(/\bdr\.?\b/gi, "Doutor")
+        .replace(/\bprof\.?\b/gi, "Professor")
+        .replace(/\bsanta tereza\b/gi, "Vila Santa Tereza")
+        .trim();
+    }
+
     function mostrarAvisoFirebase(texto) {
       if (!avisoFirebase) return;
       avisoFirebase.textContent = texto;
@@ -321,38 +373,46 @@
       }
     }
 
-    function montarConsultaLocal(endereco) {
-      const limpo = String(endereco || "").trim();
-      if (!limpo) return "";
-      const lower = limpo.toLowerCase();
-      if (lower.includes("rio grande") || lower.includes("cassino") || lower.includes("rs")) {
-        return limpo;
-      }
-      return limpo + ", Rio Grande, Rio Grande do Sul, Brasil";
-    }
-
-    async function geocodificarEndereco(endereco) {
-      const consulta = encodeURIComponent(montarConsultaLocal(endereco));
-      const viewbox = "-52.65,-32.28,-52.05,-31.95";
+    async function consultarNominatimLocal(textoBusca) {
+      // Caixa geográfica restrita a Rio Grande e Balneário Cassino (bounded=1)
+      const viewbox = "-52.68,-32.35,-52.04,-31.92";
       const url =
-        "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&viewbox=" +
+        "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&bounded=1&viewbox=" +
         encodeURIComponent(viewbox) +
         "&q=" +
-        consulta;
+        encodeURIComponent(textoBusca);
 
-      const resp = await fetch(url, {
-        headers: { "Accept": "application/json" }
-      });
-      if (!resp.ok) throw new Error("Falha ao buscar endereço");
+      const resp = await fetch(url, { headers: { "Accept": "application/json" } });
+      if (!resp.ok) return null;
       const dados = await resp.json();
-      if (!Array.isArray(dados) || !dados.length) {
-        throw new Error("Endereço não encontrado");
-      }
+      if (!Array.isArray(dados) || !dados.length) return null;
       return {
         lat: Number(dados[0].lat),
         lon: Number(dados[0].lon),
         nome: dados[0].display_name
       };
+    }
+
+    async function geocodificarEndereco(endereco) {
+      // 1. Verifica primeiro nos pontos conhecidos locais (FURG, Shopping, Centro, Cassino, etc.)
+      const conhecido = buscarPontoConhecido(endereco);
+      if (conhecido) return conhecido;
+
+      const limpo = expandirAbreviacoes(endereco);
+      const semNumero = limpo.replace(/,?\s*\d+\b/g, "").trim();
+
+      const tentativas = [
+        limpo + ", Rio Grande, RS",
+        limpo,
+        semNumero && semNumero !== limpo ? semNumero + ", Rio Grande, RS" : ""
+      ].filter(Boolean);
+
+      for (const tentativa of tentativas) {
+        const achado = await consultarNominatimLocal(tentativa);
+        if (achado) return achado;
+      }
+
+      throw new Error("Endereço não encontrado em Rio Grande / Cassino");
     }
 
     async function buscarDistanciaKmOSRM(pontoA, pontoB) {
@@ -394,6 +454,10 @@
         ]);
 
         const km = await buscarDistanciaKmOSRM(pontoA, pontoB);
+        if (km > 120) {
+          throw new Error("Distância fora da área de atendimento");
+        }
+
         distanciaCalculadaKm = km;
         erroRota.textContent = "";
         atualizarTelaPreco();
@@ -402,7 +466,7 @@
         distanciaCalculadaKm = null;
         atualizarTelaPreco();
         erroRota.textContent =
-          "Não foi possível localizar a rota automaticamente. Tente incluir o bairro ou 'Cassino / Rio Grande'.";
+          "Não localizamos um dos endereços. Tente escrever o nome da rua ou bairro (ex: Av. Presidente Vargas, Centro, FURG).";
       } finally {
         btnCalcularRota.disabled = false;
         btnCalcularRota.textContent = "Calcular Valor pela Rota";
@@ -413,7 +477,7 @@
       clearTimeout(calculoTimer);
       calculoTimer = setTimeout(() => {
         calcularRotaAutomatica();
-      }, 800);
+      }, 900);
     }
 
     function renderizarCorrida(c) {
