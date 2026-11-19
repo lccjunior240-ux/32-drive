@@ -4,23 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0b192c" />
-  <link rel="manifest" href="manifest-motorista.json" />
+  <link rel="manifest" href="manifest-passageiro.json" />
   <link rel="icon" type="image/png" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-512.png" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <title>32 Drive — Motorista</title>
+  <title>32 Drive — Passageiro</title>
   <style>
     :root {
-      --bg: #ffffff;
+      --bg: #f8fafc;
       --card: #ffffff;
-      --navy-card: linear-gradient(145deg, #0b192c 0%, #13294b 65%, #0c1e38 100%);
-      --navy-border: #1e3f6e;
+      --navy-header: linear-gradient(145deg, #0b192c 0%, #13294b 70%, #0c1e38 100%);
       --border: #cbd5e1;
       --text: #0f172a;
       --muted: #475569;
       --accent: #f59e0b;
       --green: #059669;
-      --red: #dc2626;
+      --blue: #0284c7;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -34,7 +32,7 @@
       line-height: 1.45;
     }
     header {
-      background: #0b192c;
+      background: var(--navy-header);
       border-bottom: 3px solid var(--accent);
       padding: 16px;
       display: flex;
@@ -47,46 +45,54 @@
       color: #ffffff;
     }
     .brand { display: flex; align-items: center; gap: 12px; }
-    .brand img { width: 46px; height: 46px; border-radius: 11px; border: 2px solid var(--accent); background: #fff; }
+    .brand img {
+      width: 46px;
+      height: 46px;
+      border-radius: 11px;
+      border: 2px solid var(--accent);
+      background: #ffffff;
+    }
     h1 { font-size: 20px; font-weight: 900; color: var(--accent); }
     .subtitle { font-size: 15px; color: #dbeafe; }
-    .badge { background: var(--accent); color: #0f172a; font-weight: 800; font-size: 14px; padding: 7px 12px; border-radius: 999px; }
+    .badge {
+      background: var(--accent);
+      color: #0f172a;
+      font-weight: 800;
+      font-size: 14px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
     main {
       flex: 1;
       padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 16px;
-      max-width: 680px;
+      max-width: 720px;
       width: 100%;
       margin: 0 auto;
     }
-    .hero-card {
-      background: var(--navy-card);
-      border: 1px solid var(--navy-border);
-      border-radius: 18px;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      color: #ffffff;
-    }
-    .hero-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-    .online-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(16, 185, 129, 0.22);
-      color: #6ee7b7;
-      border: 1px solid rgba(110, 231, 183, 0.5);
-      padding: 7px 13px;
-      border-radius: 999px;
+    .aviso-chuva {
+      display: none;
+      background: #e0f2fe;
+      border: 2px solid #0284c7;
+      color: #0c4a6e;
+      border-radius: 14px;
+      padding: 12px 14px;
       font-size: 15px;
       font-weight: 800;
     }
-    .online-pill.offline { background: rgba(239, 68, 68, 0.25); color: #fecaca; border-color: rgba(252, 165, 165, 0.5); }
-    .dot { width: 9px; height: 9px; border-radius: 50%; background: #34d399; }
-    .online-pill.offline .dot { background: #f87171; }
+    .aviso-firebase {
+      display: none;
+      background: #fffbeb;
+      border: 2px solid #f59e0b;
+      color: #78350f;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-weight: 700;
+    }
     .card {
       background: var(--card);
       border: 2px solid var(--border);
@@ -95,9 +101,11 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
     }
+    .card-title { font-size: 19px; font-weight: 900; color: #0f172a; }
     label { font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: block; }
-    input {
+    input, select {
       width: 100%;
       padding: 14px;
       border-radius: 12px;
@@ -108,6 +116,18 @@
       font-weight: 600;
     }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .estimativa-box {
+      background: #f1f5f9;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .estimativa-lbl { font-size: 15px; font-weight: 700; color: var(--muted); }
+    .estimativa-val { font-size: 24px; font-weight: 900; color: var(--green); }
     .btn {
       width: 100%;
       padding: 15px;
@@ -117,62 +137,18 @@
       font-weight: 800;
       cursor: pointer;
     }
-    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-    .btn-status-toggle { background: #ffffff; color: #0f172a; border: 2px solid #93c5fd; }
     .btn-primary { background: #0b192c; color: #ffffff; }
-    .btn-aceitar { background: #10b981; color: #052e16; }
-    .btn-recusar { background: #fee2e2; color: #991b1b; border: 2px solid #f87171; }
-    .btn-finalizar { background: #f59e0b; color: #0f172a; }
-    .alerta-bloqueio {
-      display: none;
-      background: #fef2f2;
-      border: 2px solid #ef4444;
-      color: #991b1b;
-      border-radius: 12px;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: 800;
-    }
-    .alerta-bloqueio.visivel { display: block; }
-    .financeiro-box {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
-      background: #f8fafc;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      text-align: center;
-    }
-    .fin-num { font-size: 19px; font-weight: 900; color: #0f172a; }
-    .fin-lbl { font-size: 13px; color: var(--muted); font-weight: 700; }
-    #mapa-motorista { width: 100%; height: 210px; border-radius: 14px; border: 2px solid var(--border); z-index: 1; }
-    .pedido-card {
+    .btn-accent { background: var(--accent); color: #0f172a; }
+    .status-msg { font-size: 16px; font-weight: 800; color: #047857; text-align: center; min-height: 20px; }
+    .corrida-box {
       background: #f8fafc;
       border: 2px solid var(--border);
       border-radius: 14px;
       padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 6px;
     }
-    .pedido-card.destaque { border-color: #10b981; background: #ecfdf5; }
-    .pedido-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .pedido-valor { font-weight: 900; font-size: 22px; color: var(--green); }
-    .eta-box { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-    .eta-chip {
-      padding: 8px 12px;
-      border-radius: 10px;
-      border: 2px solid var(--border);
-      background: #ffffff;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    .eta-chip.ativo { background: #10b981; color: #052e16; border-color: #059669; }
-    .eta-input { width: 95px; padding: 8px; font-size: 16px; }
-    .actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-    .status-msg { font-size: 16px; font-weight: 800; color: #047857; text-align: center; min-height: 22px; }
   </style>
 </head>
 <body>
@@ -180,472 +156,214 @@
     <div class="brand">
       <img src="icon-512.png" alt="32 Drive" />
       <div>
-        <h1>32 DRIVE — Motorista</h1>
-        <div class="subtitle" id="header-motorista-nome">Configure seu perfil abaixo</div>
+        <h1>32 DRIVE — Passageiro</h1>
+        <div class="subtitle">Pedir Corrida • Cassino &amp; Rio Grande</div>
       </div>
     </div>
-    <span class="badge" id="badge-aprovacao">Verificando</span>
+    <span class="badge" id="badge-passageiro">Passageiro</span>
   </header>
 
   <main>
-    <section class="hero-card">
-      <div class="hero-top">
-        <div>
-          <div style="font-size:22px;font-weight:900;color:#f59e0b;">PAINEL OPERACIONAL</div>
-          <div style="font-size:15px;color:#dbeafe;" id="hero-veiculo-info">Veículo não configurado</div>
-        </div>
-        <span class="online-pill offline" id="status-pill">
-          <span class="dot"></span>
-          <span id="status-pill-text">Offline</span>
-        </span>
-      </div>
-
-      <div class="alerta-bloqueio" id="alerta-bloqueio">
-        Seu cadastro está aguardando liberação do Administrador para operar.
-      </div>
-
-      <button class="btn btn-status-toggle" type="button" id="btn-alternar-online">Ficar Online</button>
-      <div class="status-msg" id="msg-operacao" style="color:#fde68a;"></div>
-    </section>
-
-    <!-- Resumo financeiro pós-corrida (Taxa 15% Admin) -->
-    <div class="card">
-      <div style="font-weight:900;font-size:18px;">Meu Resumo Pós-Corrida (Repasse 15%)</div>
-      <div class="financeiro-box">
-        <div>
-          <div class="fin-lbl">Bruto Finalizado</div>
-          <div class="fin-num" id="fin-bruto">R$ 0,00</div>
-        </div>
-        <div>
-          <div class="fin-lbl">Repasse 32 Drive (15%)</div>
-          <div class="fin-num" style="color:#0284c7;" id="fin-taxa">R$ 0,00</div>
-        </div>
-        <div>
-          <div class="fin-lbl">Seu Líquido (85%)</div>
-          <div class="fin-num" style="color:#059669;" id="fin-liquido">R$ 0,00</div>
-        </div>
-      </div>
+    <div class="aviso-chuva" id="aviso-chuva">
+      Modo Chuva ativo (+25% aplicado na estimativa).
     </div>
+    <div class="aviso-firebase" id="aviso-firebase"></div>
 
-    <!-- Cadastro do motorista parceiro -->
-    <div class="card">
-      <div style="font-weight:900;font-size:18px;">Cadastro do Motorista Parceiro</div>
+    <section class="card">
+      <div class="card-title">Solicitar Corrida</div>
+
+      <div>
+        <label for="pas-nome">Seu Nome</label>
+        <input id="pas-nome" type="text" placeholder="Ex: Maria Clara" />
+      </div>
+
+      <div>
+        <label for="pas-origem">Ponto de Embarque (Origem)</label>
+        <input id="pas-origem" type="text" placeholder="Ex: Av. Rio Grande, 450 — Cassino" />
+      </div>
+
+      <div>
+        <label for="pas-destino">Destino</label>
+        <input id="pas-destino" type="text" placeholder="Ex: Centro — Rio Grande" />
+      </div>
+
       <div class="grid-2">
         <div>
-          <label for="mot-id">Código / CPF (ID)</label>
-          <input id="mot-id" type="text" placeholder="Ex: MOT-01" />
+          <label for="pas-distancia">Distância Estimada (km)</label>
+          <input id="pas-distancia" type="number" min="1" max="100" step="0.5" value="5" />
         </div>
         <div>
-          <label for="mot-placa">Placa do Veículo</label>
-          <input id="mot-placa" type="text" placeholder="Ex: IQD8060" />
+          <label for="pas-pagamento">Pagamento</label>
+          <select id="pas-pagamento">
+            <option value="Pix">Pix</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Cartão">Cartão</option>
+          </select>
         </div>
       </div>
-      <div>
-        <label for="mot-nome">Nome completo</label>
-        <input id="mot-nome" type="text" placeholder="Ex: Luíz Carlos Costa Jr." />
-      </div>
-      <div>
-        <label for="mot-veiculo">Modelo / Ano / Cor</label>
-        <input id="mot-veiculo" type="text" placeholder="Ex: VW Voyage 2010 Prata" />
-      </div>
-      <div>
-        <label for="mot-pix">Sua Chave Pix (para receber do passageiro)</label>
-        <input id="mot-pix" type="text" placeholder="CPF, e-mail, telefone ou chave aleatória" />
-      </div>
-      <button class="btn btn-primary" type="button" id="btn-salvar-perfil">Salvar perfil na nuvem</button>
-      <div class="status-msg" id="msg-perfil"></div>
-    </div>
 
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-weight:900;font-size:19px;">Corridas disponíveis e em andamento</div>
-        <span class="badge" id="contador">0</span>
+      <div class="estimativa-box">
+        <div>
+          <div class="estimativa-lbl">Valor Estimado</div>
+          <div id="detalhe-tarifa" style="font-size:14px;color:var(--muted);">Base + km</div>
+        </div>
+        <div class="estimativa-val" id="pas-valor-estimado">R$ 14,00</div>
       </div>
-      <div id="mapa-motorista"></div>
-      <div id="lista-motorista" style="display:flex;flex-direction:column;gap:12px;"></div>
-    </div>
+
+      <button class="btn btn-accent" type="button" id="btn-solicitar-corrida">
+        Chamar Motorista
+      </button>
+      <div class="status-msg" id="msg-passageiro"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Acompanhamento da Corrida</div>
+      <div id="box-corrida-ativa" class="corrida-box">
+        Nenhuma corrida solicitada ainda.
+      </div>
+    </section>
   </main>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module">
-    import { db } from "./firebase-config.js";
-    import {
-      collection,
-      doc,
-      getDoc,
-      setDoc,
-      updateDoc,
-      onSnapshot,
-      runTransaction,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    const badgePassageiro = document.getElementById("badge-passageiro");
+    const avisoChuva = document.getElementById("aviso-chuva");
+    const avisoFirebase = document.getElementById("aviso-firebase");
+    const msgPassageiro = document.getElementById("msg-passageiro");
+    const boxCorridaAtiva = document.getElementById("box-corrida-ativa");
+    const elDistancia = document.getElementById("pas-distancia");
+    const elValorEstimado = document.getElementById("pas-valor-estimado");
+    const elDetalheTarifa = document.getElementById("detalhe-tarifa");
 
-    const CHAVE_PERFIL_LOCAL = "32drive_perfil_motorista_v2";
-    const temposSelecionados = {};
-    let motoristaLiberado = false;
-    let estaOnline = false;
-    let mapa = null;
-    let camadaRota = null;
-    let unsubMotorista = null;
-    let todasCorridas = [];
+    let db = null;
+    let fs = null;
+    let modoChuva = false;
+    let corridaAtualId = localStorage.getItem("32drive_corrida_id") || "";
 
-    const PONTOS_REFERENCIA = [
-      { chaves: ["ijui", "ijuí", "654"], coords: [-32.1865, -52.1642] },
-      { chaves: ["guanabara"], coords: [-32.1798, -52.1685] },
-      { chaves: ["cassino", "av. rio grande"], coords: [-32.1833, -52.1667] },
-      { chaves: ["centro", "general bacelar"], coords: [-32.0350, -52.0986] },
-      { chaves: ["furg", "carreiros"], coords: [-32.0750, -52.1630] },
-      { chaves: ["cidade nova"], coords: [-32.0520, -52.1180] },
-      { chaves: ["santa tereza"], coords: [-32.0490, -52.0920] }
-    ];
+    function mostrarAvisoFirebase(texto) {
+      if (!avisoFirebase) return;
+      avisoFirebase.textContent = texto;
+      avisoFirebase.style.display = texto ? "block" : "none";
+    }
 
-    function lerPerfilLocal() {
-      try {
-        return JSON.parse(localStorage.getItem(CHAVE_PERFIL_LOCAL) || "null") || {
-          id: "MOT-01",
-          nome: "Luíz Carlos Costa Jr.",
-          veiculo: "VW Voyage 2010",
-          placa: "IQD8060",
-          chavePix: "45bd89b5-9dd7-4cda-8715-789257d06596"
-        };
-      } catch (e) {
-        return { id: "MOT-01", nome: "", veiculo: "", placa: "", chavePix: "" };
+    function formatarMoeda(valor) {
+      return "R$ " + Number(valor || 0).toFixed(2).replace(".", ",");
+    }
+
+    function calcularEstimativa() {
+      const km = Math.max(1, Number(elDistancia.value || 1));
+      const base = 6.5;
+      const porKm = 1.5;
+      let total = base + km * porKm;
+      if (modoChuva) total = total * 1.25;
+      const arredondado = Number(total.toFixed(2));
+      elValorEstimado.textContent = formatarMoeda(arredondado);
+      elDetalheTarifa.textContent = modoChuva
+        ? km + " km • Inclui +25% chuva"
+        : km + " km • Tarifa padrão";
+      return arredondado;
+    }
+
+    function renderizarCorrida(c) {
+      if (!c) {
+        boxCorridaAtiva.innerHTML = "Nenhuma corrida solicitada ainda.";
+        return;
       }
+      const motTexto = c.motorista && c.motorista.nome
+        ? c.motorista.nome + " • " + (c.motorista.veiculo || "") + " (" + (c.motorista.placa || "") + ")"
+        : "Aguardando motorista aceitar...";
+
+      boxCorridaAtiva.innerHTML =
+        "<div><strong>Código:</strong> " + (c.codigo || "—") + " • <strong>Status:</strong> " + (c.status || "Solicitada") + "</div>" +
+        "<div><strong>Passageiro:</strong> " + (c.passageiro || "—") + " • <strong>Valor:</strong> " + formatarMoeda(c.valorBruto) + "</div>" +
+        "<div><strong>Trecho:</strong> " + (c.origem || "—") + " → " + (c.destino || "—") + "</div>" +
+        "<div><strong>Pagamento:</strong> " + (c.pagamento || "Pix") + "</div>" +
+        "<div><strong>Motorista:</strong> " + motTexto + "</div>";
     }
 
-    function preencherCamposPerfil() {
-      const p = lerPerfilLocal();
-      document.getElementById("mot-id").value = p.id || "";
-      document.getElementById("mot-nome").value = p.nome || "";
-      document.getElementById("mot-veiculo").value = p.veiculo || "";
-      document.getElementById("mot-placa").value = p.placa || "";
-      document.getElementById("mot-pix").value = p.chavePix || "";
-    }
+    async function solicitarCorrida() {
+      const nome = (document.getElementById("pas-nome").value || "").trim();
+      const origem = (document.getElementById("pas-origem").value || "").trim();
+      const destino = (document.getElementById("pas-destino").value || "").trim();
+      const pagamento = document.getElementById("pas-pagamento").value || "Pix";
+      const valorBruto = calcularEstimativa();
 
-    function atualizarHeaderUI(perfil) {
-      document.getElementById("header-motorista-nome").textContent = perfil.nome || "Perfil não configurado";
-      document.getElementById("hero-veiculo-info").textContent =
-        perfil.veiculo && perfil.placa ? perfil.veiculo + " • Placa " + perfil.placa : "Configure seu veículo";
-
-      const badge = document.getElementById("badge-aprovacao");
-      const alerta = document.getElementById("alerta-bloqueio");
-      const btnOnline = document.getElementById("btn-alternar-online");
-      const pill = document.getElementById("status-pill");
-      const pillText = document.getElementById("status-pill-text");
-
-      if (badge) {
-        badge.textContent = motoristaLiberado ? "LIBERADO" : "AGUARDANDO ADMIN";
-        badge.style.background = motoristaLiberado ? "#10b981" : "#ef4444";
-        badge.style.color = motoristaLiberado ? "#052e16" : "#ffffff";
+      if (!nome || !origem || !destino) {
+        msgPassageiro.textContent = "Preencha seu nome, embarque e destino.";
+        return;
       }
-      if (alerta) alerta.classList.toggle("visivel", !motoristaLiberado);
-      if (btnOnline) {
-        btnOnline.disabled = !motoristaLiberado;
-        btnOnline.textContent = estaOnline ? "Ficar Offline" : "Ficar Online";
-      }
-      if (pill) pill.classList.toggle("offline", !estaOnline);
-      if (pillText) pillText.textContent = estaOnline ? "Online e Liberado" : "Offline";
-    }
 
-    function monitorarDocumentoMotorista(idMotorista) {
-      if (unsubMotorista) unsubMotorista();
-      if (!idMotorista) return;
-
-      const ref = doc(db, "motoristas", idMotorista);
-      unsubMotorista = onSnapshot(ref, async (snap) => {
-        const perfilLocal = lerPerfilLocal();
-        if (snap.exists()) {
-          const dados = snap.data();
-          motoristaLiberado = Boolean(dados.liberado);
-          estaOnline = Boolean(dados.online && motoristaLiberado);
-          atualizarHeaderUI(Object.assign({}, perfilLocal, dados));
-        } else {
-          motoristaLiberado = false;
-          estaOnline = false;
-          atualizarHeaderUI(perfilLocal);
-        }
-        renderizar();
-      });
-    }
-
-    async function salvarPerfilNuvem() {
-      const msg = document.getElementById("msg-perfil");
-      const perfil = {
-        id: (document.getElementById("mot-id").value || "").trim().toUpperCase(),
-        nome: (document.getElementById("mot-nome").value || "").trim(),
-        veiculo: (document.getElementById("mot-veiculo").value || "").trim(),
-        placa: (document.getElementById("mot-placa").value || "").trim().toUpperCase(),
-        chavePix: (document.getElementById("mot-pix").value || "").trim()
+      const codigo = "32D-" + Math.floor(1000 + Math.random() * 9000);
+      const corridaLocal = {
+        codigo,
+        passageiro: nome,
+        origem,
+        destino,
+        pagamento,
+        valorBruto,
+        status: "Aguardando motorista",
+        motorista: null,
+        criadoEmTimestamp: Date.now()
       };
 
-      if (!perfil.id || !perfil.nome || !perfil.veiculo || !perfil.placa) {
-        if (msg) msg.textContent = "Preencha ID, Nome, Veículo e Placa.";
+      renderizarCorrida(corridaLocal);
+
+      if (!db || !fs) {
+        msgPassageiro.textContent = "Simulação local exibida. Configure o firebase-config.js para enviar ao motorista.";
         return;
       }
 
-      localStorage.setItem(CHAVE_PERFIL_LOCAL, JSON.stringify(perfil));
-
       try {
-        if (msg) msg.textContent = "Salvando cadastro no Firebase...";
-        const ref = doc(db, "motoristas", perfil.id);
-        const snap = await getDoc(ref);
-        const jaLiberado = snap.exists() ? Boolean(snap.data().liberado) : false;
-
-        await setDoc(
-          ref,
-          {
-            id: perfil.id,
-            nome: perfil.nome,
-            veiculo: perfil.veiculo,
-            placa: perfil.placa,
-            chavePix: perfil.chavePix,
-            liberado: jaLiberado,
-            online: snap.exists() ? Boolean(snap.data().online && jaLiberado) : false,
-            atualizadoEm: serverTimestamp()
-          },
-          { merge: true }
-        );
-
-        monitorarDocumentoMotorista(perfil.id);
-        if (msg) {
-          msg.textContent = jaLiberado
-            ? "Perfil atualizado e liberado para operar!"
-            : "Cadastro enviado! Aguardando liberação no Painel Admin.";
-        }
+        msgPassageiro.textContent = "Enviando solicitação...";
+        const docRef = await fs.addDoc(fs.collection(db, "corridas"), {
+          ...corridaLocal,
+          criadoEm: fs.serverTimestamp()
+        });
+        corridaAtualId = docRef.id;
+        localStorage.setItem("32drive_corrida_id", corridaAtualId);
+        msgPassageiro.textContent = "Corrida " + codigo + " enviada com sucesso!";
+        observarCorridaAtual();
       } catch (erro) {
         console.error(erro);
-        if (msg) msg.textContent = "Erro ao salvar no Firebase. Confira o firebase-config.js.";
+        msgPassageiro.textContent = "Erro ao enviar corrida para a nuvem.";
       }
     }
 
-    async function alternarOnline() {
-      const msgOp = document.getElementById("msg-operacao");
-      const perfil = lerPerfilLocal();
-      if (!motoristaLiberado) {
-        if (msgOp) msgOp.textContent = "Aguarde o Admin liberar seu ID (" + perfil.id + ").";
-        return;
-      }
-
-      try {
-        const novoEstado = !estaOnline;
-        await updateDoc(doc(db, "motoristas", perfil.id), {
-          online: novoEstado,
-          atualizadoEm: serverTimestamp()
-        });
-        if (msgOp) msgOp.textContent = novoEstado ? "Você está online recebendo corridas!" : "Você ficou offline.";
-      } catch (erro) {
-        console.error(erro);
-        if (msgOp) msgOp.textContent = "Salve seu perfil antes de ficar online.";
-      }
-    }
-
-    function iniciarMapa() {
-      if (!window.L || !document.getElementById("mapa-motorista")) return;
-      mapa = L.map("mapa-motorista").setView([-32.1833, -52.1667], 13);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap" }).addTo(mapa);
-      camadaRota = L.layerGroup().addTo(mapa);
-    }
-
-    function acharPontoLocal(texto) {
-      const lower = String(texto || "").toLowerCase();
-      for (const item of PONTOS_REFERENCIA) {
-        for (const chave of item.chaves) {
-          if (lower.includes(chave)) return item.coords;
-        }
-      }
-      return null;
-    }
-
-    function atualizarMapaPedido(pedido) {
-      if (!mapa || !camadaRota) return;
-      camadaRota.clearLayers();
-      if (!pedido) return;
-      const p1 = acharPontoLocal(pedido.origem);
-      const p2 = acharPontoLocal(pedido.destino);
-      if (p1) L.marker(p1).addTo(camadaRota).bindPopup("Embarque");
-      if (p2) L.marker(p2).addTo(camadaRota).bindPopup("Destino");
-      if (p1 && p2) {
-        const linha = L.polyline([p1, p2], { color: "#0b192c", weight: 4 }).addTo(camadaRota);
-        mapa.fitBounds(linha.getBounds(), { padding: [24, 24] });
-      }
-    }
-
-    function calcularResumoFinanceiro(corridasDoMotorista) {
-      let bruto = 0;
-      corridasDoMotorista.forEach((p) => {
-        if (p.status === "Corrida finalizada") {
-          const val = Number(p.valorBruto || 0);
-          if (!isNaN(val)) bruto += val;
+    function observarCorridaAtual() {
+      if (!db || !fs || !corridaAtualId) return;
+      fs.onSnapshot(fs.doc(db, "corridas", corridaAtualId), (snap) => {
+        if (snap.exists()) {
+          renderizarCorrida(snap.data());
         }
       });
-      const taxa = Number((bruto * 0.15).toFixed(2));
-      const liquido = Number((bruto - taxa).toFixed(2));
-      document.getElementById("fin-bruto").textContent = "R$ " + bruto.toFixed(2).replace(".", ",");
-      document.getElementById("fin-taxa").textContent = "R$ " + taxa.toFixed(2).replace(".", ",");
-      document.getElementById("fin-liquido").textContent = "R$ " + liquido.toFixed(2).replace(".", ",");
     }
 
-    // Aceite com transação atômica: impede que 2 motoristas aceitem a mesma corrida
-    async function aceitarCorrida(docId) {
-      const msgOp = document.getElementById("msg-operacao");
-      if (!motoristaLiberado || !estaOnline) {
-        if (msgOp) msgOp.textContent = "Fique Online (com cadastro liberado) para aceitar corridas.";
-        return;
-      }
+    elDistancia.addEventListener("input", calcularEstimativa);
+    document.getElementById("btn-solicitar-corrida").addEventListener("click", solicitarCorrida);
+    calcularEstimativa();
 
-      const perfil = lerPerfilLocal();
-      const inputMin = document.getElementById("eta-input-" + docId);
-      const tempoChegada = (inputMin && inputMin.value.trim()) || temposSelecionados[docId] || "5";
+    try {
+      const configModulo = await import("./firebase-config.js");
+      fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      db = configModulo.db;
+      if (!db) throw new Error("db não exportado");
 
-      const corridaRef = doc(db, "corridas", docId);
+      badgePassageiro.textContent = "Online";
+      mostrarAvisoFirebase("");
 
-      try {
-        await runTransaction(db, async (transaction) => {
-          const snap = await transaction.get(corridaRef);
-          if (!snap.exists()) throw new Error("Corrida não encontrada.");
-          const atual = snap.data();
-
-          if (atual.status !== "Aguardando motorista") {
-            throw new Error("Esta corrida já foi aceita ou encerrada por outro motorista.");
-          }
-
-          transaction.update(corridaRef, {
-            status: "Corrida aceita",
-            tempoChegada: tempoChegada,
-            motoristaId: perfil.id,
-            motorista: {
-              id: perfil.id,
-              nome: perfil.nome,
-              veiculo: perfil.veiculo,
-              placa: perfil.placa,
-              chavePix: perfil.chavePix || ""
-            },
-            aceitaEm: serverTimestamp()
-          });
-        });
-
-        if (msgOp) msgOp.textContent = "Corrida aceita! Seus dados já apareceram para o passageiro.";
-      } catch (erro) {
-        alert(erro.message || "Não foi possível aceitar esta corrida.");
-      }
-    }
-
-    async function recusarCorrida(docId) {
-      const perfil = lerPerfilLocal();
-      const corridaRef = doc(db, "corridas", docId);
-      await updateDoc(corridaRef, {
-        status: "Corrida recusada",
-        recusadaPor: perfil.id
-      });
-    }
-
-    async function finalizarCorrida(docId) {
-      const corridaRef = doc(db, "corridas", docId);
-      await updateDoc(corridaRef, {
-        status: "Corrida finalizada",
-        finalizadaEm: serverTimestamp()
-      });
-      const msgOp = document.getElementById("msg-operacao");
-      if (msgOp) msgOp.textContent = "Corrida finalizada e contabilizada no repasse pós-corrida!";
-    }
-
-    function renderizar() {
-      const container = document.getElementById("lista-motorista");
-      const perfil = lerPerfilLocal();
-
-      // Mostra: corridas aguardando (se motorista estiver online e liberado) + corridas deste motorista
-      const visiveis = todasCorridas.filter((p) => {
-        if (p.status === "Aguardando motorista") return estaOnline && motoristaLiberado;
-        return p.motoristaId === perfil.id;
+      fs.onSnapshot(fs.doc(db, "config", "geral"), (snap) => {
+        modoChuva = snap.exists() ? Boolean(snap.data().chuva) : false;
+        avisoChuva.style.display = modoChuva ? "block" : "none";
+        calcularEstimativa();
       });
 
-      document.getElementById("contador").textContent = String(visiveis.length);
-      calcularResumoFinanceiro(visiveis);
-      atualizarMapaPedido(visiveis[0] || null);
-
-      if (!visiveis.length) {
-        container.innerHTML =
-          '<div class="pedido-card" style="color:#475569;">' +
-          (estaOnline
-            ? "Nenhuma corrida aguardando no momento."
-            : "Fique Online para visualizar novas solicitações de passageiros.") +
-          "</div>";
-        return;
-      }
-
-      container.innerHTML = visiveis
-        .slice(0, 15)
-        .map((p) => {
-          const etaAtual = temposSelecionados[p.docId] || p.tempoChegada || "5";
-          const aguardando = p.status === "Aguardando motorista";
-          const emAndamento = p.status === "Corrida aceita";
-
-          return (
-            '<div class="pedido-card' + (aguardando ? " destaque" : "") + '">' +
-            '<div class="pedido-top"><strong>' + p.codigo + " • " + p.passageiro + '</strong><span class="pedido-valor">' + p.valorFormatado + "</span></div>" +
-            "<div><strong>Status:</strong> " + p.status + "</div>" +
-            "<div><strong>Embarque:</strong> " + p.origem + "<br/><strong>Destino:</strong> " + p.destino + "<br/><strong>Distância:</strong> " + p.km + " km • " + p.pagamento + "</div>" +
-            '<div class="eta-box"><span>Chegada:</span>' +
-            ["3", "5", "8", "12"]
-              .map(
-                (m) =>
-                  '<button class="eta-chip' +
-                  (String(etaAtual) === m ? " ativo" : "") +
-                  '" type="button" data-acao="set-eta" data-id="' +
-                  p.docId +
-                  '" data-min="' +
-                  m +
-                  '">' +
-                  m +
-                  " min</button>"
-              )
-              .join("") +
-            '<input class="eta-input" id="eta-input-' + p.docId + '" type="number" value="' + etaAtual + '" />' +
-            "</div>" +
-            '<div class="actions">' +
-            '<button class="btn btn-aceitar" type="button" data-acao="aceitar" data-id="' + p.docId + '"' + (!aguardando ? " disabled" : "") + ">Aceitar</button>" +
-            '<button class="btn btn-recusar" type="button" data-acao="recusar" data-id="' + p.docId + '"' + (!aguardando ? " disabled" : "") + ">Recusar</button>" +
-            '<button class="btn btn-finalizar" type="button" data-acao="finalizar" data-id="' + p.docId + '"' + (!emAndamento ? " disabled" : "") + ">Finalizar</button>" +
-            "</div>" +
-            "</div>"
-          );
-        })
-        .join("");
+      observarCorridaAtual();
+    } catch (erro) {
+      console.error(erro);
+      badgePassageiro.textContent = "Passageiro";
+      mostrarAvisoFirebase(
+        "Tela do Passageiro carregada. O arquivo firebase-config.js ainda não foi encontrado no repositório."
+      );
     }
-
-    function iniciarOuvinteCorridas() {
-      onSnapshot(collection(db, "corridas"), (snapshot) => {
-        const itens = [];
-        snapshot.forEach((docSnap) => {
-          itens.push({ docId: docSnap.id, ...docSnap.data() });
-        });
-        itens.sort((a, b) => (b.criadoEmTimestamp || 0) - (a.criadoEmTimestamp || 0));
-        todasCorridas = itens;
-        renderizar();
-      });
-    }
-
-    document.addEventListener("click", (ev) => {
-      const btn = ev.target.closest("button[data-acao]");
-      if (!btn) return;
-      const acao = btn.getAttribute("data-acao");
-      const docId = btn.getAttribute("data-id");
-      if (acao === "set-eta") {
-        temposSelecionados[docId] = btn.getAttribute("data-min");
-        renderizar();
-      }
-      if (acao === "aceitar") aceitarCorrida(docId);
-      if (acao === "recusar") recusarCorrida(docId);
-      if (acao === "finalizar") finalizarCorrida(docId);
-    });
-
-    document.getElementById("btn-salvar-perfil").addEventListener("click", salvarPerfilNuvem);
-    document.getElementById("btn-alternar-online").addEventListener("click", alternarOnline);
-
-    iniciarMapa();
-    preencherCamposPerfil();
-    monitorarDocumentoMotorista(lerPerfilLocal().id);
-    iniciarOuvinteCorridas();
   </script>
 </body>
 </html>
