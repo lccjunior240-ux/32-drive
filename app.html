@@ -18,6 +18,7 @@
       --muted: #475569;
       --accent: #f59e0b;
       --green: #059669;
+      --blue: #0284c7;
       --red: #dc2626;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -55,7 +56,7 @@
     h1 { font-size: 20px; font-weight: 900; color: var(--accent); }
     .subtitle { font-size: 15px; color: #dbeafe; }
     .badge {
-      background: var(--accent);
+      background: #94a3b8;
       color: #0f172a;
       font-weight: 800;
       font-size: 14px;
@@ -83,6 +84,16 @@
       font-size: 15px;
       font-weight: 700;
     }
+    .aviso-chuva {
+      display: none;
+      background: #e0f2fe;
+      border: 2px solid #0284c7;
+      color: #0c4a6e;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-weight: 800;
+    }
     .card {
       background: var(--card);
       border: 2px solid var(--border);
@@ -92,6 +103,12 @@
       flex-direction: column;
       gap: 12px;
       box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
     }
     .card-title { font-size: 19px; font-weight: 900; color: #0f172a; }
     label { font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: block; }
@@ -105,6 +122,7 @@
       font-size: 17px;
       font-weight: 600;
     }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .btn {
       width: 100%;
       padding: 15px;
@@ -114,9 +132,16 @@
       font-weight: 800;
       cursor: pointer;
     }
+    .btn-sm {
+      padding: 10px 14px;
+      font-size: 14px;
+      width: auto;
+    }
     .btn-primary { background: #0b192c; color: #ffffff; }
     .btn-green { background: #10b981; color: #052e16; }
     .btn-accent { background: var(--accent); color: #0f172a; }
+    .btn-outline { background: #e2e8f0; color: #0f172a; border: 2px solid #94a3b8; }
+    .btn-danger { background: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; }
     .status-msg { font-size: 16px; font-weight: 800; color: #047857; text-align: center; min-height: 20px; }
     .corrida-card {
       background: #f8fafc;
@@ -125,7 +150,29 @@
       padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
+    }
+    .corrida-ativa {
+      background: #ecfdf5;
+      border: 2px solid #10b981;
+    }
+    .tag {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .tag-chuva {
+      background: #0284c7;
+      color: #ffffff;
+    }
+    .valor-destaque {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--green);
     }
   </style>
 </head>
@@ -135,28 +182,37 @@
       <img src="icon-512.png" alt="32 Drive" />
       <div>
         <h1>32 DRIVE — Motorista</h1>
-        <div class="subtitle">Aceitar Corridas • Cassino &amp; Rio Grande</div>
+        <div class="subtitle">Painel de Corridas • Cassino &amp; Rio Grande</div>
       </div>
     </div>
     <span class="badge" id="badge-motorista">Offline</span>
   </header>
 
   <main>
+    <div class="aviso-chuva" id="aviso-chuva">
+      Modo Chuva ativo no sistema (+25% nas tarifas).
+    </div>
     <div class="aviso-firebase" id="aviso-firebase"></div>
 
     <section class="card">
       <div class="card-title">Identificação do Motorista</div>
-      <div>
-        <label for="mot-codigo">Seu Código de Motorista</label>
-        <input id="mot-codigo" type="text" placeholder="Ex: MOT-01" />
+      <div class="grid-2">
+        <div>
+          <label for="mot-codigo">Código</label>
+          <input id="mot-codigo" type="text" placeholder="Ex: MOT-01" />
+        </div>
+        <div>
+          <label for="mot-placa">Placa</label>
+          <input id="mot-placa" type="text" placeholder="Ex: IQD8060" />
+        </div>
       </div>
       <div>
-        <label for="mot-nome">Seu Nome</label>
+        <label for="mot-nome">Nome do Motorista</label>
         <input id="mot-nome" type="text" placeholder="Ex: Junior Costa" />
       </div>
       <div>
-        <label for="mot-veiculo">Veículo e Placa</label>
-        <input id="mot-veiculo" type="text" placeholder="Ex: VW Voyage 2010 • IQD8060" />
+        <label for="mot-veiculo">Veículo</label>
+        <input id="mot-veiculo" type="text" placeholder="Ex: VW Voyage 1.0 Prata" />
       </div>
       <button class="btn btn-green" type="button" id="btn-ficar-online">
         Ficar Online para Corridas
@@ -164,11 +220,21 @@
       <div class="status-msg" id="msg-motorista"></div>
     </section>
 
+    <section class="card" id="sec-corrida-andamento" style="display:none;">
+      <div class="card-title">Corrida em Andamento</div>
+      <div id="box-corrida-andamento"></div>
+    </section>
+
     <section class="card">
-      <div class="card-title">Corridas Disponíveis</div>
+      <div class="card-header">
+        <div class="card-title">Chamados Disponíveis</div>
+        <button class="btn btn-outline btn-sm" type="button" id="btn-simular-chamado">
+          Simular Chamado
+        </button>
+      </div>
       <div id="lista-corridas-motorista" style="display:flex;flex-direction:column;gap:12px;">
         <div class="corrida-card" style="color:var(--muted);">
-          Nenhuma corrida disponível no momento.
+          Nenhuma corrida aguardando motorista no momento.
         </div>
       </div>
     </section>
@@ -177,12 +243,45 @@
   <script type="module">
     const badgeMotorista = document.getElementById("badge-motorista");
     const avisoFirebase = document.getElementById("aviso-firebase");
+    const avisoChuva = document.getElementById("aviso-chuva");
     const msgMotorista = document.getElementById("msg-motorista");
     const listaCorridasEl = document.getElementById("lista-corridas-motorista");
+    const secCorridaAndamento = document.getElementById("sec-corrida-andamento");
+    const boxCorridaAndamento = document.getElementById("box-corrida-andamento");
+
+    const elCodigo = document.getElementById("mot-codigo");
+    const elNome = document.getElementById("mot-nome");
+    const elVeiculo = document.getElementById("mot-veiculo");
+    const elPlaca = document.getElementById("mot-placa");
+    const btnOnline = document.getElementById("btn-ficar-online");
 
     let db = null;
     let fs = null;
     let online = false;
+    let corridaEmAndamento = null;
+    let chamadosLocais = [];
+
+    function carregarPerfilSalvo() {
+      try {
+        const salvo = JSON.parse(localStorage.getItem("32drive_motorista_perfil") || "null");
+        if (!salvo) return;
+        if (salvo.codigo) elCodigo.value = salvo.codigo;
+        if (salvo.nome) elNome.value = salvo.nome;
+        if (salvo.veiculo) elVeiculo.value = salvo.veiculo;
+        if (salvo.placa) elPlaca.value = salvo.placa;
+      } catch (_) {}
+    }
+
+    function salvarPerfil() {
+      const perfil = {
+        codigo: (elCodigo.value || "").trim().toUpperCase(),
+        nome: (elNome.value || "").trim(),
+        veiculo: (elVeiculo.value || "").trim(),
+        placa: (elPlaca.value || "").trim().toUpperCase()
+      };
+      localStorage.setItem("32drive_motorista_perfil", JSON.stringify(perfil));
+      return perfil;
+    }
 
     function mostrarAvisoFirebase(texto) {
       if (!avisoFirebase) return;
@@ -195,63 +294,206 @@
     }
 
     function alternarOnline() {
-      const codigo = (document.getElementById("mot-codigo").value || "").trim().toUpperCase();
-      const nome = (document.getElementById("mot-nome").value || "").trim();
-      if (!codigo || !nome) {
-        msgMotorista.textContent = "Preencha seu Código e Nome para ficar online.";
+      const perfil = salvarPerfil();
+      if (!perfil.codigo || !perfil.nome) {
+        msgMotorista.textContent = "Preencha pelo menos seu Código e Nome para ficar online.";
         return;
       }
       online = !online;
       badgeMotorista.textContent = online ? "Online" : "Offline";
-      badgeMotorista.style.background = online ? "#10b981" : "#f59e0b";
+      badgeMotorista.style.background = online ? "#10b981" : "#94a3b8";
       badgeMotorista.style.color = online ? "#052e16" : "#0f172a";
-      document.getElementById("btn-ficar-online").textContent = online
-        ? "Ficar Offline"
-        : "Ficar Online para Corridas";
+      btnOnline.textContent = online ? "Ficar Offline" : "Ficar Online para Corridas";
+      btnOnline.className = online ? "btn btn-danger" : "btn btn-green";
       msgMotorista.textContent = online
-        ? "Você está ONLINE como " + nome + " (" + codigo + ")."
-        : "Você ficou OFFLINE.";
+        ? "Online como " + perfil.nome + " (" + perfil.codigo + ") — pronto para receber corridas."
+        : "Você ficou offline.";
     }
 
-    function renderizarCorridas(itens) {
-      if (!itens.length) {
-        listaCorridasEl.innerHTML =
-          '<div class="corrida-card" style="color:var(--muted);">Nenhuma corrida disponível no momento.</div>';
+    function montarLinkMapa(endereco) {
+      const q = encodeURIComponent(String(endereco || "") + ", Rio Grande, RS");
+      return "https://www.google.com/maps/search/?api=1&query=" + q;
+    }
+
+    function renderizarCorridaAndamento() {
+      if (!corridaEmAndamento) {
+        secCorridaAndamento.style.display = "none";
+        boxCorridaAndamento.innerHTML = "";
         return;
       }
+
+      secCorridaAndamento.style.display = "flex";
+      const c = corridaEmAndamento;
+      const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
+
+      let acaoHtml = "";
+      if (c.status === "Motorista a caminho") {
+        acaoHtml =
+          '<button class="btn btn-primary" type="button" data-etapa="No local de embarque">Cheguei no Embarque</button>';
+      } else if (c.status === "No local de embarque") {
+        acaoHtml =
+          '<button class="btn btn-green" type="button" data-etapa="Em viagem">Iniciar Viagem</button>';
+      } else if (c.status === "Em viagem") {
+        acaoHtml =
+          '<button class="btn btn-accent" type="button" data-etapa="Finalizada">Finalizar Corrida</button>';
+      }
+
+      boxCorridaAndamento.innerHTML =
+        '<div class="corrida-card corrida-ativa">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+            '<strong>' + (c.codigo || "32D") + ' • ' + (c.passageiro || "Passageiro") + '</strong>' +
+            '<span class="valor-destaque">' + formatarMoeda(c.valorBruto) + '</span>' +
+          '</div>' +
+          '<div><span class="tag">' + (c.status || "Em andamento") + '</span> <span class="tag">' + kmTxt + '</span> <span class="tag">' + (c.pagamento || "Pix") + '</span></div>' +
+          '<div><strong>Embarque:</strong> ' + (c.origem || "—") + '</div>' +
+          '<div><strong>Destino:</strong> ' + (c.destino || "—") + '</div>' +
+          '<div class="grid-2">' +
+            '<a class="btn btn-outline" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkMapa(c.origem) + '">Abrir Embarque</a>' +
+            '<a class="btn btn-outline" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkMapa(c.destino) + '">Abrir Destino</a>' +
+          '</div>' +
+          acaoHtml +
+        '</div>';
+    }
+
+    function renderizarChamados(itens) {
+      if (!itens.length) {
+        listaCorridasEl.innerHTML =
+          '<div class="corrida-card" style="color:var(--muted);">Nenhuma corrida aguardando motorista no momento.</div>';
+        return;
+      }
+
       listaCorridasEl.innerHTML = itens
         .map((c) => {
-          const bruto = Number(c.valorBruto || 0);
+          const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
+          const tagChuva = c.chuva ? ' <span class="tag tag-chuva">Chuva +25%</span>' : "";
           return (
             '<div class="corrida-card">' +
-            "<div><strong>" + (c.codigo || "Corrida") + " • " + (c.passageiro || "Passageiro") + "</strong> — <strong>" + formatarMoeda(bruto) + "</strong></div>" +
-            "<div><strong>Embarque:</strong> " + (c.origem || "—") + "<br/><strong>Destino:</strong> " + (c.destino || "—") + "<br/><strong>Pagamento:</strong> " + (c.pagamento || "Pix") + " • <strong>Status:</strong> " + (c.status || "Aguardando") + "</div>" +
-            '<button class="btn btn-accent" type="button" data-aceitar="' + c.docId + '">Aceitar Corrida</button>' +
-            "</div>"
+              '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                '<strong>' + (c.codigo || "Corrida") + ' • ' + (c.passageiro || "Passageiro") + '</strong>' +
+                '<span class="valor-destaque">' + formatarMoeda(c.valorBruto) + '</span>' +
+              '</div>' +
+              '<div><span class="tag">' + kmTxt + '</span> <span class="tag">' + (c.pagamento || "Pix") + '</span>' + tagChuva + '</div>' +
+              '<div><strong>Embarque:</strong> ' + (c.origem || "—") + '<br/><strong>Destino:</strong> ' + (c.destino || "—") + '</div>' +
+              '<button class="btn btn-accent" type="button" data-aceitar="' + c.docId + '">Aceitar Corrida</button>' +
+            '</div>'
           );
         })
         .join("");
     }
 
     async function aceitarCorrida(docId) {
-      if (!db || !fs || !docId) {
-        msgMotorista.textContent = "Conecte o firebase-config.js para aceitar corridas na nuvem.";
+      const perfil = salvarPerfil();
+      if (!perfil.nome) {
+        msgMotorista.textContent = "Preencha seu Nome antes de aceitar uma corrida.";
         return;
       }
-      const nome = (document.getElementById("mot-nome").value || "Motorista 32 Drive").trim();
-      const veiculo = (document.getElementById("mot-veiculo").value || "Veículo 32 Drive").trim();
-      await fs.updateDoc(fs.doc(db, "corridas", docId), {
-        status: "Motorista a caminho",
-        motorista: { nome, veiculo, placa: "32D" }
-      });
-      msgMotorista.textContent = "Corrida aceita com sucesso!";
+
+      const dadosMotorista = {
+        codigo: perfil.codigo || "MOT-01",
+        nome: perfil.nome,
+        veiculo: perfil.veiculo || "Veículo 32 Drive",
+        placa: perfil.placa || "32D"
+      };
+
+      // Caso seja chamado simulado local
+      const idxLocal = chamadosLocais.findIndex((item) => item.docId === docId);
+      if (idxLocal !== -1) {
+        const escolhida = {
+          ...chamadosLocais[idxLocal],
+          status: "Motorista a caminho",
+          motorista: dadosMotorista
+        };
+        chamadosLocais.splice(idxLocal, 1);
+        corridaEmAndamento = escolhida;
+        renderizarChamados(chamadosLocais);
+        renderizarCorridaAndamento();
+        msgMotorista.textContent = "Chamado simulado aceito!";
+        return;
+      }
+
+      if (!db || !fs || !docId) {
+        msgMotorista.textContent = "Conecte o firebase-config.js para aceitar corridas reais.";
+        return;
+      }
+
+      try {
+        await fs.updateDoc(fs.doc(db, "corridas", docId), {
+          status: "Motorista a caminho",
+          motorista: dadosMotorista,
+          aceitaEm: fs.serverTimestamp()
+        });
+        msgMotorista.textContent = "Corrida aceita! O passageiro já foi avisado.";
+      } catch (erro) {
+        console.error(erro);
+        msgMotorista.textContent = "Erro ao aceitar corrida.";
+      }
     }
 
-    document.getElementById("btn-ficar-online").addEventListener("click", alternarOnline);
+    async function avancarEtapaCorrida(novaEtapa) {
+      if (!corridaEmAndamento) return;
+
+      if (String(corridaEmAndamento.docId || "").startsWith("SIM-")) {
+        if (novaEtapa === "Finalizada") {
+          msgMotorista.textContent = "Corrida simulada finalizada (" + formatarMoeda(corridaEmAndamento.valorBruto) + ").";
+          corridaEmAndamento = null;
+        } else {
+          corridaEmAndamento.status = novaEtapa;
+          msgMotorista.textContent = "Status atualizado: " + novaEtapa;
+        }
+        renderizarCorridaAndamento();
+        return;
+      }
+
+      if (!db || !fs) return;
+      try {
+        await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
+          status: novaEtapa
+        });
+        if (novaEtapa === "Finalizada") {
+          msgMotorista.textContent = "Corrida finalizada com sucesso!";
+          corridaEmAndamento = null;
+          renderizarCorridaAndamento();
+        } else {
+          msgMotorista.textContent = "Status atualizado: " + novaEtapa;
+        }
+      } catch (erro) {
+        console.error(erro);
+        msgMotorista.textContent = "Erro ao atualizar status da corrida.";
+      }
+    }
+
+    function simularChamadoTeste() {
+      const fake = {
+        docId: "SIM-" + Date.now(),
+        codigo: "32D-" + Math.floor(1000 + Math.random() * 9000),
+        passageiro: "Passageiro Teste",
+        origem: "Av. Rio Grande, 450 — Cassino",
+        destino: "FURG — Campus Carreiros, Rio Grande",
+        distanciaKm: 14.5,
+        pagamento: "Pix",
+        valorBruto: 29.0,
+        chuva: false,
+        status: "Aguardando motorista"
+      };
+      chamadosLocais.unshift(fake);
+      renderizarChamados(chamadosLocais);
+      msgMotorista.textContent = "Chamado de teste criado abaixo.";
+    }
+
+    carregarPerfilSalvo();
+    btnOnline.addEventListener("click", alternarOnline);
+    document.getElementById("btn-simular-chamado").addEventListener("click", simularChamadoTeste);
+
     listaCorridasEl.addEventListener("click", (ev) => {
       const btn = ev.target.closest("button[data-aceitar]");
       if (!btn) return;
       aceitarCorrida(btn.getAttribute("data-aceitar"));
+    });
+
+    boxCorridaAndamento.addEventListener("click", (ev) => {
+      const btn = ev.target.closest("button[data-etapa]");
+      if (!btn) return;
+      avancarEtapaCorrida(btn.getAttribute("data-etapa"));
     });
 
     try {
@@ -261,20 +503,39 @@
       if (!db) throw new Error("db não exportado");
 
       mostrarAvisoFirebase("");
+
+      fs.onSnapshot(fs.doc(db, "config", "geral"), (snap) => {
+        const chuvaAtiva = snap.exists() ? Boolean(snap.data().chuva) : false;
+        avisoChuva.style.display = chuvaAtiva ? "block" : "none";
+      });
+
       fs.onSnapshot(fs.collection(db, "corridas"), (snapshot) => {
-        const itens = [];
+        const aguardando = [];
+        let ativaMinha = null;
+        const meuCodigo = (elCodigo.value || "").trim().toUpperCase();
+
         snapshot.forEach((docSnap) => {
-          const dados = docSnap.data();
-          if (dados.status === "Aguardando motorista") {
-            itens.push({ docId: docSnap.id, ...dados });
+          const d = docSnap.data();
+          if (d.status === "Aguardando motorista") {
+            aguardando.push({ docId: docSnap.id, ...d });
+          } else if (
+            d.status !== "Finalizada" &&
+            d.status !== "Cancelada" &&
+            d.motorista &&
+            (!meuCodigo || String(d.motorista.codigo || "").toUpperCase() === meuCodigo)
+          ) {
+            ativaMinha = { docId: docSnap.id, ...d };
           }
         });
-        renderizarCorridas(itens);
+
+        renderizarChamados(aguardando);
+        corridaEmAndamento = ativaMinha;
+        renderizarCorridaAndamento();
       });
     } catch (erro) {
       console.error(erro);
       mostrarAvisoFirebase(
-        "Painel do Motorista carregado. O arquivo firebase-config.js ainda não foi encontrado no repositório."
+        "Painel do Motorista carregado. Use 'Simular Chamado' para testar ou adicione o firebase-config.js para receber corridas reais do Passageiro."
       );
     }
   </script>
