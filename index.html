@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0b192c" />
-  <link rel="manifest" href="manifest-passageiro.json?v=36" />
+  <link rel="manifest" href="manifest-passageiro.json?v=37" />
   <link rel="icon" type="image/png" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-512.png" />
   <title>32 Drive — Passageiro</title>
@@ -233,7 +233,7 @@
         <div class="subtitle">Pedir Corrida • Cassino &amp; Rio Grande</div>
       </div>
     </div>
-    <span class="badge" id="badge-passageiro">v36</span>
+    <span class="badge" id="badge-passageiro">v37</span>
   </header>
 
   <main>
@@ -576,29 +576,30 @@
         return;
       }
 
-      if (c.status === "Finalizada" || c.status === "Cancelada") {
-        limparCorridaTela("Corrida " + (c.status === "Finalizada" ? "finalizada" : "cancelada") + ". Pronta para novo pedido.");
+      const st = String(c.status || "");
+      if (st === "Finalizada" || st === "Cancelada") {
+        limparCorridaTela("Corrida " + (st === "Finalizada" ? "finalizada" : "cancelada") + ". Pronta para novo pedido.");
         msgPassageiro.textContent = "Corrida encerrada e painel zerado.";
         return;
       }
 
       const foiAceita = Boolean(c.motorista && c.motorista.nome) ||
-        ["Aceita", "Motorista a caminho", "No local de embarque", "Em viagem"].includes(c.status);
+        ["Aceita", "Motorista a caminho", "No local de embarque", "Em viagem"].includes(st);
 
       const minutosChegada = Number(c.tempoChegadaMin || 0) || Number(c.tempoEstimadoRotaMin || 0) || null;
       const modoChegada = c.modoTempoChegada || (c.tempoChegadaMin ? "motorista" : "estimativa da rota");
 
-      if (foiAceita && ultimoStatusAvisado !== (c.status || "Aceita")) {
-        ultimoStatusAvisado = c.status || "Aceita";
-        msgPassageiro.textContent = "Viagem aceita! " + (minutosChegada ? "Chegada estimada em " + minutosChegada + " min." : "Motorista a caminho.");
+      if (foiAceita && ultimoStatusAvisado !== st) {
+        ultimoStatusAvisado = st || "Aceita";
+        msgPassageiro.textContent = "Viagem aceita! " + (minutosChegada ? "Chegada até você em " + minutosChegada + " min." : "Motorista a caminho.");
       }
 
       const alertaAceitaHtml = foiAceita
-        ? '<div class="alerta-aceita">Viagem aceita! O motorista confirmou seu pedido.</div>'
+        ? '<div class="alerta-aceita">Viagem aceita! O motorista confirmou sua corrida.</div>'
         : "";
 
       const chegadaHtml = minutosChegada
-        ? '<div class="chegada-destaque">Previsão de chegada até você: <strong>' +
+        ? '<div class="chegada-destaque">Tempo de chegada até você: <strong>' +
             escaparHtml(minutosChegada) + ' min</strong> (' + escaparHtml(modoChegada) + ')</div>'
         : "";
 
@@ -628,7 +629,7 @@
       boxCorridaAtiva.innerHTML =
         alertaAceitaHtml +
         chegadaHtml +
-        "<div><strong>Código:</strong> " + escaparHtml(c.codigo || "—") + " • <strong>Status:</strong> " + escaparHtml(c.status || "Solicitada") + "</div>" +
+        "<div><strong>Código:</strong> " + escaparHtml(c.codigo || "—") + " • <strong>Status:</strong> " + escaparHtml(st || "Solicitada") + "</div>" +
         "<div><strong>Passageiro:</strong> " + escaparHtml(c.passageiro || "—") + " • <strong>Valor:</strong> " + formatarMoeda(c.valorBruto) + "</div>" +
         "<div><strong>Distância:</strong> " + kmTxt + " • <strong>Pagamento:</strong> " + escaparHtml(c.pagamento || "Pix") + "</div>" +
         "<div><strong>Trecho:</strong> " + escaparHtml(c.origem || "—") + " → " + escaparHtml(c.destino || "—") + "</div>" +
