@@ -123,6 +123,42 @@
       font-weight: 600;
     }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .modo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn-modo {
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 2px solid #94a3b8;
+      background: #f8fafc;
+      color: #0f172a;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-modo.ativo {
+      background: #0b192c;
+      border-color: #0b192c;
+      color: #ffffff;
+    }
+    .minutos-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .btn-min {
+      padding: 11px 8px;
+      border-radius: 10px;
+      border: 2px solid #cbd5e1;
+      background: #f1f5f9;
+      color: #0f172a;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .btn-min.ativo {
+      background: var(--accent);
+      border-color: #d97706;
+      color: #0f172a;
+    }
     .btn {
       width: 100%;
       padding: 15px;
@@ -140,6 +176,7 @@
     .btn-primary { background: #0b192c; color: #ffffff; }
     .btn-green { background: #10b981; color: #052e16; }
     .btn-accent { background: var(--accent); color: #0f172a; }
+    .btn-blue { background: var(--blue); color: #ffffff; }
     .btn-outline { background: #e2e8f0; color: #0f172a; border: 2px solid #94a3b8; }
     .btn-danger { background: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; }
     .status-msg { font-size: 16px; font-weight: 800; color: #047857; text-align: center; min-height: 20px; }
@@ -174,6 +211,15 @@
       font-weight: 900;
       color: var(--green);
     }
+    .pix-motorista-box {
+      background: #eff6ff;
+      border: 2px solid #93c5fd;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
   </style>
 </head>
 <body>
@@ -195,7 +241,7 @@
     <div class="aviso-firebase" id="aviso-firebase"></div>
 
     <section class="card">
-      <div class="card-title">Identificação do Motorista</div>
+      <div class="card-title">Identificação &amp; Pix do Motorista</div>
       <div class="grid-2">
         <div>
           <label for="mot-codigo">Código</label>
@@ -214,10 +260,34 @@
         <label for="mot-veiculo">Veículo</label>
         <input id="mot-veiculo" type="text" placeholder="Ex: VW Voyage 1.0 Prata" />
       </div>
+      <div>
+        <label for="mot-pix">Sua Chave Pix (para enviar ao passageiro)</label>
+        <input id="mot-pix" type="text" placeholder="CPF, celular, e-mail ou chave aleatória" />
+      </div>
       <button class="btn btn-green" type="button" id="btn-ficar-online">
         Ficar Online para Corridas
       </button>
       <div class="status-msg" id="msg-motorista"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Tempo de Chegada (Rota Automática ou Manual)</div>
+      <div class="modo-row">
+        <button class="btn-modo ativo" type="button" id="modo-auto">Automático (Rota)</button>
+        <button class="btn-modo" type="button" id="modo-manual">Manual (Minutos)</button>
+      </div>
+      <div id="resumo-tempo-modo" style="font-size:15px;font-weight:700;color:var(--muted);">
+        Modo Automático ativo: usa o tempo estimado pela rota do mapa ao aceitar.
+      </div>
+      <div class="minutos-grid" id="grid-minutos">
+        <button class="btn-min" type="button" data-min="2">2 min</button>
+        <button class="btn-min" type="button" data-min="6">6 min</button>
+        <button class="btn-min" type="button" data-min="8">8 min</button>
+        <button class="btn-min" type="button" data-min="10">10 min</button>
+        <button class="btn-min" type="button" data-min="12">12 min</button>
+        <button class="btn-min" type="button" data-min="18">18 min</button>
+        <button class="btn-min" type="button" data-min="20">20 min</button>
+      </div>
     </section>
 
     <section class="card" id="sec-corrida-andamento" style="display:none;">
@@ -253,11 +323,18 @@
     const elNome = document.getElementById("mot-nome");
     const elVeiculo = document.getElementById("mot-veiculo");
     const elPlaca = document.getElementById("mot-placa");
+    const elPix = document.getElementById("mot-pix");
     const btnOnline = document.getElementById("btn-ficar-online");
+    const btnModoAuto = document.getElementById("modo-auto");
+    const btnModoManual = document.getElementById("modo-manual");
+    const resumoTempoModo = document.getElementById("resumo-tempo-modo");
+    const botoesMin = Array.from(document.querySelectorAll(".btn-min"));
 
     let db = null;
     let fs = null;
-    let online = false;
+    let online = localStorage.getItem("32drive_motorista_online") === "true";
+    let modoTempo = localStorage.getItem("32drive_modo_tempo") || "auto";
+    let minutoManualSelecionado = Number(localStorage.getItem("32drive_min_manual") || "6");
     let corridaEmAndamento = null;
     let chamadosLocais = [];
 
@@ -269,6 +346,7 @@
         if (salvo.nome) elNome.value = salvo.nome;
         if (salvo.veiculo) elVeiculo.value = salvo.veiculo;
         if (salvo.placa) elPlaca.value = salvo.placa;
+        if (salvo.chavePix) elPix.value = salvo.chavePix;
       } catch (_) {}
     }
 
@@ -277,10 +355,47 @@
         codigo: (elCodigo.value || "").trim().toUpperCase(),
         nome: (elNome.value || "").trim(),
         veiculo: (elVeiculo.value || "").trim(),
-        placa: (elPlaca.value || "").trim().toUpperCase()
+        placa: (elPlaca.value || "").trim().toUpperCase(),
+        chavePix: (elPix.value || "").trim()
       };
       localStorage.setItem("32drive_motorista_perfil", JSON.stringify(perfil));
       return perfil;
+    }
+
+    function aplicarVisualOnline(silencioso = false) {
+      badgeMotorista.textContent = online ? "Online" : "Offline";
+      badgeMotorista.style.background = online ? "#10b981" : "#94a3b8";
+      badgeMotorista.style.color = online ? "#052e16" : "#0f172a";
+      btnOnline.textContent = online ? "Ficar Offline" : "Ficar Online para Corridas";
+      btnOnline.className = online ? "btn btn-danger" : "btn btn-green";
+      if (!silencioso) {
+        const nome = (elNome.value || "").trim();
+        const cod = (elCodigo.value || "").trim().toUpperCase();
+        msgMotorista.textContent = online
+          ? "Online" + (nome ? " como " + nome : "") + (cod ? " (" + cod + ")" : "") + " — pronto para corridas."
+          : "Você está Offline.";
+      }
+    }
+
+    function atualizarVisualTempo() {
+      const isManual = modoTempo === "manual";
+      btnModoAuto.classList.toggle("ativo", !isManual);
+      btnModoManual.classList.toggle("ativo", isManual);
+      botoesMin.forEach((b) => {
+        b.classList.toggle("ativo", Number(b.dataset.min) === minutoManualSelecionado);
+      });
+      resumoTempoModo.textContent = isManual
+        ? "Modo Manual ativo: envia " + minutoManualSelecionado + " min ao aceitar/atualizar."
+        : "Modo Automático ativo: usa o tempo estimado pela rota do mapa (ou toque em um botão de minutos para ajustar na hora).";
+    }
+
+    function resolverMinutosChegada(corrida) {
+      if (modoTempo === "manual") {
+        return { minutos: minutoManualSelecionado, modo: "manual" };
+      }
+      const dist = Number(corrida.distanciaKm || 0);
+      const minRota = Number(corrida.tempoEstimadoRotaMin || 0) || Math.max(2, Math.round(dist * 2.2) || 6);
+      return { minutos: Math.max(2, minRota), modo: "automático (rota)" };
     }
 
     function mostrarAvisoFirebase(texto) {
@@ -295,24 +410,26 @@
 
     function alternarOnline() {
       const perfil = salvarPerfil();
-      if (!perfil.codigo || !perfil.nome) {
+      if (!online && (!perfil.codigo || !perfil.nome)) {
         msgMotorista.textContent = "Preencha pelo menos seu Código e Nome para ficar online.";
         return;
       }
       online = !online;
-      badgeMotorista.textContent = online ? "Online" : "Offline";
-      badgeMotorista.style.background = online ? "#10b981" : "#94a3b8";
-      badgeMotorista.style.color = online ? "#052e16" : "#0f172a";
-      btnOnline.textContent = online ? "Ficar Offline" : "Ficar Online para Corridas";
-      btnOnline.className = online ? "btn btn-danger" : "btn btn-green";
-      msgMotorista.textContent = online
-        ? "Online como " + perfil.nome + " (" + perfil.codigo + ") — pronto para receber corridas."
-        : "Você ficou offline.";
+      localStorage.setItem("32drive_motorista_online", String(online));
+      aplicarVisualOnline(false);
     }
 
     function montarLinkMapa(endereco) {
       const q = encodeURIComponent(String(endereco || "") + ", Rio Grande, RS");
       return "https://www.google.com/maps/search/?api=1&query=" + q;
+    }
+
+    function escaparHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
     }
 
     function renderizarCorridaAndamento() {
@@ -325,9 +442,10 @@
       secCorridaAndamento.style.display = "flex";
       const c = corridaEmAndamento;
       const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
+      const pixAtual = (c.chavePixMotorista || (elPix.value || "").trim());
 
       let acaoHtml = "";
-      if (c.status === "Motorista a caminho") {
+      if (c.status === "Motorista a caminho" || c.status === "Aceita") {
         acaoHtml =
           '<button class="btn btn-primary" type="button" data-etapa="No local de embarque">Cheguei no Embarque</button>';
       } else if (c.status === "No local de embarque") {
@@ -341,18 +459,64 @@
       boxCorridaAndamento.innerHTML =
         '<div class="corrida-card corrida-ativa">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-            '<strong>' + (c.codigo || "32D") + ' • ' + (c.passageiro || "Passageiro") + '</strong>' +
+            '<strong>' + escaparHtml(c.codigo || "32D") + ' • ' + escaparHtml(c.passageiro || "Passageiro") + '</strong>' +
             '<span class="valor-destaque">' + formatarMoeda(c.valorBruto) + '</span>' +
           '</div>' +
-          '<div><span class="tag">' + (c.status || "Em andamento") + '</span> <span class="tag">' + kmTxt + '</span> <span class="tag">' + (c.pagamento || "Pix") + '</span></div>' +
-          '<div><strong>Embarque:</strong> ' + (c.origem || "—") + '</div>' +
-          '<div><strong>Destino:</strong> ' + (c.destino || "—") + '</div>' +
+          '<div>' +
+            '<span class="tag">' + escaparHtml(c.status || "Em andamento") + '</span> ' +
+            '<span class="tag">' + kmTxt + '</span> ' +
+            '<span class="tag">' + escaparHtml(c.pagamento || "Pix") + '</span> ' +
+            (c.tempoChegadaMin ? '<span class="tag">Chegada: ' + escaparHtml(c.tempoChegadaMin) + ' min</span>' : '') +
+          '</div>' +
+          '<div><strong>Embarque:</strong> ' + escaparHtml(c.origem || "—") + '</div>' +
+          '<div><strong>Destino:</strong> ' + escaparHtml(c.destino || "—") + '</div>' +
+          '<div class="pix-motorista-box">' +
+            '<div><strong>Chave Pix para o passageiro:</strong> ' + (pixAtual ? escaparHtml(pixAtual) : "Não informada") + '</div>' +
+            '<button class="btn btn-blue btn-sm" type="button" id="btn-enviar-pix-corrida">Enviar / Atualizar Chave Pix ao Passageiro</button>' +
+          '</div>' +
           '<div class="grid-2">' +
             '<a class="btn btn-outline" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkMapa(c.origem) + '">Abrir Embarque</a>' +
             '<a class="btn btn-outline" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkMapa(c.destino) + '">Abrir Destino</a>' +
           '</div>' +
           acaoHtml +
         '</div>';
+
+      const btnPix = document.getElementById("btn-enviar-pix-corrida");
+      if (btnPix) {
+        btnPix.addEventListener("click", enviarChavePixCorrida);
+      }
+    }
+
+    async function enviarChavePixCorrida() {
+      if (!corridaEmAndamento) return;
+      const perfil = salvarPerfil();
+      const chave = (perfil.chavePix || "").trim();
+      if (!chave) {
+        msgMotorista.textContent = "Digite sua Chave Pix acima antes de enviar ao passageiro.";
+        return;
+      }
+
+      corridaEmAndamento.chavePixMotorista = chave;
+      if (corridaEmAndamento.motorista) {
+        corridaEmAndamento.motorista.chavePix = chave;
+      }
+      renderizarCorridaAndamento();
+
+      if (String(corridaEmAndamento.docId || "").startsWith("SIM-") || !db || !fs) {
+        msgMotorista.textContent = "Chave Pix enviada para a corrida!";
+        return;
+      }
+
+      try {
+        await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
+          chavePixMotorista: chave,
+          "motorista.chavePix": chave
+        });
+        msgMotorista.textContent = "Chave Pix enviada para o passageiro!";
+      } catch (erro) {
+        console.error(erro);
+        msgMotorista.textContent = "Erro ao enviar chave Pix.";
+      }
     }
 
     function renderizarChamados(itens) {
@@ -366,15 +530,21 @@
         .map((c) => {
           const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
           const tagChuva = c.chuva ? ' <span class="tag tag-chuva">Chuva +25%</span>' : "";
+          const prev = resolverMinutosChegada(c);
           return (
             '<div class="corrida-card">' +
               '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                '<strong>' + (c.codigo || "Corrida") + ' • ' + (c.passageiro || "Passageiro") + '</strong>' +
+                '<strong>' + escaparHtml(c.codigo || "Corrida") + ' • ' + escaparHtml(c.passageiro || "Passageiro") + '</strong>' +
                 '<span class="valor-destaque">' + formatarMoeda(c.valorBruto) + '</span>' +
               '</div>' +
-              '<div><span class="tag">' + kmTxt + '</span> <span class="tag">' + (c.pagamento || "Pix") + '</span>' + tagChuva + '</div>' +
-              '<div><strong>Embarque:</strong> ' + (c.origem || "—") + '<br/><strong>Destino:</strong> ' + (c.destino || "—") + '</div>' +
-              '<button class="btn btn-accent" type="button" data-aceitar="' + c.docId + '">Aceitar Corrida</button>' +
+              '<div>' +
+                '<span class="tag">' + kmTxt + '</span> ' +
+                '<span class="tag">' + escaparHtml(c.pagamento || "Pix") + '</span> ' +
+                '<span class="tag">Chegada: ' + prev.minutos + ' min (' + prev.modo + ')</span>' +
+                tagChuva +
+              '</div>' +
+              '<div><strong>Embarque:</strong> ' + escaparHtml(c.origem || "—") + '<br/><strong>Destino:</strong> ' + escaparHtml(c.destino || "—") + '</div>' +
+              '<button class="btn btn-accent" type="button" data-aceitar="' + escaparHtml(c.docId) + '">Aceitar Corrida</button>' +
             '</div>'
           );
         })
@@ -388,26 +558,36 @@
         return;
       }
 
+      const chamado = chamadosLocais.find((item) => item.docId === docId) || {};
+      const tempoInfo = resolverMinutosChegada(chamado);
+
       const dadosMotorista = {
         codigo: perfil.codigo || "MOT-01",
         nome: perfil.nome,
         veiculo: perfil.veiculo || "Veículo 32 Drive",
-        placa: perfil.placa || "32D"
+        placa: perfil.placa || "32D",
+        chavePix: perfil.chavePix || ""
       };
 
-      // Caso seja chamado simulado local
+      const payloadAtualizacao = {
+        status: "Motorista a caminho",
+        motorista: dadosMotorista,
+        tempoChegadaMin: tempoInfo.minutos,
+        modoTempoChegada: tempoInfo.modo,
+        chavePixMotorista: perfil.chavePix || ""
+      };
+
       const idxLocal = chamadosLocais.findIndex((item) => item.docId === docId);
       if (idxLocal !== -1) {
         const escolhida = {
           ...chamadosLocais[idxLocal],
-          status: "Motorista a caminho",
-          motorista: dadosMotorista
+          ...payloadAtualizacao
         };
         chamadosLocais.splice(idxLocal, 1);
         corridaEmAndamento = escolhida;
         renderizarChamados(chamadosLocais);
         renderizarCorridaAndamento();
-        msgMotorista.textContent = "Chamado simulado aceito!";
+        msgMotorista.textContent = "Corrida aceita! Chegada em " + tempoInfo.minutos + " min (" + tempoInfo.modo + ").";
         return;
       }
 
@@ -418,11 +598,10 @@
 
       try {
         await fs.updateDoc(fs.doc(db, "corridas", docId), {
-          status: "Motorista a caminho",
-          motorista: dadosMotorista,
+          ...payloadAtualizacao,
           aceitaEm: fs.serverTimestamp()
         });
-        msgMotorista.textContent = "Corrida aceita! O passageiro já foi avisado.";
+        msgMotorista.textContent = "Corrida aceita! Passageiro avisado (" + tempoInfo.minutos + " min).";
       } catch (erro) {
         console.error(erro);
         msgMotorista.textContent = "Erro ao aceitar corrida.";
@@ -470,6 +649,7 @@
         origem: "Av. Rio Grande, 450 — Cassino",
         destino: "FURG — Campus Carreiros, Rio Grande",
         distanciaKm: 14.5,
+        tempoEstimadoRotaMin: 22,
         pagamento: "Pix",
         valorBruto: 29.0,
         chuva: false,
@@ -481,6 +661,59 @@
     }
 
     carregarPerfilSalvo();
+    aplicarVisualOnline(true);
+    atualizarVisualTempo();
+
+    [elCodigo, elNome, elVeiculo, elPlaca, elPix].forEach((campo) => {
+      campo.addEventListener("change", salvarPerfil);
+    });
+
+    window.addEventListener("focus", () => aplicarVisualOnline(true));
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) aplicarVisualOnline(true);
+    });
+
+    btnModoAuto.addEventListener("click", () => {
+      modoTempo = "auto";
+      localStorage.setItem("32drive_modo_tempo", "auto");
+      atualizarVisualTempo();
+      renderizarChamados(chamadosLocais);
+    });
+
+    btnModoManual.addEventListener("click", () => {
+      modoTempo = "manual";
+      localStorage.setItem("32drive_modo_tempo", "manual");
+      atualizarVisualTempo();
+      renderizarChamados(chamadosLocais);
+    });
+
+    botoesMin.forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const min = Number(btn.dataset.min);
+        minutoManualSelecionado = min;
+        modoTempo = "manual";
+        localStorage.setItem("32drive_min_manual", String(min));
+        localStorage.setItem("32drive_modo_tempo", "manual");
+        atualizarVisualTempo();
+        renderizarChamados(chamadosLocais);
+
+        if (corridaEmAndamento) {
+          corridaEmAndamento.tempoChegadaMin = min;
+          corridaEmAndamento.modoTempoChegada = "manual";
+          renderizarCorridaAndamento();
+          if (!String(corridaEmAndamento.docId || "").startsWith("SIM-") && db && fs) {
+            try {
+              await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
+                tempoChegadaMin: min,
+                modoTempoChegada: "manual"
+              });
+              msgMotorista.textContent = "Previsão atualizada para " + min + " min (manual).";
+            } catch (_) {}
+          }
+        }
+      });
+    });
+
     btnOnline.addEventListener("click", alternarOnline);
     document.getElementById("btn-simular-chamado").addEventListener("click", simularChamadoTeste);
 
@@ -528,6 +761,7 @@
           }
         });
 
+        chamadosLocais = aguardando;
         renderizarChamados(aguardando);
         corridaEmAndamento = ativaMinha;
         renderizarCorridaAndamento();
