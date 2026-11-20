@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0b192c" />
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="manifest.json?v=36" />
   <link rel="icon" type="image/png" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-512.png" />
   <title>32 Drive — Motorista</title>
@@ -93,6 +93,16 @@
       padding: 12px 14px;
       font-size: 15px;
       font-weight: 800;
+    }
+    .aviso-offline-chamados {
+      background: #fef2f2;
+      border: 2px solid #fca5a5;
+      color: #991b1b;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 800;
+      text-align: center;
     }
     .card {
       background: var(--card);
@@ -291,7 +301,12 @@
     </section>
 
     <section class="card" id="sec-corrida-andamento" style="display:none;">
-      <div class="card-title">Corrida em Andamento</div>
+      <div class="card-header">
+        <div class="card-title">Corrida em Andamento</div>
+        <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-andamento">
+          Limpar Painel
+        </button>
+      </div>
       <div id="box-corrida-andamento"></div>
     </section>
 
@@ -303,8 +318,8 @@
         </button>
       </div>
       <div id="lista-corridas-motorista" style="display:flex;flex-direction:column;gap:12px;">
-        <div class="corrida-card" style="color:var(--muted);">
-          Nenhuma corrida aguardando motorista no momento.
+        <div class="aviso-offline-chamados">
+          Você está Offline. Toque em "Ficar Online para Corridas" para visualizar e aceitar chamados.
         </div>
       </div>
     </section>
@@ -318,6 +333,7 @@
     const listaCorridasEl = document.getElementById("lista-corridas-motorista");
     const secCorridaAndamento = document.getElementById("sec-corrida-andamento");
     const boxCorridaAndamento = document.getElementById("box-corrida-andamento");
+    const btnLimparAndamento = document.getElementById("btn-limpar-andamento");
 
     const elCodigo = document.getElementById("mot-codigo");
     const elNome = document.getElementById("mot-nome");
@@ -362,18 +378,38 @@
       return perfil;
     }
 
+    async function sincronizarPresencaFirestore(estaOnline, perfil) {
+      if (!db || !fs) return;
+      const idDoc = (perfil.codigo || "MOTORISTA_PADRAO").replace(/[^A-Za-z0-9_-]/g, "_");
+      try {
+        await fs.setDoc(
+          fs.doc(db, "motoristas_status", idDoc),
+          {
+            online: Boolean(estaOnline),
+            codigo: perfil.codigo || "",
+            nome: perfil.nome || "",
+            veiculo: perfil.veiculo || "",
+            placa: perfil.placa || "",
+            atualizadoEm: fs.serverTimestamp()
+          },
+          { merge: true }
+        );
+      } catch (_) {}
+    }
+
     function aplicarVisualOnline(silencioso = false) {
       badgeMotorista.textContent = online ? "Online" : "Offline";
       badgeMotorista.style.background = online ? "#10b981" : "#94a3b8";
       badgeMotorista.style.color = online ? "#052e16" : "#0f172a";
       btnOnline.textContent = online ? "Ficar Offline" : "Ficar Online para Corridas";
       btnOnline.className = online ? "btn btn-danger" : "btn btn-green";
+      renderizarChamados(chamadosLocais);
       if (!silencioso) {
         const nome = (elNome.value || "").trim();
         const cod = (elCodigo.value || "").trim().toUpperCase();
         msgMotorista.textContent = online
           ? "Online" + (nome ? " como " + nome : "") + (cod ? " (" + cod + ")" : "") + " — pronto para corridas."
-          : "Você está Offline.";
+          : "Você está Offline. Chamados ocultos até ficar Online.";
       }
     }
 
@@ -408,7 +444,7 @@
       return "R$ " + Number(valor || 0).toFixed(2).replace(".", ",");
     }
 
-    function alternarOnline() {
+    async function alternarOnline() {
       const perfil = salvarPerfil();
       if (!online && (!perfil.codigo || !perfil.nome)) {
         msgMotorista.textContent = "Preencha pelo menos seu Código e Nome para ficar online.";
@@ -417,6 +453,7 @@
       online = !online;
       localStorage.setItem("32drive_motorista_online", String(online));
       aplicarVisualOnline(false);
+      await sincronizarPresencaFirestore(online, perfil);
     }
 
     function montarLinkMapa(endereco) {
@@ -432,8 +469,16 @@
         .replace(/"/g, "&quot;");
     }
 
+    function limparPainelAndamento(msg = "Painel de corrida em andamento limpo.") {
+      corridaEmAndamento = null;
+      secCorridaAndamento.style.display = "none";
+      boxCorridaAndamento.innerHTML = "";
+      if (msg) msgMotorista.textContent = msg;
+    }
+
     function renderizarCorridaAndamento() {
-      if (!corridaEmAndamento) {
+      if (!corridaEmAndamento || corridaEmAndamento.status === "Finalizada" || corridaEmAndamento.status === "Cancelada") {
+        corridaEmAndamento = null;
         secCorridaAndamento.style.display = "none";
         boxCorridaAndamento.innerHTML = "";
         return;
@@ -520,6 +565,12 @@
     }
 
     function renderizarChamados(itens) {
+      if (!online) {
+        listaCorridasEl.innerHTML =
+          '<div class="aviso-offline-chamados">Você está Offline. Toque em "Ficar Online para Corridas" para receber e aceitar chamados.</div>';
+        return;
+      }
+
       if (!itens.length) {
         listaCorridasEl.innerHTML =
           '<div class="corrida-card" style="color:var(--muted);">Nenhuma corrida aguardando motorista no momento.</div>';
@@ -552,6 +603,10 @@
     }
 
     async function aceitarCorrida(docId) {
+      if (!online) {
+        msgMotorista.textContent = "Fique Online antes de aceitar corridas.";
+        return;
+      }
       const perfil = salvarPerfil();
       if (!perfil.nome) {
         msgMotorista.textContent = "Preencha seu Nome antes de aceitar uma corrida.";
@@ -613,27 +668,29 @@
 
       if (String(corridaEmAndamento.docId || "").startsWith("SIM-")) {
         if (novaEtapa === "Finalizada") {
-          msgMotorista.textContent = "Corrida simulada finalizada (" + formatarMoeda(corridaEmAndamento.valorBruto) + ").";
-          corridaEmAndamento = null;
+          msgMotorista.textContent = "Corrida simulada finalizada (" + formatarMoeda(corridaEmAndamento.valorBruto) + ") — painel zerado.";
+          limparPainelAndamento("");
         } else {
           corridaEmAndamento.status = novaEtapa;
           msgMotorista.textContent = "Status atualizado: " + novaEtapa;
+          renderizarCorridaAndamento();
         }
-        renderizarCorridaAndamento();
         return;
       }
 
       if (!db || !fs) return;
       try {
         await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
-          status: novaEtapa
+          status: novaEtapa,
+          ...(novaEtapa === "Finalizada" ? { finalizadaEm: fs.serverTimestamp() } : {})
         });
         if (novaEtapa === "Finalizada") {
-          msgMotorista.textContent = "Corrida finalizada com sucesso!";
-          corridaEmAndamento = null;
-          renderizarCorridaAndamento();
+          msgMotorista.textContent = "Corrida finalizada! Painel limpo para o próximo chamado.";
+          limparPainelAndamento("");
         } else {
           msgMotorista.textContent = "Status atualizado: " + novaEtapa;
+          corridaEmAndamento.status = novaEtapa;
+          renderizarCorridaAndamento();
         }
       } catch (erro) {
         console.error(erro);
@@ -642,6 +699,10 @@
     }
 
     function simularChamadoTeste() {
+      if (!online) {
+        msgMotorista.textContent = "Fique Online primeiro para receber chamados de teste.";
+        return;
+      }
       const fake = {
         docId: "SIM-" + Date.now(),
         codigo: "32D-" + Math.floor(1000 + Math.random() * 9000),
@@ -667,6 +728,8 @@
     [elCodigo, elNome, elVeiculo, elPlaca, elPix].forEach((campo) => {
       campo.addEventListener("change", salvarPerfil);
     });
+
+    btnLimparAndamento.addEventListener("click", () => limparPainelAndamento("Painel limpo."));
 
     window.addEventListener("focus", () => aplicarVisualOnline(true));
     document.addEventListener("visibilitychange", () => {
@@ -707,7 +770,7 @@
                 tempoChegadaMin: min,
                 modoTempoChegada: "manual"
               });
-              msgMotorista.textContent = "Previsão atualizada para " + min + " min (manual).";
+              msgMotorista.textContent = "Previsão de chegada atualizada para " + min + " min (manual).";
             } catch (_) {}
           }
         }
@@ -736,6 +799,7 @@
       if (!db) throw new Error("db não exportado");
 
       mostrarAvisoFirebase("");
+      await sincronizarPresencaFirestore(online, salvarPerfil());
 
       fs.onSnapshot(fs.doc(db, "config", "geral"), (snap) => {
         const chuvaAtiva = snap.exists() ? Boolean(snap.data().chuva) : false;
