@@ -134,10 +134,17 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
     .estimativa-lbl { font-size: 15px; font-weight: 800; color: #0f172a; }
-    .estimativa-val { font-size: 26px; font-weight: 900; color: var(--green); }
+    .estimativa-val {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--green);
+      white-space: nowrap;
+      min-width: 110px;
+      text-align: right;
+    }
     .btn {
       width: 100%;
       padding: 15px;
@@ -147,12 +154,18 @@
       font-weight: 800;
       cursor: pointer;
     }
+    .btn-sm {
+      padding: 10px 12px;
+      font-size: 14px;
+      width: auto;
+    }
     .btn-outline {
       background: #e2e8f0;
       color: #0f172a;
       border: 2px solid #94a3b8;
     }
     .btn-accent { background: var(--accent); color: #0f172a; }
+    .btn-green { background: #10b981; color: #052e16; }
     .status-msg { font-size: 16px; font-weight: 800; color: #047857; text-align: center; min-height: 20px; }
     .erro-msg { font-size: 15px; font-weight: 800; color: #b91c1c; text-align: center; min-height: 18px; }
     .corrida-box {
@@ -162,7 +175,37 @@
       padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
+    }
+    .alerta-aceita {
+      background: #dcfce7;
+      border: 2px solid #16a34a;
+      color: #14532d;
+      border-radius: 12px;
+      padding: 12px;
+      font-weight: 900;
+      font-size: 16px;
+    }
+    .pix-box {
+      background: #eff6ff;
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pix-chave-linha {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #ffffff;
+      border: 1px solid #93c5fd;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-weight: 800;
+      word-break: break-all;
     }
   </style>
 </head>
@@ -223,9 +266,9 @@
       <div class="estimativa-box">
         <div>
           <div class="estimativa-lbl">Valor Estimado</div>
-          <div id="detalhe-tarifa" style="font-size:14px;color:var(--muted);">Digite origem e destino</div>
+          <div id="detalhe-tarifa" style="font-size:14px;color:var(--muted);">Preencha origem e destino para calcular</div>
         </div>
-        <div class="estimativa-val" id="pas-valor-estimado">R$ 7,99</div>
+        <div class="estimativa-val" id="pas-valor-estimado"></div>
       </div>
 
       <div class="erro-msg" id="erro-rota"></div>
@@ -252,6 +295,7 @@
     const boxCorridaAtiva = document.getElementById("box-corrida-ativa");
     const elOrigem = document.getElementById("pas-origem");
     const elDestino = document.getElementById("pas-destino");
+    const elPagamento = document.getElementById("pas-pagamento");
     const elChuva = document.getElementById("pas-chuva");
     const boxChuvaToggle = document.getElementById("box-chuva-toggle");
     const txtChuvaStatus = document.getElementById("txt-chuva-status");
@@ -262,10 +306,11 @@
     let db = null;
     let fs = null;
     let distanciaCalculadaKm = null;
+    let tempoRotaMinutos = null;
     let calculoTimer = null;
     let corridaAtualId = localStorage.getItem("32drive_corrida_id") || "";
+    let ultimoStatusAvisado = "";
 
-    // Pontos de referência conhecidos em Rio Grande e Balneário Cassino
     const PONTOS_CONHECIDOS = [
       { chaves: ["furg", "campus carreiros", "universidade federal"], lat: -32.0736, lon: -52.1674, nome: "FURG — Campus Carreiros, Rio Grande" },
       { chaves: ["furg saude", "area academica", "hu furg", "hospital universitario"], lat: -32.0375, lon: -52.1045, nome: "Área Acadêmica da Saúde / HU-FURG, Rio Grande" },
@@ -344,7 +389,7 @@
 
       if (dist <= 3.5) {
         baseValor = 7.99;
-        regraTexto = dist.toFixed(1).replace(".", ",") + " km • Fixo até 3,5 km";
+        regraTexto = dist.toFixed(1).replace(".", ",") + " km • Trecho curto";
       } else {
         baseValor = dist * 2.0;
         regraTexto = dist.toFixed(1).replace(".", ",") + " km × R$ 2,00/km";
@@ -362,7 +407,7 @@
     function atualizarTelaPreco() {
       const chuvaAtiva = Boolean(elChuva.checked);
       if (distanciaCalculadaKm === null) {
-        elValorEstimado.textContent = "R$ 7,99";
+        elValorEstimado.textContent = "";
         elDetalheTarifa.textContent = "Preencha origem e destino para calcular";
         return;
       }
@@ -374,7 +419,6 @@
     }
 
     async function consultarNominatimLocal(textoBusca) {
-      // Caixa geográfica restrita a Rio Grande e Balneário Cassino (bounded=1)
       const viewbox = "-52.68,-32.35,-52.04,-31.92";
       const url =
         "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&bounded=1&viewbox=" +
@@ -394,7 +438,6 @@
     }
 
     async function geocodificarEndereco(endereco) {
-      // 1. Verifica primeiro nos pontos conhecidos locais (FURG, Shopping, Centro, Cassino, etc.)
       const conhecido = buscarPontoConhecido(endereco);
       if (conhecido) return conhecido;
 
@@ -415,7 +458,7 @@
       throw new Error("Endereço não encontrado em Rio Grande / Cassino");
     }
 
-    async function buscarDistanciaKmOSRM(pontoA, pontoB) {
+    async function buscarRotaOSRM(pontoA, pontoB) {
       const url =
         "https://router.project-osrm.org/route/v1/driving/" +
         pontoA.lon + "," + pontoA.lat + ";" +
@@ -429,7 +472,10 @@
         throw new Error("Rota indisponível");
       }
       const metros = Number(dados.routes[0].distance || 0);
-      return Number((metros / 1000).toFixed(2));
+      const segundos = Number(dados.routes[0].duration || 0);
+      const km = Number((metros / 1000).toFixed(2));
+      const minutosEstimados = Math.max(2, Math.round(segundos / 60) || Math.round(km * 2.2));
+      return { km, minutosEstimados };
     }
 
     async function calcularRotaAutomatica() {
@@ -439,12 +485,13 @@
 
       if (origem.length < 3 || destino.length < 3) {
         distanciaCalculadaKm = null;
+        tempoRotaMinutos = null;
         atualizarTelaPreco();
         return;
       }
 
       try {
-        elDetalheTarifa.textContent = "Calculando distância da rota...";
+        elDetalheTarifa.textContent = "Calculando rota e distância...";
         btnCalcularRota.disabled = true;
         btnCalcularRota.textContent = "Calculando rota...";
 
@@ -453,17 +500,19 @@
           geocodificarEndereco(destino)
         ]);
 
-        const km = await buscarDistanciaKmOSRM(pontoA, pontoB);
-        if (km > 120) {
+        const rota = await buscarRotaOSRM(pontoA, pontoB);
+        if (rota.km > 120) {
           throw new Error("Distância fora da área de atendimento");
         }
 
-        distanciaCalculadaKm = km;
+        distanciaCalculadaKm = rota.km;
+        tempoRotaMinutos = rota.minutosEstimados;
         erroRota.textContent = "";
         atualizarTelaPreco();
       } catch (erro) {
         console.error(erro);
         distanciaCalculadaKm = null;
+        tempoRotaMinutos = null;
         atualizarTelaPreco();
         erroRota.textContent =
           "Não localizamos um dos endereços. Tente escrever o nome da rua ou bairro (ex: Av. Presidente Vargas, Centro, FURG).";
@@ -480,30 +529,100 @@
       }, 900);
     }
 
+    function escaparHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
     function renderizarCorrida(c) {
       if (!c) {
         boxCorridaAtiva.innerHTML = "Nenhuma corrida solicitada ainda.";
         return;
       }
+
+      const foiAceita = Boolean(c.motorista && c.motorista.nome) ||
+        ["Aceita", "Motorista a caminho", "No local de embarque", "Em viagem"].includes(c.status);
+
+      if (foiAceita && ultimoStatusAvisado !== (c.status || "Aceita")) {
+        ultimoStatusAvisado = c.status || "Aceita";
+        msgPassageiro.textContent = "Viagem aceita! O motorista já foi acionado.";
+      }
+
+      const alertaAceitaHtml = foiAceita
+        ? '<div class="alerta-aceita">Viagem aceita! ' +
+            (c.tempoChegadaMin
+              ? 'Previsão de chegada: ' + escaparHtml(c.tempoChegadaMin) + ' min (' + escaparHtml(c.modoTempoChegada || "rota") + ').'
+              : 'Motorista a caminho.') +
+          '</div>'
+        : "";
+
       const motTexto = c.motorista && c.motorista.nome
-        ? c.motorista.nome + " • " + (c.motorista.veiculo || "") + " (" + (c.motorista.placa || "") + ")"
+        ? escaparHtml(c.motorista.nome) +
+          (c.motorista.veiculo ? " • " + escaparHtml(c.motorista.veiculo) : "") +
+          (c.motorista.placa ? " (" + escaparHtml(c.motorista.placa) + ")" : "")
         : "Aguardando motorista aceitar...";
 
       const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
+      const tempoTxt = c.tempoChegadaMin
+        ? escaparHtml(c.tempoChegadaMin) + " min (" + escaparHtml(c.modoTempoChegada || "rota") + ")"
+        : (c.tempoEstimadoRotaMin ? "~" + escaparHtml(c.tempoEstimadoRotaMin) + " min (estimativa da rota)" : "A definir");
+
+      const chavePix = (c.chavePixMotorista || (c.motorista && c.motorista.chavePix) || "").trim();
+      const mostrarPix = String(c.pagamento || "").toLowerCase() === "pix" || Boolean(chavePix);
+
+      const pixHtml = mostrarPix
+        ? '<div class="pix-box">' +
+            '<div><strong>Pagamento via Pix</strong> — Valor: <strong>' + formatarMoeda(c.valorBruto) + '</strong></div>' +
+            (chavePix
+              ? '<div class="pix-chave-linha">' +
+                  '<span id="texto-chave-pix">' + escaparHtml(chavePix) + '</span>' +
+                  '<button class="btn btn-green btn-sm" type="button" id="btn-copiar-pix">Copiar Pix</button>' +
+                '</div>' +
+                '<div style="font-size:13px;color:#1e3a8a;">Copie a chave e faça o Pix diretamente para o motorista.</div>'
+              : '<div style="font-size:14px;color:#1e3a8a;">Aguardando o motorista enviar a chave Pix na corrida.</div>') +
+          '</div>'
+        : "";
 
       boxCorridaAtiva.innerHTML =
-        "<div><strong>Código:</strong> " + (c.codigo || "—") + " • <strong>Status:</strong> " + (c.status || "Solicitada") + "</div>" +
-        "<div><strong>Passageiro:</strong> " + (c.passageiro || "—") + " • <strong>Valor:</strong> " + formatarMoeda(c.valorBruto) + "</div>" +
-        "<div><strong>Distância:</strong> " + kmTxt + " • <strong>Pagamento:</strong> " + (c.pagamento || "Pix") + "</div>" +
-        "<div><strong>Trecho:</strong> " + (c.origem || "—") + " → " + (c.destino || "—") + "</div>" +
-        "<div><strong>Motorista:</strong> " + motTexto + "</div>";
+        alertaAceitaHtml +
+        "<div><strong>Código:</strong> " + escaparHtml(c.codigo || "—") + " • <strong>Status:</strong> " + escaparHtml(c.status || "Solicitada") + "</div>" +
+        "<div><strong>Passageiro:</strong> " + escaparHtml(c.passageiro || "—") + " • <strong>Valor:</strong> " + formatarMoeda(c.valorBruto) + "</div>" +
+        "<div><strong>Distância:</strong> " + kmTxt + " • <strong>Pagamento:</strong> " + escaparHtml(c.pagamento || "Pix") + "</div>" +
+        "<div><strong>Chegada:</strong> " + tempoTxt + "</div>" +
+        "<div><strong>Trecho:</strong> " + escaparHtml(c.origem || "—") + " → " + escaparHtml(c.destino || "—") + "</div>" +
+        "<div><strong>Motorista:</strong> " + motTexto + "</div>" +
+        pixHtml;
+
+      const btnCopiar = document.getElementById("btn-copiar-pix");
+      if (btnCopiar && chavePix) {
+        btnCopiar.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(chavePix);
+            btnCopiar.textContent = "Copiado!";
+          } catch (_) {
+            const temp = document.createElement("textarea");
+            temp.value = chavePix;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand("copy");
+            document.body.removeChild(temp);
+            btnCopiar.textContent = "Copiado!";
+          }
+          setTimeout(() => {
+            if (btnCopiar) btnCopiar.textContent = "Copiar Pix";
+          }, 2000);
+        });
+      }
     }
 
     async function solicitarCorrida() {
       const nome = (document.getElementById("pas-nome").value || "").trim();
       const origem = (elOrigem.value || "").trim();
       const destino = (elDestino.value || "").trim();
-      const pagamento = document.getElementById("pas-pagamento").value || "Pix";
+      const pagamento = elPagamento.value || "Pix";
 
       if (!nome || !origem || !destino) {
         msgPassageiro.textContent = "Preencha seu nome, origem e destino.";
@@ -522,6 +641,7 @@
       const calc = calcularPrecoPelaDistancia(distanciaCalculadaKm, Boolean(elChuva.checked));
       const valorBruto = calc ? calc.valor : 7.99;
       const codigo = "32D-" + Math.floor(1000 + Math.random() * 9000);
+      ultimoStatusAvisado = "";
 
       const corridaLocal = {
         codigo,
@@ -529,7 +649,9 @@
         origem,
         destino,
         distanciaKm: distanciaCalculadaKm,
+        tempoEstimadoRotaMin: tempoRotaMinutos || Math.max(2, Math.round(distanciaCalculadaKm * 2.2)),
         pagamento,
+        chavePixMotorista: "",
         valorBruto,
         chuva: Boolean(elChuva.checked),
         status: "Aguardando motorista",
@@ -552,7 +674,7 @@
         });
         corridaAtualId = docRef.id;
         localStorage.setItem("32drive_corrida_id", corridaAtualId);
-        msgPassageiro.textContent = "Corrida " + codigo + " enviada com sucesso!";
+        msgPassageiro.textContent = "Corrida " + codigo + " enviada! Aguardando motorista...";
         observarCorridaAtual();
       } catch (erro) {
         console.error(erro);
