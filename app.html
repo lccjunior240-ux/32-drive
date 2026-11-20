@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0b192c" />
-  <link rel="manifest" href="manifest.json?v=36" />
+  <link rel="manifest" href="manifest.json?v=37" />
   <link rel="icon" type="image/png" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-512.png" />
   <title>32 Drive — Motorista</title>
@@ -179,7 +179,7 @@
       cursor: pointer;
     }
     .btn-sm {
-      padding: 10px 14px;
+      padding: 9px 12px;
       font-size: 14px;
       width: auto;
     }
@@ -220,15 +220,6 @@
       font-size: 22px;
       font-weight: 900;
       color: var(--green);
-    }
-    .pix-motorista-box {
-      background: #eff6ff;
-      border: 2px solid #93c5fd;
-      border-radius: 12px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
     }
   </style>
 </head>
@@ -271,8 +262,11 @@
         <input id="mot-veiculo" type="text" placeholder="Ex: VW Voyage 1.0 Prata" />
       </div>
       <div>
-        <label for="mot-pix">Sua Chave Pix (para enviar ao passageiro)</label>
+        <label for="mot-pix">Sua Chave Pix</label>
         <input id="mot-pix" type="text" placeholder="CPF, celular, e-mail ou chave aleatória" />
+        <button class="btn btn-blue" style="margin-top:8px;" type="button" id="btn-enviar-pix">
+          Enviar Chave Pix ao Passageiro
+        </button>
       </div>
       <button class="btn btn-green" type="button" id="btn-ficar-online">
         Ficar Online para Corridas
@@ -313,9 +307,14 @@
     <section class="card">
       <div class="card-header">
         <div class="card-title">Chamados Disponíveis</div>
-        <button class="btn btn-outline btn-sm" type="button" id="btn-simular-chamado">
-          Simular Chamado
-        </button>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-chamados">
+            Limpar
+          </button>
+          <button class="btn btn-outline btn-sm" type="button" id="btn-simular-chamado">
+            Simular Chamado
+          </button>
+        </div>
       </div>
       <div id="lista-corridas-motorista" style="display:flex;flex-direction:column;gap:12px;">
         <div class="aviso-offline-chamados">
@@ -334,6 +333,8 @@
     const secCorridaAndamento = document.getElementById("sec-corrida-andamento");
     const boxCorridaAndamento = document.getElementById("box-corrida-andamento");
     const btnLimparAndamento = document.getElementById("btn-limpar-andamento");
+    const btnLimparChamados = document.getElementById("btn-limpar-chamados");
+    const btnEnviarPix = document.getElementById("btn-enviar-pix");
 
     const elCodigo = document.getElementById("mot-codigo");
     const elNome = document.getElementById("mot-nome");
@@ -353,6 +354,7 @@
     let minutoManualSelecionado = Number(localStorage.getItem("32drive_min_manual") || "6");
     let corridaEmAndamento = null;
     let chamadosLocais = [];
+    let corridaOcultaId = localStorage.getItem("32drive_mot_oculta_id") || "";
 
     function carregarPerfilSalvo() {
       try {
@@ -470,6 +472,10 @@
     }
 
     function limparPainelAndamento(msg = "Painel de corrida em andamento limpo.") {
+      if (corridaEmAndamento && corridaEmAndamento.docId) {
+        corridaOcultaId = corridaEmAndamento.docId;
+        localStorage.setItem("32drive_mot_oculta_id", corridaOcultaId);
+      }
       corridaEmAndamento = null;
       secCorridaAndamento.style.display = "none";
       boxCorridaAndamento.innerHTML = "";
@@ -515,49 +521,46 @@
           '</div>' +
           '<div><strong>Embarque:</strong> ' + escaparHtml(c.origem || "—") + '</div>' +
           '<div><strong>Destino:</strong> ' + escaparHtml(c.destino || "—") + '</div>' +
-          '<div class="pix-motorista-box">' +
-            '<div><strong>Chave Pix para o passageiro:</strong> ' + (pixAtual ? escaparHtml(pixAtual) : "Não informada") + '</div>' +
-            '<button class="btn btn-blue btn-sm" type="button" id="btn-enviar-pix-corrida">Enviar / Atualizar Chave Pix ao Passageiro</button>' +
-          '</div>' +
+          '<div><strong>Chave Pix enviada:</strong> ' + (pixAtual ? escaparHtml(pixAtual) : "Nenhuma chave enviada ainda") + '</div>' +
           '<div class="grid-2">' +
             '<a class="btn btn-outline" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkMapa(c.origem) + '">Abrir Embarque</a>' +
             '<a class="btn btn-outline" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkMapa(c.destino) + '">Abrir Destino</a>' +
           '</div>' +
           acaoHtml +
         '</div>';
-
-      const btnPix = document.getElementById("btn-enviar-pix-corrida");
-      if (btnPix) {
-        btnPix.addEventListener("click", enviarChavePixCorrida);
-      }
     }
 
-    async function enviarChavePixCorrida() {
-      if (!corridaEmAndamento) return;
+    async function enviarChavePix() {
       const perfil = salvarPerfil();
       const chave = (perfil.chavePix || "").trim();
       if (!chave) {
-        msgMotorista.textContent = "Digite sua Chave Pix acima antes de enviar ao passageiro.";
+        msgMotorista.textContent = "Digite sua Chave Pix antes de enviar.";
         return;
       }
 
-      corridaEmAndamento.chavePixMotorista = chave;
-      if (corridaEmAndamento.motorista) {
-        corridaEmAndamento.motorista.chavePix = chave;
+      if (corridaEmAndamento) {
+        corridaEmAndamento.chavePixMotorista = chave;
+        if (corridaEmAndamento.motorista) {
+          corridaEmAndamento.motorista.chavePix = chave;
+        }
+        renderizarCorridaAndamento();
       }
-      renderizarCorridaAndamento();
 
-      if (String(corridaEmAndamento.docId || "").startsWith("SIM-") || !db || !fs) {
-        msgMotorista.textContent = "Chave Pix enviada para a corrida!";
+      if (!db || !fs) {
+        msgMotorista.textContent = "Chave Pix salva localmente (" + chave + ").";
         return;
       }
 
       try {
-        await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
-          chavePixMotorista: chave,
-          "motorista.chavePix": chave
-        });
-        msgMotorista.textContent = "Chave Pix enviada para o passageiro!";
+        if (corridaEmAndamento && corridaEmAndamento.docId && !String(corridaEmAndamento.docId).startsWith("SIM-")) {
+          await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
+            chavePixMotorista: chave,
+            "motorista.chavePix": chave
+          });
+          msgMotorista.textContent = "Chave Pix enviada ao passageiro da corrida!";
+        } else {
+          msgMotorista.textContent = "Chave Pix salva (" + chave + ") — será enviada ao aceitar a próxima corrida.";
+        }
       } catch (erro) {
         console.error(erro);
         msgMotorista.textContent = "Erro ao enviar chave Pix.";
@@ -567,7 +570,7 @@
     function renderizarChamados(itens) {
       if (!online) {
         listaCorridasEl.innerHTML =
-          '<div class="aviso-offline-chamados">Você está Offline. Toque em "Ficar Online para Corridas" para receber e aceitar chamados.</div>';
+          '<div class="aviso-offline-chamados">Você está Offline. Toque em "Ficar Online para Corridas" para visualizar e aceitar chamados.</div>';
         return;
       }
 
@@ -613,6 +616,11 @@
         return;
       }
 
+      if (corridaOcultaId === docId) {
+        corridaOcultaId = "";
+        localStorage.removeItem("32drive_mot_oculta_id");
+      }
+
       const chamado = chamadosLocais.find((item) => item.docId === docId) || {};
       const tempoInfo = resolverMinutosChegada(chamado);
 
@@ -656,6 +664,8 @@
           ...payloadAtualizacao,
           aceitaEm: fs.serverTimestamp()
         });
+        corridaEmAndamento = { docId, ...chamado, ...payloadAtualizacao };
+        renderizarCorridaAndamento();
         msgMotorista.textContent = "Corrida aceita! Passageiro avisado (" + tempoInfo.minutos + " min).";
       } catch (erro) {
         console.error(erro);
@@ -685,7 +695,7 @@
           ...(novaEtapa === "Finalizada" ? { finalizadaEm: fs.serverTimestamp() } : {})
         });
         if (novaEtapa === "Finalizada") {
-          msgMotorista.textContent = "Corrida finalizada! Painel limpo para o próximo chamado.";
+          msgMotorista.textContent = "Corrida finalizada! Painel limpo.";
           limparPainelAndamento("");
         } else {
           msgMotorista.textContent = "Status atualizado: " + novaEtapa;
@@ -729,7 +739,13 @@
       campo.addEventListener("change", salvarPerfil);
     });
 
-    btnLimparAndamento.addEventListener("click", () => limparPainelAndamento("Painel limpo."));
+    btnEnviarPix.addEventListener("click", enviarChavePix);
+    btnLimparAndamento.addEventListener("click", () => limparPainelAndamento("Painel de corrida em andamento limpo."));
+    btnLimparChamados.addEventListener("click", () => {
+      chamadosLocais = [];
+      renderizarChamados([]);
+      msgMotorista.textContent = "Lista de chamados limpa.";
+    });
 
     window.addEventListener("focus", () => aplicarVisualOnline(true));
     document.addEventListener("visibilitychange", () => {
@@ -813,11 +829,13 @@
 
         snapshot.forEach((docSnap) => {
           const d = docSnap.data();
-          if (d.status === "Aguardando motorista") {
+          const st = String(d.status || "");
+          if (st === "Aguardando motorista") {
             aguardando.push({ docId: docSnap.id, ...d });
           } else if (
-            d.status !== "Finalizada" &&
-            d.status !== "Cancelada" &&
+            st !== "Finalizada" &&
+            st !== "Cancelada" &&
+            docSnap.id !== corridaOcultaId &&
             d.motorista &&
             (!meuCodigo || String(d.motorista.codigo || "").toUpperCase() === meuCodigo)
           ) {
