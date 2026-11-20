@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0b192c" />
-  <link rel="manifest" href="manifest-passageiro.json" />
+  <link rel="manifest" href="manifest-passageiro.json?v=36" />
   <link rel="icon" type="image/png" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-512.png" />
   <title>32 Drive — Passageiro</title>
@@ -93,6 +93,12 @@
       gap: 12px;
       box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
     }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
     .card-title { font-size: 19px; font-weight: 900; color: #0f172a; }
     label { font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: block; }
     input, select {
@@ -155,7 +161,7 @@
       cursor: pointer;
     }
     .btn-sm {
-      padding: 10px 12px;
+      padding: 9px 12px;
       font-size: 14px;
       width: auto;
     }
@@ -184,6 +190,15 @@
       border-radius: 12px;
       padding: 12px;
       font-weight: 900;
+      font-size: 16px;
+    }
+    .chegada-destaque {
+      background: #fef3c7;
+      border: 2px solid #f59e0b;
+      color: #78350f;
+      border-radius: 12px;
+      padding: 12px;
+      font-weight: 800;
       font-size: 16px;
     }
     .pix-box {
@@ -218,7 +233,7 @@
         <div class="subtitle">Pedir Corrida • Cassino &amp; Rio Grande</div>
       </div>
     </div>
-    <span class="badge" id="badge-passageiro">Passageiro</span>
+    <span class="badge" id="badge-passageiro">v36</span>
   </header>
 
   <main>
@@ -280,7 +295,12 @@
     </section>
 
     <section class="card">
-      <div class="card-title">Acompanhamento da Corrida</div>
+      <div class="card-header">
+        <div class="card-title">Acompanhamento da Corrida</div>
+        <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-corrida">
+          Limpar
+        </button>
+      </div>
       <div id="box-corrida-ativa" class="corrida-box">
         Nenhuma corrida solicitada ainda.
       </div>
@@ -302,6 +322,7 @@
     const elValorEstimado = document.getElementById("pas-valor-estimado");
     const elDetalheTarifa = document.getElementById("detalhe-tarifa");
     const btnCalcularRota = document.getElementById("btn-calcular-rota");
+    const btnLimparCorrida = document.getElementById("btn-limpar-corrida");
 
     let db = null;
     let fs = null;
@@ -309,6 +330,7 @@
     let tempoRotaMinutos = null;
     let calculoTimer = null;
     let corridaAtualId = localStorage.getItem("32drive_corrida_id") || "";
+    let unsubscribeCorrida = null;
     let ultimoStatusAvisado = "";
 
     const PONTOS_CONHECIDOS = [
@@ -537,26 +559,47 @@
         .replace(/"/g, "&quot;");
     }
 
+    function limparCorridaTela(mensagem = "Nenhuma corrida solicitada ainda.") {
+      if (typeof unsubscribeCorrida === "function") {
+        unsubscribeCorrida();
+        unsubscribeCorrida = null;
+      }
+      corridaAtualId = "";
+      localStorage.removeItem("32drive_corrida_id");
+      ultimoStatusAvisado = "";
+      boxCorridaAtiva.innerHTML = escaparHtml(mensagem);
+    }
+
     function renderizarCorrida(c) {
       if (!c) {
         boxCorridaAtiva.innerHTML = "Nenhuma corrida solicitada ainda.";
         return;
       }
 
+      if (c.status === "Finalizada" || c.status === "Cancelada") {
+        limparCorridaTela("Corrida " + (c.status === "Finalizada" ? "finalizada" : "cancelada") + ". Pronta para novo pedido.");
+        msgPassageiro.textContent = "Corrida encerrada e painel zerado.";
+        return;
+      }
+
       const foiAceita = Boolean(c.motorista && c.motorista.nome) ||
         ["Aceita", "Motorista a caminho", "No local de embarque", "Em viagem"].includes(c.status);
 
+      const minutosChegada = Number(c.tempoChegadaMin || 0) || Number(c.tempoEstimadoRotaMin || 0) || null;
+      const modoChegada = c.modoTempoChegada || (c.tempoChegadaMin ? "motorista" : "estimativa da rota");
+
       if (foiAceita && ultimoStatusAvisado !== (c.status || "Aceita")) {
         ultimoStatusAvisado = c.status || "Aceita";
-        msgPassageiro.textContent = "Viagem aceita! O motorista já foi acionado.";
+        msgPassageiro.textContent = "Viagem aceita! " + (minutosChegada ? "Chegada estimada em " + minutosChegada + " min." : "Motorista a caminho.");
       }
 
       const alertaAceitaHtml = foiAceita
-        ? '<div class="alerta-aceita">Viagem aceita! ' +
-            (c.tempoChegadaMin
-              ? 'Previsão de chegada: ' + escaparHtml(c.tempoChegadaMin) + ' min (' + escaparHtml(c.modoTempoChegada || "rota") + ').'
-              : 'Motorista a caminho.') +
-          '</div>'
+        ? '<div class="alerta-aceita">Viagem aceita! O motorista confirmou seu pedido.</div>'
+        : "";
+
+      const chegadaHtml = minutosChegada
+        ? '<div class="chegada-destaque">Previsão de chegada até você: <strong>' +
+            escaparHtml(minutosChegada) + ' min</strong> (' + escaparHtml(modoChegada) + ')</div>'
         : "";
 
       const motTexto = c.motorista && c.motorista.nome
@@ -566,10 +609,6 @@
         : "Aguardando motorista aceitar...";
 
       const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
-      const tempoTxt = c.tempoChegadaMin
-        ? escaparHtml(c.tempoChegadaMin) + " min (" + escaparHtml(c.modoTempoChegada || "rota") + ")"
-        : (c.tempoEstimadoRotaMin ? "~" + escaparHtml(c.tempoEstimadoRotaMin) + " min (estimativa da rota)" : "A definir");
-
       const chavePix = (c.chavePixMotorista || (c.motorista && c.motorista.chavePix) || "").trim();
       const mostrarPix = String(c.pagamento || "").toLowerCase() === "pix" || Boolean(chavePix);
 
@@ -588,10 +627,10 @@
 
       boxCorridaAtiva.innerHTML =
         alertaAceitaHtml +
+        chegadaHtml +
         "<div><strong>Código:</strong> " + escaparHtml(c.codigo || "—") + " • <strong>Status:</strong> " + escaparHtml(c.status || "Solicitada") + "</div>" +
         "<div><strong>Passageiro:</strong> " + escaparHtml(c.passageiro || "—") + " • <strong>Valor:</strong> " + formatarMoeda(c.valorBruto) + "</div>" +
         "<div><strong>Distância:</strong> " + kmTxt + " • <strong>Pagamento:</strong> " + escaparHtml(c.pagamento || "Pix") + "</div>" +
-        "<div><strong>Chegada:</strong> " + tempoTxt + "</div>" +
         "<div><strong>Trecho:</strong> " + escaparHtml(c.origem || "—") + " → " + escaparHtml(c.destino || "—") + "</div>" +
         "<div><strong>Motorista:</strong> " + motTexto + "</div>" +
         pixHtml;
@@ -683,11 +722,17 @@
     }
 
     function observarCorridaAtual() {
+      if (typeof unsubscribeCorrida === "function") {
+        unsubscribeCorrida();
+        unsubscribeCorrida = null;
+      }
       if (!db || !fs || !corridaAtualId) return;
-      fs.onSnapshot(fs.doc(db, "corridas", corridaAtualId), (snap) => {
-        if (snap.exists()) {
-          renderizarCorrida(snap.data());
+      unsubscribeCorrida = fs.onSnapshot(fs.doc(db, "corridas", corridaAtualId), (snap) => {
+        if (!snap.exists()) {
+          limparCorridaTela("Nenhuma corrida solicitada ainda.");
+          return;
         }
+        renderizarCorrida(snap.data());
       });
     }
 
@@ -696,6 +741,10 @@
     elOrigem.addEventListener("change", calcularRotaAutomatica);
     elDestino.addEventListener("change", calcularRotaAutomatica);
     btnCalcularRota.addEventListener("click", calcularRotaAutomatica);
+    btnLimparCorrida.addEventListener("click", () => {
+      limparCorridaTela("Nenhuma corrida solicitada ainda.");
+      msgPassageiro.textContent = "Painel limpo.";
+    });
 
     elChuva.addEventListener("change", () => {
       atualizarVisualChuva(elChuva.checked);
