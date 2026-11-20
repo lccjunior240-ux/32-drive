@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0b192c" />
-  <link rel="manifest" href="manifest-passageiro.json?v=37" />
+  <link rel="manifest" href="manifest-passageiro.json?v=39" />
   <link rel="icon" type="image/png" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-512.png" />
   <title>32 Drive — Passageiro</title>
@@ -110,6 +110,18 @@
       color: #0f172a;
       font-size: 17px;
       font-weight: 600;
+    }
+    .btn-gps {
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 2px solid #0284c7;
+      background: #e0f2fe;
+      color: #0c4a6e;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      width: 100%;
     }
     .chuva-toggle {
       display: flex;
@@ -233,7 +245,7 @@
         <div class="subtitle">Pedir Corrida • Cassino &amp; Rio Grande</div>
       </div>
     </div>
-    <span class="badge" id="badge-passageiro">v37</span>
+    <span class="badge" id="badge-passageiro">v39</span>
   </header>
 
   <main>
@@ -250,6 +262,9 @@
       <div>
         <label for="pas-origem">Onde você está? (Origem)</label>
         <input id="pas-origem" type="text" placeholder="Ex: Av. Rio Grande, 450, Cassino" />
+        <button class="btn-gps" type="button" id="btn-gps-origem">
+          Usar Localização Atual (GPS)
+        </button>
       </div>
 
       <div>
@@ -313,6 +328,7 @@
     const msgPassageiro = document.getElementById("msg-passageiro");
     const erroRota = document.getElementById("erro-rota");
     const boxCorridaAtiva = document.getElementById("box-corrida-ativa");
+    const elNome = document.getElementById("pas-nome");
     const elOrigem = document.getElementById("pas-origem");
     const elDestino = document.getElementById("pas-destino");
     const elPagamento = document.getElementById("pas-pagamento");
@@ -323,6 +339,7 @@
     const elDetalheTarifa = document.getElementById("detalhe-tarifa");
     const btnCalcularRota = document.getElementById("btn-calcular-rota");
     const btnLimparCorrida = document.getElementById("btn-limpar-corrida");
+    const btnGpsOrigem = document.getElementById("btn-gps-origem");
 
     let db = null;
     let fs = null;
@@ -330,8 +347,11 @@
     let tempoRotaMinutos = null;
     let calculoTimer = null;
     let corridaAtualId = localStorage.getItem("32drive_corrida_id") || "";
-    let unsubscribeCorrida = null;
+    let corridaOcultaPasId = localStorage.getItem("32drive_pas_oculta_id") || "";
     let ultimoStatusAvisado = "";
+
+    const nomeSalvo = localStorage.getItem("32drive_pas_nome") || "";
+    if (nomeSalvo) elNome.value = nomeSalvo;
 
     const PONTOS_CONHECIDOS = [
       { chaves: ["furg", "campus carreiros", "universidade federal"], lat: -32.0736, lon: -52.1674, nome: "FURG — Campus Carreiros, Rio Grande" },
@@ -438,6 +458,57 @@
         elValorEstimado.textContent = formatarMoeda(calc.valor);
         elDetalheTarifa.textContent = calc.detalhe;
       }
+    }
+
+    async function usarLocalizacaoAtual() {
+      erroRota.textContent = "";
+      if (!navigator.geolocation) {
+        erroRota.textContent = "Seu navegador não suporta localização GPS.";
+        return;
+      }
+      btnGpsOrigem.disabled = true;
+      btnGpsOrigem.textContent = "Buscando localização...";
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          try {
+            const url =
+              "https://nominatim.openstreetmap.org/reverse?format=json&lat=" +
+              encodeURIComponent(lat) +
+              "&lon=" +
+              encodeURIComponent(lon);
+            const resp = await fetch(url, { headers: { "Accept": "application/json" } });
+            if (resp.ok) {
+              const data = await resp.json();
+              const addr = data.address || {};
+              const rua = addr.road || addr.pedestrian || addr.suburb || "";
+              const num = addr.house_number ? ", " + addr.house_number : "";
+              const bairro = addr.suburb || addr.neighbourhood || "";
+              const cidade = addr.city || addr.town || addr.municipality || "Rio Grande";
+              const formatado = [rua + num, bairro, cidade].filter(Boolean).join(" — ");
+              elOrigem.value = formatado || (lat.toFixed(5) + ", " + lon.toFixed(5));
+            } else {
+              elOrigem.value = lat.toFixed(5) + ", " + lon.toFixed(5);
+            }
+            if ((elDestino.value || "").trim().length >= 3) {
+              await calcularRotaAutomatica();
+            }
+          } catch (_) {
+            elOrigem.value = lat.toFixed(5) + ", " + lon.toFixed(5);
+          } finally {
+            btnGpsOrigem.disabled = false;
+            btnGpsOrigem.textContent = "Usar Localização Atual (GPS)";
+          }
+        },
+        () => {
+          erroRota.textContent = "Permita o acesso à localização no navegador ou digite a rua.";
+          btnGpsOrigem.disabled = false;
+          btnGpsOrigem.textContent = "Usar Localização Atual (GPS)";
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
     }
 
     async function consultarNominatimLocal(textoBusca) {
@@ -560,9 +631,9 @@
     }
 
     function limparCorridaTela(mensagem = "Nenhuma corrida solicitada ainda.") {
-      if (typeof unsubscribeCorrida === "function") {
-        unsubscribeCorrida();
-        unsubscribeCorrida = null;
+      if (corridaAtualId) {
+        corridaOcultaPasId = corridaAtualId;
+        localStorage.setItem("32drive_pas_oculta_id", corridaOcultaPasId);
       }
       corridaAtualId = "";
       localStorage.removeItem("32drive_corrida_id");
@@ -570,16 +641,20 @@
       boxCorridaAtiva.innerHTML = escaparHtml(mensagem);
     }
 
-    function renderizarCorrida(c) {
+    function renderizarCorrida(c, docId = "") {
       if (!c) {
         boxCorridaAtiva.innerHTML = "Nenhuma corrida solicitada ainda.";
         return;
       }
 
+      if (docId && docId === corridaOcultaPasId) {
+        return;
+      }
+
       const st = String(c.status || "");
       if (st === "Finalizada" || st === "Cancelada") {
-        limparCorridaTela("Corrida " + (st === "Finalizada" ? "finalizada" : "cancelada") + ". Pronta para novo pedido.");
-        msgPassageiro.textContent = "Corrida encerrada e painel zerado.";
+        limparCorridaTela("Nenhuma corrida solicitada ainda.");
+        msgPassageiro.textContent = "Corrida encerrada.";
         return;
       }
 
@@ -659,7 +734,7 @@
     }
 
     async function solicitarCorrida() {
-      const nome = (document.getElementById("pas-nome").value || "").trim();
+      const nome = (elNome.value || "").trim();
       const origem = (elOrigem.value || "").trim();
       const destino = (elDestino.value || "").trim();
       const pagamento = elPagamento.value || "Pix";
@@ -668,6 +743,10 @@
         msgPassageiro.textContent = "Preencha seu nome, origem e destino.";
         return;
       }
+
+      localStorage.setItem("32drive_pas_nome", nome);
+      corridaOcultaPasId = "";
+      localStorage.removeItem("32drive_pas_oculta_id");
 
       if (distanciaCalculadaKm === null) {
         await calcularRotaAutomatica();
@@ -715,28 +794,16 @@
         corridaAtualId = docRef.id;
         localStorage.setItem("32drive_corrida_id", corridaAtualId);
         msgPassageiro.textContent = "Corrida " + codigo + " enviada! Aguardando motorista...";
-        observarCorridaAtual();
       } catch (erro) {
         console.error(erro);
-        msgPassageiro.textContent = "Erro ao enviar corrida para a nuvem.";
+        msgPassageiro.textContent = "Erro ao enviar corrida (" + (erro.code || erro.message || "Firestore") + ").";
       }
     }
 
-    function observarCorridaAtual() {
-      if (typeof unsubscribeCorrida === "function") {
-        unsubscribeCorrida();
-        unsubscribeCorrida = null;
-      }
-      if (!db || !fs || !corridaAtualId) return;
-      unsubscribeCorrida = fs.onSnapshot(fs.doc(db, "corridas", corridaAtualId), (snap) => {
-        if (!snap.exists()) {
-          limparCorridaTela("Nenhuma corrida solicitada ainda.");
-          return;
-        }
-        renderizarCorrida(snap.data());
-      });
-    }
-
+    btnGpsOrigem.addEventListener("click", usarLocalizacaoAtual);
+    elNome.addEventListener("change", () => {
+      localStorage.setItem("32drive_pas_nome", (elNome.value || "").trim());
+    });
     elOrigem.addEventListener("input", agendarCalculoAutomatico);
     elDestino.addEventListener("input", agendarCalculoAutomatico);
     elOrigem.addEventListener("change", calcularRotaAutomatica);
@@ -772,7 +839,39 @@
         atualizarTelaPreco();
       });
 
-      observarCorridaAtual();
+      fs.onSnapshot(fs.collection(db, "corridas"), (snapshot) => {
+        let encontrada = null;
+        let encontradaId = "";
+        let maisRecenteTs = -1;
+        const nomeDigitado = normalizarTexto(elNome.value);
+
+        snapshot.forEach((docSnap) => {
+          if (docSnap.id === corridaOcultaPasId) return;
+          const d = docSnap.data();
+          const st = String(d.status || "");
+          if (st === "Finalizada" || st === "Cancelada") return;
+
+          if (corridaAtualId && docSnap.id === corridaAtualId) {
+            encontrada = d;
+            encontradaId = docSnap.id;
+          } else if (!corridaAtualId && nomeDigitado && normalizarTexto(d.passageiro) === nomeDigitado) {
+            const ts = Number(d.criadoEmTimestamp || 0);
+            if (ts >= maisRecenteTs) {
+              maisRecenteTs = ts;
+              encontrada = d;
+              encontradaId = docSnap.id;
+            }
+          }
+        });
+
+        if (encontrada && encontradaId) {
+          corridaAtualId = encontradaId;
+          localStorage.setItem("32drive_corrida_id", encontradaId);
+          renderizarCorrida(encontrada, encontradaId);
+        } else if (!corridaAtualId) {
+          boxCorridaAtiva.innerHTML = "Nenhuma corrida solicitada ainda.";
+        }
+      });
     } catch (erro) {
       console.error(erro);
       badgePassageiro.textContent = "Passageiro";
