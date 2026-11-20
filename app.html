@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0b192c" />
-  <link rel="manifest" href="manifest.json?v=37" />
+  <link rel="manifest" href="manifest.json?v=39" />
   <link rel="icon" type="image/png" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-512.png" />
   <title>32 Drive — Motorista</title>
@@ -19,7 +19,6 @@
       --accent: #f59e0b;
       --green: #059669;
       --blue: #0284c7;
-      --red: #dc2626;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -56,8 +55,8 @@
     h1 { font-size: 20px; font-weight: 900; color: var(--accent); }
     .subtitle { font-size: 15px; color: #dbeafe; }
     .badge {
-      background: #94a3b8;
-      color: #0f172a;
+      background: #10b981;
+      color: #052e16;
       font-weight: 800;
       font-size: 14px;
       padding: 7px 12px;
@@ -93,16 +92,6 @@
       padding: 12px 14px;
       font-size: 15px;
       font-weight: 800;
-    }
-    .aviso-offline-chamados {
-      background: #fef2f2;
-      border: 2px solid #fca5a5;
-      color: #991b1b;
-      border-radius: 14px;
-      padding: 14px;
-      font-size: 15px;
-      font-weight: 800;
-      text-align: center;
     }
     .card {
       background: var(--card);
@@ -188,7 +177,6 @@
     .btn-accent { background: var(--accent); color: #0f172a; }
     .btn-blue { background: var(--blue); color: #ffffff; }
     .btn-outline { background: #e2e8f0; color: #0f172a; border: 2px solid #94a3b8; }
-    .btn-danger { background: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; }
     .status-msg { font-size: 16px; font-weight: 800; color: #047857; text-align: center; min-height: 20px; }
     .corrida-card {
       background: #f8fafc;
@@ -232,7 +220,7 @@
         <div class="subtitle">Painel de Corridas • Cassino &amp; Rio Grande</div>
       </div>
     </div>
-    <span class="badge" id="badge-motorista">Offline</span>
+    <span class="badge" id="badge-motorista">Ativo</span>
   </header>
 
   <main>
@@ -268,8 +256,8 @@
           Enviar Chave Pix ao Passageiro
         </button>
       </div>
-      <button class="btn btn-green" type="button" id="btn-ficar-online">
-        Ficar Online para Corridas
+      <button class="btn btn-green" type="button" id="btn-salvar-perfil">
+        Salvar Dados do Motorista
       </button>
       <div class="status-msg" id="msg-motorista"></div>
     </section>
@@ -317,15 +305,12 @@
         </div>
       </div>
       <div id="lista-corridas-motorista" style="display:flex;flex-direction:column;gap:12px;">
-        <div class="aviso-offline-chamados">
-          Você está Offline. Toque em "Ficar Online para Corridas" para visualizar e aceitar chamados.
-        </div>
+        <div class="corrida-card" style="color:var(--muted);">Nenhuma corrida aguardando motorista no momento.</div>
       </div>
     </section>
   </main>
 
   <script type="module">
-    const badgeMotorista = document.getElementById("badge-motorista");
     const avisoFirebase = document.getElementById("aviso-firebase");
     const avisoChuva = document.getElementById("aviso-chuva");
     const msgMotorista = document.getElementById("msg-motorista");
@@ -335,13 +320,13 @@
     const btnLimparAndamento = document.getElementById("btn-limpar-andamento");
     const btnLimparChamados = document.getElementById("btn-limpar-chamados");
     const btnEnviarPix = document.getElementById("btn-enviar-pix");
+    const btnSalvarPerfil = document.getElementById("btn-salvar-perfil");
 
     const elCodigo = document.getElementById("mot-codigo");
     const elNome = document.getElementById("mot-nome");
     const elVeiculo = document.getElementById("mot-veiculo");
     const elPlaca = document.getElementById("mot-placa");
     const elPix = document.getElementById("mot-pix");
-    const btnOnline = document.getElementById("btn-ficar-online");
     const btnModoAuto = document.getElementById("modo-auto");
     const btnModoManual = document.getElementById("modo-manual");
     const resumoTempoModo = document.getElementById("resumo-tempo-modo");
@@ -349,12 +334,15 @@
 
     let db = null;
     let fs = null;
-    let online = localStorage.getItem("32drive_motorista_online") === "true";
     let modoTempo = localStorage.getItem("32drive_modo_tempo") || "auto";
     let minutoManualSelecionado = Number(localStorage.getItem("32drive_min_manual") || "6");
     let corridaEmAndamento = null;
     let chamadosLocais = [];
-    let corridaOcultaId = localStorage.getItem("32drive_mot_oculta_id") || "";
+    let idsOcultos = new Set(JSON.parse(localStorage.getItem("32drive_mot_ocultos_v39") || "[]"));
+
+    function salvarOcultos() {
+      localStorage.setItem("32drive_mot_ocultos_v39", JSON.stringify(Array.from(idsOcultos)));
+    }
 
     function carregarPerfilSalvo() {
       try {
@@ -378,41 +366,6 @@
       };
       localStorage.setItem("32drive_motorista_perfil", JSON.stringify(perfil));
       return perfil;
-    }
-
-    async function sincronizarPresencaFirestore(estaOnline, perfil) {
-      if (!db || !fs) return;
-      const idDoc = (perfil.codigo || "MOTORISTA_PADRAO").replace(/[^A-Za-z0-9_-]/g, "_");
-      try {
-        await fs.setDoc(
-          fs.doc(db, "motoristas_status", idDoc),
-          {
-            online: Boolean(estaOnline),
-            codigo: perfil.codigo || "",
-            nome: perfil.nome || "",
-            veiculo: perfil.veiculo || "",
-            placa: perfil.placa || "",
-            atualizadoEm: fs.serverTimestamp()
-          },
-          { merge: true }
-        );
-      } catch (_) {}
-    }
-
-    function aplicarVisualOnline(silencioso = false) {
-      badgeMotorista.textContent = online ? "Online" : "Offline";
-      badgeMotorista.style.background = online ? "#10b981" : "#94a3b8";
-      badgeMotorista.style.color = online ? "#052e16" : "#0f172a";
-      btnOnline.textContent = online ? "Ficar Offline" : "Ficar Online para Corridas";
-      btnOnline.className = online ? "btn btn-danger" : "btn btn-green";
-      renderizarChamados(chamadosLocais);
-      if (!silencioso) {
-        const nome = (elNome.value || "").trim();
-        const cod = (elCodigo.value || "").trim().toUpperCase();
-        msgMotorista.textContent = online
-          ? "Online" + (nome ? " como " + nome : "") + (cod ? " (" + cod + ")" : "") + " — pronto para corridas."
-          : "Você está Offline. Chamados ocultos até ficar Online.";
-      }
     }
 
     function atualizarVisualTempo() {
@@ -446,18 +399,6 @@
       return "R$ " + Number(valor || 0).toFixed(2).replace(".", ",");
     }
 
-    async function alternarOnline() {
-      const perfil = salvarPerfil();
-      if (!online && (!perfil.codigo || !perfil.nome)) {
-        msgMotorista.textContent = "Preencha pelo menos seu Código e Nome para ficar online.";
-        return;
-      }
-      online = !online;
-      localStorage.setItem("32drive_motorista_online", String(online));
-      aplicarVisualOnline(false);
-      await sincronizarPresencaFirestore(online, perfil);
-    }
-
     function montarLinkMapa(endereco) {
       const q = encodeURIComponent(String(endereco || "") + ", Rio Grande, RS");
       return "https://www.google.com/maps/search/?api=1&query=" + q;
@@ -471,10 +412,10 @@
         .replace(/"/g, "&quot;");
     }
 
-    function limparPainelAndamento(msg = "Painel de corrida em andamento limpo.") {
+    function limparPainelAndamento(msg = "Painel limpo.") {
       if (corridaEmAndamento && corridaEmAndamento.docId) {
-        corridaOcultaId = corridaEmAndamento.docId;
-        localStorage.setItem("32drive_mot_oculta_id", corridaOcultaId);
+        idsOcultos.add(corridaEmAndamento.docId);
+        salvarOcultos();
       }
       corridaEmAndamento = null;
       secCorridaAndamento.style.display = "none";
@@ -483,10 +424,14 @@
     }
 
     function renderizarCorridaAndamento() {
-      if (!corridaEmAndamento || corridaEmAndamento.status === "Finalizada" || corridaEmAndamento.status === "Cancelada") {
-        corridaEmAndamento = null;
+      if (!corridaEmAndamento) {
         secCorridaAndamento.style.display = "none";
         boxCorridaAndamento.innerHTML = "";
+        return;
+      }
+      const st = String(corridaEmAndamento.status || "");
+      if (st === "Finalizada" || st === "Cancelada") {
+        limparPainelAndamento("");
         return;
       }
 
@@ -496,13 +441,13 @@
       const pixAtual = (c.chavePixMotorista || (elPix.value || "").trim());
 
       let acaoHtml = "";
-      if (c.status === "Motorista a caminho" || c.status === "Aceita") {
+      if (st === "Motorista a caminho" || st === "Aceita") {
         acaoHtml =
           '<button class="btn btn-primary" type="button" data-etapa="No local de embarque">Cheguei no Embarque</button>';
-      } else if (c.status === "No local de embarque") {
+      } else if (st === "No local de embarque") {
         acaoHtml =
           '<button class="btn btn-green" type="button" data-etapa="Em viagem">Iniciar Viagem</button>';
-      } else if (c.status === "Em viagem") {
+      } else if (st === "Em viagem") {
         acaoHtml =
           '<button class="btn btn-accent" type="button" data-etapa="Finalizada">Finalizar Corrida</button>';
       }
@@ -514,7 +459,7 @@
             '<span class="valor-destaque">' + formatarMoeda(c.valorBruto) + '</span>' +
           '</div>' +
           '<div>' +
-            '<span class="tag">' + escaparHtml(c.status || "Em andamento") + '</span> ' +
+            '<span class="tag">' + escaparHtml(st || "Em andamento") + '</span> ' +
             '<span class="tag">' + kmTxt + '</span> ' +
             '<span class="tag">' + escaparHtml(c.pagamento || "Pix") + '</span> ' +
             (c.tempoChegadaMin ? '<span class="tag">Chegada: ' + escaparHtml(c.tempoChegadaMin) + ' min</span>' : '') +
@@ -547,7 +492,7 @@
       }
 
       if (!db || !fs) {
-        msgMotorista.textContent = "Chave Pix salva localmente (" + chave + ").";
+        msgMotorista.textContent = "Chave Pix salva (" + chave + ").";
         return;
       }
 
@@ -563,24 +508,23 @@
         }
       } catch (erro) {
         console.error(erro);
-        msgMotorista.textContent = "Erro ao enviar chave Pix.";
+        msgMotorista.textContent = "Erro ao enviar chave Pix (" + (erro.code || erro.message || "Firestore") + ").";
       }
     }
 
     function renderizarChamados(itens) {
-      if (!online) {
-        listaCorridasEl.innerHTML =
-          '<div class="aviso-offline-chamados">Você está Offline. Toque em "Ficar Online para Corridas" para visualizar e aceitar chamados.</div>';
-        return;
-      }
+      const visiveis = itens.filter((c) => {
+        const st = String(c.status || "");
+        return st === "Aguardando motorista" && !idsOcultos.has(c.docId);
+      });
 
-      if (!itens.length) {
+      if (!visiveis.length) {
         listaCorridasEl.innerHTML =
           '<div class="corrida-card" style="color:var(--muted);">Nenhuma corrida aguardando motorista no momento.</div>';
         return;
       }
 
-      listaCorridasEl.innerHTML = itens
+      listaCorridasEl.innerHTML = visiveis
         .map((c) => {
           const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
           const tagChuva = c.chuva ? ' <span class="tag tag-chuva">Chuva +25%</span>' : "";
@@ -606,27 +550,14 @@
     }
 
     async function aceitarCorrida(docId) {
-      if (!online) {
-        msgMotorista.textContent = "Fique Online antes de aceitar corridas.";
-        return;
-      }
       const perfil = salvarPerfil();
-      if (!perfil.nome) {
-        msgMotorista.textContent = "Preencha seu Nome antes de aceitar uma corrida.";
-        return;
-      }
-
-      if (corridaOcultaId === docId) {
-        corridaOcultaId = "";
-        localStorage.removeItem("32drive_mot_oculta_id");
-      }
-
+      const nomeMotorista = perfil.nome || "Motorista 32 Drive";
       const chamado = chamadosLocais.find((item) => item.docId === docId) || {};
       const tempoInfo = resolverMinutosChegada(chamado);
 
       const dadosMotorista = {
         codigo: perfil.codigo || "MOT-01",
-        nome: perfil.nome,
+        nome: nomeMotorista,
         veiculo: perfil.veiculo || "Veículo 32 Drive",
         placa: perfil.placa || "32D",
         chavePix: perfil.chavePix || ""
@@ -640,17 +571,13 @@
         chavePixMotorista: perfil.chavePix || ""
       };
 
-      const idxLocal = chamadosLocais.findIndex((item) => item.docId === docId);
-      if (idxLocal !== -1) {
-        const escolhida = {
-          ...chamadosLocais[idxLocal],
-          ...payloadAtualizacao
-        };
-        chamadosLocais.splice(idxLocal, 1);
-        corridaEmAndamento = escolhida;
+      if (String(docId).startsWith("SIM-")) {
+        const idxLocal = chamadosLocais.findIndex((item) => item.docId === docId);
+        if (idxLocal !== -1) chamadosLocais.splice(idxLocal, 1);
+        corridaEmAndamento = { ...chamado, ...payloadAtualizacao };
         renderizarChamados(chamadosLocais);
         renderizarCorridaAndamento();
-        msgMotorista.textContent = "Corrida aceita! Chegada em " + tempoInfo.minutos + " min (" + tempoInfo.modo + ").";
+        msgMotorista.textContent = "Corrida simulada aceita! Chegada em " + tempoInfo.minutos + " min.";
         return;
       }
 
@@ -669,7 +596,7 @@
         msgMotorista.textContent = "Corrida aceita! Passageiro avisado (" + tempoInfo.minutos + " min).";
       } catch (erro) {
         console.error(erro);
-        msgMotorista.textContent = "Erro ao aceitar corrida.";
+        msgMotorista.textContent = "Erro ao aceitar corrida (" + (erro.code || erro.message || "Firestore") + ").";
       }
     }
 
@@ -678,7 +605,7 @@
 
       if (String(corridaEmAndamento.docId || "").startsWith("SIM-")) {
         if (novaEtapa === "Finalizada") {
-          msgMotorista.textContent = "Corrida simulada finalizada (" + formatarMoeda(corridaEmAndamento.valorBruto) + ") — painel zerado.";
+          msgMotorista.textContent = "Corrida simulada finalizada — painel limpo.";
           limparPainelAndamento("");
         } else {
           corridaEmAndamento.status = novaEtapa;
@@ -704,15 +631,11 @@
         }
       } catch (erro) {
         console.error(erro);
-        msgMotorista.textContent = "Erro ao atualizar status da corrida.";
+        msgMotorista.textContent = "Erro ao atualizar status (" + (erro.code || erro.message || "Firestore") + ").";
       }
     }
 
     function simularChamadoTeste() {
-      if (!online) {
-        msgMotorista.textContent = "Fique Online primeiro para receber chamados de teste.";
-        return;
-      }
       const fake = {
         docId: "SIM-" + Date.now(),
         codigo: "32D-" + Math.floor(1000 + Math.random() * 9000),
@@ -732,24 +655,26 @@
     }
 
     carregarPerfilSalvo();
-    aplicarVisualOnline(true);
     atualizarVisualTempo();
+    renderizarChamados([]);
 
     [elCodigo, elNome, elVeiculo, elPlaca, elPix].forEach((campo) => {
       campo.addEventListener("change", salvarPerfil);
     });
 
+    btnSalvarPerfil.addEventListener("click", () => {
+      salvarPerfil();
+      msgMotorista.textContent = "Dados do motorista salvos.";
+    });
+
     btnEnviarPix.addEventListener("click", enviarChavePix);
-    btnLimparAndamento.addEventListener("click", () => limparPainelAndamento("Painel de corrida em andamento limpo."));
+    btnLimparAndamento.addEventListener("click", () => limparPainelAndamento("Painel limpo."));
     btnLimparChamados.addEventListener("click", () => {
+      chamadosLocais.forEach((c) => idsOcultos.add(c.docId));
+      salvarOcultos();
       chamadosLocais = [];
       renderizarChamados([]);
       msgMotorista.textContent = "Lista de chamados limpa.";
-    });
-
-    window.addEventListener("focus", () => aplicarVisualOnline(true));
-    document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) aplicarVisualOnline(true);
     });
 
     btnModoAuto.addEventListener("click", () => {
@@ -793,7 +718,6 @@
       });
     });
 
-    btnOnline.addEventListener("click", alternarOnline);
     document.getElementById("btn-simular-chamado").addEventListener("click", simularChamadoTeste);
 
     listaCorridasEl.addEventListener("click", (ev) => {
@@ -815,7 +739,6 @@
       if (!db) throw new Error("db não exportado");
 
       mostrarAvisoFirebase("");
-      await sincronizarPresencaFirestore(online, salvarPerfil());
 
       fs.onSnapshot(fs.doc(db, "config", "geral"), (snap) => {
         const chuvaAtiva = snap.exists() ? Boolean(snap.data().chuva) : false;
@@ -825,21 +748,22 @@
       fs.onSnapshot(fs.collection(db, "corridas"), (snapshot) => {
         const aguardando = [];
         let ativaMinha = null;
-        const meuCodigo = (elCodigo.value || "").trim().toUpperCase();
+        let maisRecenteAtivaTs = -1;
 
         snapshot.forEach((docSnap) => {
+          if (idsOcultos.has(docSnap.id)) return;
           const d = docSnap.data();
           const st = String(d.status || "");
+          if (st === "Finalizada" || st === "Cancelada") return;
+
           if (st === "Aguardando motorista") {
             aguardando.push({ docId: docSnap.id, ...d });
-          } else if (
-            st !== "Finalizada" &&
-            st !== "Cancelada" &&
-            docSnap.id !== corridaOcultaId &&
-            d.motorista &&
-            (!meuCodigo || String(d.motorista.codigo || "").toUpperCase() === meuCodigo)
-          ) {
-            ativaMinha = { docId: docSnap.id, ...d };
+          } else if (d.motorista && d.motorista.nome) {
+            const ts = Number(d.criadoEmTimestamp || 0);
+            if (ts >= maisRecenteAtivaTs) {
+              maisRecenteAtivaTs = ts;
+              ativaMinha = { docId: docSnap.id, ...d };
+            }
           }
         });
 
