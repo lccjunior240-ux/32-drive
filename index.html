@@ -2,23 +2,33 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
   <meta name="theme-color" content="#0b192c" />
-  <link rel="manifest" href="manifest-passageiro.json?v=39" />
+  <link rel="manifest" href="manifest-passageiro.json?v=40" />
   <link rel="icon" type="image/png" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-512.png" />
-  <title>32 Drive — Passageiro</title>
+  <title>32 Drive — Passageiro Inclusivo</title>
   <style>
     :root {
       --bg: #f8fafc;
       --card: #ffffff;
       --navy-header: linear-gradient(145deg, #0b192c 0%, #13294b 70%, #0c1e38 100%);
-      --border: #cbd5e1;
+      --border: #94a3b8;
       --text: #0f172a;
-      --muted: #475569;
+      --muted: #334155;
       --accent: #f59e0b;
-      --green: #059669;
-      --blue: #0284c7;
+      --green: #047857;
+      --blue: #0369a1;
+      --f-base: 19px;
+      --f-label: 18px;
+      --f-btn: 19px;
+      --f-title: 22px;
+    }
+    body.fonte-grande {
+      --f-base: 23px;
+      --f-label: 22px;
+      --f-btn: 22px;
+      --f-title: 26px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -28,12 +38,12 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      font-size: 18px;
-      line-height: 1.45;
+      font-size: var(--f-base);
+      line-height: 1.5;
     }
     header {
       background: var(--navy-header);
-      border-bottom: 3px solid var(--accent);
+      border-bottom: 4px solid var(--accent);
       padding: 16px;
       display: flex;
       align-items: center;
@@ -46,29 +56,35 @@
     }
     .brand { display: flex; align-items: center; gap: 12px; }
     .brand img {
-      width: 46px;
-      height: 46px;
-      border-radius: 11px;
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
       border: 2px solid var(--accent);
       background: #ffffff;
     }
-    h1 { font-size: 20px; font-weight: 900; color: var(--accent); }
-    .subtitle { font-size: 15px; color: #dbeafe; }
-    .badge {
+    h1 { font-size: 21px; font-weight: 900; color: var(--accent); }
+    .subtitle { font-size: 15px; color: #e2e8f0; font-weight: 600; }
+    .header-acoes { display: flex; align-items: center; gap: 8px; }
+    .btn-acess {
+      background: #ffffff;
+      color: #0b192c;
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .btn-acess.ativo {
       background: var(--accent);
       color: #0f172a;
-      font-weight: 800;
-      font-size: 14px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      white-space: nowrap;
     }
     main {
       flex: 1;
       padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 18px;
       max-width: 720px;
       width: 100%;
       margin: 0 auto;
@@ -76,162 +92,203 @@
     .aviso-firebase {
       display: none;
       background: #fffbeb;
-      border: 2px solid #f59e0b;
+      border: 2px solid #d97706;
       color: #78350f;
       border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 15px;
+      padding: 14px;
+      font-size: var(--f-label);
       font-weight: 700;
     }
     .card {
       background: var(--card);
       border: 2px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
+      border-radius: 18px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+      gap: 14px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
     }
     .card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      flex-wrap: wrap;
     }
-    .card-title { font-size: 19px; font-weight: 900; color: #0f172a; }
-    label { font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: block; }
+    .card-title { font-size: var(--f-title); font-weight: 900; color: #0f172a; }
+    label.campo-lbl {
+      font-size: var(--f-label);
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 6px;
+      display: block;
+    }
     input, select {
       width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: 2px solid #94a3b8;
+      min-height: 56px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 2px solid #475569;
       background: #ffffff;
       color: #0f172a;
-      font-size: 17px;
-      font-weight: 600;
+      font-size: var(--f-base);
+      font-weight: 700;
     }
     .btn-gps {
       margin-top: 8px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 2px solid #0284c7;
+      min-height: 54px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 2px solid var(--blue);
       background: #e0f2fe;
       color: #0c4a6e;
-      font-size: 15px;
-      font-weight: 800;
+      font-size: var(--f-label);
+      font-weight: 900;
       cursor: pointer;
       width: 100%;
+    }
+    .atalhos-rapidos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-atalho {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 2px solid #475569;
+      background: #f1f5f9;
+      color: #0f172a;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-atalho:hover, .btn-atalho:focus {
+      background: #0b192c;
+      color: #ffffff;
+      border-color: #0b192c;
     }
     .chuva-toggle {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 12px;
       background: #f0f9ff;
-      border: 2px solid #7dd3fc;
-      border-radius: 12px;
-      padding: 12px 14px;
+      border: 2px solid #0284c7;
+      border-radius: 14px;
+      padding: 14px 16px;
       cursor: pointer;
+      min-height: 60px;
     }
     .chuva-toggle.ativo {
-      background: #0284c7;
-      border-color: #0369a1;
+      background: #0369a1;
+      border-color: #0c4a6e;
       color: #ffffff;
     }
     .chuva-toggle input {
-      width: 22px;
-      height: 22px;
+      width: 28px;
+      height: 28px;
+      min-height: 28px;
       accent-color: #0b192c;
     }
     .estimativa-box {
       background: #f1f5f9;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
+      border: 2px solid #475569;
+      border-radius: 14px;
+      padding: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
     }
-    .estimativa-lbl { font-size: 15px; font-weight: 800; color: #0f172a; }
+    .estimativa-lbl { font-size: var(--f-label); font-weight: 900; color: #0f172a; }
     .estimativa-val {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 900;
       color: var(--green);
       white-space: nowrap;
-      min-width: 110px;
       text-align: right;
     }
     .btn {
       width: 100%;
-      padding: 15px;
+      min-height: 58px;
+      padding: 15px 18px;
       border: none;
-      border-radius: 12px;
-      font-size: 17px;
-      font-weight: 800;
+      border-radius: 14px;
+      font-size: var(--f-btn);
+      font-weight: 900;
       cursor: pointer;
     }
     .btn-sm {
-      padding: 9px 12px;
-      font-size: 14px;
+      min-height: 46px;
+      padding: 10px 14px;
+      font-size: 16px;
       width: auto;
     }
     .btn-outline {
       background: #e2e8f0;
       color: #0f172a;
-      border: 2px solid #94a3b8;
+      border: 2px solid #475569;
     }
-    .btn-accent { background: var(--accent); color: #0f172a; }
-    .btn-green { background: #10b981; color: #052e16; }
-    .status-msg { font-size: 16px; font-weight: 800; color: #047857; text-align: center; min-height: 20px; }
-    .erro-msg { font-size: 15px; font-weight: 800; color: #b91c1c; text-align: center; min-height: 18px; }
+    .btn-accent {
+      background: var(--accent);
+      color: #0f172a;
+      border: 2px solid #b45309;
+    }
+    .btn-green {
+      background: #059669;
+      color: #ffffff;
+    }
+    .status-msg { font-size: var(--f-label); font-weight: 900; color: var(--green); text-align: center; min-height: 24px; }
+    .erro-msg { font-size: var(--f-label); font-weight: 900; color: #b91c1c; text-align: center; min-height: 20px; }
     .corrida-box {
       background: #f8fafc;
-      border: 2px solid var(--border);
+      border: 2px solid #64748b;
       border-radius: 14px;
-      padding: 14px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
     .alerta-aceita {
       background: #dcfce7;
-      border: 2px solid #16a34a;
+      border: 2px solid #15803d;
       color: #14532d;
       border-radius: 12px;
-      padding: 12px;
+      padding: 14px;
       font-weight: 900;
-      font-size: 16px;
+      font-size: var(--f-label);
     }
     .chegada-destaque {
       background: #fef3c7;
-      border: 2px solid #f59e0b;
+      border: 2px solid #d97706;
       color: #78350f;
       border-radius: 12px;
-      padding: 12px;
-      font-weight: 800;
-      font-size: 16px;
+      padding: 14px;
+      font-weight: 900;
+      font-size: var(--f-label);
     }
     .pix-box {
       background: #eff6ff;
-      border: 2px solid #3b82f6;
+      border: 2px solid #1d4ed8;
       border-radius: 12px;
-      padding: 12px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
     .pix-chave-linha {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 10px;
+      flex-wrap: wrap;
       background: #ffffff;
-      border: 1px solid #93c5fd;
+      border: 2px solid #60a5fa;
       border-radius: 10px;
-      padding: 10px 12px;
-      font-weight: 800;
+      padding: 12px;
+      font-weight: 900;
       word-break: break-all;
     }
   </style>
@@ -241,39 +298,56 @@
     <div class="brand">
       <img src="icon-512.png" alt="32 Drive" />
       <div>
-        <h1>32 DRIVE — Passageiro</h1>
-        <div class="subtitle">Pedir Corrida • Cassino &amp; Rio Grande</div>
+        <h1>32 DRIVE</h1>
+        <div class="subtitle">Inclusivo • Cassino &amp; Rio Grande</div>
       </div>
     </div>
-    <span class="badge" id="badge-passageiro">v39</span>
+    <div class="header-acoes">
+      <button class="btn-acess" type="button" id="btn-fonte-grande" aria-pressed="false">
+        Letra A+
+      </button>
+    </div>
   </header>
 
   <main>
     <div class="aviso-firebase" id="aviso-firebase"></div>
 
     <section class="card">
-      <div class="card-title">Solicitar Corrida</div>
-
-      <div>
-        <label for="pas-nome">Seu Nome</label>
-        <input id="pas-nome" type="text" placeholder="Ex: Maria Clara" />
-      </div>
-
-      <div>
-        <label for="pas-origem">Onde você está? (Origem)</label>
-        <input id="pas-origem" type="text" placeholder="Ex: Av. Rio Grande, 450, Cassino" />
-        <button class="btn-gps" type="button" id="btn-gps-origem">
-          Usar Localização Atual (GPS)
+      <div class="card-header">
+        <div class="card-title">1. Pedir Corrida</div>
+        <button class="btn btn-outline btn-sm" type="button" id="btn-ler-voz">
+          Ouvir Resumo
         </button>
       </div>
 
       <div>
-        <label for="pas-destino">Para onde vai? (Destino)</label>
-        <input id="pas-destino" type="text" placeholder="Ex: FURG, Centro, Shopping Praça..." />
+        <label class="campo-lbl" for="pas-nome">Seu Nome</label>
+        <input id="pas-nome" type="text" placeholder="Como podemos te chamar?" />
       </div>
 
       <div>
-        <label for="pas-pagamento">Forma de Pagamento</label>
+        <label class="campo-lbl" for="pas-origem">Onde você está agora?</label>
+        <input id="pas-origem" type="text" placeholder="Rua, bairro ou toque no botão de localização" />
+        <button class="btn-gps" type="button" id="btn-gps-origem">
+          Usar Minha Localização Atual (GPS)
+        </button>
+      </div>
+
+      <div>
+        <label class="campo-lbl" for="pas-destino">Para onde você quer ir?</label>
+        <input id="pas-destino" type="text" placeholder="Escolha um lugar rápido abaixo ou digite" />
+        <div class="atalhos-rapidos" id="atalhos-destino">
+          <button class="btn-atalho" type="button" data-destino="Centro — Rio Grande">Centro</button>
+          <button class="btn-atalho" type="button" data-destino="Balneário Cassino — Av. Rio Grande">Cassino</button>
+          <button class="btn-atalho" type="button" data-destino="FURG — Campus Carreiros, Rio Grande">FURG</button>
+          <button class="btn-atalho" type="button" data-destino="Santa Casa do Rio Grande">Santa Casa</button>
+          <button class="btn-atalho" type="button" data-destino="Estação Rodoviária de Rio Grande">Rodoviária</button>
+          <button class="btn-atalho" type="button" data-destino="Shopping Praça Rio Grande">Shopping Praça</button>
+        </div>
+      </div>
+
+      <div>
+        <label class="campo-lbl" for="pas-pagamento">Como você vai pagar?</label>
         <select id="pas-pagamento">
           <option value="Pix">Pix</option>
           <option value="Dinheiro">Dinheiro</option>
@@ -283,20 +357,20 @@
 
       <label class="chuva-toggle" id="box-chuva-toggle" for="pas-chuva">
         <div>
-          <strong>Adicional Dia de Chuva (+25%)</strong>
-          <div style="font-size:14px;opacity:0.9;" id="txt-chuva-status">Desativado (tarifa normal)</div>
+          <strong>Dia de Chuva (+25%)</strong>
+          <div style="font-size:16px;font-weight:700;" id="txt-chuva-status">Tarifa normal</div>
         </div>
         <input id="pas-chuva" type="checkbox" />
       </label>
 
       <button class="btn btn-outline" type="button" id="btn-calcular-rota">
-        Calcular Valor pela Rota
+        Ver Valor da Viagem
       </button>
 
       <div class="estimativa-box">
         <div>
           <div class="estimativa-lbl">Valor Estimado</div>
-          <div id="detalhe-tarifa" style="font-size:14px;color:var(--muted);">Preencha origem e destino para calcular</div>
+          <div id="detalhe-tarifa" style="font-size:16px;font-weight:700;color:var(--muted);">Preencha onde está e para onde vai</div>
         </div>
         <div class="estimativa-val" id="pas-valor-estimado"></div>
       </div>
@@ -311,9 +385,9 @@
 
     <section class="card">
       <div class="card-header">
-        <div class="card-title">Acompanhamento da Corrida</div>
+        <div class="card-title">2. Sua Viagem</div>
         <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-corrida">
-          Limpar
+          Limpar Tela
         </button>
       </div>
       <div id="box-corrida-ativa" class="corrida-box">
@@ -323,7 +397,6 @@
   </main>
 
   <script type="module">
-    const badgePassageiro = document.getElementById("badge-passageiro");
     const avisoFirebase = document.getElementById("aviso-firebase");
     const msgPassageiro = document.getElementById("msg-passageiro");
     const erroRota = document.getElementById("erro-rota");
@@ -340,6 +413,9 @@
     const btnCalcularRota = document.getElementById("btn-calcular-rota");
     const btnLimparCorrida = document.getElementById("btn-limpar-corrida");
     const btnGpsOrigem = document.getElementById("btn-gps-origem");
+    const btnFonteGrande = document.getElementById("btn-fonte-grande");
+    const btnLerVoz = document.getElementById("btn-ler-voz");
+    const atalhosDestino = document.getElementById("atalhos-destino");
 
     let db = null;
     let fs = null;
@@ -349,9 +425,30 @@
     let corridaAtualId = localStorage.getItem("32drive_corrida_id") || "";
     let corridaOcultaPasId = localStorage.getItem("32drive_pas_oculta_id") || "";
     let ultimoStatusAvisado = "";
+    let ultimoResumoVoz = "Nenhuma corrida solicitada ainda.";
 
     const nomeSalvo = localStorage.getItem("32drive_pas_nome") || "";
     if (nomeSalvo) elNome.value = nomeSalvo;
+
+    const fonteGrandeSalva = localStorage.getItem("32drive_fonte_grande") === "true";
+    function aplicarFonteGrande(ativo) {
+      document.body.classList.toggle("fonte-grande", ativo);
+      btnFonteGrande.classList.toggle("ativo", ativo);
+      btnFonteGrande.setAttribute("aria-pressed", String(ativo));
+      localStorage.setItem("32drive_fonte_grande", String(ativo));
+    }
+    aplicarFonteGrande(fonteGrandeSalva);
+
+    function falarTexto(texto) {
+      try {
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+          const fala = new SpeechSynthesisUtterance(texto);
+          fala.lang = "pt-BR";
+          window.speechSynthesis.speak(fala);
+        }
+      } catch (_) {}
+    }
 
     const PONTOS_CONHECIDOS = [
       { chaves: ["furg", "campus carreiros", "universidade federal"], lat: -32.0736, lon: -52.1674, nome: "FURG — Campus Carreiros, Rio Grande" },
@@ -418,8 +515,8 @@
       elChuva.checked = Boolean(ativo);
       boxChuvaToggle.classList.toggle("ativo", Boolean(ativo));
       txtChuvaStatus.textContent = ativo
-        ? "Ativo: +25% aplicado no valor"
-        : "Desativado (tarifa normal)";
+        ? "Ativo: acréscimo de 25% no valor"
+        : "Tarifa normal";
     }
 
     function calcularPrecoPelaDistancia(km, chuvaAtiva) {
@@ -450,7 +547,7 @@
       const chuvaAtiva = Boolean(elChuva.checked);
       if (distanciaCalculadaKm === null) {
         elValorEstimado.textContent = "";
-        elDetalheTarifa.textContent = "Preencha origem e destino para calcular";
+        elDetalheTarifa.textContent = "Preencha onde está e para onde vai";
         return;
       }
       const calc = calcularPrecoPelaDistancia(distanciaCalculadaKm, chuvaAtiva);
@@ -463,11 +560,11 @@
     async function usarLocalizacaoAtual() {
       erroRota.textContent = "";
       if (!navigator.geolocation) {
-        erroRota.textContent = "Seu navegador não suporta localização GPS.";
+        erroRota.textContent = "Este aparelho não tem localização GPS ativa.";
         return;
       }
       btnGpsOrigem.disabled = true;
-      btnGpsOrigem.textContent = "Buscando localização...";
+      btnGpsOrigem.textContent = "Buscando sua localização...";
 
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
@@ -499,13 +596,13 @@
             elOrigem.value = lat.toFixed(5) + ", " + lon.toFixed(5);
           } finally {
             btnGpsOrigem.disabled = false;
-            btnGpsOrigem.textContent = "Usar Localização Atual (GPS)";
+            btnGpsOrigem.textContent = "Usar Minha Localização Atual (GPS)";
           }
         },
         () => {
-          erroRota.textContent = "Permita o acesso à localização no navegador ou digite a rua.";
+          erroRota.textContent = "Toque em Permitir na localização do navegador ou escolha um atalho.";
           btnGpsOrigem.disabled = false;
-          btnGpsOrigem.textContent = "Usar Localização Atual (GPS)";
+          btnGpsOrigem.textContent = "Usar Minha Localização Atual (GPS)";
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
@@ -584,9 +681,9 @@
       }
 
       try {
-        elDetalheTarifa.textContent = "Calculando rota e distância...";
+        elDetalheTarifa.textContent = "Calculando distância e valor...";
         btnCalcularRota.disabled = true;
-        btnCalcularRota.textContent = "Calculando rota...";
+        btnCalcularRota.textContent = "Calculando...";
 
         const [pontoA, pontoB] = await Promise.all([
           geocodificarEndereco(origem),
@@ -608,10 +705,10 @@
         tempoRotaMinutos = null;
         atualizarTelaPreco();
         erroRota.textContent =
-          "Não localizamos um dos endereços. Tente escrever o nome da rua ou bairro (ex: Av. Presidente Vargas, Centro, FURG).";
+          "Não encontramos o endereço. Use a localização GPS ou toque em um dos botões rápidos.";
       } finally {
         btnCalcularRota.disabled = false;
-        btnCalcularRota.textContent = "Calcular Valor pela Rota";
+        btnCalcularRota.textContent = "Ver Valor da Viagem";
       }
     }
 
@@ -638,12 +735,14 @@
       corridaAtualId = "";
       localStorage.removeItem("32drive_corrida_id");
       ultimoStatusAvisado = "";
+      ultimoResumoVoz = mensagem;
       boxCorridaAtiva.innerHTML = escaparHtml(mensagem);
     }
 
     function renderizarCorrida(c, docId = "") {
       if (!c) {
         boxCorridaAtiva.innerHTML = "Nenhuma corrida solicitada ainda.";
+        ultimoResumoVoz = "Nenhuma corrida solicitada ainda.";
         return;
       }
 
@@ -654,7 +753,7 @@
       const st = String(c.status || "");
       if (st === "Finalizada" || st === "Cancelada") {
         limparCorridaTela("Nenhuma corrida solicitada ainda.");
-        msgPassageiro.textContent = "Corrida encerrada.";
+        msgPassageiro.textContent = "Viagem encerrada.";
         return;
       }
 
@@ -666,15 +765,15 @@
 
       if (foiAceita && ultimoStatusAvisado !== st) {
         ultimoStatusAvisado = st || "Aceita";
-        msgPassageiro.textContent = "Viagem aceita! " + (minutosChegada ? "Chegada até você em " + minutosChegada + " min." : "Motorista a caminho.");
+        msgPassageiro.textContent = "Viagem aceita! " + (minutosChegada ? "Chegada em " + minutosChegada + " min." : "Motorista a caminho.");
       }
 
       const alertaAceitaHtml = foiAceita
-        ? '<div class="alerta-aceita">Viagem aceita! O motorista confirmou sua corrida.</div>'
+        ? '<div class="alerta-aceita">Viagem aceita! O motorista confirmou seu pedido.</div>'
         : "";
 
       const chegadaHtml = minutosChegada
-        ? '<div class="chegada-destaque">Tempo de chegada até você: <strong>' +
+        ? '<div class="chegada-destaque">Tempo de chegada: <strong>' +
             escaparHtml(minutosChegada) + ' min</strong> (' + escaparHtml(modoChegada) + ')</div>'
         : "";
 
@@ -688,26 +787,30 @@
       const chavePix = (c.chavePixMotorista || (c.motorista && c.motorista.chavePix) || "").trim();
       const mostrarPix = String(c.pagamento || "").toLowerCase() === "pix" || Boolean(chavePix);
 
+      ultimoResumoVoz =
+        (foiAceita ? "Viagem aceita. " : "Corrida solicitada. ") +
+        "Valor " + formatarMoeda(c.valorBruto) + ". " +
+        (minutosChegada ? "Chegada em " + minutosChegada + " minutos. " : "") +
+        (c.motorista && c.motorista.nome ? "Motorista " + c.motorista.nome + "." : "Aguardando motorista.");
+
       const pixHtml = mostrarPix
         ? '<div class="pix-box">' +
-            '<div><strong>Pagamento via Pix</strong> — Valor: <strong>' + formatarMoeda(c.valorBruto) + '</strong></div>' +
+            '<div><strong>Pagamento Pix</strong> — Valor: <strong>' + formatarMoeda(c.valorBruto) + '</strong></div>' +
             (chavePix
               ? '<div class="pix-chave-linha">' +
                   '<span id="texto-chave-pix">' + escaparHtml(chavePix) + '</span>' +
                   '<button class="btn btn-green btn-sm" type="button" id="btn-copiar-pix">Copiar Pix</button>' +
-                '</div>' +
-                '<div style="font-size:13px;color:#1e3a8a;">Copie a chave e faça o Pix diretamente para o motorista.</div>'
-              : '<div style="font-size:14px;color:#1e3a8a;">Aguardando o motorista enviar a chave Pix na corrida.</div>') +
+                '</div>'
+              : '<div style="font-size:16px;color:#1e3a8a;font-weight:700;">Aguardando o motorista enviar a chave Pix.</div>') +
           '</div>'
         : "";
 
       boxCorridaAtiva.innerHTML =
         alertaAceitaHtml +
         chegadaHtml +
-        "<div><strong>Código:</strong> " + escaparHtml(c.codigo || "—") + " • <strong>Status:</strong> " + escaparHtml(st || "Solicitada") + "</div>" +
-        "<div><strong>Passageiro:</strong> " + escaparHtml(c.passageiro || "—") + " • <strong>Valor:</strong> " + formatarMoeda(c.valorBruto) + "</div>" +
+        "<div><strong>Status:</strong> " + escaparHtml(st || "Solicitada") + " • <strong>Valor:</strong> " + formatarMoeda(c.valorBruto) + "</div>" +
         "<div><strong>Distância:</strong> " + kmTxt + " • <strong>Pagamento:</strong> " + escaparHtml(c.pagamento || "Pix") + "</div>" +
-        "<div><strong>Trecho:</strong> " + escaparHtml(c.origem || "—") + " → " + escaparHtml(c.destino || "—") + "</div>" +
+        "<div><strong>De:</strong> " + escaparHtml(c.origem || "—") + "<br/><strong>Para:</strong> " + escaparHtml(c.destino || "—") + "</div>" +
         "<div><strong>Motorista:</strong> " + motTexto + "</div>" +
         pixHtml;
 
@@ -740,7 +843,7 @@
       const pagamento = elPagamento.value || "Pix";
 
       if (!nome || !origem || !destino) {
-        msgPassageiro.textContent = "Preencha seu nome, origem e destino.";
+        msgPassageiro.textContent = "Preencha seu nome, onde está e para onde vai.";
         return;
       }
 
@@ -753,7 +856,7 @@
       }
 
       if (distanciaCalculadaKm === null) {
-        msgPassageiro.textContent = "Confira os endereços de origem e destino antes de chamar.";
+        msgPassageiro.textContent = "Confira onde está e para onde vai antes de chamar.";
         return;
       }
 
@@ -781,24 +884,41 @@
       renderizarCorrida(corridaLocal);
 
       if (!db || !fs) {
-        msgPassageiro.textContent = "Corrida simulada (" + formatarMoeda(valorBruto) + "). Configure o firebase-config.js para enviar ao motorista.";
+        msgPassageiro.textContent = "Corrida simulada (" + formatarMoeda(valorBruto) + ").";
         return;
       }
 
       try {
-        msgPassageiro.textContent = "Enviando solicitação...";
+        msgPassageiro.textContent = "Chamando motorista...";
         const docRef = await fs.addDoc(fs.collection(db, "corridas"), {
           ...corridaLocal,
           criadoEm: fs.serverTimestamp()
         });
         corridaAtualId = docRef.id;
         localStorage.setItem("32drive_corrida_id", corridaAtualId);
-        msgPassageiro.textContent = "Corrida " + codigo + " enviada! Aguardando motorista...";
+        msgPassageiro.textContent = "Pedido enviado! Aguardando motorista...";
       } catch (erro) {
         console.error(erro);
-        msgPassageiro.textContent = "Erro ao enviar corrida (" + (erro.code || erro.message || "Firestore") + ").";
+        msgPassageiro.textContent = "Erro ao enviar pedido (" + (erro.code || erro.message || "Firestore") + ").";
       }
     }
+
+    btnFonteGrande.addEventListener("click", () => {
+      aplicarFonteGrande(!document.body.classList.contains("fonte-grande"));
+    });
+
+    btnLerVoz.addEventListener("click", () => {
+      falarTexto(ultimoResumoVoz);
+    });
+
+    atalhosDestino.addEventListener("click", async (ev) => {
+      const btn = ev.target.closest("button[data-destino]");
+      if (!btn) return;
+      elDestino.value = btn.getAttribute("data-destino");
+      if ((elOrigem.value || "").trim().length >= 3) {
+        await calcularRotaAutomatica();
+      }
+    });
 
     btnGpsOrigem.addEventListener("click", usarLocalizacaoAtual);
     elNome.addEventListener("change", () => {
@@ -811,7 +931,7 @@
     btnCalcularRota.addEventListener("click", calcularRotaAutomatica);
     btnLimparCorrida.addEventListener("click", () => {
       limparCorridaTela("Nenhuma corrida solicitada ainda.");
-      msgPassageiro.textContent = "Painel limpo.";
+      msgPassageiro.textContent = "Tela limpa.";
     });
 
     elChuva.addEventListener("change", () => {
@@ -830,7 +950,6 @@
       db = configModulo.db;
       if (!db) throw new Error("db não exportado");
 
-      badgePassageiro.textContent = "Online";
       mostrarAvisoFirebase("");
 
       fs.onSnapshot(fs.doc(db, "config", "geral"), (snap) => {
@@ -874,7 +993,6 @@
       });
     } catch (erro) {
       console.error(erro);
-      badgePassageiro.textContent = "Passageiro";
       mostrarAvisoFirebase(
         "Tela do Passageiro carregada. O arquivo firebase-config.js ainda não foi encontrado no repositório."
       );
