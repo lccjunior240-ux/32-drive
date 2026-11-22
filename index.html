@@ -214,30 +214,6 @@
       color: #0f172a;
       border-color: #b45309;
     }
-    .chuva-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      background: #e0f2fe;
-      border: 2px solid #0284c7;
-      border-radius: 14px;
-      padding: 14px 16px;
-      cursor: pointer;
-      min-height: 60px;
-      color: #0c4a6e;
-    }
-    .chuva-toggle.ativo {
-      background: #bae6fd;
-      border-color: #0369a1;
-      color: #082f49;
-    }
-    .chuva-toggle input {
-      width: 28px;
-      height: 28px;
-      min-height: 28px;
-      accent-color: #0369a1;
-    }
     .btn {
       width: 100%;
       min-height: 58px;
@@ -398,14 +374,6 @@
         </select>
       </div>
 
-      <label class="chuva-toggle" id="box-chuva-toggle" for="pas-chuva">
-        <div>
-          <strong>Dia de Chuva</strong>
-          <div style="font-size:16px;font-weight:700;" id="txt-chuva-status">Tempo seco</div>
-        </div>
-        <input id="pas-chuva" type="checkbox" />
-      </label>
-
       <div class="erro-msg" id="erro-rota"></div>
 
       <button class="btn btn-accent" type="button" id="btn-solicitar-corrida">
@@ -436,9 +404,6 @@
     const elOrigem = document.getElementById("pas-origem");
     const elDestino = document.getElementById("pas-destino");
     const elPagamento = document.getElementById("pas-pagamento");
-    const elChuva = document.getElementById("pas-chuva");
-    const boxChuvaToggle = document.getElementById("box-chuva-toggle");
-    const txtChuvaStatus = document.getElementById("txt-chuva-status");
     const btnLimparCorrida = document.getElementById("btn-limpar-corrida");
     const btnGpsOrigem = document.getElementById("btn-gps-origem");
     const btnFonteGrande = document.getElementById("btn-fonte-grande");
@@ -572,10 +537,13 @@
       return "R$ " + Number(valor || 0).toFixed(2).replace(".", ",");
     }
 
-    function atualizarVisualChuva(ativo) {
-      elChuva.checked = Boolean(ativo);
-      boxChuvaToggle.classList.toggle("ativo", Boolean(ativo));
-      txtChuvaStatus.textContent = ativo ? "Chuva informada" : "Tempo seco";
+    function salvarChamadoLocal(corrida) {
+      try {
+        const atuais = JSON.parse(localStorage.getItem("32entrega_chamados_fila") || "[]");
+        const lista = Array.isArray(atuais) ? atuais.filter((item) => item.docId !== corrida.docId) : [];
+        lista.unshift(corrida);
+        localStorage.setItem("32entrega_chamados_fila", JSON.stringify(lista.slice(0, 20)));
+      } catch (_) {}
     }
 
     async function usarLocalizacaoAtual() {
@@ -735,261 +703,4 @@
     function limparCorridaTela(mensagem = "Nenhuma entrega solicitada ainda.") {
       if (corridaAtualId) {
         corridaOcultaPasId = corridaAtualId;
-        localStorage.setItem("32drive_pas_oculta_id", corridaOcultaPasId);
-      }
-      corridaAtualId = "";
-      localStorage.removeItem("32drive_corrida_id");
-      ultimoStatusAvisado = "";
-      ultimoResumoVoz = mensagem;
-      boxCorridaAtiva.innerHTML = escaparHtml(mensagem);
-    }
-
-    function renderizarCorrida(c, docId = "") {
-      if (!c) {
-        boxCorridaAtiva.innerHTML = "Nenhuma entrega solicitada ainda.";
-        ultimoResumoVoz = "Nenhuma entrega solicitada ainda.";
-        return;
-      }
-
-      if (docId && docId === corridaOcultaPasId) {
-        return;
-      }
-
-      const st = String(c.status || "");
-      if (st === "Finalizada" || st === "Cancelada") {
-        limparCorridaTela("Nenhuma entrega solicitada ainda.");
-        msgPassageiro.textContent = "Entrega encerrada.";
-        return;
-      }
-
-      const foiAceita = Boolean(c.motorista && c.motorista.nome) ||
-        ["Aceita", "Motorista a caminho", "No local de embarque", "Em viagem"].includes(st);
-
-      const minutosChegada = Number(c.tempoChegadaMin || 0) || Number(c.tempoEstimadoRotaMin || 0) || null;
-      const modoChegada = c.modoTempoChegada || (c.tempoChegadaMin ? "entregador" : "estimativa da rota");
-
-      if (foiAceita && ultimoStatusAvisado !== st) {
-        ultimoStatusAvisado = st || "Aceita";
-        msgPassageiro.textContent = "Entrega aceita! " + (minutosChegada ? "Chegada em " + minutosChegada + " min." : "Entregador a caminho.");
-      }
-
-      const alertaAceitaHtml = foiAceita
-        ? '<div class="alerta-aceita">Entrega aceita! O entregador confirmou seu pedido.</div>'
-        : "";
-
-      const chegadaHtml = minutosChegada
-        ? '<div class="chegada-destaque">Tempo de chegada: <strong>' +
-            escaparHtml(minutosChegada) + ' min</strong> (' + escaparHtml(modoChegada) + ')</div>'
-        : "";
-
-      const motTexto = c.motorista && c.motorista.nome
-        ? escaparHtml(c.motorista.nome) +
-          (c.motorista.veiculo ? " • " + escaparHtml(c.motorista.veiculo) : "") +
-          (c.motorista.placa ? " (" + escaparHtml(c.motorista.placa) + ")" : "")
-        : "Aguardando entregador aceitar...";
-
-      const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
-      const chavePix = (c.chavePixMotorista || (c.motorista && c.motorista.chavePix) || "").trim();
-      const mostrarPix = String(c.pagamento || "").toLowerCase() === "pix" || Boolean(chavePix);
-      const valorDefinido = Number(c.valorBruto || 0) > 0;
-
-      ultimoResumoVoz =
-        (foiAceita ? "Entrega aceita. " : "Entrega solicitada. ") +
-        (minutosChegada ? "Chegada em " + minutosChegada + " minutos. " : "") +
-        (c.motorista && c.motorista.nome ? "Entregador " + c.motorista.nome + "." : "Aguardando entregador.");
-
-      const pixHtml = mostrarPix
-        ? '<div class="pix-box">' +
-            '<div><strong>Pagamento Pix</strong>' + (valorDefinido ? ' — Valor: <strong>' + formatarMoeda(c.valorBruto) + '</strong>' : '') + '</div>' +
-            (chavePix
-              ? '<div class="pix-chave-linha">' +
-                  '<span id="texto-chave-pix">' + escaparHtml(chavePix) + '</span>' +
-                  '<button class="btn btn-green btn-sm" type="button" id="btn-copiar-pix">Copiar Pix</button>' +
-                '</div>'
-              : '<div style="font-size:16px;color:#0c4a6e;font-weight:700;">Aguardando o entregador enviar a chave Pix.</div>') +
-          '</div>'
-        : "";
-
-      boxCorridaAtiva.innerHTML =
-        alertaAceitaHtml +
-        chegadaHtml +
-        "<div><strong>Status:</strong> " + escaparHtml(st || "Solicitada") + (valorDefinido ? " • <strong>Valor:</strong> " + formatarMoeda(c.valorBruto) : "") + "</div>" +
-        "<div><strong>Distância:</strong> " + kmTxt + " • <strong>Pagamento:</strong> " + escaparHtml(c.pagamento || "Pix") + "</div>" +
-        "<div><strong>Retirada:</strong> " + escaparHtml(c.origem || "—") + "<br/><strong>Destino:</strong> " + escaparHtml(c.destino || "—") + "</div>" +
-        "<div><strong>Entregador:</strong> " + motTexto + "</div>" +
-        pixHtml;
-
-      const btnCopiar = document.getElementById("btn-copiar-pix");
-      if (btnCopiar && chavePix) {
-        btnCopiar.addEventListener("click", async () => {
-          try {
-            await navigator.clipboard.writeText(chavePix);
-            btnCopiar.textContent = "Copiado!";
-          } catch (_) {
-            const temp = document.createElement("textarea");
-            temp.value = chavePix;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand("copy");
-            document.body.removeChild(temp);
-            btnCopiar.textContent = "Copiado!";
-          }
-          setTimeout(() => {
-            if (btnCopiar) btnCopiar.textContent = "Copiar Pix";
-          }, 2000);
-        });
-      }
-    }
-
-    async function solicitarCorrida() {
-      const nome = (elNome.value || "").trim();
-      const origem = (elOrigem.value || "").trim();
-      const destino = (elDestino.value || "").trim();
-      const pagamento = elPagamento.value || "Pix";
-
-      if (!nome || !origem || !destino) {
-        msgPassageiro.textContent = "Preencha seu nome, onde buscar e onde entregar.";
-        return;
-      }
-
-      localStorage.setItem("32drive_pas_nome", nome);
-      corridaOcultaPasId = "";
-      localStorage.removeItem("32drive_pas_oculta_id");
-
-      if (distanciaCalculadaKm === null) {
-        await calcularRotaSilenciosa();
-      }
-
-      const codigo = "32E-" + Math.floor(1000 + Math.random() * 9000);
-      ultimoStatusAvisado = "";
-
-      const corridaLocal = {
-        codigo,
-        passageiro: nome,
-        origem,
-        destino,
-        distanciaKm: distanciaCalculadaKm || 0,
-        tempoEstimadoRotaMin: tempoRotaMinutos || (distanciaCalculadaKm ? Math.max(2, Math.round(distanciaCalculadaKm * 2.2)) : 6),
-        pagamento,
-        chavePixMotorista: "",
-        chuva: Boolean(elChuva.checked),
-        status: "Aguardando motorista",
-        motorista: null,
-        criadoEmTimestamp: Date.now()
-      };
-
-      renderizarCorrida(corridaLocal);
-
-      if (!db || !fs) {
-        msgPassageiro.textContent = "Entrega simulada enviada.";
-        return;
-      }
-
-      try {
-        msgPassageiro.textContent = "Chamando entregador...";
-        const docRef = await fs.addDoc(fs.collection(db, "corridas"), {
-          ...corridaLocal,
-          criadoEm: fs.serverTimestamp()
-        });
-        corridaAtualId = docRef.id;
-        localStorage.setItem("32drive_corrida_id", corridaAtualId);
-        msgPassageiro.textContent = "Pedido enviado! Aguardando entregador...";
-      } catch (erro) {
-        console.error(erro);
-        msgPassageiro.textContent = "Erro ao enviar pedido (" + (erro.code || erro.message || "Firestore") + ").";
-      }
-    }
-
-    btnFonteGrande.addEventListener("click", () => {
-      aplicarFonteGrande(!document.body.classList.contains("fonte-grande"));
-    });
-
-    btnLerVoz.addEventListener("click", () => {
-      falarTexto(ultimoResumoVoz);
-    });
-
-    atalhosDestino.addEventListener("click", async (ev) => {
-      const btn = ev.target.closest("button[data-destino]");
-      if (!btn) return;
-      elDestino.value = btn.getAttribute("data-destino");
-      if ((elOrigem.value || "").trim().length >= 3) {
-        await calcularRotaSilenciosa();
-      }
-    });
-
-    btnGpsOrigem.addEventListener("click", usarLocalizacaoAtual);
-    elNome.addEventListener("change", () => {
-      localStorage.setItem("32drive_pas_nome", (elNome.value || "").trim());
-    });
-    elOrigem.addEventListener("input", agendarCalculoAutomatico);
-    elDestino.addEventListener("input", agendarCalculoAutomatico);
-    elOrigem.addEventListener("change", calcularRotaSilenciosa);
-    elDestino.addEventListener("change", calcularRotaSilenciosa);
-    btnLimparCorrida.addEventListener("click", () => {
-      limparCorridaTela("Nenhuma entrega solicitada ainda.");
-      msgPassageiro.textContent = "Tela limpa.";
-    });
-
-    elChuva.addEventListener("change", () => {
-      atualizarVisualChuva(elChuva.checked);
-    });
-
-    document.getElementById("btn-solicitar-corrida").addEventListener("click", solicitarCorrida);
-
-    atualizarVisualChuva(false);
-
-    try {
-      const configModulo = await import("./firebase-config.js");
-      fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-      db = configModulo.db;
-      if (!db) throw new Error("db não exportado");
-
-      mostrarAvisoFirebase("");
-
-      fs.onSnapshot(fs.doc(db, "config", "geral"), (snap) => {
-        const chuvaGlobal = snap.exists() ? Boolean(snap.data().chuva) : false;
-        atualizarVisualChuva(chuvaGlobal);
-      });
-
-      fs.onSnapshot(fs.collection(db, "corridas"), (snapshot) => {
-        let encontrada = null;
-        let encontradaId = "";
-        let maisRecenteTs = -1;
-        const nomeDigitado = normalizarTexto(elNome.value);
-
-        snapshot.forEach((docSnap) => {
-          if (docSnap.id === corridaOcultaPasId) return;
-          const d = docSnap.data();
-          const st = String(d.status || "");
-          if (st === "Finalizada" || st === "Cancelada") return;
-
-          if (corridaAtualId && docSnap.id === corridaAtualId) {
-            encontrada = d;
-            encontradaId = docSnap.id;
-          } else if (!corridaAtualId && nomeDigitado && normalizarTexto(d.passageiro) === nomeDigitado) {
-            const ts = Number(d.criadoEmTimestamp || 0);
-            if (ts >= maisRecenteTs) {
-              maisRecenteTs = ts;
-              encontrada = d;
-              encontradaId = docSnap.id;
-            }
-          }
-        });
-
-        if (encontrada && encontradaId) {
-          corridaAtualId = encontradaId;
-          localStorage.setItem("32drive_corrida_id", encontradaId);
-          renderizarCorrida(encontrada, encontradaId);
-        } else if (!corridaAtualId) {
-          boxCorridaAtiva.innerHTML = "Nenhuma entrega solicitada ainda.";
-        }
-      });
-    } catch (erro) {
-      console.error(erro);
-      mostrarAvisoFirebase(
-        "Tela do Cliente carregada. O arquivo firebase-config.js ainda não foi encontrado no repositório."
-      );
-    }
-  </script>
-</body>
-</html>
+        localStorage.setItem("32drive_pas_oculta_id", corridaO
