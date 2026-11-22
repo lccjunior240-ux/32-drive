@@ -377,6 +377,7 @@
       let fs = null;
       let corridaAtualId = localStorage.getItem("32drive_corrida_id") || "";
       let corridaOcultaPasId = localStorage.getItem("32drive_pas_oculta_id") || "";
+      let unsubDocAtual = null;
       let ultimoStatusAvisado = "";
       let ultimoResumoVoz = "Nenhuma entrega solicitada ainda.";
 
@@ -475,8 +476,26 @@
         } catch (_) {}
       };
 
+      function assinarDocumentoDireto(docId) {
+        if (unsubDocAtual) {
+          try { unsubDocAtual(); } catch (_) {}
+          unsubDocAtual = null;
+        }
+        if (!db || !fs || !docId || String(docId).startsWith("LOC-") || String(docId).startsWith("SIM-")) {
+          return;
+        }
+        unsubDocAtual = fs.onSnapshot(fs.doc(db, "corridas", docId), function (docSnap) {
+          if (!docSnap.exists()) return;
+          renderizarCorrida(docSnap.data(), docSnap.id);
+        });
+      }
+
       function limparCorridaTela(mensagem) {
         const msgFinal = mensagem || "Nenhuma entrega solicitada ainda.";
+        if (unsubDocAtual) {
+          try { unsubDocAtual(); } catch (_) {}
+          unsubDocAtual = null;
+        }
         if (corridaAtualId) {
           corridaOcultaPasId = corridaAtualId;
           localStorage.setItem("32drive_pas_oculta_id", corridaOcultaPasId);
@@ -668,6 +687,7 @@
           }));
           corridaAtualId = docRef.id;
           localStorage.setItem("32drive_corrida_id", corridaAtualId);
+          assinarDocumentoDireto(corridaAtualId);
           renderizarCorrida(Object.assign({}, corridaLocal, { docId: docRef.id }), docRef.id);
           if (msgPassageiro) msgPassageiro.textContent = "Pedido enviado! Aguardando entregador...";
         } catch (erro) {
@@ -693,6 +713,10 @@
 
           mostrarAvisoFirebase("");
 
+          if (corridaAtualId) {
+            assinarDocumentoDireto(corridaAtualId);
+          }
+
           fs.onSnapshot(fs.collection(db, "corridas"), function (snapshot) {
             let encontrada = null;
             let encontradaId = "";
@@ -716,7 +740,7 @@
                 maisRecenteTs = ts;
                 encontrada = d;
                 encontradaId = docSnap.id;
-              } else if (!encontrada && !corridaAtualId && !nomeAlvo && ts >= maisRecenteTs) {
+              } else if (!encontrada && (!corridaAtualId || String(corridaAtualId).startsWith("LOC-")) && !nomeAlvo && ts >= maisRecenteTs) {
                 maisRecenteTs = ts;
                 encontrada = d;
                 encontradaId = docSnap.id;
@@ -724,11 +748,12 @@
             });
 
             if (encontrada && encontradaId) {
-              corridaAtualId = encontradaId;
-              localStorage.setItem("32drive_corrida_id", encontradaId);
+              if (corridaAtualId !== encontradaId) {
+                corridaAtualId = encontradaId;
+                localStorage.setItem("32drive_corrida_id", encontradaId);
+                assinarDocumentoDireto(encontradaId);
+              }
               renderizarCorrida(encontrada, encontradaId);
-            } else if (!corridaAtualId && boxCorridaAtiva) {
-              boxCorridaAtiva.innerHTML = "Nenhuma entrega solicitada ainda.";
             }
           });
         } catch (erro) {
