@@ -19,6 +19,7 @@
       --accent: #f59e0b;
       --green: #059669;
       --blue: #0369a1;
+      --red: #b91c1c;
       --f-base: 19px;
       --f-label: 18px;
       --f-btn: 19px;
@@ -118,9 +119,7 @@
       flex-direction: column;
       gap: 8px;
     }
-    .box-colar-rapido.ativo {
-      display: flex;
-    }
+    .box-colar-rapido.ativo { display: flex; }
     .box-colar-rapido textarea {
       width: 100%;
       min-height: 90px;
@@ -226,6 +225,15 @@
       background: #ecfdf5;
       border: 2px solid #059669;
       color: #064e3b;
+      border-radius: 12px;
+      padding: 14px;
+      font-weight: 900;
+      font-size: var(--f-label);
+    }
+    .alerta-recusa {
+      background: #fef2f2;
+      border: 2px solid #dc2626;
+      color: #7f1d1d;
       border-radius: 12px;
       padding: 14px;
       font-weight: 900;
@@ -498,9 +506,28 @@
         }
 
         const st = String(c.status || "");
-        if (st === "Finalizada" || st === "Cancelada") {
-          limparCorridaTela("Nenhuma entrega solicitada ainda.");
-          if (msgPassageiro) msgPassageiro.textContent = "Entrega encerrada.";
+        const foiRecusada = ["Recusada", "Cancelada", "Não aceita", "Nao aceita"].includes(st);
+        const foiFinalizada = st === "Finalizada";
+
+        if (foiFinalizada) {
+          limparCorridaTela("Entrega finalizada pelo entregador.");
+          if (msgPassageiro) msgPassageiro.textContent = "Entrega finalizada!";
+          return;
+        }
+
+        if (foiRecusada) {
+          const assinaturaRecusa = "RECUSA|" + st + "|" + String(c.motivoRecusa || "");
+          if (ultimoStatusAvisado !== assinaturaRecusa) {
+            ultimoStatusAvisado = assinaturaRecusa;
+            if (msgPassageiro) msgPassageiro.textContent = "O entregador não aceitou / cancelou este pedido.";
+          }
+          ultimoResumoVoz = "O entregador informou que não aceitou este pedido.";
+          boxCorridaAtiva.innerHTML =
+            '<div class="alerta-recusa">Entrega não aceita / cancelada pelo entregador' +
+              (c.motivoRecusa ? ': ' + escaparHtml(c.motivoRecusa) : '.') +
+            '</div>' +
+            "<div><strong>Status:</strong> " + escaparHtml(st) + "</div>" +
+            "<div><strong>Retirada:</strong> " + escaparHtml(c.origem || "—") + "<br/><strong>Destino:</strong> " + escaparHtml(c.destino || "—") + "</div>";
           return;
         }
 
@@ -510,9 +537,10 @@
         const minutosChegada = Number(c.tempoChegadaMin || 0) || null;
         const modoChegada = c.modoTempoChegada || (c.tempoChegadaMin ? "entregador" : "");
         const valorDefinido = Number(c.valorBruto || 0) > 0;
+        const assinaturaAtual = st + "|" + String(c.valorBruto || "") + "|" + String(c.tempoChegadaMin || "") + "|" + String(c.chavePixMotorista || "");
 
-        if (foiAceita && ultimoStatusAvisado !== (st + "|" + String(c.valorBruto || ""))) {
-          ultimoStatusAvisado = (st || "Aceita") + "|" + String(c.valorBruto || "");
+        if (foiAceita && ultimoStatusAvisado !== assinaturaAtual) {
+          ultimoStatusAvisado = assinaturaAtual;
           if (msgPassageiro) {
             msgPassageiro.textContent =
               "Entrega aceita! " +
@@ -676,9 +704,6 @@
             snapshot.forEach(function (docSnap) {
               if (docSnap.id === corridaOcultaPasId) return;
               const d = docSnap.data();
-              const st = String(d.status || "");
-              if (st === "Finalizada" || st === "Cancelada") return;
-
               const ts = Number(d.criadoEmTimestamp || 0);
               const bateId = corridaAtualId && docSnap.id === corridaAtualId;
               const bateNome = nomeAlvo && normalizarTexto(d.passageiro) === nomeAlvo;
