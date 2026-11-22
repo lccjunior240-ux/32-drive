@@ -19,6 +19,7 @@
       --accent: #f59e0b;
       --green: #047857;
       --blue: #0369a1;
+      --red: #b91c1c;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -235,6 +236,7 @@
     .btn-green { background: #059669; color: #ffffff; }
     .btn-accent { background: var(--accent); color: #0f172a; border: 2px solid #b45309; }
     .btn-blue { background: var(--blue); color: #ffffff; }
+    .btn-danger { background: var(--red); color: #ffffff; }
     .btn-outline { background: #ffffff; color: #0f172a; border: 2px solid #64748b; }
     .status-msg { font-size: 16px; font-weight: 800; color: #047857; text-align: center; min-height: 20px; }
     .corrida-card {
@@ -359,7 +361,7 @@
         <button class="btn-modo" type="button" id="modo-manual" onclick="window.setModoTempoV39 && window.setModoTempoV39('manual')">Manual (Minutos)</button>
       </div>
       <div id="resumo-tempo-modo" style="font-size:15px;font-weight:700;color:var(--muted);">
-        Modo Automático ativo: usa o tempo estimado ao aceitar.
+        Modo Automático ativo: define o tempo ao aceitar.
       </div>
       <div class="minutos-grid" id="grid-minutos">
         <button class="btn-min" type="button" data-min="2" onclick="window.aplicarTempoV39 && window.aplicarTempoV39(2)">2 min</button>
@@ -794,7 +796,7 @@
           return;
         }
         const st = String(corridaEmAndamento.status || "");
-        if (st === "Finalizada" || st === "Cancelada") {
+        if (st === "Finalizada" || st === "Cancelada" || st === "Recusada") {
           limparPainelAndamento("");
           return;
         }
@@ -805,17 +807,17 @@
         const modTxt = (c.motorista && c.motorista.modalidade) ? c.motorista.modalidade : (elModalidade ? elModalidade.value : "");
         const temValor = Number(c.valorBruto || 0) > 0;
 
-        let acaoHtml = "";
+        let etapaHtml = "";
         if (st === "Motorista a caminho" || st === "Aceita") {
-          acaoHtml =
+          etapaHtml =
             '<button class="btn btn-primary" type="button" data-etapa="No local de embarque">Cheguei na Casa do Cliente</button>';
         } else if (st === "No local de embarque") {
-          acaoHtml =
+          etapaHtml =
             '<button class="btn btn-green" type="button" data-etapa="Em viagem">Fazer Entrega</button>';
-        } else if (st === "Em viagem") {
-          acaoHtml =
-            '<button class="btn btn-accent" type="button" data-etapa="Finalizada">Concluir Entrega</button>';
         }
+
+        const botaoFinalizarHtml =
+          '<button class="btn btn-accent" type="button" data-etapa="Finalizada">Finalizar Entrega</button>';
 
         boxCorridaAndamento.innerHTML =
           '<div class="corrida-card corrida-ativa">' +
@@ -837,7 +839,8 @@
               '<a class="btn btn-outline" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkMapa(c.destino) + '">Mapa Destino</a>' +
             '</div>' +
             '<a class="btn btn-blue" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkRotaCompleta(c.origem, c.destino) + '">Abrir Rota Completa no Mapa</a>' +
-            acaoHtml +
+            etapaHtml +
+            botaoFinalizarHtml +
           '</div>';
       }
 
@@ -909,10 +912,41 @@
                 '</div>' +
                 '<div><strong>Casa do Cliente:</strong> ' + escaparHtml(c.origem || "—") + '<br/><strong>Destino:</strong> ' + escaparHtml(c.destino || "—") + '</div>' +
                 '<button class="btn btn-accent" type="button" data-aceitar="' + escaparHtml(c.docId) + '">Aceitar Entrega' + (valorMostrado !== null ? ' (' + formatarMoeda(valorMostrado) + ')' : '') + '</button>' +
+                '<button class="btn btn-danger" type="button" data-recusar="' + escaparHtml(c.docId) + '">Não Aceitar</button>' +
               '</div>'
             );
           })
           .join("");
+      }
+
+      async function recusarCorrida(docId) {
+        const perfil = salvarPerfil();
+        chamadosLocais = chamadosLocais.filter(function (item) {
+          return item.docId !== docId;
+        });
+        gravarChamadosLocaisFila(chamadosLocais);
+        idsOcultos.add(docId);
+        salvarOcultos();
+        renderizarChamados(chamadosLocais);
+
+        if (String(docId).startsWith("SIM-") || String(docId).startsWith("LOC-") || !db || !fs || !docId) {
+          if (msgMotorista) msgMotorista.textContent = "Chamado marcado como não aceito.";
+          return;
+        }
+
+        try {
+          await fs.updateDoc(fs.doc(db, "corridas", docId), {
+            status: "Recusada",
+            recusadaPor: perfil.nome || "Entregador 32 Entrega",
+            recusadaEm: fs.serverTimestamp()
+          });
+          if (msgMotorista) msgMotorista.textContent = "Resposta de não aceite enviada ao cliente.";
+        } catch (erro) {
+          console.error(erro);
+          if (msgMotorista) {
+            msgMotorista.textContent = "Erro ao enviar não aceite (" + (erro.code || erro.message || "Firestore") + ").";
+          }
+        }
       }
 
       async function aceitarCorrida(docId) {
@@ -985,7 +1019,7 @@
 
         if (String(corridaEmAndamento.docId || "").startsWith("SIM-") || String(corridaEmAndamento.docId || "").startsWith("LOC-")) {
           if (novaEtapa === "Finalizada") {
-            if (msgMotorista) msgMotorista.textContent = "Entrega concluída — painel limpo.";
+            if (msgMotorista) msgMotorista.textContent = "Entrega finalizada — painel limpo.";
             limparPainelAndamento("");
           } else {
             corridaEmAndamento.status = novaEtapa;
@@ -1005,7 +1039,7 @@
             )
           );
           if (novaEtapa === "Finalizada") {
-            if (msgMotorista) msgMotorista.textContent = "Entrega concluída! Painel limpo.";
+            if (msgMotorista) msgMotorista.textContent = "Entrega finalizada! Cliente avisado e painel limpo.";
             limparPainelAndamento("");
           } else {
             if (msgMotorista) msgMotorista.textContent = "Etapa atualizada: " + novaEtapa;
@@ -1057,9 +1091,15 @@
 
       if (listaCorridasEl) {
         listaCorridasEl.addEventListener("click", function (ev) {
-          const btn = ev.target.closest("button[data-aceitar]");
-          if (!btn) return;
-          aceitarCorrida(btn.getAttribute("data-aceitar"));
+          const btnAceitar = ev.target.closest("button[data-aceitar]");
+          if (btnAceitar) {
+            aceitarCorrida(btnAceitar.getAttribute("data-aceitar"));
+            return;
+          }
+          const btnRecusar = ev.target.closest("button[data-recusar]");
+          if (btnRecusar) {
+            recusarCorrida(btnRecusar.getAttribute("data-recusar"));
+          }
         });
       }
 
@@ -1093,12 +1133,12 @@
               const jaVisto = assinaturasVistas.has(assinatura);
               assinaturasVistas.add(assinatura);
 
-              if (!primeiraCargaFirestore && !jaVisto && st !== "Finalizada" && st !== "Cancelada") {
+              if (!primeiraCargaFirestore && !jaVisto && st !== "Finalizada" && st !== "Cancelada" && st !== "Recusada") {
                 houveNovidadeDoCliente = true;
               }
 
               if (idsOcultos.has(docSnap.id)) return;
-              if (st === "Finalizada" || st === "Cancelada") return;
+              if (st === "Finalizada" || st === "Cancelada" || st === "Recusada") return;
 
               if (st === "Aguardando motorista") {
                 aguardando.push(Object.assign({ docId: docSnap.id }, d));
