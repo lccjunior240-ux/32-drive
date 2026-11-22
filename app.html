@@ -245,4 +245,211 @@
     .btn-green { background: #059669; color: #ffffff; }
     .btn-accent { background: var(--accent); color: #0f172a; border: 2px solid #b45309; }
     .btn-blue { background: var(--blue); color: #ffffff; }
-    .btn-outline {
+    .btn-outline { background: #ffffff; color: #0f172a; border: 2px solid #64748b; }
+    .status-msg { font-size: 16px; font-weight: 800; color: #047857; text-align: center; min-height: 20px; }
+    .corrida-card {
+      background: #ffffff;
+      border: 2px solid #94a3b8;
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      color: #0f172a;
+    }
+    .corrida-ativa {
+      background: #ecfdf5;
+      border: 2px solid #059669;
+      color: #064e3b;
+    }
+    .tag {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .tag-chuva {
+      background: #0284c7;
+      color: #ffffff;
+    }
+    .valor-destaque {
+      font-size: 22px;
+      font-weight: 900;
+      color: #047857;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="icon-512.png" alt="32 Entrega" />
+      <div>
+        <h1>32 Entrega — Entregador</h1>
+        <div class="subtitle">V39 • Cassino &amp; Rio Grande</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="btn-colar-topo" type="button" id="btn-colar-topo" title="Colar texto ou código">
+        <span>📥</span>
+        <span id="txt-colar-topo">Colar</span>
+      </button>
+      <span class="badge" id="badge-motorista">Ativo</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="box-colar-rapido" id="box-colar-rapido">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <strong style="font-size:15px;color:#b45309;">Área para Colar</strong>
+        <button class="btn btn-outline btn-sm" type="button" id="btn-fechar-colar">Fechar</button>
+      </div>
+      <textarea id="area-colar-texto" placeholder="Cole aqui o texto ou código da área de transferência..."></textarea>
+    </div>
+
+    <div class="aviso-chuva" id="aviso-chuva">
+      Modo Chuva ativo no sistema (+25% nas tarifas).
+    </div>
+    <div class="aviso-firebase" id="aviso-firebase"></div>
+
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">Alerta Sonoro (Bip de Mensagem)</div>
+        <button class="btn btn-blue btn-sm" type="button" id="btn-testar-bip">
+          🔔 Testar Bip
+        </button>
+      </div>
+      <div id="status-som-bip" style="font-size:15px;font-weight:700;color:var(--muted);">
+        Emite um bip sonoro quando chega mensagem ou atualização do cliente. Toque em "Testar Bip" para liberar o áudio.
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Identificação &amp; Pix do Entregador</div>
+      <div class="grid-2">
+        <div>
+          <label for="mot-codigo">Código</label>
+          <input id="mot-codigo" type="text" placeholder="Ex: ENT-01" />
+        </div>
+        <div>
+          <label for="mot-placa">Placa</label>
+          <input id="mot-placa" type="text" placeholder="Ex: IQD8060" />
+        </div>
+      </div>
+      <div>
+        <label for="mot-nome">Nome do Entregador</label>
+        <input id="mot-nome" type="text" placeholder="Ex: Junior Costa" />
+      </div>
+      <div class="grid-2">
+        <div>
+          <label for="mot-modalidade">Modalidade</label>
+          <select id="mot-modalidade">
+            <option value="Carro">Carro</option>
+            <option value="Moto">Moto</option>
+            <option value="Bike / Utilitário">Bike / Utilitário</option>
+          </select>
+        </div>
+        <div>
+          <label for="mot-veiculo">Veículo</label>
+          <input id="mot-veiculo" type="text" placeholder="Ex: VW Voyage 1.0 Prata" />
+        </div>
+      </div>
+      <div>
+        <label for="mot-pix">Sua Chave Pix</label>
+        <input id="mot-pix" type="text" placeholder="CPF, celular, e-mail ou chave aleatória" />
+        <button class="btn btn-blue" style="margin-top:8px;" type="button" id="btn-enviar-pix">
+          Enviar Chave Pix ao Cliente
+        </button>
+      </div>
+      <button class="btn btn-green" type="button" id="btn-salvar-perfil">
+        Salvar Dados do Entregador
+      </button>
+      <div class="status-msg" id="msg-motorista"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Tempo para Chegar na Casa do Cliente</div>
+      <div class="modo-row">
+        <button class="btn-modo ativo" type="button" id="modo-auto">Automático (Rota)</button>
+        <button class="btn-modo" type="button" id="modo-manual">Manual (Minutos)</button>
+      </div>
+      <div id="resumo-tempo-modo" style="font-size:15px;font-weight:700;color:var(--muted);">
+        Modo Automático ativo: usa o tempo estimado pela rota do mapa ao aceitar.
+      </div>
+      <div class="minutos-grid" id="grid-minutos">
+        <button class="btn-min" type="button" data-min="2">2 min</button>
+        <button class="btn-min" type="button" data-min="6">6 min</button>
+        <button class="btn-min" type="button" data-min="8">8 min</button>
+        <button class="btn-min" type="button" data-min="10">10 min</button>
+        <button class="btn-min" type="button" data-min="12">12 min</button>
+        <button class="btn-min" type="button" data-min="18">18 min</button>
+        <button class="btn-min" type="button" data-min="20">20 min</button>
+      </div>
+      <div class="grid-2" style="align-items:end;">
+        <div>
+          <label for="input-min-cliente">Minutos até o cliente</label>
+          <input id="input-min-cliente" type="number" min="1" max="180" step="1" placeholder="Ex: 15" />
+        </div>
+        <button class="btn btn-accent" type="button" id="btn-aplicar-tempo-cliente">
+          Definir Tempo
+        </button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Tabela de Valor Manual (R$ 10 até R$ 100)</div>
+      <div style="font-size:15px;font-weight:700;color:var(--muted);">
+        Toque em R$ 10 ou de 5 em 5 até R$ 100, ou preencha o valor que você aceita fazer a entrega.
+      </div>
+      <div class="tabela-valores-grid" id="grid-valores-manuais">
+        <button class="btn-valor-rapido" type="button" data-valor="10">R$ 10</button>
+        <button class="btn-valor-rapido" type="button" data-valor="15">R$ 15</button>
+        <button class="btn-valor-rapido" type="button" data-valor="20">R$ 20</button>
+        <button class="btn-valor-rapido" type="button" data-valor="25">R$ 25</button>
+        <button class="btn-valor-rapido" type="button" data-valor="30">R$ 30</button>
+        <button class="btn-valor-rapido" type="button" data-valor="35">R$ 35</button>
+        <button class="btn-valor-rapido" type="button" data-valor="40">R$ 40</button>
+        <button class="btn-valor-rapido" type="button" data-valor="45">R$ 45</button>
+        <button class="btn-valor-rapido" type="button" data-valor="50">R$ 50</button>
+        <button class="btn-valor-rapido" type="button" data-valor="55">R$ 55</button>
+        <button class="btn-valor-rapido" type="button" data-valor="60">R$ 60</button>
+        <button class="btn-valor-rapido" type="button" data-valor="65">R$ 65</button>
+        <button class="btn-valor-rapido" type="button" data-valor="70">R$ 70</button>
+        <button class="btn-valor-rapido" type="button" data-valor="75">R$ 75</button>
+        <button class="btn-valor-rapido" type="button" data-valor="80">R$ 80</button>
+        <button class="btn-valor-rapido" type="button" data-valor="85">R$ 85</button>
+        <button class="btn-valor-rapido" type="button" data-valor="90">R$ 90</button>
+        <button class="btn-valor-rapido" type="button" data-valor="95">R$ 95</button>
+        <button class="btn-valor-rapido" type="button" data-valor="100">R$ 100</button>
+      </div>
+      <div class="grid-2" style="align-items:end;">
+        <div>
+          <label for="input-valor-manual">Valor da entrega (R$)</label>
+          <input id="input-valor-manual" type="number" min="1" max="5000" step="0.5" placeholder="Ex: 25" />
+        </div>
+        <button class="btn btn-green" type="button" id="btn-aplicar-valor-manual">
+          Aplicar Valor
+        </button>
+      </div>
+    </section>
+
+    <section class="card" id="sec-corrida-andamento" style="display:none;">
+      <div class="card-header">
+        <div class="card-title">Entrega em Andamento</div>
+        <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-andamento">
+          Limpar Painel
+        </button>
+      </div>
+      <div id="box-corrida-andamento"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">Chamados Disponíveis</div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-chamados">
+            Limpar
+          </button>
+          <button class="btn btn-outline btn-sm" type="button" id="btn-simular
