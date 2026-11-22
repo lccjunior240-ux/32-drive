@@ -193,27 +193,6 @@
       cursor: pointer;
       width: 100%;
     }
-    .atalhos-rapidos {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    .btn-atalho {
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 2px solid #64748b;
-      background: #ffffff;
-      color: #0f172a;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    .btn-atalho:hover, .btn-atalho:focus {
-      background: var(--accent);
-      color: #0f172a;
-      border-color: #b45309;
-    }
     .btn {
       width: 100%;
       min-height: 58px;
@@ -346,7 +325,7 @@
 
       <div>
         <label class="campo-lbl" for="pas-origem">Onde buscar a entrega?</label>
-        <input id="pas-origem" type="text" placeholder="Rua, bairro ou toque no botão de localização" />
+        <input id="pas-origem" type="text" placeholder="Digite a rua, número e bairro" />
         <button class="btn-gps" type="button" id="btn-gps-origem">
           Usar Minha Localização Atual (GPS)
         </button>
@@ -354,15 +333,7 @@
 
       <div>
         <label class="campo-lbl" for="pas-destino">Onde entregar?</label>
-        <input id="pas-destino" type="text" placeholder="Escolha um lugar rápido abaixo ou digite" />
-        <div class="atalhos-rapidos" id="atalhos-destino">
-          <button class="btn-atalho" type="button" data-destino="Centro — Rio Grande">Centro</button>
-          <button class="btn-atalho" type="button" data-destino="Balneário Cassino — Av. Rio Grande">Cassino</button>
-          <button class="btn-atalho" type="button" data-destino="FURG — Campus Carreiros, Rio Grande">FURG</button>
-          <button class="btn-atalho" type="button" data-destino="Santa Casa do Rio Grande">Santa Casa</button>
-          <button class="btn-atalho" type="button" data-destino="Estação Rodoviária de Rio Grande">Rodoviária</button>
-          <button class="btn-atalho" type="button" data-destino="Shopping Praça Rio Grande">Shopping Praça</button>
-        </div>
+        <input id="pas-destino" type="text" placeholder="Digite o endereço de entrega (rua, número, bairro)" />
       </div>
 
       <div>
@@ -408,7 +379,6 @@
     const btnGpsOrigem = document.getElementById("btn-gps-origem");
     const btnFonteGrande = document.getElementById("btn-fonte-grande");
     const btnLerVoz = document.getElementById("btn-ler-voz");
-    const atalhosDestino = document.getElementById("atalhos-destino");
     const btnColarTopo = document.getElementById("btn-colar-topo");
     const txtColarTopo = document.getElementById("txt-colar-topo");
     const boxColarRapido = document.getElementById("box-colar-rapido");
@@ -476,23 +446,6 @@
       } catch (_) {}
     }
 
-    const PONTOS_CONHECIDOS = [
-      { chaves: ["furg", "campus carreiros", "universidade federal"], lat: -32.0736, lon: -52.1674, nome: "FURG — Campus Carreiros, Rio Grande" },
-      { chaves: ["furg saude", "area academica", "hu furg", "hospital universitario"], lat: -32.0375, lon: -52.1045, nome: "Área Acadêmica da Saúde / HU-FURG, Rio Grande" },
-      { chaves: ["shopping praca", "praca rio grande"], lat: -32.0628, lon: -52.1489, nome: "Shopping Praça Rio Grande" },
-      { chaves: ["partage", "partage shopping"], lat: -32.0592, lon: -52.1387, nome: "Partage Shopping Rio Grande" },
-      { chaves: ["rodoviaria", "estacao rodoviaria"], lat: -32.0369, lon: -52.1072, nome: "Estação Rodoviária de Rio Grande" },
-      { chaves: ["santa casa"], lat: -32.0357, lon: -52.1021, nome: "Santa Casa do Rio Grande" },
-      { chaves: ["centro", "centro rio grande", "largo barbosa coelho"], lat: -32.0349, lon: -52.0986, nome: "Centro — Rio Grande" },
-      { chaves: ["cassino", "balneario cassino", "av rio grande cassino"], lat: -32.1829, lon: -52.1592, nome: "Balneário Cassino — Av. Rio Grande" },
-      { chaves: ["querencia"], lat: -32.1685, lon: -52.1642, nome: "Bairro Querência — Cassino" },
-      { chaves: ["molhes", "molhes da barra"], lat: -32.1614, lon: -52.0968, nome: "Molhes da Barra — Cassino" },
-      { chaves: ["cidade nova"], lat: -32.0434, lon: -52.1095, nome: "Bairro Cidade Nova — Rio Grande" },
-      { chaves: ["vila militar"], lat: -32.0462, lon: -52.1189, nome: "Vila Militar — Rio Grande" },
-      { chaves: ["parque marinha"], lat: -32.0672, lon: -52.1563, nome: "Parque Marinha — Rio Grande" },
-      { chaves: ["junção", "juncao"], lat: -32.0548, lon: -52.1311, nome: "Junção — Rio Grande" }
-    ];
-
     function normalizarTexto(txt) {
       return String(txt || "")
         .toLowerCase()
@@ -503,19 +456,6 @@
         .trim();
     }
 
-    function buscarPontoConhecido(endereco) {
-      const norm = normalizarTexto(endereco);
-      if (!norm) return null;
-      for (const ponto of PONTOS_CONHECIDOS) {
-        for (const chave of ponto.chaves) {
-          if (norm === chave || norm.startsWith(chave + " ") || norm.endsWith(" " + chave)) {
-            return { lat: ponto.lat, lon: ponto.lon, nome: ponto.nome };
-          }
-        }
-      }
-      return null;
-    }
-
     function expandirAbreviacoes(endereco) {
       return String(endereco || "")
         .replace(/\bav\.?\b/gi, "Avenida")
@@ -523,7 +463,6 @@
         .replace(/\bpres\.?\b/gi, "Presidente")
         .replace(/\bdr\.?\b/gi, "Doutor")
         .replace(/\bprof\.?\b/gi, "Professor")
-        .replace(/\bsanta tereza\b/gi, "Vila Santa Tereza")
         .trim();
     }
 
@@ -589,7 +528,7 @@
           }
         },
         () => {
-          erroRota.textContent = "Toque em Permitir na localização do navegador ou escolha um atalho.";
+          erroRota.textContent = "Toque em Permitir na localização do navegador ou digite o endereço.";
           btnGpsOrigem.disabled = false;
           btnGpsOrigem.textContent = "Usar Minha Localização Atual (GPS)";
         },
@@ -617,9 +556,6 @@
     }
 
     async function geocodificarEndereco(endereco) {
-      const conhecido = buscarPontoConhecido(endereco);
-      if (conhecido) return conhecido;
-
       const limpo = expandirAbreviacoes(endereco);
       const semNumero = limpo.replace(/,?\s*\d+\b/g, "").trim();
 
@@ -634,7 +570,7 @@
         if (achado) return achado;
       }
 
-      throw new Error("Endereço não encontrado em Rio Grande / Cassino");
+      throw new Error("Endereço não encontrado");
     }
 
     async function buscarRotaOSRM(pontoA, pontoB) {
@@ -703,4 +639,246 @@
     function limparCorridaTela(mensagem = "Nenhuma entrega solicitada ainda.") {
       if (corridaAtualId) {
         corridaOcultaPasId = corridaAtualId;
-        localStorage.setItem("32drive_pas_oculta_id", corridaO
+        localStorage.setItem("32drive_pas_oculta_id", corridaOcultaPasId);
+      }
+      corridaAtualId = "";
+      localStorage.removeItem("32drive_corrida_id");
+      ultimoStatusAvisado = "";
+      ultimoResumoVoz = mensagem;
+      boxCorridaAtiva.innerHTML = escaparHtml(mensagem);
+    }
+
+    function renderizarCorrida(c, docId = "") {
+      if (!c) {
+        boxCorridaAtiva.innerHTML = "Nenhuma entrega solicitada ainda.";
+        ultimoResumoVoz = "Nenhuma entrega solicitada ainda.";
+        return;
+      }
+
+      if (docId && docId === corridaOcultaPasId) {
+        return;
+      }
+
+      const st = String(c.status || "");
+      if (st === "Finalizada" || st === "Cancelada") {
+        limparCorridaTela("Nenhuma entrega solicitada ainda.");
+        msgPassageiro.textContent = "Entrega encerrada.";
+        return;
+      }
+
+      const foiAceita = Boolean(c.motorista && c.motorista.nome) ||
+        ["Aceita", "Motorista a caminho", "No local de embarque", "Em viagem"].includes(st);
+
+      const minutosChegada = Number(c.tempoChegadaMin || 0) || Number(c.tempoEstimadoRotaMin || 0) || null;
+      const modoChegada = c.modoTempoChegada || (c.tempoChegadaMin ? "entregador" : "estimativa da rota");
+
+      if (foiAceita && ultimoStatusAvisado !== st) {
+        ultimoStatusAvisado = st || "Aceita";
+        msgPassageiro.textContent = "Entrega aceita! " + (minutosChegada ? "Chegada em " + minutosChegada + " min." : "Entregador a caminho.");
+      }
+
+      const alertaAceitaHtml = foiAceita
+        ? '<div class="alerta-aceita">Entrega aceita! O entregador confirmou seu pedido.</div>'
+        : "";
+
+      const chegadaHtml = minutosChegada
+        ? '<div class="chegada-destaque">Tempo de chegada: <strong>' +
+            escaparHtml(minutosChegada) + ' min</strong> (' + escaparHtml(modoChegada) + ')</div>'
+        : "";
+
+      const motTexto = c.motorista && c.motorista.nome
+        ? escaparHtml(c.motorista.nome) +
+          (c.motorista.veiculo ? " • " + escaparHtml(c.motorista.veiculo) : "") +
+          (c.motorista.placa ? " (" + escaparHtml(c.motorista.placa) + ")" : "")
+        : "Aguardando entregador aceitar...";
+
+      const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
+      const chavePix = (c.chavePixMotorista || (c.motorista && c.motorista.chavePix) || "").trim();
+      const mostrarPix = String(c.pagamento || "").toLowerCase() === "pix" || Boolean(chavePix);
+      const valorDefinido = Number(c.valorBruto || 0) > 0;
+
+      ultimoResumoVoz =
+        (foiAceita ? "Entrega aceita. " : "Entrega solicitada. ") +
+        (minutosChegada ? "Chegada em " + minutosChegada + " minutos. " : "") +
+        (c.motorista && c.motorista.nome ? "Entregador " + c.motorista.nome + "." : "Aguardando entregador.");
+
+      const pixHtml = mostrarPix
+        ? '<div class="pix-box">' +
+            '<div><strong>Pagamento Pix</strong>' + (valorDefinido ? ' — Valor: <strong>' + formatarMoeda(c.valorBruto) + '</strong>' : '') + '</div>' +
+            (chavePix
+              ? '<div class="pix-chave-linha">' +
+                  '<span id="texto-chave-pix">' + escaparHtml(chavePix) + '</span>' +
+                  '<button class="btn btn-green btn-sm" type="button" id="btn-copiar-pix">Copiar Pix</button>' +
+                '</div>'
+              : '<div style="font-size:16px;color:#0c4a6e;font-weight:700;">Aguardando o entregador enviar a chave Pix.</div>') +
+          '</div>'
+        : "";
+
+      boxCorridaAtiva.innerHTML =
+        alertaAceitaHtml +
+        chegadaHtml +
+        "<div><strong>Status:</strong> " + escaparHtml(st || "Solicitada") + (valorDefinido ? " • <strong>Valor:</strong> " + formatarMoeda(c.valorBruto) : "") + "</div>" +
+        "<div><strong>Distância:</strong> " + kmTxt + " • <strong>Pagamento:</strong> " + escaparHtml(c.pagamento || "Pix") + "</div>" +
+        "<div><strong>Retirada:</strong> " + escaparHtml(c.origem || "—") + "<br/><strong>Destino:</strong> " + escaparHtml(c.destino || "—") + "</div>" +
+        "<div><strong>Entregador:</strong> " + motTexto + "</div>" +
+        pixHtml;
+
+      const btnCopiar = document.getElementById("btn-copiar-pix");
+      if (btnCopiar && chavePix) {
+        btnCopiar.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(chavePix);
+            btnCopiar.textContent = "Copiado!";
+          } catch (_) {
+            const temp = document.createElement("textarea");
+            temp.value = chavePix;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand("copy");
+            document.body.removeChild(temp);
+            btnCopiar.textContent = "Copiado!";
+          }
+          setTimeout(() => {
+            if (btnCopiar) btnCopiar.textContent = "Copiar Pix";
+          }, 2000);
+        });
+      }
+    }
+
+    async function solicitarCorrida() {
+      const nome = (elNome.value || "").trim();
+      const origem = (elOrigem.value || "").trim();
+      const destino = (elDestino.value || "").trim();
+      const pagamento = elPagamento.value || "Pix";
+
+      if (!nome || !origem || !destino) {
+        msgPassageiro.textContent = "Preencha seu nome, onde buscar e onde entregar.";
+        return;
+      }
+
+      localStorage.setItem("32drive_pas_nome", nome);
+      corridaOcultaPasId = "";
+      localStorage.removeItem("32drive_pas_oculta_id");
+
+      if (distanciaCalculadaKm === null) {
+        await calcularRotaSilenciosa();
+      }
+
+      const codigo = "32E-" + Math.floor(1000 + Math.random() * 9000);
+      const idLocal = "LOC-" + Date.now();
+      ultimoStatusAvisado = "";
+
+      const corridaLocal = {
+        docId: idLocal,
+        codigo,
+        passageiro: nome,
+        origem,
+        destino,
+        distanciaKm: distanciaCalculadaKm || 0,
+        tempoEstimadoRotaMin: tempoRotaMinutos || (distanciaCalculadaKm ? Math.max(2, Math.round(distanciaCalculadaKm * 2.2)) : 6),
+        pagamento,
+        chavePixMotorista: "",
+        chuva: false,
+        status: "Aguardando motorista",
+        motorista: null,
+        criadoEmTimestamp: Date.now()
+      };
+
+      corridaAtualId = idLocal;
+      localStorage.setItem("32drive_corrida_id", corridaAtualId);
+      salvarChamadoLocal(corridaLocal);
+      renderizarCorrida(corridaLocal, idLocal);
+
+      if (!db || !fs) {
+        msgPassageiro.textContent = "Pedido enviado no aparelho! Abra a tela do Entregador para aceitar.";
+        return;
+      }
+
+      try {
+        msgPassageiro.textContent = "Chamando entregador...";
+        const docRef = await fs.addDoc(fs.collection(db, "corridas"), {
+          ...corridaLocal,
+          criadoEm: fs.serverTimestamp()
+        });
+        corridaAtualId = docRef.id;
+        localStorage.setItem("32drive_corrida_id", corridaAtualId);
+        msgPassageiro.textContent = "Pedido enviado! Aguardando entregador...";
+      } catch (erro) {
+        console.error(erro);
+        msgPassageiro.textContent = "Pedido salvo no aparelho (" + (erro.code || erro.message || "Firestore") + ").";
+      }
+    }
+
+    btnFonteGrande.addEventListener("click", () => {
+      aplicarFonteGrande(!document.body.classList.contains("fonte-grande"));
+    });
+
+    btnLerVoz.addEventListener("click", () => {
+      falarTexto(ultimoResumoVoz);
+    });
+
+    btnGpsOrigem.addEventListener("click", usarLocalizacaoAtual);
+    elNome.addEventListener("change", () => {
+      localStorage.setItem("32drive_pas_nome", (elNome.value || "").trim());
+    });
+    elOrigem.addEventListener("input", agendarCalculoAutomatico);
+    elDestino.addEventListener("input", agendarCalculoAutomatico);
+    elOrigem.addEventListener("change", calcularRotaSilenciosa);
+    elDestino.addEventListener("change", calcularRotaSilenciosa);
+    btnLimparCorrida.addEventListener("click", () => {
+      limparCorridaTela("Nenhuma entrega solicitada ainda.");
+      msgPassageiro.textContent = "Tela limpa.";
+    });
+
+    document.getElementById("btn-solicitar-corrida").addEventListener("click", solicitarCorrida);
+
+    try {
+      const configModulo = await import("./firebase-config.js");
+      fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      db = configModulo.db;
+      if (!db) throw new Error("db não exportado");
+
+      mostrarAvisoFirebase("");
+
+      fs.onSnapshot(fs.collection(db, "corridas"), (snapshot) => {
+        let encontrada = null;
+        let encontradaId = "";
+        let maisRecenteTs = -1;
+        const nomeDigitado = normalizarTexto(elNome.value);
+
+        snapshot.forEach((docSnap) => {
+          if (docSnap.id === corridaOcultaPasId) return;
+          const d = docSnap.data();
+          const st = String(d.status || "");
+          if (st === "Finalizada" || st === "Cancelada") return;
+
+          if (corridaAtualId && docSnap.id === corridaAtualId) {
+            encontrada = d;
+            encontradaId = docSnap.id;
+          } else if (!corridaAtualId && nomeDigitado && normalizarTexto(d.passageiro) === nomeDigitado) {
+            const ts = Number(d.criadoEmTimestamp || 0);
+            if (ts >= maisRecenteTs) {
+              maisRecenteTs = ts;
+              encontrada = d;
+              encontradaId = docSnap.id;
+            }
+          }
+        });
+
+        if (encontrada && encontradaId) {
+          corridaAtualId = encontradaId;
+          localStorage.setItem("32drive_corrida_id", encontradaId);
+          renderizarCorrida(encontrada, encontradaId);
+        } else if (!corridaAtualId) {
+          boxCorridaAtiva.innerHTML = "Nenhuma entrega solicitada ainda.";
+        }
+      });
+    } catch (erro) {
+      console.error(erro);
+      mostrarAvisoFirebase(
+        "Tela do Cliente carregada sem firebase-config.js: pedidos funcionam no aparelho e sincronizam quando o Firebase estiver conectado."
+      );
+    }
+  </script>
+</body>
+</html>
