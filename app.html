@@ -130,16 +130,6 @@
       font-size: 15px;
       font-weight: 700;
     }
-    .aviso-chuva {
-      display: none;
-      background: #e0f2fe;
-      border: 2px solid #0284c7;
-      color: #0c4a6e;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 15px;
-      font-weight: 800;
-    }
     .card {
       background: var(--card);
       border: 2px solid var(--border);
@@ -271,10 +261,6 @@
       background: #e2e8f0;
       color: #0f172a;
     }
-    .tag-chuva {
-      background: #0284c7;
-      color: #ffffff;
-    }
     .valor-destaque {
       font-size: 22px;
       font-weight: 900;
@@ -292,7 +278,7 @@
       </div>
     </div>
     <div class="header-right">
-      <button class="btn-colar-topo" type="button" id="btn-colar-topo" title="Colar texto ou código">
+      <button class="btn-colar-topo" type="button" id="btn-colar-topo" onclick="window.acionarColarTopoV39 && window.acionarColarTopoV39()" title="Colar texto ou código">
         <span>📥</span>
         <span id="txt-colar-topo">Colar</span>
       </button>
@@ -304,20 +290,17 @@
     <div class="box-colar-rapido" id="box-colar-rapido">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
         <strong style="font-size:15px;color:#b45309;">Área para Colar</strong>
-        <button class="btn btn-outline btn-sm" type="button" id="btn-fechar-colar">Fechar</button>
+        <button class="btn btn-outline btn-sm" type="button" id="btn-fechar-colar" onclick="window.fecharBoxColarV39 && window.fecharBoxColarV39()">Fechar</button>
       </div>
       <textarea id="area-colar-texto" placeholder="Cole aqui o texto ou código da área de transferência..."></textarea>
     </div>
 
-    <div class="aviso-chuva" id="aviso-chuva">
-      Modo Chuva ativo no sistema (+25% nas tarifas).
-    </div>
     <div class="aviso-firebase" id="aviso-firebase"></div>
 
     <section class="card">
       <div class="card-header">
         <div class="card-title">Alerta Sonoro (Bip de Mensagem)</div>
-        <button class="btn btn-blue btn-sm" type="button" id="btn-testar-bip">
+        <button class="btn btn-blue btn-sm" type="button" id="btn-testar-bip" onclick="window.testarBipV39 && window.testarBipV39()">
           🔔 Testar Bip
         </button>
       </div>
@@ -359,11 +342,11 @@
       <div>
         <label for="mot-pix">Sua Chave Pix</label>
         <input id="mot-pix" type="text" placeholder="CPF, celular, e-mail ou chave aleatória" />
-        <button class="btn btn-blue" style="margin-top:8px;" type="button" id="btn-enviar-pix">
+        <button class="btn btn-blue" style="margin-top:8px;" type="button" id="btn-enviar-pix" onclick="window.enviarChavePixV39 && window.enviarChavePixV39()">
           Enviar Chave Pix ao Cliente
         </button>
       </div>
-      <button class="btn btn-green" type="button" id="btn-salvar-perfil">
+      <button class="btn btn-green" type="button" id="btn-salvar-perfil" onclick="window.salvarPerfilBotaoV39 && window.salvarPerfilBotaoV39()">
         Salvar Dados do Entregador
       </button>
       <div class="status-msg" id="msg-motorista"></div>
@@ -372,27 +355,27 @@
     <section class="card">
       <div class="card-title">Tempo para Chegar na Casa do Cliente</div>
       <div class="modo-row">
-        <button class="btn-modo ativo" type="button" id="modo-auto">Automático (Rota)</button>
-        <button class="btn-modo" type="button" id="modo-manual">Manual (Minutos)</button>
+        <button class="btn-modo ativo" type="button" id="modo-auto" onclick="window.setModoTempoV39 && window.setModoTempoV39('auto')">Automático (Rota)</button>
+        <button class="btn-modo" type="button" id="modo-manual" onclick="window.setModoTempoV39 && window.setModoTempoV39('manual')">Manual (Minutos)</button>
       </div>
       <div id="resumo-tempo-modo" style="font-size:15px;font-weight:700;color:var(--muted);">
-        Modo Automático ativo: usa o tempo estimado pela rota do mapa ao aceitar.
+        Modo Automático ativo: usa o tempo estimado ao aceitar.
       </div>
       <div class="minutos-grid" id="grid-minutos">
-        <button class="btn-min" type="button" data-min="2">2 min</button>
-        <button class="btn-min" type="button" data-min="6">6 min</button>
-        <button class="btn-min" type="button" data-min="8">8 min</button>
-        <button class="btn-min" type="button" data-min="10">10 min</button>
-        <button class="btn-min" type="button" data-min="12">12 min</button>
-        <button class="btn-min" type="button" data-min="18">18 min</button>
-        <button class="btn-min" type="button" data-min="20">20 min</button>
+        <button class="btn-min" type="button" data-min="2" onclick="window.aplicarTempoV39 && window.aplicarTempoV39(2)">2 min</button>
+        <button class="btn-min" type="button" data-min="6" onclick="window.aplicarTempoV39 && window.aplicarTempoV39(6)">6 min</button>
+        <button class="btn-min" type="button" data-min="8" onclick="window.aplicarTempoV39 && window.aplicarTempoV39(8)">8 min</button>
+        <button class="btn-min" type="button" data-min="10" onclick="window.aplicarTempoV39 && window.aplicarTempoV39(10)">10 min</button>
+        <button class="btn-min" type="button" data-min="12" onclick="window.aplicarTempoV39 && window.aplicarTempoV39(12)">12 min</button>
+        <button class="btn-min" type="button" data-min="18" onclick="window.aplicarTempoV39 && window.aplicarTempoV39(18)">18 min</button>
+        <button class="btn-min" type="button" data-min="20" onclick="window.aplicarTempoV39 && window.aplicarTempoV39(20)">20 min</button>
       </div>
       <div class="grid-2" style="align-items:end;">
         <div>
           <label for="input-min-cliente">Minutos até o cliente</label>
           <input id="input-min-cliente" type="number" min="1" max="180" step="1" placeholder="Ex: 15" />
         </div>
-        <button class="btn btn-accent" type="button" id="btn-aplicar-tempo-cliente">
+        <button class="btn btn-accent" type="button" id="btn-aplicar-tempo-cliente" onclick="window.aplicarTempoInputV39 && window.aplicarTempoInputV39()">
           Definir Tempo
         </button>
       </div>
@@ -401,35 +384,35 @@
     <section class="card">
       <div class="card-title">Tabela de Valor Manual (R$ 10 até R$ 100)</div>
       <div style="font-size:15px;font-weight:700;color:var(--muted);">
-        Toque em R$ 10 ou de 5 em 5 até R$ 100, ou preencha o valor que você aceita fazer a entrega.
+        Toque em R$ 10 ou de 5 em 5 até R$ 100, ou digite o valor que você vai cobrar para enviar ao cliente.
       </div>
       <div class="tabela-valores-grid" id="grid-valores-manuais">
-        <button class="btn-valor-rapido" type="button" data-valor="10">R$ 10</button>
-        <button class="btn-valor-rapido" type="button" data-valor="15">R$ 15</button>
-        <button class="btn-valor-rapido" type="button" data-valor="20">R$ 20</button>
-        <button class="btn-valor-rapido" type="button" data-valor="25">R$ 25</button>
-        <button class="btn-valor-rapido" type="button" data-valor="30">R$ 30</button>
-        <button class="btn-valor-rapido" type="button" data-valor="35">R$ 35</button>
-        <button class="btn-valor-rapido" type="button" data-valor="40">R$ 40</button>
-        <button class="btn-valor-rapido" type="button" data-valor="45">R$ 45</button>
-        <button class="btn-valor-rapido" type="button" data-valor="50">R$ 50</button>
-        <button class="btn-valor-rapido" type="button" data-valor="55">R$ 55</button>
-        <button class="btn-valor-rapido" type="button" data-valor="60">R$ 60</button>
-        <button class="btn-valor-rapido" type="button" data-valor="65">R$ 65</button>
-        <button class="btn-valor-rapido" type="button" data-valor="70">R$ 70</button>
-        <button class="btn-valor-rapido" type="button" data-valor="75">R$ 75</button>
-        <button class="btn-valor-rapido" type="button" data-valor="80">R$ 80</button>
-        <button class="btn-valor-rapido" type="button" data-valor="85">R$ 85</button>
-        <button class="btn-valor-rapido" type="button" data-valor="90">R$ 90</button>
-        <button class="btn-valor-rapido" type="button" data-valor="95">R$ 95</button>
-        <button class="btn-valor-rapido" type="button" data-valor="100">R$ 100</button>
+        <button class="btn-valor-rapido" type="button" data-valor="10" onclick="window.aplicarValorV39 && window.aplicarValorV39(10)">R$ 10</button>
+        <button class="btn-valor-rapido" type="button" data-valor="15" onclick="window.aplicarValorV39 && window.aplicarValorV39(15)">R$ 15</button>
+        <button class="btn-valor-rapido" type="button" data-valor="20" onclick="window.aplicarValorV39 && window.aplicarValorV39(20)">R$ 20</button>
+        <button class="btn-valor-rapido" type="button" data-valor="25" onclick="window.aplicarValorV39 && window.aplicarValorV39(25)">R$ 25</button>
+        <button class="btn-valor-rapido" type="button" data-valor="30" onclick="window.aplicarValorV39 && window.aplicarValorV39(30)">R$ 30</button>
+        <button class="btn-valor-rapido" type="button" data-valor="35" onclick="window.aplicarValorV39 && window.aplicarValorV39(35)">R$ 35</button>
+        <button class="btn-valor-rapido" type="button" data-valor="40" onclick="window.aplicarValorV39 && window.aplicarValorV39(40)">R$ 40</button>
+        <button class="btn-valor-rapido" type="button" data-valor="45" onclick="window.aplicarValorV39 && window.aplicarValorV39(45)">R$ 45</button>
+        <button class="btn-valor-rapido" type="button" data-valor="50" onclick="window.aplicarValorV39 && window.aplicarValorV39(50)">R$ 50</button>
+        <button class="btn-valor-rapido" type="button" data-valor="55" onclick="window.aplicarValorV39 && window.aplicarValorV39(55)">R$ 55</button>
+        <button class="btn-valor-rapido" type="button" data-valor="60" onclick="window.aplicarValorV39 && window.aplicarValorV39(60)">R$ 60</button>
+        <button class="btn-valor-rapido" type="button" data-valor="65" onclick="window.aplicarValorV39 && window.aplicarValorV39(65)">R$ 65</button>
+        <button class="btn-valor-rapido" type="button" data-valor="70" onclick="window.aplicarValorV39 && window.aplicarValorV39(70)">R$ 70</button>
+        <button class="btn-valor-rapido" type="button" data-valor="75" onclick="window.aplicarValorV39 && window.aplicarValorV39(75)">R$ 75</button>
+        <button class="btn-valor-rapido" type="button" data-valor="80" onclick="window.aplicarValorV39 && window.aplicarValorV39(80)">R$ 80</button>
+        <button class="btn-valor-rapido" type="button" data-valor="85" onclick="window.aplicarValorV39 && window.aplicarValorV39(85)">R$ 85</button>
+        <button class="btn-valor-rapido" type="button" data-valor="90" onclick="window.aplicarValorV39 && window.aplicarValorV39(90)">R$ 90</button>
+        <button class="btn-valor-rapido" type="button" data-valor="95" onclick="window.aplicarValorV39 && window.aplicarValorV39(95)">R$ 95</button>
+        <button class="btn-valor-rapido" type="button" data-valor="100" onclick="window.aplicarValorV39 && window.aplicarValorV39(100)">R$ 100</button>
       </div>
       <div class="grid-2" style="align-items:end;">
         <div>
           <label for="input-valor-manual">Valor da entrega (R$)</label>
-          <input id="input-valor-manual" type="number" min="1" max="5000" step="0.5" placeholder="Ex: 25" />
+          <input id="input-valor-manual" type="number" min="1" max="5000" step="0.5" placeholder="Deixe em branco ou digite o valor" />
         </div>
-        <button class="btn btn-green" type="button" id="btn-aplicar-valor-manual">
+        <button class="btn btn-green" type="button" id="btn-aplicar-valor-manual" onclick="window.aplicarValorInputV39 && window.aplicarValorInputV39()">
           Aplicar Valor
         </button>
       </div>
@@ -438,7 +421,7 @@
     <section class="card" id="sec-corrida-andamento" style="display:none;">
       <div class="card-header">
         <div class="card-title">Entrega em Andamento</div>
-        <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-andamento">
+        <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-andamento" onclick="window.limparAndamentoBotaoV39 && window.limparAndamentoBotaoV39()">
           Limpar Painel
         </button>
       </div>
@@ -449,10 +432,10 @@
       <div class="card-header">
         <div class="card-title">Chamados Disponíveis</div>
         <div style="display:flex;gap:6px;">
-          <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-chamados">
+          <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-chamados" onclick="window.limparChamadosBotaoV39 && window.limparChamadosBotaoV39()">
             Limpar
           </button>
-          <button class="btn btn-outline btn-sm" type="button" id="btn-simular-chamado">
+          <button class="btn btn-outline btn-sm" type="button" id="btn-simular-chamado" onclick="window.simularChamadoV39 && window.simularChamadoV39()">
             Simular Chamado
           </button>
         </div>
@@ -466,27 +449,17 @@
   <script>
     (function () {
       const avisoFirebase = document.getElementById("aviso-firebase");
-      const avisoChuva = document.getElementById("aviso-chuva");
       const msgMotorista = document.getElementById("msg-motorista");
       const listaCorridasEl = document.getElementById("lista-corridas-motorista");
       const secCorridaAndamento = document.getElementById("sec-corrida-andamento");
       const boxCorridaAndamento = document.getElementById("box-corrida-andamento");
-      const btnLimparAndamento = document.getElementById("btn-limpar-andamento");
-      const btnLimparChamados = document.getElementById("btn-limpar-chamados");
-      const btnEnviarPix = document.getElementById("btn-enviar-pix");
-      const btnSalvarPerfil = document.getElementById("btn-salvar-perfil");
-      const btnColarTopo = document.getElementById("btn-colar-topo");
       const txtColarTopo = document.getElementById("txt-colar-topo");
       const boxColarRapido = document.getElementById("box-colar-rapido");
       const areaColarTexto = document.getElementById("area-colar-texto");
-      const btnFecharColar = document.getElementById("btn-fechar-colar");
-      const btnTestarBip = document.getElementById("btn-testar-bip");
       const statusSomBip = document.getElementById("status-som-bip");
       const inputMinCliente = document.getElementById("input-min-cliente");
-      const btnAplicarTempoCliente = document.getElementById("btn-aplicar-tempo-cliente");
       const botoesValorRapido = Array.from(document.querySelectorAll(".btn-valor-rapido"));
       const inputValorManual = document.getElementById("input-valor-manual");
-      const btnAplicarValorManual = document.getElementById("btn-aplicar-valor-manual");
 
       const elCodigo = document.getElementById("mot-codigo");
       const elNome = document.getElementById("mot-nome");
@@ -542,7 +515,7 @@
       let fs = null;
       let modoTempo = lerStorageSeguro("32drive_modo_tempo", "auto");
       let minutoManualSelecionado = Number(lerStorageSeguro("32drive_min_manual", "6")) || 6;
-      let valorManualSelecionado = Number(lerStorageSeguro("32entrega_valor_manual", "0")) || 0;
+      let valorManualSelecionado = 0;
       let corridaEmAndamento = null;
       let chamadosLocais = lerChamadosLocaisFila();
       let idsOcultos = lerOcultosSeguro();
@@ -550,7 +523,7 @@
       let assinaturasVistas = new Set();
       let primeiraCargaFirestore = true;
 
-      function obterValorPreenchidoOuManual(fallbackValor) {
+      function obterValorEscolhido() {
         const digitado = Number(inputValorManual && inputValorManual.value);
         if (Number.isFinite(digitado) && digitado > 0) {
           return Number(digitado.toFixed(2));
@@ -558,7 +531,7 @@
         if (valorManualSelecionado > 0) {
           return Number(valorManualSelecionado.toFixed(2));
         }
-        return fallbackValor;
+        return null;
       }
 
       function tocarBip(repeticoes) {
@@ -585,30 +558,28 @@
             osc.start(inicio);
             osc.stop(inicio + 0.17);
           }
-          statusSomBip.textContent = "Som ativo: bip emitido ao receber mensagem ou atualização.";
+          if (statusSomBip) statusSomBip.textContent = "Som ativo: bip emitido ao receber mensagem ou atualização do cliente.";
         } catch (_) {
-          statusSomBip.textContent = "Toque na tela para liberar o som do bip no aparelho.";
+          if (statusSomBip) statusSomBip.textContent = "Toque na tela para liberar o som do bip no aparelho.";
         }
       }
 
-      if (btnTestarBip) {
-        btnTestarBip.addEventListener("click", function () {
-          tocarBip(2);
-        });
-      }
+      window.testarBipV39 = function () {
+        tocarBip(2);
+      };
 
-      async function acionarColarTopo() {
-        boxColarRapido.classList.add("ativo");
+      window.acionarColarTopoV39 = async function () {
+        if (boxColarRapido) boxColarRapido.classList.add("ativo");
         try {
           if (navigator.clipboard && navigator.clipboard.readText) {
             const texto = await navigator.clipboard.readText();
             if (texto) {
-              areaColarTexto.value = texto;
+              if (areaColarTexto) areaColarTexto.value = texto;
               if (document.activeElement && (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA")) {
                 document.activeElement.value = texto;
               }
               if (txtColarTopo) txtColarTopo.textContent = "Colado!";
-              msgMotorista.textContent = "Conteúdo colado da área de transferência!";
+              if (msgMotorista) msgMotorista.textContent = "Conteúdo colado da área de transferência!";
               setTimeout(function () {
                 if (txtColarTopo) txtColarTopo.textContent = "Colar";
               }, 2000);
@@ -616,16 +587,13 @@
             }
           }
         } catch (_) {}
-        areaColarTexto.focus();
-        msgMotorista.textContent = "Área de colar aberta: toque e cole aqui.";
-      }
+        if (areaColarTexto) areaColarTexto.focus();
+        if (msgMotorista) msgMotorista.textContent = "Área de colar aberta: toque e cole aqui.";
+      };
 
-      if (btnColarTopo) btnColarTopo.addEventListener("click", acionarColarTopo);
-      if (btnFecharColar) {
-        btnFecharColar.addEventListener("click", function () {
-          boxColarRapido.classList.remove("ativo");
-        });
-      }
+      window.fecharBoxColarV39 = function () {
+        if (boxColarRapido) boxColarRapido.classList.remove("ativo");
+      };
 
       function salvarOcultos() {
         gravarStorageSeguro("32drive_mot_ocultos_v39", JSON.stringify(Array.from(idsOcultos)));
@@ -635,59 +603,61 @@
         try {
           const salvo = JSON.parse(lerStorageSeguro("32drive_motorista_perfil", "null"));
           if (!salvo) return;
-          if (salvo.codigo) elCodigo.value = salvo.codigo;
-          if (salvo.nome) elNome.value = salvo.nome;
+          if (salvo.codigo && elCodigo) elCodigo.value = salvo.codigo;
+          if (salvo.nome && elNome) elNome.value = salvo.nome;
           if (salvo.modalidade && elModalidade) elModalidade.value = salvo.modalidade;
-          if (salvo.veiculo) elVeiculo.value = salvo.veiculo;
-          if (salvo.placa) elPlaca.value = salvo.placa;
-          if (salvo.chavePix) elPix.value = salvo.chavePix;
+          if (salvo.veiculo && elVeiculo) elVeiculo.value = salvo.veiculo;
+          if (salvo.placa && elPlaca) elPlaca.value = salvo.placa;
+          if (salvo.chavePix && elPix) elPix.value = salvo.chavePix;
         } catch (_) {}
       }
 
       function salvarPerfil() {
         const perfil = {
-          codigo: (elCodigo.value || "").trim().toUpperCase(),
-          nome: (elNome.value || "").trim(),
+          codigo: (elCodigo && elCodigo.value ? elCodigo.value : "").trim().toUpperCase(),
+          nome: (elNome && elNome.value ? elNome.value : "").trim(),
           modalidade: elModalidade ? elModalidade.value : "Carro",
-          veiculo: (elVeiculo.value || "").trim(),
-          placa: (elPlaca.value || "").trim().toUpperCase(),
-          chavePix: (elPix.value || "").trim()
+          veiculo: (elVeiculo && elVeiculo.value ? elVeiculo.value : "").trim(),
+          placa: (elPlaca && elPlaca.value ? elPlaca.value : "").trim().toUpperCase(),
+          chavePix: (elPix && elPix.value ? elPix.value : "").trim()
         };
         gravarStorageSeguro("32drive_motorista_perfil", JSON.stringify(perfil));
         return perfil;
       }
 
+      window.salvarPerfilBotaoV39 = function () {
+        salvarPerfil();
+        if (msgMotorista) msgMotorista.textContent = "Dados do entregador salvos.";
+      };
+
       function atualizarVisualTempo() {
         const isManual = modoTempo === "manual";
-        btnModoAuto.classList.toggle("ativo", !isManual);
-        btnModoManual.classList.toggle("ativo", isManual);
+        if (btnModoAuto) btnModoAuto.classList.toggle("ativo", !isManual);
+        if (btnModoManual) btnModoManual.classList.toggle("ativo", isManual);
         botoesMin.forEach(function (b) {
           b.classList.toggle("ativo", Number(b.dataset.min) === minutoManualSelecionado);
         });
-        if (!inputMinCliente.value) {
+        if (inputMinCliente && !inputMinCliente.value) {
           inputMinCliente.value = String(minutoManualSelecionado);
         }
-        resumoTempoModo.textContent = isManual
-          ? "Modo Manual ativo: envia " + minutoManualSelecionado + " min para chegar na casa do cliente."
-          : "Modo Automático ativo: usa o tempo estimado pela rota do mapa ao aceitar.";
+        if (resumoTempoModo) {
+          resumoTempoModo.textContent = isManual
+            ? "Modo Manual ativo: envia " + minutoManualSelecionado + " min para chegar na casa do cliente."
+            : "Modo Automático ativo: define o tempo ao aceitar.";
+        }
       }
 
       function atualizarVisualValorManual() {
         botoesValorRapido.forEach(function (b) {
           b.classList.toggle("ativo", Number(b.dataset.valor) === valorManualSelecionado && valorManualSelecionado > 0);
         });
-        if (valorManualSelecionado > 0 && !inputValorManual.value) {
-          inputValorManual.value = String(valorManualSelecionado);
-        }
       }
 
-      function resolverMinutosChegada(corrida) {
+      function resolverMinutosChegada() {
         if (modoTempo === "manual") {
           return { minutos: minutoManualSelecionado, modo: "manual" };
         }
-        const dist = Number(corrida.distanciaKm || 0);
-        const minRota = Number(corrida.tempoEstimadoRotaMin || 0) || Math.max(2, Math.round(dist * 2.2) || 6);
-        return { minutos: Math.max(2, minRota), modo: "automático (rota)" };
+        return { minutos: 6, modo: "automático" };
       }
 
       function mostrarAvisoFirebase(texto) {
@@ -719,15 +689,22 @@
           .replace(/"/g, "&quot;");
       }
 
-      async function aplicarTempoCliente(minutos) {
+      window.setModoTempoV39 = function (modo) {
+        modoTempo = modo === "manual" ? "manual" : "auto";
+        gravarStorageSeguro("32drive_modo_tempo", modoTempo);
+        atualizarVisualTempo();
+        renderizarChamados(chamadosLocais);
+      };
+
+      window.aplicarTempoV39 = async function (minutos) {
         const minNum = Math.max(1, Math.min(180, Number(minutos) || 0));
         if (!minNum) {
-          msgMotorista.textContent = "Digite um tempo em minutos válido.";
+          if (msgMotorista) msgMotorista.textContent = "Digite um tempo em minutos válido.";
           return;
         }
         minutoManualSelecionado = minNum;
         modoTempo = "manual";
-        inputMinCliente.value = String(minNum);
+        if (inputMinCliente) inputMinCliente.value = String(minNum);
         gravarStorageSeguro("32drive_min_manual", String(minNum));
         gravarStorageSeguro("32drive_modo_tempo", "manual");
         atualizarVisualTempo();
@@ -746,20 +723,24 @@
             } catch (_) {}
           }
         }
-        msgMotorista.textContent = "Tempo para chegar na casa do cliente: " + minNum + " min.";
-      }
+        if (msgMotorista) msgMotorista.textContent = "Tempo para chegar na casa do cliente: " + minNum + " min.";
+      };
 
-      async function aplicarValorManual(valor) {
+      window.aplicarTempoInputV39 = async function () {
+        await window.aplicarTempoV39(inputMinCliente ? inputMinCliente.value : "");
+      };
+
+      window.aplicarValorV39 = async function (valor) {
         const num = Number(valor);
         if (!Number.isFinite(num) || num <= 0) {
-          msgMotorista.textContent = "Escolha ou digite um valor válido.";
+          if (msgMotorista) msgMotorista.textContent = "Escolha ou digite um valor válido.";
           return;
         }
         const valorFinal = Number(num.toFixed(2));
         valorManualSelecionado = valorFinal;
-        inputValorManual.value = String(valorFinal);
-        gravarStorageSeguro("32entrega_valor_manual", String(valorFinal));
+        if (inputValorManual) inputValorManual.value = String(valorFinal);
         atualizarVisualValorManual();
+        renderizarChamados(chamadosLocais);
 
         if (corridaEmAndamento) {
           corridaEmAndamento.valorBruto = valorFinal;
@@ -771,14 +752,14 @@
               });
             } catch (_) {}
           }
-        } else if (chamadosLocais.length > 0) {
-          chamadosLocais[0].valorBruto = valorFinal;
-          gravarChamadosLocaisFila(chamadosLocais);
-          renderizarChamados(chamadosLocais);
         }
 
-        msgMotorista.textContent = "Valor definido em " + formatarMoeda(valorFinal) + ".";
-      }
+        if (msgMotorista) msgMotorista.textContent = "Valor definido em " + formatarMoeda(valorFinal) + ".";
+      };
+
+      window.aplicarValorInputV39 = async function () {
+        await window.aplicarValorV39(inputValorManual ? inputValorManual.value : "");
+      };
 
       function limparPainelAndamento(msg) {
         if (corridaEmAndamento && corridaEmAndamento.docId) {
@@ -786,15 +767,30 @@
           salvarOcultos();
         }
         corridaEmAndamento = null;
-        secCorridaAndamento.style.display = "none";
-        boxCorridaAndamento.innerHTML = "";
-        if (msg) msgMotorista.textContent = msg;
+        if (secCorridaAndamento) secCorridaAndamento.style.display = "none";
+        if (boxCorridaAndamento) boxCorridaAndamento.innerHTML = "";
+        if (msg && msgMotorista) msgMotorista.textContent = msg;
       }
 
+      window.limparAndamentoBotaoV39 = function () {
+        limparPainelAndamento("Painel limpo.");
+      };
+
+      window.limparChamadosBotaoV39 = function () {
+        chamadosLocais.forEach(function (c) {
+          idsOcultos.add(c.docId);
+        });
+        salvarOcultos();
+        chamadosLocais = [];
+        gravarChamadosLocaisFila([]);
+        renderizarChamados([]);
+        if (msgMotorista) msgMotorista.textContent = "Lista de chamados limpa.";
+      };
+
       function renderizarCorridaAndamento() {
-        if (!corridaEmAndamento) {
-          secCorridaAndamento.style.display = "none";
-          boxCorridaAndamento.innerHTML = "";
+        if (!corridaEmAndamento || !secCorridaAndamento || !boxCorridaAndamento) {
+          if (secCorridaAndamento) secCorridaAndamento.style.display = "none";
+          if (boxCorridaAndamento) boxCorridaAndamento.innerHTML = "";
           return;
         }
         const st = String(corridaEmAndamento.status || "");
@@ -805,9 +801,9 @@
 
         secCorridaAndamento.style.display = "flex";
         const c = corridaEmAndamento;
-        const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
-        const pixAtual = (c.chavePixMotorista || (elPix.value || "").trim());
+        const pixAtual = (c.chavePixMotorista || (elPix && elPix.value ? elPix.value : "")).trim();
         const modTxt = (c.motorista && c.motorista.modalidade) ? c.motorista.modalidade : (elModalidade ? elModalidade.value : "");
+        const temValor = Number(c.valorBruto || 0) > 0;
 
         let acaoHtml = "";
         if (st === "Motorista a caminho" || st === "Aceita") {
@@ -825,11 +821,10 @@
           '<div class="corrida-card corrida-ativa">' +
             '<div style="display:flex;justify-content:space-between;align-items:center;">' +
               '<strong>' + escaparHtml(c.codigo || "32E") + ' • ' + escaparHtml(c.passageiro || "Cliente") + '</strong>' +
-              '<span class="valor-destaque">' + formatarMoeda(c.valorBruto) + '</span>' +
+              (temValor ? '<span class="valor-destaque">' + formatarMoeda(c.valorBruto) + '</span>' : '<span class="tag">Sem valor definido</span>') +
             '</div>' +
             '<div>' +
               '<span class="tag">' + escaparHtml(st || "Em andamento") + '</span> ' +
-              '<span class="tag">' + kmTxt + '</span> ' +
               '<span class="tag">' + escaparHtml(c.pagamento || "Pix") + '</span> ' +
               (modTxt ? '<span class="tag">' + escaparHtml(modTxt) + '</span> ' : '') +
               (c.tempoChegadaMin ? '<span class="tag">Chegada: ' + escaparHtml(c.tempoChegadaMin) + ' min</span>' : '') +
@@ -846,11 +841,11 @@
           '</div>';
       }
 
-      async function enviarChavePix() {
+      window.enviarChavePixV39 = async function () {
         const perfil = salvarPerfil();
         const chave = (perfil.chavePix || "").trim();
         if (!chave) {
-          msgMotorista.textContent = "Digite sua Chave Pix antes de enviar.";
+          if (msgMotorista) msgMotorista.textContent = "Digite sua Chave Pix antes de enviar.";
           return;
         }
 
@@ -863,7 +858,7 @@
         }
 
         if (!db || !fs) {
-          msgMotorista.textContent = "Chave Pix salva (" + chave + ").";
+          if (msgMotorista) msgMotorista.textContent = "Chave Pix salva (" + chave + ").";
           return;
         }
 
@@ -873,17 +868,18 @@
               chavePixMotorista: chave,
               "motorista.chavePix": chave
             });
-            msgMotorista.textContent = "Chave Pix enviada ao cliente da entrega!";
+            if (msgMotorista) msgMotorista.textContent = "Chave Pix enviada ao cliente da entrega!";
           } else {
-            msgMotorista.textContent = "Chave Pix salva (" + chave + ") — será enviada ao aceitar a próxima entrega.";
+            if (msgMotorista) msgMotorista.textContent = "Chave Pix salva (" + chave + ") — será enviada ao aceitar a próxima entrega.";
           }
         } catch (erro) {
           console.error(erro);
-          msgMotorista.textContent = "Erro ao enviar chave Pix (" + (erro.code || erro.message || "Firestore") + ").";
+          if (msgMotorista) msgMotorista.textContent = "Erro ao enviar chave Pix (" + (erro.code || erro.message || "Firestore") + ").";
         }
-      }
+      };
 
       function renderizarChamados(itens) {
+        if (!listaCorridasEl) return;
         const visiveis = itens.filter(function (c) {
           const st = String(c.status || "");
           return st === "Aguardando motorista" && !idsOcultos.has(c.docId);
@@ -895,26 +891,24 @@
           return;
         }
 
+        const valorEscolhido = obterValorEscolhido();
+
         listaCorridasEl.innerHTML = visiveis
           .map(function (c) {
-            const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
-            const tagChuva = c.chuva ? ' <span class="tag tag-chuva">Chuva +25%</span>' : "";
-            const prev = resolverMinutosChegada(c);
-            const valorExibido = obterValorPreenchidoOuManual(c.valorBruto);
+            const prev = resolverMinutosChegada();
+            const valorMostrado = valorEscolhido !== null ? valorEscolhido : (Number(c.valorBruto || 0) > 0 ? Number(c.valorBruto) : null);
             return (
               '<div class="corrida-card">' +
                 '<div style="display:flex;justify-content:space-between;align-items:center;">' +
                   '<strong>' + escaparHtml(c.codigo || "Entrega") + ' • ' + escaparHtml(c.passageiro || "Cliente") + '</strong>' +
-                  '<span class="valor-destaque">' + formatarMoeda(valorExibido) + '</span>' +
+                  (valorMostrado !== null ? '<span class="valor-destaque">' + formatarMoeda(valorMostrado) + '</span>' : '<span class="tag">Definir valor</span>') +
                 '</div>' +
                 '<div>' +
-                  '<span class="tag">' + kmTxt + '</span> ' +
                   '<span class="tag">' + escaparHtml(c.pagamento || "Pix") + '</span> ' +
                   '<span class="tag">Chegada: ' + prev.minutos + ' min (' + prev.modo + ')</span>' +
-                  tagChuva +
                 '</div>' +
                 '<div><strong>Casa do Cliente:</strong> ' + escaparHtml(c.origem || "—") + '<br/><strong>Destino:</strong> ' + escaparHtml(c.destino || "—") + '</div>' +
-                '<button class="btn btn-accent" type="button" data-aceitar="' + escaparHtml(c.docId) + '">Aceitar Entrega (' + formatarMoeda(valorExibido) + ')</button>' +
+                '<button class="btn btn-accent" type="button" data-aceitar="' + escaparHtml(c.docId) + '">Aceitar Entrega' + (valorMostrado !== null ? ' (' + formatarMoeda(valorMostrado) + ')' : '') + '</button>' +
               '</div>'
             );
           })
@@ -927,14 +921,8 @@
         const chamado = chamadosLocais.find(function (item) {
           return item.docId === docId;
         }) || {};
-        const tempoInfo = resolverMinutosChegada(chamado);
-        const valorFinal = obterValorPreenchidoOuManual(chamado.valorBruto);
-
-        if (valorFinal > 0) {
-          valorManualSelecionado = valorFinal;
-          gravarStorageSeguro("32entrega_valor_manual", String(valorFinal));
-          atualizarVisualValorManual();
-        }
+        const tempoInfo = resolverMinutosChegada();
+        const valorFinal = obterValorEscolhido();
 
         const dadosMotorista = {
           codigo: perfil.codigo || "ENT-01",
@@ -953,7 +941,7 @@
             modoTempoChegada: tempoInfo.modo,
             chavePixMotorista: perfil.chavePix || ""
           },
-          valorFinal !== undefined ? { valorBruto: valorFinal } : {}
+          valorFinal !== null ? { valorBruto: valorFinal } : {}
         );
 
         if (String(docId).startsWith("SIM-") || String(docId).startsWith("LOC-")) {
@@ -964,12 +952,14 @@
           corridaEmAndamento = Object.assign({}, chamado, payloadAtualizacao);
           renderizarChamados(chamadosLocais);
           renderizarCorridaAndamento();
-          msgMotorista.textContent = "Entrega aceita por " + formatarMoeda(valorFinal) + "! Chegada em " + tempoInfo.minutos + " min.";
+          if (msgMotorista) {
+            msgMotorista.textContent = "Entrega aceita" + (valorFinal !== null ? " por " + formatarMoeda(valorFinal) : "") + "! Chegada em " + tempoInfo.minutos + " min.";
+          }
           return;
         }
 
         if (!db || !fs || !docId) {
-          msgMotorista.textContent = "Conecte o firebase-config.js para aceitar entregas reais.";
+          if (msgMotorista) msgMotorista.textContent = "Conecte o firebase-config.js para aceitar entregas reais.";
           return;
         }
 
@@ -979,10 +969,14 @@
           }));
           corridaEmAndamento = Object.assign({ docId: docId }, chamado, payloadAtualizacao);
           renderizarCorridaAndamento();
-          msgMotorista.textContent = "Entrega aceita por " + formatarMoeda(valorFinal) + "! Cliente avisado.";
+          if (msgMotorista) {
+            msgMotorista.textContent = "Entrega aceita" + (valorFinal !== null ? " por " + formatarMoeda(valorFinal) : "") + "! Cliente avisado.";
+          }
         } catch (erro) {
           console.error(erro);
-          msgMotorista.textContent = "Erro ao aceitar entrega (" + (erro.code || erro.message || "Firestore") + ").";
+          if (msgMotorista) {
+            msgMotorista.textContent = "Erro ao aceitar entrega (" + (erro.code || erro.message || "Firestore") + ").";
+          }
         }
       }
 
@@ -991,11 +985,11 @@
 
         if (String(corridaEmAndamento.docId || "").startsWith("SIM-") || String(corridaEmAndamento.docId || "").startsWith("LOC-")) {
           if (novaEtapa === "Finalizada") {
-            msgMotorista.textContent = "Entrega concluída — painel limpo.";
+            if (msgMotorista) msgMotorista.textContent = "Entrega concluída — painel limpo.";
             limparPainelAndamento("");
           } else {
             corridaEmAndamento.status = novaEtapa;
-            msgMotorista.textContent = "Etapa atualizada: " + novaEtapa;
+            if (msgMotorista) msgMotorista.textContent = "Etapa atualizada: " + novaEtapa;
             renderizarCorridaAndamento();
           }
           return;
@@ -1011,39 +1005,37 @@
             )
           );
           if (novaEtapa === "Finalizada") {
-            msgMotorista.textContent = "Entrega concluída! Painel limpo.";
+            if (msgMotorista) msgMotorista.textContent = "Entrega concluída! Painel limpo.";
             limparPainelAndamento("");
           } else {
-            msgMotorista.textContent = "Etapa atualizada: " + novaEtapa;
+            if (msgMotorista) msgMotorista.textContent = "Etapa atualizada: " + novaEtapa;
             corridaEmAndamento.status = novaEtapa;
             renderizarCorridaAndamento();
           }
         } catch (erro) {
           console.error(erro);
-          msgMotorista.textContent = "Erro ao atualizar etapa (" + (erro.code || erro.message || "Firestore") + ").";
+          if (msgMotorista) {
+            msgMotorista.textContent = "Erro ao atualizar etapa (" + (erro.code || erro.message || "Firestore") + ").";
+          }
         }
       }
 
-      function simularChamadoTeste() {
+      window.simularChamadoV39 = function () {
         const fake = {
           docId: "SIM-" + Date.now(),
           codigo: "32E-" + Math.floor(1000 + Math.random() * 9000),
           passageiro: "Cliente Teste",
           origem: "Av. Rio Grande, 450 — Cassino",
           destino: "FURG — Campus Carreiros, Rio Grande",
-          distanciaKm: 14.5,
-          tempoEstimadoRotaMin: 22,
           pagamento: "Pix",
-          valorBruto: obterValorPreenchidoOuManual(25.0),
-          chuva: false,
           status: "Aguardando motorista"
         };
         chamadosLocais.unshift(fake);
         gravarChamadosLocaisFila(chamadosLocais);
         renderizarChamados(chamadosLocais);
         tocarBip(2);
-        msgMotorista.textContent = "Novo chamado do cliente! Bip emitido.";
-      }
+        if (msgMotorista) msgMotorista.textContent = "Novo chamado do cliente! Bip emitido.";
+      };
 
       carregarPerfilSalvo();
       atualizarVisualTempo();
@@ -1058,79 +1050,26 @@
         inputValorManual.addEventListener("input", function () {
           const val = Number(inputValorManual.value);
           valorManualSelecionado = Number.isFinite(val) && val > 0 ? Number(val.toFixed(2)) : 0;
-          gravarStorageSeguro("32entrega_valor_manual", String(valorManualSelecionado));
           atualizarVisualValorManual();
           renderizarChamados(chamadosLocais);
         });
       }
 
-      btnSalvarPerfil.addEventListener("click", function () {
-        salvarPerfil();
-        msgMotorista.textContent = "Dados do entregador salvos.";
-      });
-
-      btnEnviarPix.addEventListener("click", enviarChavePix);
-      btnLimparAndamento.addEventListener("click", function () {
-        limparPainelAndamento("Painel limpo.");
-      });
-      btnLimparChamados.addEventListener("click", function () {
-        chamadosLocais.forEach(function (c) {
-          idsOcultos.add(c.docId);
+      if (listaCorridasEl) {
+        listaCorridasEl.addEventListener("click", function (ev) {
+          const btn = ev.target.closest("button[data-aceitar]");
+          if (!btn) return;
+          aceitarCorrida(btn.getAttribute("data-aceitar"));
         });
-        salvarOcultos();
-        chamadosLocais = [];
-        gravarChamadosLocaisFila([]);
-        renderizarChamados([]);
-        msgMotorista.textContent = "Lista de chamados limpa.";
-      });
+      }
 
-      btnModoAuto.addEventListener("click", function () {
-        modoTempo = "auto";
-        gravarStorageSeguro("32drive_modo_tempo", "auto");
-        atualizarVisualTempo();
-        renderizarChamados(chamadosLocais);
-      });
-
-      btnModoManual.addEventListener("click", function () {
-        modoTempo = "manual";
-        gravarStorageSeguro("32drive_modo_tempo", "manual");
-        atualizarVisualTempo();
-        renderizarChamados(chamadosLocais);
-      });
-
-      botoesMin.forEach(function (btn) {
-        btn.addEventListener("click", async function () {
-          await aplicarTempoCliente(Number(btn.dataset.min));
+      if (boxCorridaAndamento) {
+        boxCorridaAndamento.addEventListener("click", function (ev) {
+          const btn = ev.target.closest("button[data-etapa]");
+          if (!btn) return;
+          avancarEtapaCorrida(btn.getAttribute("data-etapa"));
         });
-      });
-
-      btnAplicarTempoCliente.addEventListener("click", async function () {
-        await aplicarTempoCliente(inputMinCliente.value);
-      });
-
-      botoesValorRapido.forEach(function (btn) {
-        btn.addEventListener("click", async function () {
-          await aplicarValorManual(Number(btn.dataset.valor));
-        });
-      });
-
-      btnAplicarValorManual.addEventListener("click", async function () {
-        await aplicarValorManual(inputValorManual.value);
-      });
-
-      document.getElementById("btn-simular-chamado").addEventListener("click", simularChamadoTeste);
-
-      listaCorridasEl.addEventListener("click", function (ev) {
-        const btn = ev.target.closest("button[data-aceitar]");
-        if (!btn) return;
-        aceitarCorrida(btn.getAttribute("data-aceitar"));
-      });
-
-      boxCorridaAndamento.addEventListener("click", function (ev) {
-        const btn = ev.target.closest("button[data-etapa]");
-        if (!btn) return;
-        avancarEtapaCorrida(btn.getAttribute("data-etapa"));
-      });
+      }
 
       window.__conectarFirebaseV39 = async function () {
         try {
@@ -1140,11 +1079,6 @@
           if (!db) throw new Error("db não exportado");
 
           mostrarAvisoFirebase("");
-
-          fs.onSnapshot(fs.doc(db, "config", "geral"), function (snap) {
-            const chuvaAtiva = snap.exists() ? Boolean(snap.data().chuva) : false;
-            avisoChuva.style.display = chuvaAtiva ? "block" : "none";
-          });
 
           fs.onSnapshot(fs.collection(db, "corridas"), function (snapshot) {
             const aguardando = [];
@@ -1179,7 +1113,7 @@
 
             if (houveNovidadeDoCliente) {
               tocarBip(2);
-              msgMotorista.textContent = "Nova mensagem/atualização do cliente! Bip emitido.";
+              if (msgMotorista) msgMotorista.textContent = "Nova mensagem/atualização do cliente! Bip emitido.";
             }
             primeiraCargaFirestore = false;
 
