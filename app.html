@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -44,17 +44,16 @@
       z-index: 1000;
       color: #ffffff;
     }
-    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .brand { display: flex; align-items: center; gap: 12px; }
     .brand img {
       width: 46px;
       height: 46px;
       border-radius: 11px;
       border: 2px solid var(--accent);
       background: #ffffff;
-      flex-shrink: 0;
     }
-    h1 { font-size: 19px; font-weight: 900; color: var(--accent); }
-    .subtitle { font-size: 14px; color: #dbeafe; }
+    h1 { font-size: 20px; font-weight: 900; color: var(--accent); }
+    .subtitle { font-size: 15px; color: #dbeafe; }
     .badge {
       background: #10b981;
       color: #052e16;
@@ -63,7 +62,6 @@
       padding: 7px 12px;
       border-radius: 999px;
       white-space: nowrap;
-      flex-shrink: 0;
     }
     main {
       flex: 1;
@@ -110,7 +108,6 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      flex-wrap: wrap;
     }
     .card-title { font-size: 19px; font-weight: 900; color: #0f172a; }
     label { font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: block; }
@@ -335,46 +332,21 @@
     const resumoTempoModo = document.getElementById("resumo-tempo-modo");
     const botoesMin = Array.from(document.querySelectorAll(".btn-min"));
 
-    function lerStorageSeguro(chave, fallback) {
-      try {
-        const val = localStorage.getItem(chave);
-        return val === null ? fallback : val;
-      } catch (_) {
-        return fallback;
-      }
-    }
-
-    function gravarStorageSeguro(chave, valor) {
-      try {
-        localStorage.setItem(chave, valor);
-      } catch (_) {}
-    }
-
-    function lerOcultosSeguro() {
-      try {
-        const raw = lerStorageSeguro("32drive_mot_ocultos_v39", "[]");
-        const arr = JSON.parse(raw);
-        return new Set(Array.isArray(arr) ? arr : []);
-      } catch (_) {
-        return new Set();
-      }
-    }
-
     let db = null;
     let fs = null;
-    let modoTempo = lerStorageSeguro("32drive_modo_tempo", "auto");
-    let minutoManualSelecionado = Number(lerStorageSeguro("32drive_min_manual", "6")) || 6;
+    let modoTempo = localStorage.getItem("32drive_modo_tempo") || "auto";
+    let minutoManualSelecionado = Number(localStorage.getItem("32drive_min_manual") || "6");
     let corridaEmAndamento = null;
     let chamadosLocais = [];
-    let idsOcultos = lerOcultosSeguro();
+    let idsOcultos = new Set(JSON.parse(localStorage.getItem("32drive_mot_ocultos_v39") || "[]"));
 
     function salvarOcultos() {
-      gravarStorageSeguro("32drive_mot_ocultos_v39", JSON.stringify(Array.from(idsOcultos)));
+      localStorage.setItem("32drive_mot_ocultos_v39", JSON.stringify(Array.from(idsOcultos)));
     }
 
     function carregarPerfilSalvo() {
       try {
-        const salvo = JSON.parse(lerStorageSeguro("32drive_motorista_perfil", "null"));
+        const salvo = JSON.parse(localStorage.getItem("32drive_motorista_perfil") || "null");
         if (!salvo) return;
         if (salvo.codigo) elCodigo.value = salvo.codigo;
         if (salvo.nome) elNome.value = salvo.nome;
@@ -392,7 +364,7 @@
         placa: (elPlaca.value || "").trim().toUpperCase(),
         chavePix: (elPix.value || "").trim()
       };
-      gravarStorageSeguro("32drive_motorista_perfil", JSON.stringify(perfil));
+      localStorage.setItem("32drive_motorista_perfil", JSON.stringify(perfil));
       return perfil;
     }
 
@@ -707,14 +679,14 @@
 
     btnModoAuto.addEventListener("click", () => {
       modoTempo = "auto";
-      gravarStorageSeguro("32drive_modo_tempo", "auto");
+      localStorage.setItem("32drive_modo_tempo", "auto");
       atualizarVisualTempo();
       renderizarChamados(chamadosLocais);
     });
 
     btnModoManual.addEventListener("click", () => {
       modoTempo = "manual";
-      gravarStorageSeguro("32drive_modo_tempo", "manual");
+      localStorage.setItem("32drive_modo_tempo", "manual");
       atualizarVisualTempo();
       renderizarChamados(chamadosLocais);
     });
@@ -724,8 +696,8 @@
         const min = Number(btn.dataset.min);
         minutoManualSelecionado = min;
         modoTempo = "manual";
-        gravarStorageSeguro("32drive_min_manual", String(min));
-        gravarStorageSeguro("32drive_modo_tempo", "manual");
+        localStorage.setItem("32drive_min_manual", String(min));
+        localStorage.setItem("32drive_modo_tempo", "manual");
         atualizarVisualTempo();
         renderizarChamados(chamadosLocais);
 
@@ -760,54 +732,52 @@
       avancarEtapaCorrida(btn.getAttribute("data-etapa"));
     });
 
-    (async () => {
-      try {
-        const configModulo = await import("./firebase-config.js");
-        fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-        db = configModulo.db;
-        if (!db) throw new Error("db não exportado");
+    try {
+      const configModulo = await import("./firebase-config.js");
+      fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      db = configModulo.db;
+      if (!db) throw new Error("db não exportado");
 
-        mostrarAvisoFirebase("");
+      mostrarAvisoFirebase("");
 
-        fs.onSnapshot(fs.doc(db, "config", "geral"), (snap) => {
-          const chuvaAtiva = snap.exists() ? Boolean(snap.data().chuva) : false;
-          avisoChuva.style.display = chuvaAtiva ? "block" : "none";
-        });
+      fs.onSnapshot(fs.doc(db, "config", "geral"), (snap) => {
+        const chuvaAtiva = snap.exists() ? Boolean(snap.data().chuva) : false;
+        avisoChuva.style.display = chuvaAtiva ? "block" : "none";
+      });
 
-        fs.onSnapshot(fs.collection(db, "corridas"), (snapshot) => {
-          const aguardando = [];
-          let ativaMinha = null;
-          let maisRecenteAtivaTs = -1;
+      fs.onSnapshot(fs.collection(db, "corridas"), (snapshot) => {
+        const aguardando = [];
+        let ativaMinha = null;
+        let maisRecenteAtivaTs = -1;
 
-          snapshot.forEach((docSnap) => {
-            if (idsOcultos.has(docSnap.id)) return;
-            const d = docSnap.data();
-            const st = String(d.status || "");
-            if (st === "Finalizada" || st === "Cancelada") return;
+        snapshot.forEach((docSnap) => {
+          if (idsOcultos.has(docSnap.id)) return;
+          const d = docSnap.data();
+          const st = String(d.status || "");
+          if (st === "Finalizada" || st === "Cancelada") return;
 
-            if (st === "Aguardando motorista") {
-              aguardando.push({ docId: docSnap.id, ...d });
-            } else if (d.motorista && d.motorista.nome) {
-              const ts = Number(d.criadoEmTimestamp || 0);
-              if (ts >= maisRecenteAtivaTs) {
-                maisRecenteAtivaTs = ts;
-                ativaMinha = { docId: docSnap.id, ...d };
-              }
+          if (st === "Aguardando motorista") {
+            aguardando.push({ docId: docSnap.id, ...d });
+          } else if (d.motorista && d.motorista.nome) {
+            const ts = Number(d.criadoEmTimestamp || 0);
+            if (ts >= maisRecenteAtivaTs) {
+              maisRecenteAtivaTs = ts;
+              ativaMinha = { docId: docSnap.id, ...d };
             }
-          });
-
-          chamadosLocais = aguardando;
-          renderizarChamados(aguardando);
-          corridaEmAndamento = ativaMinha;
-          renderizarCorridaAndamento();
+          }
         });
-      } catch (erro) {
-        console.error(erro);
-        mostrarAvisoFirebase(
-          "Painel do Entregador carregado. Use 'Simular Chamado' para testar ou adicione o firebase-config.js para receber entregas reais do Cliente."
-        );
-      }
-    })();
+
+        chamadosLocais = aguardando;
+        renderizarChamados(aguardando);
+        corridaEmAndamento = ativaMinha;
+        renderizarCorridaAndamento();
+      });
+    } catch (erro) {
+      console.error(erro);
+      mostrarAvisoFirebase(
+        "Painel do Entregador carregado. Use 'Simular Chamado' para testar ou adicione o firebase-config.js para receber entregas reais do Cliente."
+      );
+    }
   </script>
 </body>
 </html>
