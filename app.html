@@ -206,17 +206,39 @@
     .btn-valor-rapido {
       padding: 10px 6px;
       border-radius: 10px;
-      border: 2px solid #047857;
+      border: 2px solid #b91c1c;
       background: #ffffff;
-      color: #047857;
+      color: #b91c1c;
       font-size: 15px;
       font-weight: 900;
       cursor: pointer;
     }
-    .btn-valor-rapido.ativo {
+    .btn-valor-rapido.pendente {
+      background: #dc2626;
+      border-color: #991b1b;
+      color: #ffffff;
+    }
+    .btn-valor-rapido.enviado {
       background: #059669;
       border-color: #047857;
       color: #ffffff;
+    }
+    .status-envio-valor {
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 900;
+      font-size: 15px;
+      text-align: center;
+    }
+    .status-envio-valor.vermelho {
+      background: #fef2f2;
+      border: 2px solid #dc2626;
+      color: #991b1b;
+    }
+    .status-envio-valor.verde {
+      background: #ecfdf5;
+      border: 2px solid #059669;
+      color: #064e3b;
     }
     .btn {
       width: 100%;
@@ -266,6 +288,9 @@
     .valor-destaque {
       font-size: 22px;
       font-weight: 900;
+      color: #b91c1c;
+    }
+    .valor-destaque.enviado {
       color: #047857;
     }
   </style>
@@ -384,38 +409,38 @@
     </section>
 
     <section class="card">
-      <div class="card-title">Tabela de Valor Manual (R$ 10 até R$ 100)</div>
-      <div style="font-size:15px;font-weight:700;color:var(--muted);">
-        Toque em R$ 10 ou de 5 em 5 até R$ 100, ou digite o valor que você vai cobrar para enviar ao cliente.
+      <div class="card-title">1. Colocar Valor Manual (R$ 10 até R$ 100)</div>
+      <div id="status-envio-valor" class="status-envio-valor vermelho">
+        Valor não enviado ao cliente (permanece em vermelho até clicar em Enviar ao Cliente).
       </div>
       <div class="tabela-valores-grid" id="grid-valores-manuais">
-        <button class="btn-valor-rapido" type="button" data-valor="10" onclick="window.aplicarValorV39 && window.aplicarValorV39(10)">R$ 10</button>
-        <button class="btn-valor-rapido" type="button" data-valor="15" onclick="window.aplicarValorV39 && window.aplicarValorV39(15)">R$ 15</button>
-        <button class="btn-valor-rapido" type="button" data-valor="20" onclick="window.aplicarValorV39 && window.aplicarValorV39(20)">R$ 20</button>
-        <button class="btn-valor-rapido" type="button" data-valor="25" onclick="window.aplicarValorV39 && window.aplicarValorV39(25)">R$ 25</button>
-        <button class="btn-valor-rapido" type="button" data-valor="30" onclick="window.aplicarValorV39 && window.aplicarValorV39(30)">R$ 30</button>
-        <button class="btn-valor-rapido" type="button" data-valor="35" onclick="window.aplicarValorV39 && window.aplicarValorV39(35)">R$ 35</button>
-        <button class="btn-valor-rapido" type="button" data-valor="40" onclick="window.aplicarValorV39 && window.aplicarValorV39(40)">R$ 40</button>
-        <button class="btn-valor-rapido" type="button" data-valor="45" onclick="window.aplicarValorV39 && window.aplicarValorV39(45)">R$ 45</button>
-        <button class="btn-valor-rapido" type="button" data-valor="50" onclick="window.aplicarValorV39 && window.aplicarValorV39(50)">R$ 50</button>
-        <button class="btn-valor-rapido" type="button" data-valor="55" onclick="window.aplicarValorV39 && window.aplicarValorV39(55)">R$ 55</button>
-        <button class="btn-valor-rapido" type="button" data-valor="60" onclick="window.aplicarValorV39 && window.aplicarValorV39(60)">R$ 60</button>
-        <button class="btn-valor-rapido" type="button" data-valor="65" onclick="window.aplicarValorV39 && window.aplicarValorV39(65)">R$ 65</button>
-        <button class="btn-valor-rapido" type="button" data-valor="70" onclick="window.aplicarValorV39 && window.aplicarValorV39(70)">R$ 70</button>
-        <button class="btn-valor-rapido" type="button" data-valor="75" onclick="window.aplicarValorV39 && window.aplicarValorV39(75)">R$ 75</button>
-        <button class="btn-valor-rapido" type="button" data-valor="80" onclick="window.aplicarValorV39 && window.aplicarValorV39(80)">R$ 80</button>
-        <button class="btn-valor-rapido" type="button" data-valor="85" onclick="window.aplicarValorV39 && window.aplicarValorV39(85)">R$ 85</button>
-        <button class="btn-valor-rapido" type="button" data-valor="90" onclick="window.aplicarValorV39 && window.aplicarValorV39(90)">R$ 90</button>
-        <button class="btn-valor-rapido" type="button" data-valor="95" onclick="window.aplicarValorV39 && window.aplicarValorV39(95)">R$ 95</button>
-        <button class="btn-valor-rapido" type="button" data-valor="100" onclick="window.aplicarValorV39 && window.aplicarValorV39(100)">R$ 100</button>
+        <button class="btn-valor-rapido" type="button" data-valor="10" onclick="window.selecionarValorV39 && window.selecionarValorV39(10)">R$ 10</button>
+        <button class="btn-valor-rapido" type="button" data-valor="15" onclick="window.selecionarValorV39 && window.selecionarValorV39(15)">R$ 15</button>
+        <button class="btn-valor-rapido" type="button" data-valor="20" onclick="window.selecionarValorV39 && window.selecionarValorV39(20)">R$ 20</button>
+        <button class="btn-valor-rapido" type="button" data-valor="25" onclick="window.selecionarValorV39 && window.selecionarValorV39(25)">R$ 25</button>
+        <button class="btn-valor-rapido" type="button" data-valor="30" onclick="window.selecionarValorV39 && window.selecionarValorV39(30)">R$ 30</button>
+        <button class="btn-valor-rapido" type="button" data-valor="35" onclick="window.selecionarValorV39 && window.selecionarValorV39(35)">R$ 35</button>
+        <button class="btn-valor-rapido" type="button" data-valor="40" onclick="window.selecionarValorV39 && window.selecionarValorV39(40)">R$ 40</button>
+        <button class="btn-valor-rapido" type="button" data-valor="45" onclick="window.selecionarValorV39 && window.selecionarValorV39(45)">R$ 45</button>
+        <button class="btn-valor-rapido" type="button" data-valor="50" onclick="window.selecionarValorV39 && window.selecionarValorV39(50)">R$ 50</button>
+        <button class="btn-valor-rapido" type="button" data-valor="55" onclick="window.selecionarValorV39 && window.selecionarValorV39(55)">R$ 55</button>
+        <button class="btn-valor-rapido" type="button" data-valor="60" onclick="window.selecionarValorV39 && window.selecionarValorV39(60)">R$ 60</button>
+        <button class="btn-valor-rapido" type="button" data-valor="65" onclick="window.selecionarValorV39 && window.selecionarValorV39(65)">R$ 65</button>
+        <button class="btn-valor-rapido" type="button" data-valor="70" onclick="window.selecionarValorV39 && window.selecionarValorV39(70)">R$ 70</button>
+        <button class="btn-valor-rapido" type="button" data-valor="75" onclick="window.selecionarValorV39 && window.selecionarValorV39(75)">R$ 75</button>
+        <button class="btn-valor-rapido" type="button" data-valor="80" onclick="window.selecionarValorV39 && window.selecionarValorV39(80)">R$ 80</button>
+        <button class="btn-valor-rapido" type="button" data-valor="85" onclick="window.selecionarValorV39 && window.selecionarValorV39(85)">R$ 85</button>
+        <button class="btn-valor-rapido" type="button" data-valor="90" onclick="window.selecionarValorV39 && window.selecionarValorV39(90)">R$ 90</button>
+        <button class="btn-valor-rapido" type="button" data-valor="95" onclick="window.selecionarValorV39 && window.selecionarValorV39(95)">R$ 95</button>
+        <button class="btn-valor-rapido" type="button" data-valor="100" onclick="window.selecionarValorV39 && window.selecionarValorV39(100)">R$ 100</button>
       </div>
       <div class="grid-2" style="align-items:end;">
         <div>
           <label for="input-valor-manual">Valor da entrega (R$)</label>
-          <input id="input-valor-manual" type="number" min="1" max="5000" step="0.5" placeholder="Deixe em branco ou digite o valor" />
+          <input id="input-valor-manual" type="number" min="1" max="5000" step="0.5" placeholder="Digite ou escolha o valor" />
         </div>
-        <button class="btn btn-green" type="button" id="btn-aplicar-valor-manual" onclick="window.aplicarValorInputV39 && window.aplicarValorInputV39()">
-          Aplicar Valor
+        <button class="btn btn-danger" type="button" id="btn-colocar-valor-manual" onclick="window.colocarValorInputV39 && window.colocarValorInputV39()">
+          Colocar Valor
         </button>
       </div>
     </section>
@@ -462,6 +487,7 @@
       const inputMinCliente = document.getElementById("input-min-cliente");
       const botoesValorRapido = Array.from(document.querySelectorAll(".btn-valor-rapido"));
       const inputValorManual = document.getElementById("input-valor-manual");
+      const statusEnvioValor = document.getElementById("status-envio-valor");
 
       const elCodigo = document.getElementById("mot-codigo");
       const elNome = document.getElementById("mot-nome");
@@ -518,6 +544,7 @@
       let modoTempo = lerStorageSeguro("32drive_modo_tempo", "auto");
       let minutoManualSelecionado = Number(lerStorageSeguro("32drive_min_manual", "6")) || 6;
       let valorManualSelecionado = 0;
+      let valorJaEnviado = false;
       let corridaEmAndamento = null;
       let chamadosLocais = lerChamadosLocaisFila();
       let idsOcultos = lerOcultosSeguro();
@@ -650,9 +677,29 @@
       }
 
       function atualizarVisualValorManual() {
+        const atual = obterValorEscolhido();
         botoesValorRapido.forEach(function (b) {
-          b.classList.toggle("ativo", Number(b.dataset.valor) === valorManualSelecionado && valorManualSelecionado > 0);
+          const valBtn = Number(b.dataset.valor);
+          const selecionado = atual !== null && valBtn === atual;
+          b.classList.remove("pendente", "enviado");
+          if (selecionado) {
+            b.classList.add(valorJaEnviado ? "enviado" : "pendente");
+          }
         });
+
+        if (statusEnvioValor) {
+          statusEnvioValor.classList.remove("vermelho", "verde");
+          if (valorJaEnviado && atual !== null) {
+            statusEnvioValor.classList.add("verde");
+            statusEnvioValor.textContent = "Valor " + formatarMoeda(atual) + " enviado ao cliente (confirmado em verde).";
+          } else if (atual !== null) {
+            statusEnvioValor.classList.add("vermelho");
+            statusEnvioValor.textContent = "Valor " + formatarMoeda(atual) + " colocado em vermelho — ainda não enviado ao cliente.";
+          } else {
+            statusEnvioValor.classList.add("vermelho");
+            statusEnvioValor.textContent = "Valor não enviado ao cliente (permanece em vermelho até clicar em Enviar ao Cliente).";
+          }
+        }
       }
 
       function resolverMinutosChegada() {
@@ -711,56 +758,96 @@
         gravarStorageSeguro("32drive_modo_tempo", "manual");
         atualizarVisualTempo();
         renderizarChamados(chamadosLocais);
-
-        if (corridaEmAndamento) {
-          corridaEmAndamento.tempoChegadaMin = minNum;
-          corridaEmAndamento.modoTempoChegada = "manual";
-          renderizarCorridaAndamento();
-          if (!String(corridaEmAndamento.docId || "").startsWith("SIM-") && !String(corridaEmAndamento.docId || "").startsWith("LOC-") && db && fs) {
-            try {
-              await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
-                tempoChegadaMin: minNum,
-                modoTempoChegada: "manual"
-              });
-            } catch (_) {}
-          }
-        }
-        if (msgMotorista) msgMotorista.textContent = "Tempo para chegar na casa do cliente: " + minNum + " min.";
+        if (msgMotorista) msgMotorista.textContent = "Tempo selecionado: " + minNum + " min.";
       };
 
       window.aplicarTempoInputV39 = async function () {
         await window.aplicarTempoV39(inputMinCliente ? inputMinCliente.value : "");
       };
 
-      window.aplicarValorV39 = async function (valor) {
+      window.selecionarValorV39 = function (valor) {
         const num = Number(valor);
-        if (!Number.isFinite(num) || num <= 0) {
-          if (msgMotorista) msgMotorista.textContent = "Escolha ou digite um valor válido.";
-          return;
-        }
+        if (!Number.isFinite(num) || num <= 0) return;
         const valorFinal = Number(num.toFixed(2));
         valorManualSelecionado = valorFinal;
+        valorJaEnviado = false;
         if (inputValorManual) inputValorManual.value = String(valorFinal);
         atualizarVisualValorManual();
         renderizarChamados(chamadosLocais);
-
-        if (corridaEmAndamento) {
-          corridaEmAndamento.valorBruto = valorFinal;
-          renderizarCorridaAndamento();
-          if (!String(corridaEmAndamento.docId || "").startsWith("SIM-") && !String(corridaEmAndamento.docId || "").startsWith("LOC-") && db && fs) {
-            try {
-              await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
-                valorBruto: valorFinal
-              });
-            } catch (_) {}
-          }
+        renderizarCorridaAndamento();
+        if (msgMotorista) {
+          msgMotorista.textContent = "Valor " + formatarMoeda(valorFinal) + " selecionado (em vermelho, pendente de envio).";
         }
-
-        if (msgMotorista) msgMotorista.textContent = "Valor definido em " + formatarMoeda(valorFinal) + ".";
       };
 
-      window.aplicarValorInputV39 = async function () {
-        await window.aplicarValorV39(inputValorManual ? inputValorManual.value : "");
+      window.colocarValorInputV39 = function () {
+        const num = Number(inputValorManual && inputValorManual.value);
+        if (!Number.isFinite(num) || num <= 0) {
+          if (msgMotorista) msgMotorista.textContent = "Digite um valor válido antes de colocar.";
+          return;
+        }
+        window.selecionarValorV39(num);
+      };
+
+      window.enviarAtualizacaoClienteV39 = async function () {
+        if (!corridaEmAndamento) {
+          if (msgMotorista) msgMotorista.textContent = "Aceite uma entrega primeiro antes de enviar ao cliente.";
+          return;
+        }
+        const perfil = salvarPerfil();
+        const tempoInfo = resolverMinutosChegada();
+        const valorFinal = obterValorEscolhido();
+        const chavePix = (perfil.chavePix || "").trim();
+
+        const dadosMotorista = {
+          codigo: perfil.codigo || "ENT-01",
+          nome: perfil.nome || "Entregador 32 Entrega",
+          modalidade: perfil.modalidade || "Carro",
+          veiculo: perfil.veiculo || "Veículo 32 Entrega",
+          placa: perfil.placa || "32E",
+          chavePix: chavePix
+        };
+
+        const atualizacao = Object.assign(
+          {
+            status: corridaEmAndamento.status || "Motorista a caminho",
+            motorista: dadosMotorista,
+            tempoChegadaMin: tempoInfo.minutos,
+            modoTempoChegada: tempoInfo.modo,
+            chavePixMotorista: chavePix,
+            enviadoAoCliente: true,
+            enviadoEmLocal: Date.now()
+          },
+          valorFinal !== null ? { valorBruto: valorFinal } : {}
+        );
+
+        corridaEmAndamento = Object.assign({}, corridaEmAndamento, atualizacao);
+        valorJaEnviado = true;
+        atualizarVisualValorManual();
+        renderizarCorridaAndamento();
+
+        if (String(corridaEmAndamento.docId || "").startsWith("SIM-") || String(corridaEmAndamento.docId || "").startsWith("LOC-") || !db || !fs) {
+          if (msgMotorista) {
+            msgMotorista.textContent = "Enviado ao cliente" + (valorFinal !== null ? " por " + formatarMoeda(valorFinal) : "") + " (confirmado em verde).";
+          }
+          return;
+        }
+
+        try {
+          await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), Object.assign({}, atualizacao, {
+            enviadoAoClienteEm: fs.serverTimestamp()
+          }));
+          if (msgMotorista) {
+            msgMotorista.textContent = "Enviado ao cliente" + (valorFinal !== null ? " por " + formatarMoeda(valorFinal) : "") + "! V40 notificado.";
+          }
+        } catch (erro) {
+          console.error(erro);
+          valorJaEnviado = false;
+          atualizarVisualValorManual();
+          if (msgMotorista) {
+            msgMotorista.textContent = "Erro ao enviar ao cliente (" + (erro.code || erro.message || "Firestore") + ").";
+          }
+        }
       };
 
       function limparPainelAndamento(msg) {
@@ -769,6 +856,8 @@
           salvarOcultos();
         }
         corridaEmAndamento = null;
+        valorJaEnviado = false;
+        atualizarVisualValorManual();
         if (secCorridaAndamento) secCorridaAndamento.style.display = "none";
         if (boxCorridaAndamento) boxCorridaAndamento.innerHTML = "";
         if (msg && msgMotorista) msgMotorista.textContent = msg;
@@ -805,16 +894,21 @@
         const c = corridaEmAndamento;
         const pixAtual = (c.chavePixMotorista || (elPix && elPix.value ? elPix.value : "")).trim();
         const modTxt = (c.motorista && c.motorista.modalidade) ? c.motorista.modalidade : (elModalidade ? elModalidade.value : "");
-        const temValor = Number(c.valorBruto || 0) > 0;
+        const valorMostrado = obterValorEscolhido() !== null ? obterValorEscolhido() : (Number(c.valorBruto || 0) > 0 ? Number(c.valorBruto) : null);
 
         let etapaHtml = "";
-        if (st === "Motorista a caminho" || st === "Aceita") {
+        if (st === "Aceita" || st === "Motorista a caminho") {
           etapaHtml =
             '<button class="btn btn-primary" type="button" data-etapa="No local de embarque">Cheguei na Casa do Cliente</button>';
         } else if (st === "No local de embarque") {
           etapaHtml =
             '<button class="btn btn-green" type="button" data-etapa="Em viagem">Fazer Entrega</button>';
         }
+
+        const botaoEnviarClienteHtml =
+          '<button class="btn ' + (valorJaEnviado ? 'btn-green' : 'btn-danger') + '" type="button" onclick="window.enviarAtualizacaoClienteV39 && window.enviarAtualizacaoClienteV39()">' +
+            (valorJaEnviado ? 'Enviado ao Cliente (Confirmado)' : 'Enviar ao Cliente' + (valorMostrado !== null ? ' (' + formatarMoeda(valorMostrado) + ')' : '')) +
+          '</button>';
 
         const botaoFinalizarHtml =
           '<button class="btn btn-accent" type="button" data-etapa="Finalizada">Finalizar Entrega</button>';
@@ -823,7 +917,9 @@
           '<div class="corrida-card corrida-ativa">' +
             '<div style="display:flex;justify-content:space-between;align-items:center;">' +
               '<strong>' + escaparHtml(c.codigo || "32E") + ' • ' + escaparHtml(c.passageiro || "Cliente") + '</strong>' +
-              (temValor ? '<span class="valor-destaque">' + formatarMoeda(c.valorBruto) + '</span>' : '<span class="tag">Sem valor definido</span>') +
+              (valorMostrado !== null
+                ? '<span class="valor-destaque ' + (valorJaEnviado ? 'enviado' : '') + '">' + formatarMoeda(valorMostrado) + '</span>'
+                : '<span class="tag">Sem valor</span>') +
             '</div>' +
             '<div>' +
               '<span class="tag">' + escaparHtml(st || "Em andamento") + '</span> ' +
@@ -831,6 +927,7 @@
               (modTxt ? '<span class="tag">' + escaparHtml(modTxt) + '</span> ' : '') +
               (c.tempoChegadaMin ? '<span class="tag">Chegada: ' + escaparHtml(c.tempoChegadaMin) + ' min</span>' : '') +
             '</div>' +
+            (c.respostaCliente ? '<div><strong>Resposta do Cliente:</strong> ' + escaparHtml(c.respostaCliente) + '</div>' : '') +
             '<div><strong>Casa do Cliente / Retirada:</strong> ' + escaparHtml(c.origem || "—") + '</div>' +
             '<div><strong>Destino da Entrega:</strong> ' + escaparHtml(c.destino || "—") + '</div>' +
             '<div><strong>Chave Pix enviada:</strong> ' + (pixAtual ? escaparHtml(pixAtual) : "Nenhuma chave enviada ainda") + '</div>' +
@@ -839,6 +936,7 @@
               '<a class="btn btn-outline" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkMapa(c.destino) + '">Mapa Destino</a>' +
             '</div>' +
             '<a class="btn btn-blue" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkRotaCompleta(c.origem, c.destino) + '">Abrir Rota Completa no Mapa</a>' +
+            botaoEnviarClienteHtml +
             etapaHtml +
             botaoFinalizarHtml +
           '</div>';
@@ -873,7 +971,7 @@
             });
             if (msgMotorista) msgMotorista.textContent = "Chave Pix enviada ao cliente da entrega!";
           } else {
-            if (msgMotorista) msgMotorista.textContent = "Chave Pix salva (" + chave + ") — será enviada ao aceitar a próxima entrega.";
+            if (msgMotorista) msgMotorista.textContent = "Chave Pix salva (" + chave + ") — será enviada ao enviar ao cliente.";
           }
         } catch (erro) {
           console.error(erro);
@@ -904,14 +1002,16 @@
               '<div class="corrida-card">' +
                 '<div style="display:flex;justify-content:space-between;align-items:center;">' +
                   '<strong>' + escaparHtml(c.codigo || "Entrega") + ' • ' + escaparHtml(c.passageiro || "Cliente") + '</strong>' +
-                  (valorMostrado !== null ? '<span class="valor-destaque">' + formatarMoeda(valorMostrado) + '</span>' : '<span class="tag">Definir valor</span>') +
+                  (valorMostrado !== null
+                    ? '<span class="valor-destaque ' + (valorJaEnviado ? 'enviado' : '') + '">' + formatarMoeda(valorMostrado) + '</span>'
+                    : '<span class="tag">Sem valor</span>') +
                 '</div>' +
                 '<div>' +
                   '<span class="tag">' + escaparHtml(c.pagamento || "Pix") + '</span> ' +
                   '<span class="tag">Chegada: ' + prev.minutos + ' min (' + prev.modo + ')</span>' +
                 '</div>' +
                 '<div><strong>Casa do Cliente:</strong> ' + escaparHtml(c.origem || "—") + '<br/><strong>Destino:</strong> ' + escaparHtml(c.destino || "—") + '</div>' +
-                '<button class="btn btn-accent" type="button" data-aceitar="' + escaparHtml(c.docId) + '">Aceitar Entrega' + (valorMostrado !== null ? ' (' + formatarMoeda(valorMostrado) + ')' : '') + '</button>' +
+                '<button class="btn btn-accent" type="button" data-aceitar="' + escaparHtml(c.docId) + '">Aceitar Entrega</button>' +
                 '<button class="btn btn-danger" type="button" data-recusar="' + escaparHtml(c.docId) + '">Não Aceitar</button>' +
               '</div>'
             );
@@ -956,7 +1056,6 @@
           return item.docId === docId;
         }) || {};
         const tempoInfo = resolverMinutosChegada();
-        const valorFinal = obterValorEscolhido();
 
         const dadosMotorista = {
           codigo: perfil.codigo || "ENT-01",
@@ -967,27 +1066,27 @@
           chavePix: perfil.chavePix || ""
         };
 
-        const payloadAtualizacao = Object.assign(
-          {
-            status: "Motorista a caminho",
-            motorista: dadosMotorista,
-            tempoChegadaMin: tempoInfo.minutos,
-            modoTempoChegada: tempoInfo.modo,
-            chavePixMotorista: perfil.chavePix || ""
-          },
-          valorFinal !== null ? { valorBruto: valorFinal } : {}
-        );
+        const payloadAceite = {
+          status: "Aceita",
+          motorista: dadosMotorista,
+          tempoChegadaMin: tempoInfo.minutos,
+          modoTempoChegada: tempoInfo.modo,
+          chavePixMotorista: perfil.chavePix || ""
+        };
+
+        valorJaEnviado = false;
+        atualizarVisualValorManual();
 
         if (String(docId).startsWith("SIM-") || String(docId).startsWith("LOC-")) {
           chamadosLocais = chamadosLocais.filter(function (item) {
             return item.docId !== docId;
           });
           gravarChamadosLocaisFila(chamadosLocais);
-          corridaEmAndamento = Object.assign({}, chamado, payloadAtualizacao);
+          corridaEmAndamento = Object.assign({}, chamado, payloadAceite);
           renderizarChamados(chamadosLocais);
           renderizarCorridaAndamento();
           if (msgMotorista) {
-            msgMotorista.textContent = "Entrega aceita" + (valorFinal !== null ? " por " + formatarMoeda(valorFinal) : "") + "! Chegada em " + tempoInfo.minutos + " min.";
+            msgMotorista.textContent = "Entrega aceita! Clique em Enviar ao Cliente para mandar a confirmação/valor.";
           }
           return;
         }
@@ -998,13 +1097,13 @@
         }
 
         try {
-          await fs.updateDoc(fs.doc(db, "corridas", docId), Object.assign({}, payloadAtualizacao, {
+          await fs.updateDoc(fs.doc(db, "corridas", docId), Object.assign({}, payloadAceite, {
             aceitaEm: fs.serverTimestamp()
           }));
-          corridaEmAndamento = Object.assign({ docId: docId }, chamado, payloadAtualizacao);
+          corridaEmAndamento = Object.assign({ docId: docId }, chamado, payloadAceite);
           renderizarCorridaAndamento();
           if (msgMotorista) {
-            msgMotorista.textContent = "Entrega aceita" + (valorFinal !== null ? " por " + formatarMoeda(valorFinal) : "") + "! Cliente avisado.";
+            msgMotorista.textContent = "Entrega aceita! Clique em Enviar ao Cliente para mandar o aceite e o valor.";
           }
         } catch (erro) {
           console.error(erro);
@@ -1084,8 +1183,10 @@
         inputValorManual.addEventListener("input", function () {
           const val = Number(inputValorManual.value);
           valorManualSelecionado = Number.isFinite(val) && val > 0 ? Number(val.toFixed(2)) : 0;
+          valorJaEnviado = false;
           atualizarVisualValorManual();
           renderizarChamados(chamadosLocais);
+          renderizarCorridaAndamento();
         });
       }
 
@@ -1129,7 +1230,7 @@
             snapshot.forEach(function (docSnap) {
               const d = docSnap.data();
               const st = String(d.status || "");
-              const assinatura = docSnap.id + "|" + st + "|" + String(d.origem || "") + "|" + String(d.destino || "") + "|" + String(d.valorBruto || "");
+              const assinatura = docSnap.id + "|" + st + "|" + String(d.origem || "") + "|" + String(d.destino || "") + "|" + String(d.valorBruto || "") + "|" + String(d.respostaCliente || "");
               const jaVisto = assinaturasVistas.has(assinatura);
               assinaturasVistas.add(assinatura);
 
@@ -1153,7 +1254,7 @@
 
             if (houveNovidadeDoCliente) {
               tocarBip(2);
-              if (msgMotorista) msgMotorista.textContent = "Nova mensagem/atualização do cliente! Bip emitido.";
+              if (msgMotorista) msgMotorista.textContent = "Nova mensagem/atualização! Bip emitido.";
             }
             primeiraCargaFirestore = false;
 
