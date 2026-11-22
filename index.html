@@ -209,6 +209,10 @@
       background: #059669;
       color: #ffffff;
     }
+    .btn-danger {
+      background: var(--red);
+      color: #ffffff;
+    }
     .status-msg { font-size: var(--f-label); font-weight: 900; color: #047857; text-align: center; min-height: 24px; }
     .erro-msg { font-size: var(--f-label); font-weight: 900; color: #b91c1c; text-align: center; min-height: 20px; }
     .corrida-box {
@@ -376,10 +380,13 @@
       let db = null;
       let fs = null;
       let corridaAtualId = localStorage.getItem("32drive_corrida_id") || "";
-      let corridaOcultaPasId = localStorage.getItem("32drive_pas_oculta_id") || "";
+      let telaLimpaManualmente = false;
       let unsubDocAtual = null;
+      let corridaAtualDados = null;
       let ultimoStatusAvisado = "";
       let ultimoResumoVoz = "Nenhuma entrega solicitada ainda.";
+
+      localStorage.removeItem("32drive_pas_oculta_id");
 
       function escaparHtml(str) {
         return String(str || "")
@@ -391,16 +398,6 @@
 
       function formatarMoeda(valor) {
         return "R$ " + Number(valor || 0).toFixed(2).replace(".", ",");
-      }
-
-      function normalizarTexto(txt) {
-        return String(txt || "")
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .replace(/[^a-z09\s]/g, " ")
-          .replace(/\s+/g, " ")
-          .trim();
       }
 
       function mostrarAvisoFirebase(texto) {
@@ -476,6 +473,54 @@
         } catch (_) {}
       };
 
+      window.confirmarValorClienteV40 = async function () {
+        if (!corridaAtualDados) return;
+        const valorFmt = Number(corridaAtualDados.valorBruto || 0) > 0 ? formatarMoeda(corridaAtualDados.valorBruto) : "combinado";
+        const respostaTexto = "Cliente aceitou a corrida por " + valorFmt;
+        corridaAtualDados.respostaCliente = respostaTexto;
+        corridaAtualDados.aceitoPeloCliente = true;
+        renderizarCorrida(corridaAtualDados, corridaAtualId);
+        if (msgPassageiro) msgPassageiro.textContent = respostaTexto + "!";
+
+        if (!db || !fs || !corridaAtualId || String(corridaAtualId).startsWith("LOC-") || String(corridaAtualId).startsWith("SIM-")) {
+          return;
+        }
+        try {
+          await fs.updateDoc(fs.doc(db, "corridas", corridaAtualId), {
+            respostaCliente: respostaTexto,
+            aceitoPeloCliente: true,
+            confirmadoClienteEm: fs.serverTimestamp()
+          });
+        } catch (erro) {
+          console.error(erro);
+          if (msgPassageiro) {
+            msgPassageiro.textContent = "Não foi possível gravar resposta (" + (erro.code || erro.message || "Firestore") + ").";
+          }
+        }
+      };
+
+      window.recusarValorClienteV40 = async function () {
+        if (!corridaAtualDados) return;
+        const respostaTexto = "Cliente não aceitou o valor";
+        corridaAtualDados.respostaCliente = respostaTexto;
+        corridaAtualDados.aceitoPeloCliente = false;
+        renderizarCorrida(corridaAtualDados, corridaAtualId);
+        if (msgPassageiro) msgPassageiro.textContent = respostaTexto + ".";
+
+        if (!db || !fs || !corridaAtualId || String(corridaAtualId).startsWith("LOC-") || String(corridaAtualId).startsWith("SIM-")) {
+          return;
+        }
+        try {
+          await fs.updateDoc(fs.doc(db, "corridas", corridaAtualId), {
+            respostaCliente: respostaTexto,
+            aceitoPeloCliente: false,
+            confirmadoClienteEm: fs.serverTimestamp()
+          });
+        } catch (erro) {
+          console.error(erro);
+        }
+      };
+
       function assinarDocumentoDireto(docId) {
         if (unsubDocAtual) {
           try { unsubDocAtual(); } catch (_) {}
@@ -486,6 +531,7 @@
         }
         unsubDocAtual = fs.onSnapshot(fs.doc(db, "corridas", docId), function (docSnap) {
           if (!docSnap.exists()) return;
+          telaLimpaManualmente = false;
           renderizarCorrida(docSnap.data(), docSnap.id);
         });
       }
@@ -496,11 +542,8 @@
           try { unsubDocAtual(); } catch (_) {}
           unsubDocAtual = null;
         }
-        if (corridaAtualId) {
-          corridaOcultaPasId = corridaAtualId;
-          localStorage.setItem("32drive_pas_oculta_id", corridaOcultaPasId);
-        }
         corridaAtualId = "";
+        corridaAtualDados = null;
         localStorage.removeItem("32drive_corrida_id");
         ultimoStatusAvisado = "";
         ultimoResumoVoz = msgFinal;
@@ -508,6 +551,7 @@
       }
 
       window.limparTelaCliente = function () {
+        telaLimpaManualmente = true;
         limparCorridaTela("Nenhuma entrega solicitada ainda.");
         if (msgPassageiro) msgPassageiro.textContent = "Tela limpa.";
       };
@@ -520,9 +564,7 @@
           return;
         }
 
-        if (idDoc && idDoc === corridaOcultaPasId) {
-          return;
-        }
+        corridaAtualDados = Object.assign({}, c, { docId: idDoc || corridaAtualId });
 
         const st = String(c.status || "");
         const foiRecusada = ["Recusada", "Cancelada", "Não aceita", "Nao aceita"].includes(st);
@@ -556,7 +598,7 @@
         const minutosChegada = Number(c.tempoChegadaMin || 0) || null;
         const modoChegada = c.modoTempoChegada || (c.tempoChegadaMin ? "entregador" : "");
         const valorDefinido = Number(c.valorBruto || 0) > 0;
-        const assinaturaAtual = st + "|" + String(c.valorBruto || "") + "|" + String(c.tempoChegadaMin || "") + "|" + String(c.chavePixMotorista || "");
+        const assinaturaAtual = st + "|" + String(c.valorBruto || "") + "|" + String(c.tempoChegadaMin || "") + "|" + String(c.chavePixMotorista || "") + "|" + String(c.respostaCliente || "");
 
         if (foiAceita && ultimoStatusAvisado !== assinaturaAtual) {
           ultimoStatusAvisado = assinaturaAtual;
@@ -572,6 +614,16 @@
           ? '<div class="alerta-aceita">Entrega aceita! O entregador confirmou seu pedido' +
               (valorDefinido ? ' por <strong>' + formatarMoeda(c.valorBruto) + '</strong>' : '') +
             '.</div>'
+          : "";
+
+        const acoesClienteHtml = foiAceita
+          ? '<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">' +
+              (c.respostaCliente
+                ? '<div style="font-weight:900;color:#047857;">Retorno: ' + escaparHtml(c.respostaCliente) + '</div>'
+                : '') +
+              '<button class="btn btn-green" type="button" onclick="window.confirmarValorClienteV40 && window.confirmarValorClienteV40()">Aceitar Corrida por ' + (valorDefinido ? formatarMoeda(c.valorBruto) : 'Valor Informado') + '</button>' +
+              '<button class="btn btn-danger" type="button" onclick="window.recusarValorClienteV40 && window.recusarValorClienteV40()">Não Aceitar Valor</button>' +
+            '</div>'
           : "";
 
         const chegadaHtml = minutosChegada
@@ -609,11 +661,12 @@
         boxCorridaAtiva.innerHTML =
           alertaAceitaHtml +
           chegadaHtml +
-          "<div><strong>Status:</strong> " + escaparHtml(st || "Solicitada") + (valorDefinido ? " • <strong>Valor:</strong> " + formatarMoeda(c.valorBruto) : " • <strong>Valor:</strong> A definir pelo entregador") + "</div>" +
+          "<div><strong>Código:</strong> " + escaparHtml(c.codigo || idDoc) + " • <strong>Status:</strong> " + escaparHtml(st || "Solicitada") + (valorDefinido ? " • <strong>Valor:</strong> " + formatarMoeda(c.valorBruto) : " • <strong>Valor:</strong> A definir pelo entregador") + "</div>" +
           "<div><strong>Pagamento:</strong> " + escaparHtml(c.pagamento || "Pix") + "</div>" +
           "<div><strong>Retirada:</strong> " + escaparHtml(c.origem || "—") + "<br/><strong>Destino:</strong> " + escaparHtml(c.destino || "—") + "</div>" +
           "<div><strong>Entregador:</strong> " + motTexto + "</div>" +
-          pixHtml;
+          pixHtml +
+          acoesClienteHtml;
 
         const btnCopiar = document.getElementById("btn-copiar-pix");
         if (btnCopiar && chavePix) {
@@ -649,9 +702,8 @@
           return;
         }
 
+        telaLimpaManualmente = false;
         localStorage.setItem("32drive_pas_nome", nome);
-        corridaOcultaPasId = "";
-        localStorage.removeItem("32drive_pas_oculta_id");
 
         const codigo = "32E-" + Math.floor(1000 + Math.random() * 9000);
         const idLocal = "LOC-" + Date.now();
@@ -713,47 +765,47 @@
 
           mostrarAvisoFirebase("");
 
-          if (corridaAtualId) {
+          if (corridaAtualId && !String(corridaAtualId).startsWith("LOC-")) {
             assinarDocumentoDireto(corridaAtualId);
           }
 
           fs.onSnapshot(fs.collection(db, "corridas"), function (snapshot) {
-            let encontrada = null;
-            let encontradaId = "";
+            if (telaLimpaManualmente) return;
+
+            let docPorId = null;
+            let docPorIdKey = "";
+            let maisRecenteAtivo = null;
+            let maisRecenteAtivoKey = "";
             let maisRecenteTs = -1;
-            const nomeDigitado = normalizarTexto(elNome ? elNome.value : "");
-            const nomeSalvoNorm = normalizarTexto(localStorage.getItem("32drive_pas_nome") || "");
-            const nomeAlvo = nomeDigitado || nomeSalvoNorm;
 
             snapshot.forEach(function (docSnap) {
-              if (docSnap.id === corridaOcultaPasId) return;
               const d = docSnap.data();
-              const ts = Number(d.criadoEmTimestamp || 0);
-              const bateId = corridaAtualId && docSnap.id === corridaAtualId;
-              const bateNome = nomeAlvo && normalizarTexto(d.passageiro) === nomeAlvo;
+              const st = String(d.status || "");
+              if (st === "Finalizada" || st === "Cancelada") return;
 
-              if (bateId) {
-                encontrada = d;
-                encontradaId = docSnap.id;
+              if (corridaAtualId && docSnap.id === corridaAtualId) {
+                docPorId = d;
+                docPorIdKey = docSnap.id;
+              }
+
+              const ts = Number(d.criadoEmTimestamp || 0);
+              if (ts >= maisRecenteTs) {
                 maisRecenteTs = ts;
-              } else if (!encontrada && bateNome && ts >= maisRecenteTs) {
-                maisRecenteTs = ts;
-                encontrada = d;
-                encontradaId = docSnap.id;
-              } else if (!encontrada && (!corridaAtualId || String(corridaAtualId).startsWith("LOC-")) && !nomeAlvo && ts >= maisRecenteTs) {
-                maisRecenteTs = ts;
-                encontrada = d;
-                encontradaId = docSnap.id;
+                maisRecenteAtivo = d;
+                maisRecenteAtivoKey = docSnap.id;
               }
             });
 
-            if (encontrada && encontradaId) {
-              if (corridaAtualId !== encontradaId) {
-                corridaAtualId = encontradaId;
-                localStorage.setItem("32drive_corrida_id", encontradaId);
-                assinarDocumentoDireto(encontradaId);
+            const escolhido = docPorId || maisRecenteAtivo;
+            const escolhidoId = docPorIdKey || maisRecenteAtivoKey;
+
+            if (escolhido && escolhidoId) {
+              if (corridaAtualId !== escolhidoId) {
+                corridaAtualId = escolhidoId;
+                localStorage.setItem("32drive_corrida_id", escolhidoId);
+                assinarDocumentoDireto(escolhidoId);
               }
-              renderizarCorrida(encontrada, encontradaId);
+              renderizarCorrida(escolhido, escolhidoId);
             }
           });
         } catch (erro) {
