@@ -2,870 +2,322 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
-  <meta name="theme-color" content="#ffffff" />
-  <link rel="manifest" href="manifest-passageiro.json?v=40" />
-  <link rel="icon" type="image/png" href="icon-512.png" />
-  <link rel="apple-touch-icon" href="icon-512.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>32 Entrega — Cliente V40</title>
   <style>
-    :root {
-      --bg: #ffffff;
-      --card: #f8fafc;
-      --navy-header: linear-gradient(145deg, #0b192c 0%, #13294b 75%, #0c1e38 100%);
-      --border: #cbd5e1;
-      --text: #0f172a;
-      --muted: #334155;
-      --accent: #f59e0b;
-      --green: #059669;
-      --blue: #0369a1;
-      --red: #b91c1c;
-      --f-base: 19px;
-      --f-label: 18px;
-      --f-btn: 19px;
-      --f-title: 22px;
-    }
-    body.fonte-grande {
-      --f-base: 23px;
-      --f-label: 22px;
-      --f-btn: 22px;
-      --f-title: 26px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      font-size: var(--f-base);
-      line-height: 1.5;
-    }
-    header {
-      background: var(--navy-header);
-      border-bottom: 4px solid var(--accent);
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      color: #ffffff;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-    .brand img {
-      width: 50px;
-      height: 50px;
-      border-radius: 12px;
-      border: 2px solid var(--accent);
-      background: #ffffff;
-      flex-shrink: 0;
-    }
-    h1 { font-size: 21px; font-weight: 900; color: var(--accent); }
-    .subtitle { font-size: 15px; color: #e2e8f0; font-weight: 600; }
-    .header-acoes { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .btn-colar-topo {
-      background: #ffffff;
-      color: #0f172a;
-      border: 2px solid var(--accent);
-      border-radius: 10px;
-      padding: 8px 11px;
-      font-size: 15px;
-      font-weight: 900;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      white-space: nowrap;
-    }
-    .btn-colar-topo:active {
-      background: var(--accent);
-      color: #0f172a;
-    }
-    .btn-acess {
-      background: #ffffff;
-      color: #0f172a;
-      border: 2px solid var(--accent);
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 16px;
-      font-weight: 900;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .btn-acess.ativo {
-      background: var(--accent);
-      color: #0f172a;
-    }
-    main {
-      flex: 1;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      max-width: 720px;
-      width: 100%;
-      margin: 0 auto;
-    }
-    .box-colar-rapido {
-      display: none;
+      font-family: system-ui, -apple-system, sans-serif;
       background: #f8fafc;
-      border: 2px solid var(--accent);
-      border-radius: 14px;
-      padding: 12px;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .box-colar-rapido.ativo { display: flex; }
-    .box-colar-rapido textarea {
-      width: 100%;
-      min-height: 90px;
-      padding: 12px;
-      border-radius: 10px;
-      border: 2px solid #64748b;
-      background: #ffffff;
       color: #0f172a;
-      font-size: 15px;
-      font-family: monospace;
-      resize: vertical;
+      margin: 0;
+      padding: 16px;
     }
-    .aviso-firebase {
-      display: none;
-      background: #fffbeb;
-      border: 2px solid #d97706;
-      color: #78350f;
-      border-radius: 14px;
-      padding: 14px;
-      font-size: var(--f-label);
-      font-weight: 700;
-    }
-    .diag-box {
-      background: #0f172a;
-      color: #f8fafc;
-      border: 2px solid var(--accent);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-size: 14px;
-      font-family: monospace;
-      word-break: break-all;
-    }
-    .card {
-      background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: 18px;
-      padding: 18px;
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 14px;
-      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
     }
-    .card-header {
+    .topo {
+      background: #0b192c;
+      color: #ffffff;
+      border-bottom: 4px solid #f59e0b;
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .topo h1 {
+      margin: 0;
+      font-size: 20px;
+      color: #f59e0b;
+    }
+    .diag {
+      background: #0f172a;
+      color: #f8fafc;
+      border: 2px solid #f59e0b;
+      border-radius: 12px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 14px;
+      word-break: break-all;
+    }
+    .card {
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .card-topo {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      flex-wrap: wrap;
     }
-    .card-title { font-size: var(--f-title); font-weight: 900; color: #0f172a; }
-    label.campo-lbl {
-      font-size: var(--f-label);
-      font-weight: 900;
-      color: #0f172a;
-      margin-bottom: 6px;
+    label {
+      font-weight: 800;
+      font-size: 15px;
       display: block;
     }
     input, select {
       width: 100%;
-      min-height: 56px;
-      padding: 14px 16px;
-      border-radius: 14px;
+      box-sizing: border-box;
+      padding: 12px;
       border: 2px solid #64748b;
+      border-radius: 10px;
+      font-size: 16px;
       background: #ffffff;
       color: #0f172a;
-      font-size: var(--f-base);
-      font-weight: 700;
     }
-    input::placeholder { color: #64748b; }
-    .btn {
+    button {
       width: 100%;
-      min-height: 58px;
-      padding: 15px 18px;
+      padding: 14px;
       border: none;
-      border-radius: 14px;
-      font-size: var(--f-btn);
-      font-weight: 900;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 800;
       cursor: pointer;
     }
-    .btn-sm {
-      min-height: 46px;
-      padding: 10px 14px;
-      font-size: 16px;
+    .btn-mini {
       width: auto;
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 10px;
     }
-    .btn-outline {
-      background: #ffffff;
-      color: #0f172a;
-      border: 2px solid #64748b;
-    }
-    .btn-accent {
-      background: var(--accent);
-      color: #0f172a;
-      border: 2px solid #b45309;
-    }
-    .btn-green {
-      background: #059669;
-      color: #ffffff;
-    }
-    .btn-danger {
-      background: var(--red);
-      color: #ffffff;
-    }
-    .status-msg { font-size: var(--f-label); font-weight: 900; color: #047857; text-align: center; min-height: 24px; }
-    .erro-msg { font-size: var(--f-label); font-weight: 900; color: #b91c1c; text-align: center; min-height: 20px; }
-    .corrida-box {
-      background: #ffffff;
-      border: 2px solid #94a3b8;
-      border-radius: 14px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      color: #0f172a;
-    }
-    .alerta-aceita {
-      background: #ecfdf5;
+    .btn-ouro { background: #f59e0b; color: #0f172a; }
+    .btn-cinza { background: #e2e8f0; color: #0f172a; border: 1px solid #94a3b8; }
+    .box-pedido {
       border: 2px solid #059669;
+      background: #ecfdf5;
       color: #064e3b;
       border-radius: 12px;
       padding: 14px;
-      font-weight: 900;
-      font-size: var(--f-label);
-    }
-    .alerta-recusa {
-      background: #fef2f2;
-      border: 2px solid #dc2626;
-      color: #7f1d1d;
-      border-radius: 12px;
-      padding: 14px;
-      font-weight: 900;
-      font-size: var(--f-label);
-    }
-    .chegada-destaque {
-      background: #fffbeb;
-      border: 2px solid #d97706;
-      color: #78350f;
-      border-radius: 12px;
-      padding: 14px;
-      font-weight: 900;
-      font-size: var(--f-label);
-    }
-    .pix-box {
-      background: #f0f9ff;
-      border: 2px solid #0284c7;
-      border-radius: 12px;
-      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      color: #0c4a6e;
+      gap: 8px;
     }
-    .pix-chave-linha {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      background: #ffffff;
-      border: 2px solid #0284c7;
-      border-radius: 10px;
-      padding: 12px;
-      font-weight: 900;
-      word-break: break-all;
-      color: #0f172a;
+    .msg {
+      font-weight: 800;
+      color: #047857;
+      min-height: 22px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="brand">
-      <img src="icon-512.png" alt="32 Entrega" />
-      <div>
-        <h1>32 Entrega — Cliente</h1>
-        <div class="subtitle">V40 • Cassino &amp; Rio Grande</div>
-      </div>
-    </div>
-    <div class="header-acoes">
-      <button class="btn-colar-topo" type="button" id="btn-colar-topo" onclick="window.acionarColarTopo && window.acionarColarTopo()" title="Colar texto ou código">
-        <span>📥</span>
-        <span id="txt-colar-topo">Colar</span>
-      </button>
-      <button class="btn-acess" type="button" id="btn-fonte-grande" onclick="window.alternarFonteGrande && window.alternarFonteGrande()" aria-pressed="false">
-        Letra A+
-      </button>
-    </div>
-  </header>
-
-  <main>
-    <div class="box-colar-rapido" id="box-colar-rapido">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-        <strong style="font-size:15px;color:#b45309;">Área para Colar</strong>
-        <button class="btn btn-outline btn-sm" type="button" id="btn-fechar-colar" onclick="window.fecharBoxColar && window.fecharBoxColar()">Fechar</button>
-      </div>
-      <textarea id="area-colar-texto" placeholder="Cole aqui o texto ou código da área de transferência..."></textarea>
+  <div class="wrap">
+    <div class="topo">
+      <h1>32 Entrega — Cliente V40</h1>
+      <div>Cassino &amp; Rio Grande</div>
     </div>
 
-    <div class="aviso-firebase" id="aviso-firebase"></div>
+    <div class="diag" id="diag">Diag V40: iniciando...</div>
 
-    <section class="card">
-      <div class="card-header">
-        <div class="card-title">1. Pedir Entrega</div>
-        <button class="btn btn-outline btn-sm" type="button" id="btn-ler-voz" onclick="window.lerResumoVoz && window.lerResumoVoz()">
-          Ouvir Resumo
-        </button>
+    <div class="card">
+      <label for="cli-nome">Seu Nome</label>
+      <input id="cli-nome" type="text" placeholder="Ex: Cliente" value="Cliente" />
+
+      <label for="cli-origem">Endereço de Retirada</label>
+      <input id="cli-origem" type="text" placeholder="Ex: Rua Ijuí, 654" />
+
+      <label for="cli-destino">Endereço de Entrega</label>
+      <input id="cli-destino" type="text" placeholder="Ex: Rua Bagé, 234" />
+
+      <label for="cli-pagamento">Pagamento</label>
+      <select id="cli-pagamento">
+        <option value="Pix">Pix</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Cartão">Cartão</option>
+      </select>
+
+      <button class="btn-ouro" type="button" id="btn-chamar">Chamar Entregador</button>
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-topo">
+        <strong>Sua Entrega</strong>
+        <button class="btn-cinza btn-mini" type="button" id="btn-limpar">Encerrar / Limpar</button>
       </div>
+      <div id="detalhe-pedido">Nenhum pedido ativo no momento.</div>
+    </div>
+  </div>
 
-      <div>
-        <label class="campo-lbl" for="pas-nome">Seu Nome</label>
-        <input id="pas-nome" type="text" placeholder="Como podemos te chamar?" />
-      </div>
+  <script type="module">
+    const diagEl = document.getElementById("diag");
+    const msgEl = document.getElementById("msg");
+    const detalheEl = document.getElementById("detalhe-pedido");
+    const nomeEl = document.getElementById("cli-nome");
+    const origemEl = document.getElementById("cli-origem");
+    const destinoEl = document.getElementById("cli-destino");
+    const pagEl = document.getElementById("cli-pagamento");
+    const btnChamar = document.getElementById("btn-chamar");
+    const btnLimpar = document.getElementById("btn-limpar");
 
-      <div>
-        <label class="campo-lbl" for="pas-origem">Onde buscar a entrega?</label>
-        <input id="pas-origem" type="text" placeholder="Digite a rua, número e bairro" />
-      </div>
+    let db = null;
+    let fs = null;
+    let unsubDoc = null;
+    let corridaAtualId = localStorage.getItem("v40_corrida_atual_id") || "";
 
-      <div>
-        <label class="campo-lbl" for="pas-destino">Onde entregar?</label>
-        <input id="pas-destino" type="text" placeholder="Digite o endereço de entrega (rua, número, bairro)" />
-      </div>
+    function setDiag(t) {
+      if (diagEl) diagEl.textContent = t;
+    }
 
-      <div>
-        <label class="campo-lbl" for="pas-pagamento">Como você vai pagar?</label>
-        <select id="pas-pagamento">
-          <option value="Pix">Pix</option>
-          <option value="Dinheiro">Dinheiro</option>
-          <option value="Cartão">Cartão</option>
-        </select>
-      </div>
+    function setMsg(t) {
+      if (msgEl) msgEl.textContent = t;
+    }
 
-      <div class="erro-msg" id="erro-rota"></div>
+    function esc(s) {
+      return String(s || "").replace(/[&<>"']/g, function (m) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m];
+      });
+    }
 
-      <button class="btn btn-accent" type="button" id="btn-solicitar-corrida" onclick="window.solicitarCorrida && window.solicitarCorrida()">
-        Chamar Entregador
-      </button>
-      <div class="status-msg" id="msg-passageiro"></div>
-    </section>
+    function formatarMoeda(v) {
+      const n = Number(v);
+      return Number.isFinite(n) && n > 0 ? "R$ " + n.toFixed(2).replace(".", ",") : "A definir pelo entregador";
+    }
 
-    <section class="card">
-      <div class="card-header">
-        <div class="card-title">2. Sua Entrega</div>
-        <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-corrida" onclick="window.limparTelaCliente && window.limparTelaCliente()">
-          Limpar Tela
-        </button>
-      </div>
-      <div class="diag-box" id="diag-ao-vivo">Diag: aguardando conexão...</div>
-      <div id="box-corrida-ativa" class="corrida-box">
-        Nenhuma entrega solicitada ainda.
-      </div>
-    </section>
-  </main>
-
-  <script>
-    (function () {
-      const avisoFirebase = document.getElementById("aviso-firebase");
-      const msgPassageiro = document.getElementById("msg-passageiro");
-      const erroRota = document.getElementById("erro-rota");
-      const boxCorridaAtiva = document.getElementById("box-corrida-ativa");
-      const diagAoVivo = document.getElementById("diag-ao-vivo");
-      const elNome = document.getElementById("pas-nome");
-      const elOrigem = document.getElementById("pas-origem");
-      const elDestino = document.getElementById("pas-destino");
-      const elPagamento = document.getElementById("pas-pagamento");
-      const btnFonteGrande = document.getElementById("btn-fonte-grande");
-      const txtColarTopo = document.getElementById("txt-colar-topo");
-      const boxColarRapido = document.getElementById("box-colar-rapido");
-      const areaColarTexto = document.getElementById("area-colar-texto");
-
-      let db = null;
-      let fs = null;
-      let corridaAtualId = localStorage.getItem("32drive_corrida_id") || "";
-      let corridaAtualCodigo = localStorage.getItem("32drive_corrida_codigo") || "";
-      let telaLimpaManualmente = false;
-      let unsubDocAtual = null;
-      let corridaAtualDados = null;
-      let ultimoStatusAvisado = "";
-      let ultimoResumoVoz = "Nenhuma entrega solicitada ainda.";
-
-      localStorage.removeItem("32drive_pas_oculta_id");
-
-      function setDiag(txt) {
-        if (diagAoVivo) diagAoVivo.textContent = txt;
+    function renderPedido(docId, d) {
+      if (!detalheEl) return;
+      if (!docId || !d) {
+        detalheEl.innerHTML = "Nenhum pedido ativo no momento.";
+        setDiag("Diag V40: sem pedido ativo");
+        return;
       }
 
-      function escaparHtml(str) {
-        return String(str || "")
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
+      const motNome = (d.motorista && d.motorista.nome) ? d.motorista.nome : "Aguardando entregador aceitar...";
+      const pixChave = d.chavePixMotorista || (d.motorista && d.motorista.chavePix) || "";
+      const valTxt = formatarMoeda(d.valorBruto);
+
+      setDiag(
+        "Diag V40: ID=" + docId +
+        " | cod=" + (d.codigo || "") +
+        " | st=" + (d.status || "") +
+        " | val=" + (d.valorBruto || "") +
+        " | mot=" + (d.motorista && d.motorista.nome ? d.motorista.nome : "")
+      );
+
+      detalheEl.innerHTML =
+        '<div class="box-pedido">' +
+          '<div><strong>Código:</strong> ' + esc(d.codigo || "") + ' • <strong>Status:</strong> <strong>' + esc(d.status || "") + '</strong></div>' +
+          '<div><strong>Valor:</strong> <strong>' + esc(valTxt) + '</strong></div>' +
+          '<div><strong>Pagamento:</strong> ' + esc(d.pagamento || "Pix") + '</div>' +
+          '<div><strong>Retirada:</strong> ' + esc(d.origem || "") + '</div>' +
+          '<div><strong>Destino:</strong> ' + esc(d.destino || "") + '</div>' +
+          '<div><strong>Entregador:</strong> ' + esc(motNome) + '</div>' +
+          '<div><strong>Pix:</strong> ' + (pixChave ? esc(pixChave) : "Aguardando chave Pix...") + '</div>' +
+        '</div>';
+    }
+
+    function escutarPedido(docId) {
+      if (unsubDoc) {
+        unsubDoc();
+        unsubDoc = null;
       }
-
-      function formatarMoeda(valor) {
-        return "R$ " + Number(valor || 0).toFixed(2).replace(".", ",");
+      if (!docId || !db || !fs) {
+        renderPedido("", null);
+        return;
       }
-
-      function mostrarAvisoFirebase(texto) {
-        if (!avisoFirebase) return;
-        avisoFirebase.textContent = texto;
-        avisoFirebase.style.display = texto ? "block" : "none";
-      }
-
-      function salvarChamadoLocal(corrida) {
-        try {
-          const atuais = JSON.parse(localStorage.getItem("32entrega_chamados_fila") || "[]");
-          const lista = Array.isArray(atuais) ? atuais.filter(function (item) { return item.docId !== corrida.docId; }) : [];
-          lista.unshift(corrida);
-          localStorage.setItem("32entrega_chamados_fila", JSON.stringify(lista.slice(0, 20)));
-        } catch (_) {}
-      }
-
-      window.acionarColarTopo = async function () {
-        if (boxColarRapido) boxColarRapido.classList.add("ativo");
-        try {
-          if (navigator.clipboard && navigator.clipboard.readText) {
-            const texto = await navigator.clipboard.readText();
-            if (texto) {
-              if (areaColarTexto) areaColarTexto.value = texto;
-              if (document.activeElement && (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA")) {
-                document.activeElement.value = texto;
-              }
-              if (txtColarTopo) txtColarTopo.textContent = "Colado!";
-              if (msgPassageiro) msgPassageiro.textContent = "Conteúdo colado da área de transferência!";
-              setTimeout(function () {
-                if (txtColarTopo) txtColarTopo.textContent = "Colar";
-              }, 2000);
-              return;
-            }
-          }
-        } catch (_) {}
-        if (areaColarTexto) areaColarTexto.focus();
-        if (msgPassageiro) msgPassageiro.textContent = "Área de colar aberta: toque e cole aqui.";
-      };
-
-      window.fecharBoxColar = function () {
-        if (boxColarRapido) boxColarRapido.classList.remove("ativo");
-      };
-
-      const nomeSalvo = localStorage.getItem("32drive_pas_nome") || "";
-      if (nomeSalvo && elNome) elNome.value = nomeSalvo;
-
-      const fonteGrandeSalva = localStorage.getItem("32drive_fonte_grande") === "true";
-      function aplicarFonteGrande(ativo) {
-        document.body.classList.toggle("fonte-grande", ativo);
-        if (btnFonteGrande) {
-          btnFonteGrande.classList.toggle("ativo", ativo);
-          btnFonteGrande.setAttribute("aria-pressed", String(ativo));
-        }
-        localStorage.setItem("32drive_fonte_grande", String(ativo));
-      }
-      aplicarFonteGrande(fonteGrandeSalva);
-
-      window.alternarFonteGrande = function () {
-        aplicarFonteGrande(!document.body.classList.contains("fonte-grande"));
-      };
-
-      window.lerResumoVoz = function () {
-        const texto = ultimoResumoVoz || (boxCorridaAtiva ? boxCorridaAtiva.innerText : "") || "Nenhuma entrega solicitada ainda.";
-        if (msgPassageiro) msgPassageiro.textContent = "Resumo: " + texto;
-        try {
-          if ("speechSynthesis" in window) {
-            window.speechSynthesis.cancel();
-            const fala = new SpeechSynthesisUtterance(texto);
-            fala.lang = "pt-BR";
-            window.speechSynthesis.speak(fala);
-          }
-        } catch (_) {}
-      };
-
-      window.confirmarValorClienteV40 = async function () {
-        if (!corridaAtualDados) return;
-        const valorFmt = Number(corridaAtualDados.valorBruto || 0) > 0 ? formatarMoeda(corridaAtualDados.valorBruto) : "combinado";
-        const respostaTexto = "Cliente aceitou a corrida por " + valorFmt;
-        corridaAtualDados.respostaCliente = respostaTexto;
-        corridaAtualDados.aceitoPeloCliente = true;
-        renderizarCorrida(corridaAtualDados, corridaAtualId);
-        if (msgPassageiro) msgPassageiro.textContent = respostaTexto + "!";
-
-        if (!db || !fs || !corridaAtualId || String(corridaAtualId).startsWith("LOC-") || String(corridaAtualId).startsWith("SIM-")) {
+      unsubDoc = fs.onSnapshot(fs.doc(db, "corridas", docId), function (snap) {
+        if (!snap.exists()) {
+          corridaAtualId = "";
+          localStorage.removeItem("v40_corrida_atual_id");
+          renderPedido("", null);
           return;
         }
-        try {
-          await fs.updateDoc(fs.doc(db, "corridas", corridaAtualId), {
-            respostaCliente: respostaTexto,
-            aceitoPeloCliente: true,
-            confirmadoClienteEm: fs.serverTimestamp()
-          });
-        } catch (erro) {
-          console.error(erro);
-          if (msgPassageiro) {
-            msgPassageiro.textContent = "Não foi possível gravar resposta (" + (erro.code || erro.message || "Firestore") + ").";
-          }
-        }
-      };
+        const d = snap.data();
+        renderPedido(snap.id, d);
+      }, function (err) {
+        setDiag("Diag V40 ERR snapshot: " + (err.code || err.message));
+      });
+    }
 
-      window.recusarValorClienteV40 = async function () {
-        if (!corridaAtualDados) return;
-        const respostaTexto = "Cliente não aceitou o valor";
-        corridaAtualDados.respostaCliente = respostaTexto;
-        corridaAtualDados.aceitoPeloCliente = false;
-        renderizarCorrida(corridaAtualDados, corridaAtualId);
-        if (msgPassageiro) msgPassageiro.textContent = respostaTexto + ".";
-
-        if (!db || !fs || !corridaAtualId || String(corridaAtualId).startsWith("LOC-") || String(corridaAtualId).startsWith("SIM-")) {
+    if (btnChamar) {
+      btnChamar.onclick = async function () {
+        if (!db || !fs) {
+          setMsg("Firebase ainda não conectado.");
           return;
         }
-        try {
-          await fs.updateDoc(fs.doc(db, "corridas", corridaAtualId), {
-            respostaCliente: respostaTexto,
-            aceitoPeloCliente: false,
-            confirmadoClienteEm: fs.serverTimestamp()
-          });
-        } catch (erro) {
-          console.error(erro);
-        }
-      };
-
-      function assinarDocumentoDireto(docId) {
-        if (unsubDocAtual) {
-          try { unsubDocAtual(); } catch (_) {}
-          unsubDocAtual = null;
-        }
-        if (!db || !fs || !docId || String(docId).startsWith("LOC-") || String(docId).startsWith("SIM-")) {
-          return;
-        }
-        unsubDocAtual = fs.onSnapshot(fs.doc(db, "corridas", docId), function (docSnap) {
-          if (!docSnap.exists()) return;
-          telaLimpaManualmente = false;
-          const data = docSnap.data();
-          setDiag("DOC " + docSnap.id + " | cod=" + (data.codigo || "") + " | st=" + (data.status || "") + " | val=" + (data.valorBruto || "") + " | mot=" + ((data.motorista && data.motorista.nome) || ""));
-          renderizarCorrida(data, docSnap.id);
-        }, function (err) {
-          setDiag("ERR docSnapshot: " + (err.code || err.message));
-        });
-      }
-
-      function limparCorridaTela(mensagem) {
-        const msgFinal = mensagem || "Nenhuma entrega solicitada ainda.";
-        if (unsubDocAtual) {
-          try { unsubDocAtual(); } catch (_) {}
-          unsubDocAtual = null;
-        }
-        corridaAtualId = "";
-        corridaAtualCodigo = "";
-        corridaAtualDados = null;
-        localStorage.removeItem("32drive_corrida_id");
-        localStorage.removeItem("32drive_corrida_codigo");
-        ultimoStatusAvisado = "";
-        ultimoResumoVoz = msgFinal;
-        if (boxCorridaAtiva) boxCorridaAtiva.innerHTML = escaparHtml(msgFinal);
-      }
-
-      window.limparTelaCliente = function () {
-        telaLimpaManualmente = true;
-        limparCorridaTela("Nenhuma entrega solicitada ainda.");
-        if (msgPassageiro) msgPassageiro.textContent = "Tela limpa.";
-      };
-
-      function renderizarCorrida(c, docId) {
-        const idDoc = docId || "";
-        if (!c || !boxCorridaAtiva) {
-          if (boxCorridaAtiva) boxCorridaAtiva.innerHTML = "Nenhuma entrega solicitada ainda.";
-          ultimoResumoVoz = "Nenhuma entrega solicitada ainda.";
-          return;
-        }
-
-        if (c.codigo) {
-          corridaAtualCodigo = String(c.codigo);
-          localStorage.setItem("32drive_corrida_codigo", corridaAtualCodigo);
-        }
-
-        corridaAtualDados = Object.assign({}, c, { docId: idDoc || corridaAtualId });
-
-        const st = String(c.status || "");
-        const foiRecusada = ["Recusada", "Cancelada", "Não aceita", "Nao aceita"].includes(st);
-        const foiFinalizada = st === "Finalizada";
-
-        if (foiFinalizada) {
-          limparCorridaTela("Entrega finalizada pelo entregador.");
-          if (msgPassageiro) msgPassageiro.textContent = "Entrega finalizada!";
-          return;
-        }
-
-        if (foiRecusada) {
-          const assinaturaRecusa = "RECUSA|" + st + "|" + String(c.motivoRecusa || "");
-          if (ultimoStatusAvisado !== assinaturaRecusa) {
-            ultimoStatusAvisado = assinaturaRecusa;
-            if (msgPassageiro) msgPassageiro.textContent = "O entregador não aceitou / cancelou este pedido.";
-          }
-          ultimoResumoVoz = "O entregador informou que não aceitou este pedido.";
-          boxCorridaAtiva.innerHTML =
-            '<div class="alerta-recusa">Entrega não aceita / cancelada pelo entregador' +
-              (c.motivoRecusa ? ': ' + escaparHtml(c.motivoRecusa) : '.') +
-            '</div>' +
-            "<div><strong>Status:</strong> " + escaparHtml(st) + "</div>" +
-            "<div><strong>Retirada:</strong> " + escaparHtml(c.origem || "—") + "<br/><strong>Destino:</strong> " + escaparHtml(c.destino || "—") + "</div>";
-          return;
-        }
-
-        const foiAceita = Boolean(c.motorista && c.motorista.nome) ||
-          ["Aceita", "Motorista a caminho", "No local de embarque", "Em viagem"].includes(st);
-
-        const minutosChegada = Number(c.tempoChegadaMin || 0) || null;
-        const modoChegada = c.modoTempoChegada || (c.tempoChegadaMin ? "entregador" : "");
-        const valorDefinido = Number(c.valorBruto || 0) > 0;
-        const assinaturaAtual = st + "|" + String(c.valorBruto || "") + "|" + String(c.tempoChegadaMin || "") + "|" + String(c.chavePixMotorista || "") + "|" + String(c.respostaCliente || "");
-
-        if (foiAceita && ultimoStatusAvisado !== assinaturaAtual) {
-          ultimoStatusAvisado = assinaturaAtual;
-          if (msgPassageiro) {
-            msgPassageiro.textContent =
-              "Entrega aceita! " +
-              (valorDefinido ? "Valor: " + formatarMoeda(c.valorBruto) + ". " : "") +
-              (minutosChegada ? "Chegada em " + minutosChegada + " min." : "Entregador a caminho.");
-          }
-        }
-
-        const alertaAceitaHtml = foiAceita
-          ? '<div class="alerta-aceita">Entrega aceita! O entregador confirmou seu pedido' +
-              (valorDefinido ? ' por <strong>' + formatarMoeda(c.valorBruto) + '</strong>' : '') +
-            '.</div>'
-          : "";
-
-        const acoesClienteHtml = foiAceita
-          ? '<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">' +
-              (c.respostaCliente
-                ? '<div style="font-weight:900;color:#047857;">Retorno: ' + escaparHtml(c.respostaCliente) + '</div>'
-                : '') +
-              '<button class="btn btn-green" type="button" onclick="window.confirmarValorClienteV40 && window.confirmarValorClienteV40()">Aceitar Corrida por ' + (valorDefinido ? formatarMoeda(c.valorBruto) : 'Valor Informado') + '</button>' +
-              '<button class="btn btn-danger" type="button" onclick="window.recusarValorClienteV40 && window.recusarValorClienteV40()">Não Aceitar Valor</button>' +
-            '</div>'
-          : "";
-
-        const chegadaHtml = minutosChegada
-          ? '<div class="chegada-destaque">Tempo de chegada: <strong>' +
-              escaparHtml(minutosChegada) + ' min</strong>' + (modoChegada ? ' (' + escaparHtml(modoChegada) + ')' : '') + '</div>'
-          : "";
-
-        const motTexto = c.motorista && c.motorista.nome
-          ? escaparHtml(c.motorista.nome) +
-            (c.motorista.veiculo ? " • " + escaparHtml(c.motorista.veiculo) : "") +
-            (c.motorista.placa ? " (" + escaparHtml(c.motorista.placa) + ")" : "")
-          : "Aguardando entregador aceitar...";
-
-        const chavePix = (c.chavePixMotorista || (c.motorista && c.motorista.chavePix) || "").trim();
-        const mostrarPix = String(c.pagamento || "").toLowerCase() === "pix" || Boolean(chavePix);
-
-        ultimoResumoVoz =
-          (foiAceita ? "Entrega aceita. " : "Entrega solicitada. ") +
-          (valorDefinido ? "Valor " + formatarMoeda(c.valorBruto) + ". " : "") +
-          (minutosChegada ? "Chegada em " + minutosChegada + " minutos. " : "") +
-          (c.motorista && c.motorista.nome ? "Entregador " + c.motorista.nome + "." : "Aguardando entregador.");
-
-        const pixHtml = mostrarPix
-          ? '<div class="pix-box">' +
-              '<div><strong>Pagamento Pix</strong>' + (valorDefinido ? ' — Valor: <strong>' + formatarMoeda(c.valorBruto) + '</strong>' : '') + '</div>' +
-              (chavePix
-                ? '<div class="pix-chave-linha">' +
-                    '<span id="texto-chave-pix">' + escaparHtml(chavePix) + '</span>' +
-                    '<button class="btn btn-green btn-sm" type="button" id="btn-copiar-pix">Copiar Pix</button>' +
-                  '</div>'
-                : '<div style="font-size:16px;color:#0c4a6e;font-weight:700;">Aguardando o entregador enviar a chave Pix.</div>') +
-            '</div>'
-          : "";
-
-        boxCorridaAtiva.innerHTML =
-          alertaAceitaHtml +
-          chegadaHtml +
-          "<div><strong>Código:</strong> " + escaparHtml(c.codigo || idDoc) + " • <strong>Status:</strong> " + escaparHtml(st || "Solicitada") + (valorDefinido ? " • <strong>Valor:</strong> " + formatarMoeda(c.valorBruto) : " • <strong>Valor:</strong> A definir pelo entregador") + "</div>" +
-          "<div><strong>Pagamento:</strong> " + escaparHtml(c.pagamento || "Pix") + "</div>" +
-          "<div><strong>Retirada:</strong> " + escaparHtml(c.origem || "—") + "<br/><strong>Destino:</strong> " + escaparHtml(c.destino || "—") + "</div>" +
-          "<div><strong>Entregador:</strong> " + motTexto + "</div>" +
-          pixHtml +
-          acoesClienteHtml;
-
-        const btnCopiar = document.getElementById("btn-copiar-pix");
-        if (btnCopiar && chavePix) {
-          btnCopiar.addEventListener("click", async function () {
-            try {
-              await navigator.clipboard.writeText(chavePix);
-              btnCopiar.textContent = "Copiado!";
-            } catch (_) {
-              const temp = document.createElement("textarea");
-              temp.value = chavePix;
-              document.body.appendChild(temp);
-              temp.select();
-              document.execCommand("copy");
-              document.body.removeChild(temp);
-              btnCopiar.textContent = "Copiado!";
-            }
-            setTimeout(function () {
-              if (btnCopiar) btnCopiar.textContent = "Copiar Pix";
-            }, 2000);
-          });
-        }
-      }
-
-      window.solicitarCorrida = async function () {
-        if (erroRota) erroRota.textContent = "";
-        const nome = (elNome && elNome.value ? elNome.value : "").trim() || "Cliente";
-        const origem = (elOrigem && elOrigem.value ? elOrigem.value : "").trim();
-        const destino = (elDestino && elDestino.value ? elDestino.value : "").trim();
-        const pagamento = (elPagamento && elPagamento.value) || "Pix";
+        const origem = (origemEl && origemEl.value ? origemEl.value : "").trim();
+        const destino = (destinoEl && destinoEl.value ? destinoEl.value : "").trim();
+        const passageiro = (nomeEl && nomeEl.value ? nomeEl.value : "").trim() || "Cliente";
+        const pagamento = pagEl ? pagEl.value : "Pix";
 
         if (!origem || !destino) {
-          if (msgPassageiro) msgPassageiro.textContent = "Preencha onde buscar e onde entregar.";
+          setMsg("Preencha retirada e entrega.");
           return;
         }
 
-        telaLimpaManualmente = false;
-        localStorage.setItem("32drive_pas_nome", nome);
-
         const codigo = "32E-" + Math.floor(1000 + Math.random() * 9000);
-        const idLocal = "LOC-" + Date.now();
-        ultimoStatusAvisado = "";
-        corridaAtualCodigo = codigo;
-        localStorage.setItem("32drive_corrida_codigo", codigo);
-
-        const corridaLocal = {
-          docId: idLocal,
+        const novoDoc = {
           codigo: codigo,
-          passageiro: nome,
+          passageiro: passageiro,
           origem: origem,
           destino: destino,
           pagamento: pagamento,
-          chavePixMotorista: "",
-          chuva: false,
           status: "Aguardando motorista",
-          motorista: null,
-          criadoEmTimestamp: Date.now()
+          criadoEmTimestamp: Date.now(),
+          criadoEm: fs.serverTimestamp()
         };
 
-        corridaAtualId = idLocal;
-        localStorage.setItem("32drive_corrida_id", corridaAtualId);
-        salvarChamadoLocal(corridaLocal);
-        renderizarCorrida(corridaLocal, idLocal);
-        if (msgPassageiro) msgPassageiro.textContent = "Pedido enviado! Aguardando entregador...";
-
-        if (!db || !fs) {
-          return;
-        }
-
         try {
-          const docRef = await fs.addDoc(fs.collection(db, "corridas"), Object.assign({}, corridaLocal, {
-            criadoEm: fs.serverTimestamp()
-          }));
-          corridaAtualId = docRef.id;
-          localStorage.setItem("32drive_corrida_id", corridaAtualId);
-          setDiag("CRIADO ID=" + docRef.id + " | cod=" + codigo);
-          assinarDocumentoDireto(corridaAtualId);
-          renderizarCorrida(Object.assign({}, corridaLocal, { docId: docRef.id }), docRef.id);
-          if (msgPassageiro) msgPassageiro.textContent = "Pedido enviado! Aguardando entregador...";
-        } catch (erro) {
-          console.error(erro);
-          setDiag("ERR addDoc: " + (erro.code || erro.message));
-          if (msgPassageiro) {
-            msgPassageiro.textContent = "Pedido salvo no aparelho (" + (erro.code || erro.message || "Firestore") + ").";
-          }
+          setDiag("Diag V40: enviando pedido...");
+          const ref = await fs.addDoc(fs.collection(db, "corridas"), novoDoc);
+          corridaAtualId = ref.id;
+          localStorage.setItem("v40_corrida_atual_id", ref.id);
+          setMsg("Pedido " + codigo + " enviado!");
+          escutarPedido(ref.id);
+        } catch (e) {
+          setDiag("Diag V40 ERR criar: " + (e.code || e.message));
+          setMsg("Erro ao enviar pedido.");
         }
       };
-
-      if (elNome) {
-        elNome.addEventListener("change", function () {
-          localStorage.setItem("32drive_pas_nome", (elNome.value || "").trim());
-        });
-      }
-
-      window.__conectarFirebaseV40 = async function () {
-        try {
-          setDiag("Conectando firebase-config.js...");
-          const configModulo = await import("./firebase-config.js");
-          fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-          db = configModulo.db;
-          if (!db) throw new Error("db não exportado");
-
-          mostrarAvisoFirebase("");
-          setDiag("Conectado! Escutando corridas (id=" + (corridaAtualId || "nenhum") + ")...");
-
-          if (corridaAtualId && !String(corridaAtualId).startsWith("LOC-")) {
-            assinarDocumentoDireto(corridaAtualId);
-          }
-
-          fs.onSnapshot(fs.collection(db, "corridas"), function (snapshot) {
-            if (telaLimpaManualmente) return;
-
-            let docPorId = null;
-            let docPorIdKey = "";
-            let docPorCodigo = null;
-            let docPorCodigoKey = "";
-            let maisRecenteAtivo = null;
-            let maisRecenteAtivoKey = "";
-            let maisRecenteTs = -1;
-
-            snapshot.forEach(function (docSnap) {
-              const d = docSnap.data();
-              const st = String(d.status || "");
-              if (st === "Finalizada" || st === "Cancelada") return;
-
-              if (corridaAtualId && docSnap.id === corridaAtualId) {
-                docPorId = d;
-                docPorIdKey = docSnap.id;
-              }
-
-              if (corridaAtualCodigo && String(d.codigo || "") === corridaAtualCodigo) {
-                docPorCodigo = d;
-                docPorCodigoKey = docSnap.id;
-              }
-
-              const ts = Number(d.criadoEmTimestamp || 0);
-              if (ts >= maisRecenteTs) {
-                maisRecenteTs = ts;
-                maisRecenteAtivo = d;
-                maisRecenteAtivoKey = docSnap.id;
-              }
-            });
-
-            const escolhido = docPorId || docPorCodigo || maisRecenteAtivo;
-            const escolhidoId = docPorIdKey || docPorCodigoKey || maisRecenteAtivoKey;
-
-            if (escolhido && escolhidoId) {
-              setDiag("SNAP ID=" + escolhidoId + " | cod=" + (escolhido.codigo || "") + " | st=" + (escolhido.status || "") + " | val=" + (escolhido.valorBruto || "") + " | mot=" + ((escolhido.motorista && escolhido.motorista.nome) || ""));
-              if (corridaAtualId !== escolhidoId) {
-                corridaAtualId = escolhidoId;
-                localStorage.setItem("32drive_corrida_id", escolhidoId);
-                assinarDocumentoDireto(escolhidoId);
-              }
-              renderizarCorrida(escolhido, escolhidoId);
-            }
-          }, function (err) {
-            setDiag("ERR onSnapshot: " + (err.code || err.message));
-          });
-        } catch (erro) {
-          console.error(erro);
-          setDiag("ERR import: " + (erro.code || erro.message));
-          mostrarAvisoFirebase(
-            "Tela do Cliente carregada sem firebase-config.js: pedidos funcionam no aparelho e sincronizam quando o Firebase estiver conectado."
-          );
-        }
-      };
-    })();
-  </script>
-  <script type="module">
-    if (typeof window.__conectarFirebaseV40 === "function") {
-      window.__conectarFirebaseV40();
     }
+
+    if (btnLimpar) {
+      btnLimpar.onclick = async function () {
+        const idAntigo = corridaAtualId;
+        corridaAtualId = "";
+        localStorage.removeItem("v40_corrida_atual_id");
+        if (unsubDoc) {
+          unsubDoc();
+          unsubDoc = null;
+        }
+        renderPedido("", null);
+        if (idAntigo && db && fs) {
+          try {
+            await fs.updateDoc(fs.doc(db, "corridas", idAntigo), { status: "Cancelada" });
+          } catch (_) {}
+        }
+        setMsg("Tela limpa.");
+      };
+    }
+
+    async function iniciar() {
+      try {
+        setDiag("Diag V40: conectando firebase-config.js...");
+        let cfg = null;
+        try {
+          cfg = await import("./firebase-config.js");
+        } catch (_) {
+          cfg = await import("../firebase-config.js");
+        }
+        fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+        db = cfg.db;
+        if (!db) throw new Error("db ausente");
+
+        setDiag("Diag V40: conectado!");
+        if (corridaAtualId) {
+          escutarPedido(corridaAtualId);
+        }
+      } catch (e) {
+        setDiag("Diag V40 ERR init: " + (e && e.message ? e.message : e));
+      }
+    }
+
+    iniciar();
   </script>
 </body>
 </html>
