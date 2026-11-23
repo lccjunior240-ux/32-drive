@@ -142,6 +142,16 @@
       font-size: var(--f-label);
       font-weight: 700;
     }
+    .diag-box {
+      background: #0f172a;
+      color: #f8fafc;
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: monospace;
+      word-break: break-all;
+    }
     .card {
       background: var(--card);
       border: 2px solid var(--border);
@@ -356,6 +366,7 @@
           Limpar Tela
         </button>
       </div>
+      <div class="diag-box" id="diag-ao-vivo">Diag: aguardando conexão...</div>
       <div id="box-corrida-ativa" class="corrida-box">
         Nenhuma entrega solicitada ainda.
       </div>
@@ -368,6 +379,7 @@
       const msgPassageiro = document.getElementById("msg-passageiro");
       const erroRota = document.getElementById("erro-rota");
       const boxCorridaAtiva = document.getElementById("box-corrida-ativa");
+      const diagAoVivo = document.getElementById("diag-ao-vivo");
       const elNome = document.getElementById("pas-nome");
       const elOrigem = document.getElementById("pas-origem");
       const elDestino = document.getElementById("pas-destino");
@@ -380,6 +392,7 @@
       let db = null;
       let fs = null;
       let corridaAtualId = localStorage.getItem("32drive_corrida_id") || "";
+      let corridaAtualCodigo = localStorage.getItem("32drive_corrida_codigo") || "";
       let telaLimpaManualmente = false;
       let unsubDocAtual = null;
       let corridaAtualDados = null;
@@ -387,6 +400,10 @@
       let ultimoResumoVoz = "Nenhuma entrega solicitada ainda.";
 
       localStorage.removeItem("32drive_pas_oculta_id");
+
+      function setDiag(txt) {
+        if (diagAoVivo) diagAoVivo.textContent = txt;
+      }
 
       function escaparHtml(str) {
         return String(str || "")
@@ -532,7 +549,11 @@
         unsubDocAtual = fs.onSnapshot(fs.doc(db, "corridas", docId), function (docSnap) {
           if (!docSnap.exists()) return;
           telaLimpaManualmente = false;
-          renderizarCorrida(docSnap.data(), docSnap.id);
+          const data = docSnap.data();
+          setDiag("DOC " + docSnap.id + " | cod=" + (data.codigo || "") + " | st=" + (data.status || "") + " | val=" + (data.valorBruto || "") + " | mot=" + ((data.motorista && data.motorista.nome) || ""));
+          renderizarCorrida(data, docSnap.id);
+        }, function (err) {
+          setDiag("ERR docSnapshot: " + (err.code || err.message));
         });
       }
 
@@ -543,8 +564,10 @@
           unsubDocAtual = null;
         }
         corridaAtualId = "";
+        corridaAtualCodigo = "";
         corridaAtualDados = null;
         localStorage.removeItem("32drive_corrida_id");
+        localStorage.removeItem("32drive_corrida_codigo");
         ultimoStatusAvisado = "";
         ultimoResumoVoz = msgFinal;
         if (boxCorridaAtiva) boxCorridaAtiva.innerHTML = escaparHtml(msgFinal);
@@ -562,6 +585,11 @@
           if (boxCorridaAtiva) boxCorridaAtiva.innerHTML = "Nenhuma entrega solicitada ainda.";
           ultimoResumoVoz = "Nenhuma entrega solicitada ainda.";
           return;
+        }
+
+        if (c.codigo) {
+          corridaAtualCodigo = String(c.codigo);
+          localStorage.setItem("32drive_corrida_codigo", corridaAtualCodigo);
         }
 
         corridaAtualDados = Object.assign({}, c, { docId: idDoc || corridaAtualId });
@@ -708,6 +736,8 @@
         const codigo = "32E-" + Math.floor(1000 + Math.random() * 9000);
         const idLocal = "LOC-" + Date.now();
         ultimoStatusAvisado = "";
+        corridaAtualCodigo = codigo;
+        localStorage.setItem("32drive_corrida_codigo", codigo);
 
         const corridaLocal = {
           docId: idLocal,
@@ -739,11 +769,13 @@
           }));
           corridaAtualId = docRef.id;
           localStorage.setItem("32drive_corrida_id", corridaAtualId);
+          setDiag("CRIADO ID=" + docRef.id + " | cod=" + codigo);
           assinarDocumentoDireto(corridaAtualId);
           renderizarCorrida(Object.assign({}, corridaLocal, { docId: docRef.id }), docRef.id);
           if (msgPassageiro) msgPassageiro.textContent = "Pedido enviado! Aguardando entregador...";
         } catch (erro) {
           console.error(erro);
+          setDiag("ERR addDoc: " + (erro.code || erro.message));
           if (msgPassageiro) {
             msgPassageiro.textContent = "Pedido salvo no aparelho (" + (erro.code || erro.message || "Firestore") + ").";
           }
@@ -758,12 +790,14 @@
 
       window.__conectarFirebaseV40 = async function () {
         try {
+          setDiag("Conectando firebase-config.js...");
           const configModulo = await import("./firebase-config.js");
           fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
           db = configModulo.db;
           if (!db) throw new Error("db não exportado");
 
           mostrarAvisoFirebase("");
+          setDiag("Conectado! Escutando corridas (id=" + (corridaAtualId || "nenhum") + ")...");
 
           if (corridaAtualId && !String(corridaAtualId).startsWith("LOC-")) {
             assinarDocumentoDireto(corridaAtualId);
@@ -774,6 +808,8 @@
 
             let docPorId = null;
             let docPorIdKey = "";
+            let docPorCodigo = null;
+            let docPorCodigoKey = "";
             let maisRecenteAtivo = null;
             let maisRecenteAtivoKey = "";
             let maisRecenteTs = -1;
@@ -788,6 +824,11 @@
                 docPorIdKey = docSnap.id;
               }
 
+              if (corridaAtualCodigo && String(d.codigo || "") === corridaAtualCodigo) {
+                docPorCodigo = d;
+                docPorCodigoKey = docSnap.id;
+              }
+
               const ts = Number(d.criadoEmTimestamp || 0);
               if (ts >= maisRecenteTs) {
                 maisRecenteTs = ts;
@@ -796,10 +837,11 @@
               }
             });
 
-            const escolhido = docPorId || maisRecenteAtivo;
-            const escolhidoId = docPorIdKey || maisRecenteAtivoKey;
+            const escolhido = docPorId || docPorCodigo || maisRecenteAtivo;
+            const escolhidoId = docPorIdKey || docPorCodigoKey || maisRecenteAtivoKey;
 
             if (escolhido && escolhidoId) {
+              setDiag("SNAP ID=" + escolhidoId + " | cod=" + (escolhido.codigo || "") + " | st=" + (escolhido.status || "") + " | val=" + (escolhido.valorBruto || "") + " | mot=" + ((escolhido.motorista && escolhido.motorista.nome) || ""));
               if (corridaAtualId !== escolhidoId) {
                 corridaAtualId = escolhidoId;
                 localStorage.setItem("32drive_corrida_id", escolhidoId);
@@ -807,9 +849,12 @@
               }
               renderizarCorrida(escolhido, escolhidoId);
             }
+          }, function (err) {
+            setDiag("ERR onSnapshot: " + (err.code || err.message));
           });
         } catch (erro) {
           console.error(erro);
+          setDiag("ERR import: " + (erro.code || erro.message));
           mostrarAvisoFirebase(
             "Tela do Cliente carregada sem firebase-config.js: pedidos funcionam no aparelho e sincronizam quando o Firebase estiver conectado."
           );
