@@ -178,6 +178,26 @@
       border-color: #b45309;
       color: #0f172a;
     }
+    .desconto-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .btn-desc {
+      padding: 11px 6px;
+      border-radius: 10px;
+      border: 2px solid #cbd5e1;
+      background: #f1f5f9;
+      color: #0f172a;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .btn-desc.ativo {
+      background: #10b981;
+      border-color: #047857;
+      color: #052e16;
+    }
     .btn {
       width: 100%;
       padding: 15px;
@@ -222,6 +242,10 @@
     }
     .tag-din {
       background: #d97706;
+      color: #ffffff;
+    }
+    .tag-desc {
+      background: #047857;
       color: #ffffff;
     }
     .valor-destaque {
@@ -296,6 +320,28 @@
     </section>
 
     <section class="card">
+      <div class="card-header">
+        <div class="card-title">Descontos (% ou R$)</div>
+        <button class="btn btn-outline btn-sm" type="button" onclick="selecionarDesconto('none', 0)">
+          Sem Desconto
+        </button>
+      </div>
+      <div id="resumo-desconto" style="font-size:15px;font-weight:700;color:var(--muted);">
+        Desconto atual: Nenhum (R$ 0,00). Escolha em % ou valor fixo em reais.
+      </div>
+      <div class="desconto-grid" id="grid-desconto">
+        <button class="btn-desc" type="button" data-desc-tipo="pct" data-desc-val="5" onclick="selecionarDesconto('pct', 5)">-5%</button>
+        <button class="btn-desc" type="button" data-desc-tipo="pct" data-desc-val="10" onclick="selecionarDesconto('pct', 10)">-10%</button>
+        <button class="btn-desc" type="button" data-desc-tipo="pct" data-desc-val="15" onclick="selecionarDesconto('pct', 15)">-15%</button>
+        <button class="btn-desc" type="button" data-desc-tipo="pct" data-desc-val="20" onclick="selecionarDesconto('pct', 20)">-20%</button>
+        <button class="btn-desc" type="button" data-desc-tipo="fixo" data-desc-val="2" onclick="selecionarDesconto('fixo', 2)">-R$ 2,00</button>
+        <button class="btn-desc" type="button" data-desc-tipo="fixo" data-desc-val="5" onclick="selecionarDesconto('fixo', 5)">-R$ 5,00</button>
+        <button class="btn-desc" type="button" data-desc-tipo="fixo" data-desc-val="10" onclick="selecionarDesconto('fixo', 10)">-R$ 10,00</button>
+        <button class="btn-desc ativo" type="button" data-desc-tipo="none" data-desc-val="0" onclick="selecionarDesconto('none', 0)">0% / R$ 0</button>
+      </div>
+    </section>
+
+    <section class="card">
       <div class="card-title">Tempo de Chegada (Rota Automática ou Manual)</div>
       <div class="modo-row">
         <button class="btn-modo ativo" type="button" id="modo-auto">Automático (Rota)</button>
@@ -347,7 +393,9 @@
     const avisoFirebase = document.getElementById("aviso-firebase");
     const avisoDinamica = document.getElementById("aviso-dinamica");
     const resumoDinamica = document.getElementById("resumo-dinamica");
+    const resumoDesconto = document.getElementById("resumo-desconto");
     const botoesDin = Array.from(document.querySelectorAll(".btn-din"));
+    const botoesDesc = Array.from(document.querySelectorAll(".btn-desc"));
     const msgMotorista = document.getElementById("msg-motorista");
     const listaCorridasEl = document.getElementById("lista-corridas-motorista");
     const secCorridaAndamento = document.getElementById("sec-corrida-andamento");
@@ -373,6 +421,14 @@
     let fs = null;
     let dinamicaPct = Number(localStorage.getItem("32drive_dinamica_pct") || "0");
     if (DINAMICAS_PERMITIDAS.indexOf(dinamicaPct) === -1) dinamicaPct = 0;
+
+    let descontoTipo = localStorage.getItem("32drive_desconto_tipo") || "none";
+    let descontoValor = Number(localStorage.getItem("32drive_desconto_val") || "0");
+    if (["none", "pct", "fixo"].indexOf(descontoTipo) === -1 || isNaN(descontoValor) || descontoValor < 0) {
+      descontoTipo = "none";
+      descontoValor = 0;
+    }
+
     let modoTempo = localStorage.getItem("32drive_modo_tempo") || "auto";
     let minutoManualSelecionado = Number(localStorage.getItem("32drive_min_manual") || "6");
     let corridaEmAndamento = null;
@@ -381,6 +437,16 @@
 
     function salvarOcultos() {
       localStorage.setItem("32drive_mot_ocultos_v39", JSON.stringify(Array.from(idsOcultos)));
+    }
+
+    function formatarMoeda(valor) {
+      return "R$ " + Number(valor || 0).toFixed(2).replace(".", ",");
+    }
+
+    function formatarRotuloDesconto(tipo, val) {
+      if (tipo === "pct" && Number(val) > 0) return "-" + Number(val) + "%";
+      if (tipo === "fixo" && Number(val) > 0) return "-" + formatarMoeda(val);
+      return "";
     }
 
     function obterValorBaseCorrida(corrida) {
@@ -394,11 +460,20 @@
       return brutoSalvo;
     }
 
-    function calcularValorComDinamica(corrida, pct) {
+    function calcularValorFinal(corrida, pct, tipoDesc, valDesc) {
       const percentual = typeof pct === "number" ? pct : dinamicaPct;
+      const dTipo = typeof tipoDesc === "string" ? tipoDesc : descontoTipo;
+      const dVal = typeof valDesc === "number" ? valDesc : descontoValor;
       const base = obterValorBaseCorrida(corrida);
       if (!base) return 0;
-      return Number((base * (1 + percentual / 100)).toFixed(2));
+
+      let subtotal = base * (1 + percentual / 100);
+      if (dTipo === "pct" && dVal > 0) {
+        subtotal = subtotal * (1 - dVal / 100);
+      } else if (dTipo === "fixo" && dVal > 0) {
+        subtotal = subtotal - dVal;
+      }
+      return Number(Math.max(0, subtotal).toFixed(2));
     }
 
     function atualizarVisualDinamica() {
@@ -416,6 +491,22 @@
       }
     }
 
+    function atualizarVisualDesconto() {
+      botoesDesc.forEach(function (b) {
+        const bTipo = b.dataset.descTipo;
+        const bVal = Number(b.dataset.descVal);
+        const ativo = (descontoTipo === "none" && bTipo === "none") ||
+          (bTipo === descontoTipo && bVal === descontoValor && descontoTipo !== "none");
+        b.classList.toggle("ativo", ativo);
+      });
+      const rotulo = formatarRotuloDesconto(descontoTipo, descontoValor);
+      if (rotulo) {
+        resumoDesconto.textContent = "Desconto ativo: " + rotulo + " aplicado no valor final.";
+      } else {
+        resumoDesconto.textContent = "Desconto atual: Nenhum (R$ 0,00). Escolha em % ou valor fixo em reais.";
+      }
+    }
+
     window.selecionarDinamica = async function (pct) {
       pct = Number(pct);
       if (DINAMICAS_PERMITIDAS.indexOf(pct) === -1) return;
@@ -426,8 +517,10 @@
 
       if (corridaEmAndamento) {
         const valorBase = obterValorBaseCorrida(corridaEmAndamento);
-        const valorNovo = calcularValorComDinamica(corridaEmAndamento, pct);
+        const valorNovo = calcularValorFinal(corridaEmAndamento, pct, descontoTipo, descontoValor);
         corridaEmAndamento.dinamicaPct = pct;
+        corridaEmAndamento.descontoTipo = descontoTipo;
+        corridaEmAndamento.descontoValor = descontoValor;
         corridaEmAndamento.valorBase = valorBase;
         corridaEmAndamento.valorBruto = valorNovo;
         renderizarCorridaAndamento();
@@ -436,6 +529,8 @@
           try {
             await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
               dinamicaPct: pct,
+              descontoTipo: descontoTipo,
+              descontoValor: descontoValor,
               valorBase: valorBase,
               valorBruto: valorNovo
             });
@@ -453,6 +548,48 @@
           ? "Dinâmica definida em +" + pct + "%."
           : "Dinâmica zerada (0% Normal).";
       }
+    };
+
+    window.selecionarDesconto = async function (tipo, val) {
+      val = Number(val) || 0;
+      if (["none", "pct", "fixo"].indexOf(tipo) === -1 || val <= 0) {
+        tipo = "none";
+        val = 0;
+      }
+      descontoTipo = tipo;
+      descontoValor = val;
+      localStorage.setItem("32drive_desconto_tipo", descontoTipo);
+      localStorage.setItem("32drive_desconto_val", String(descontoValor));
+      atualizarVisualDesconto();
+      renderizarChamados(chamadosLocais);
+
+      const rotulo = formatarRotuloDesconto(descontoTipo, descontoValor);
+
+      if (corridaEmAndamento) {
+        const pctAtual = typeof corridaEmAndamento.dinamicaPct === "number" ? corridaEmAndamento.dinamicaPct : dinamicaPct;
+        const valorBase = obterValorBaseCorrida(corridaEmAndamento);
+        const valorNovo = calcularValorFinal(corridaEmAndamento, pctAtual, descontoTipo, descontoValor);
+        corridaEmAndamento.descontoTipo = descontoTipo;
+        corridaEmAndamento.descontoValor = descontoValor;
+        corridaEmAndamento.valorBase = valorBase;
+        corridaEmAndamento.valorBruto = valorNovo;
+        renderizarCorridaAndamento();
+
+        if (String(corridaEmAndamento.docId || "").indexOf("SIM-") !== 0 && db && fs) {
+          try {
+            await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
+              descontoTipo: descontoTipo,
+              descontoValor: descontoValor,
+              valorBase: valorBase,
+              valorBruto: valorNovo
+            });
+          } catch (_) {}
+        }
+      }
+
+      msgMotorista.textContent = rotulo
+        ? "Desconto " + rotulo + " aplicado."
+        : "Desconto removido.";
     };
 
     function carregarPerfilSalvo() {
@@ -506,10 +643,6 @@
       avisoFirebase.style.display = texto ? "block" : "none";
     }
 
-    function formatarMoeda(valor) {
-      return "R$ " + Number(valor || 0).toFixed(2).replace(".", ",");
-    }
-
     function montarLinkMapa(endereco) {
       const q = encodeURIComponent(String(endereco || "") + ", Rio Grande, RS");
       return "https://www.google.com/maps/search/?api=1&query=" + q;
@@ -551,7 +684,10 @@
       const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
       const pixAtual = (c.chavePixMotorista || (elPix.value || "").trim());
       const pctCorrida = typeof c.dinamicaPct === "number" ? c.dinamicaPct : dinamicaPct;
-      const valorAtual = calcularValorComDinamica(c, pctCorrida);
+      const dTipoCorrida = typeof c.descontoTipo === "string" ? c.descontoTipo : descontoTipo;
+      const dValCorrida = typeof c.descontoValor === "number" ? c.descontoValor : descontoValor;
+      const rotuloDesc = formatarRotuloDesconto(dTipoCorrida, dValCorrida);
+      const valorAtual = calcularValorFinal(c, pctCorrida, dTipoCorrida, dValCorrida);
 
       let acaoHtml = "";
       if (st === "Motorista a caminho" || st === "Aceita") {
@@ -576,7 +712,8 @@
             '<span class="tag">' + kmTxt + '</span> ' +
             '<span class="tag">' + escaparHtml(c.pagamento || "Pix") + '</span> ' +
             (c.tempoChegadaMin ? '<span class="tag">Chegada: ' + escaparHtml(c.tempoChegadaMin) + ' min</span> ' : '') +
-            (pctCorrida > 0 ? '<span class="tag tag-din">Dinâmica +' + pctCorrida + '%</span>' : '') +
+            (pctCorrida > 0 ? '<span class="tag tag-din">Dinâmica +' + pctCorrida + '%</span> ' : '') +
+            (rotuloDesc ? '<span class="tag tag-desc">Desc. ' + escaparHtml(rotuloDesc) + '</span>' : '') +
           '</div>' +
           '<div><strong>Embarque:</strong> ' + escaparHtml(c.origem || "—") + '</div>' +
           '<div><strong>Destino:</strong> ' + escaparHtml(c.destino || "—") + '</div>' +
@@ -641,20 +778,23 @@
       listaCorridasEl.innerHTML = visiveis
         .map(function (c) {
           const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
-          const valorDinamica = calcularValorComDinamica(c, dinamicaPct);
+          const valorFinal = calcularValorFinal(c, dinamicaPct, descontoTipo, descontoValor);
           const tagDin = dinamicaPct > 0 ? ' <span class="tag tag-din">Dinâmica +' + dinamicaPct + '%</span>' : "";
+          const rotuloDesc = formatarRotuloDesconto(descontoTipo, descontoValor);
+          const tagDesc = rotuloDesc ? ' <span class="tag tag-desc">Desc. ' + escaparHtml(rotuloDesc) + '</span>' : "";
           const prev = resolverMinutosChegada(c);
           return (
             '<div class="corrida-card">' +
               '<div style="display:flex;justify-content:space-between;align-items:center;">' +
                 '<strong>' + escaparHtml(c.codigo || "Corrida") + ' • ' + escaparHtml(c.passageiro || "Passageiro") + '</strong>' +
-                '<span class="valor-destaque">' + formatarMoeda(valorDinamica) + '</span>' +
+                '<span class="valor-destaque">' + formatarMoeda(valorFinal) + '</span>' +
               '</div>' +
               '<div>' +
                 '<span class="tag">' + kmTxt + '</span> ' +
                 '<span class="tag">' + escaparHtml(c.pagamento || "Pix") + '</span> ' +
                 '<span class="tag">Chegada: ' + prev.minutos + ' min (' + prev.modo + ')</span>' +
                 tagDin +
+                tagDesc +
               '</div>' +
               '<div><strong>Embarque:</strong> ' + escaparHtml(c.origem || "—") + '<br/><strong>Destino:</strong> ' + escaparHtml(c.destino || "—") + '</div>' +
               '<button class="btn btn-accent" type="button" data-aceitar="' + escaparHtml(c.docId) + '">Aceitar Corrida</button>' +
@@ -670,7 +810,7 @@
       const chamado = chamadosLocais.find(function (item) { return item.docId === docId; }) || {};
       const tempoInfo = resolverMinutosChegada(chamado);
       const valorBase = obterValorBaseCorrida(chamado);
-      const valorFinal = calcularValorComDinamica(chamado, dinamicaPct);
+      const valorFinal = calcularValorFinal(chamado, dinamicaPct, descontoTipo, descontoValor);
 
       const dadosMotorista = {
         codigo: perfil.codigo || "MOT-01",
@@ -687,6 +827,8 @@
         modoTempoChegada: tempoInfo.modo,
         chavePixMotorista: perfil.chavePix || "",
         dinamicaPct: dinamicaPct,
+        descontoTipo: descontoTipo,
+        descontoValor: descontoValor,
         valorBase: valorBase,
         valorBruto: valorFinal
       };
@@ -766,6 +908,8 @@
         valorBase: 29.0,
         valorBruto: 29.0,
         dinamicaPct: dinamicaPct,
+        descontoTipo: descontoTipo,
+        descontoValor: descontoValor,
         status: "Aguardando motorista"
       };
       chamadosLocais.unshift(fake);
@@ -775,6 +919,7 @@
 
     carregarPerfilSalvo();
     atualizarVisualDinamica();
+    atualizarVisualDesconto();
     atualizarVisualTempo();
     renderizarChamados([]);
 
