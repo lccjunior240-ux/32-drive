@@ -2,222 +2,312 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#ffffff" />
-  <link rel="manifest" href="manifest.json?v=39" />
-  <link rel="icon" type="image/png" href="icon-512.png" />
-  <link rel="apple-touch-icon" href="icon-512.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>32 Entrega — Entregador V39</title>
   <style>
-    :root {
-      --bg: #ffffff;
-      --card: #f8fafc;
-      --navy-header: linear-gradient(145deg, #0b192c 0%, #13294b 75%, #0c1e38 100%);
-      --border: #cbd5e1;
-      --text: #0f172a;
-      --muted: #334155;
-      --accent: #f59e0b;
-      --green: #047857;
-      --blue: #0369a1;
-      --red: #b91c1c;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      font-size: 18px;
-      line-height: 1.45;
-    }
-    header {
-      background: var(--navy-header);
-      border-bottom: 3px solid var(--accent);
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      color: #ffffff;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-    .brand img {
-      width: 46px;
-      height: 46px;
-      border-radius: 11px;
-      border: 2px solid var(--accent);
-      background: #ffffff;
-      flex-shrink: 0;
-    }
-    h1 { font-size: 19px; font-weight: 900; color: var(--accent); }
-    .subtitle { font-size: 14px; color: #e2e8f0; }
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-    .badge {
-      background: #10b981;
-      color: #052e16;
-      font-weight: 800;
-      font-size: 13px;
-      padding: 6px 11px;
-      border-radius: 999px;
-      white-space: nowrap;
-    }
-    .btn-colar-topo {
-      background: #ffffff;
-      color: #0f172a;
-      border: 2px solid var(--accent);
-      border-radius: 10px;
-      padding: 7px 11px;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      white-space: nowrap;
-    }
-    .btn-colar-topo:active {
-      background: var(--accent);
-      color: #0f172a;
-    }
-    main {
-      flex: 1;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-width: 720px;
-      width: 100%;
-      margin: 0 auto;
-    }
-    .box-colar-rapido {
-      display: none;
+      font-family: system-ui, -apple-system, sans-serif;
       background: #f8fafc;
-      border: 2px solid var(--accent);
-      border-radius: 14px;
-      padding: 12px;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .box-colar-rapido.ativo { display: flex; }
-    .box-colar-rapido textarea {
-      width: 100%;
-      min-height: 90px;
-      padding: 12px;
-      border-radius: 10px;
-      border: 2px solid #64748b;
-      background: #ffffff;
       color: #0f172a;
-      font-size: 15px;
-      font-family: monospace;
-      resize: vertical;
+      margin: 0;
+      padding: 16px;
     }
-    .aviso-firebase {
-      display: none;
-      background: #fffbeb;
-      border: 2px solid #d97706;
-      color: #78350f;
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .topo {
+      background: #0b192c;
+      color: #ffffff;
+      border-bottom: 4px solid #f59e0b;
       border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 15px;
-      font-weight: 700;
+      padding: 16px;
     }
-    .diag-box {
+    .topo h1 {
+      margin: 0;
+      font-size: 20px;
+      color: #f59e0b;
+    }
+    .diag {
       background: #0f172a;
       color: #f8fafc;
-      border: 2px solid var(--accent);
+      border: 2px solid #f59e0b;
       border-radius: 12px;
-      padding: 10px 12px;
-      font-size: 14px;
+      padding: 12px;
       font-family: monospace;
+      font-size: 14px;
       word-break: break-all;
     }
     .card {
-      background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: 16px;
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      border-radius: 14px;
       padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
+      gap: 10px;
     }
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
+    label {
+      font-weight: 800;
+      font-size: 15px;
+      display: block;
     }
-    .card-title { font-size: 19px; font-weight: 900; color: #0f172a; }
-    label { font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: block; }
-    input, select {
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 2px solid #64748b;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    button {
       width: 100%;
       padding: 14px;
+      border: none;
       border-radius: 12px;
-      border: 2px solid #64748b;
-      background: #ffffff;
-      color: #0f172a;
-      font-size: 17px;
-      font-weight: 600;
-    }
-    input::placeholder { color: #64748b; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .modo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .btn-modo {
-      padding: 11px 12px;
-      border-radius: 10px;
-      border: 2px solid #64748b;
-      background: #ffffff;
-      color: #0f172a;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 800;
       cursor: pointer;
     }
-    .btn-modo.ativo {
-      background: var(--accent);
-      border-color: #b45309;
-      color: #0f172a;
-    }
-    .minutos-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
+    .btn-ouro { background: #f59e0b; color: #0f172a; }
+    .btn-verde { background: #059669; color: #ffffff; }
+    .btn-laranja { background: #d97706; color: #ffffff; }
+    .item {
+      border: 2px solid #94a3b8;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
       gap: 8px;
+      background: #f8fafc;
     }
-    .btn-min {
-      padding: 11px 8px;
-      border-radius: 10px;
-      border: 2px solid #64748b;
-      background: #ffffff;
-      color: #0f172a;
-      font-size: 15px;
-      font-weight: 900;
-      cursor: pointer;
+    .msg {
+      font-weight: 800;
+      color: #047857;
+      min-height: 22px;
     }
-    .btn-min.ativo {
-      background: var(--accent);
-      border-color: #b45309;
-      color: #0f172a;
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topo">
+      <h1>32 Entrega — Entregador V39</h1>
+      <div>Cassino &amp; Rio Grande</div>
+    </div>
+
+    <div class="diag" id="diag">Diag V39: iniciando...</div>
+
+    <div class="card">
+      <label for="nome-ent">Seu Nome</label>
+      <input id="nome-ent" type="text" placeholder="Ex: Junior Costa" value="Junior Costa" />
+
+      <label for="pix-ent">Sua Chave Pix</label>
+      <input id="pix-ent" type="text" placeholder="Ex: 53999089980" />
+
+      <label for="valor-ent">Valor da Entrega (R$)</label>
+      <input id="valor-ent" type="number" step="0.5" min="1" placeholder="Ex: 20" />
+
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="card">
+      <strong>Entrega em Andamento</strong>
+      <div id="andamento">Nenhuma entrega aceita no momento.</div>
+    </div>
+
+    <div class="card">
+      <strong>Chamados Aguardando</strong>
+      <div id="chamados">Carregando...</div>
+    </div>
+  </div>
+
+  <script type="module">
+    const diagEl = document.getElementById("diag");
+    const msgEl = document.getElementById("msg");
+    const chamadosEl = document.getElementById("chamados");
+    const andamentoEl = document.getElementById("andamento");
+    const nomeEl = document.getElementById("nome-ent");
+    const pixEl = document.getElementById("pix-ent");
+    const valorEl = document.getElementById("valor-ent");
+
+    let db = null;
+    let fs = null;
+    let corridaAtual = null;
+
+    function setDiag(t) {
+      if (diagEl) diagEl.textContent = t;
     }
-    .tabela-valores-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+
+    function setMsg(t) {
+      if (msgEl) msgEl.textContent = t;
     }
-    .btn-valor-rapido {
-      padding: 10px 6px;
-      border-radius: 10px;
-      border: 2px solid #b91c1c;
-      background: #ffffff;
-      color: #b91c1c;
-      font-size: 15px;
-      font-weight:
+
+    function esc(s) {
+      return String(s || "").replace(/[&<>"']/g, function (m) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m];
+      });
+    }
+
+    function renderAndamento() {
+      if (!andamentoEl) return;
+      if (!corridaAtual) {
+        andamentoEl.innerHTML = "Nenhuma entrega aceita no momento.";
+        return;
+      }
+      const c = corridaAtual;
+      andamentoEl.innerHTML =
+        '<div class="item">' +
+          '<div><strong>' + esc(c.codigo) + '</strong> • ' + esc(c.passageiro || "Cliente") + ' • Status: <strong>' + esc(c.status) + '</strong></div>' +
+          '<div>Retirada: ' + esc(c.origem) + '<br/>Destino: ' + esc(c.destino) + '</div>' +
+          '<div>Valor atual: <strong>' + (c.valorBruto ? "R$ " + Number(c.valorBruto).toFixed(2).replace(".", ",") : "Não enviado") + '</strong></div>' +
+          '<button class="btn-verde" type="button" id="btn-enviar-cliente">Enviar Valor e Aceite ao Cliente</button>' +
+          '<button class="btn-laranja" type="button" id="btn-finalizar">Finalizar Entrega</button>' +
+        '</div>';
+
+      const btnEnv = document.getElementById("btn-enviar-cliente");
+      if (btnEnv) {
+        btnEnv.onclick = async function () {
+          const valNum = Number(valorEl && valorEl.value);
+          const nomeEnt = (nomeEl && nomeEl.value ? nomeEl.value : "").trim() || "Junior Costa";
+          const pixEnt = (pixEl && pixEl.value ? pixEl.value : "").trim();
+          const payload = {
+            status: "Aceita",
+            motorista: { nome: nomeEnt, chavePix: pixEnt },
+            chavePixMotorista: pixEnt,
+            tempoChegadaMin: 6,
+            modoTempoChegada: "manual",
+            enviadoAoCliente: true
+          };
+          if (Number.isFinite(valNum) && valNum > 0) {
+            payload.valorBruto = Number(valNum.toFixed(2));
+          }
+          try {
+            setDiag("Diag V39: gravando envio ID=" + c.docId + "...");
+            await fs.updateDoc(fs.doc(db, "corridas", c.docId), payload);
+            corridaAtual = Object.assign({}, c, payload);
+            renderAndamento();
+            setDiag("Diag V39: OK gravado ID=" + c.docId + " | val=" + (payload.valorBruto || ""));
+            setMsg("Enviado ao cliente!");
+          } catch (e) {
+            setDiag("Diag V39 ERR enviar: " + (e.code || e.message));
+            setMsg("Erro ao enviar.");
+          }
+        };
+      }
+
+      const btnFin = document.getElementById("btn-finalizar");
+      if (btnFin) {
+        btnFin.onclick = async function () {
+          try {
+            await fs.updateDoc(fs.doc(db, "corridas", c.docId), { status: "Finalizada" });
+            corridaAtual = null;
+            renderAndamento();
+            setMsg("Entrega finalizada.");
+          } catch (e) {
+            setDiag("Diag V39 ERR finalizar: " + (e.code || e.message));
+          }
+        };
+      }
+    }
+
+    function renderChamados(lista) {
+      if (!chamadosEl) return;
+      if (!lista.length) {
+        chamadosEl.innerHTML = "Nenhum chamado aguardando no momento.";
+        return;
+      }
+      chamadosEl.innerHTML = lista.map(function (c) {
+        return (
+          '<div class="item">' +
+            '<div><strong>' + esc(c.codigo) + '</strong> • ' + esc(c.passageiro || "Cliente") + '</div>' +
+            '<div>Retirada: ' + esc(c.origem) + '<br/>Destino: ' + esc(c.destino) + '</div>' +
+            '<button class="btn-ouro" type="button" data-aceitar="' + esc(c.docId) + '">Aceitar Entrega</button>' +
+          '</div>'
+        );
+      }).join("");
+
+      chamadosEl.querySelectorAll("button[data-aceitar]").forEach(function (btn) {
+        btn.onclick = async function () {
+          const id = btn.getAttribute("data-aceitar");
+          const escolhido = lista.find(function (x) { return x.docId === id; });
+          if (!escolhido) return;
+          const nomeEnt = (nomeEl && nomeEl.value ? nomeEl.value : "").trim() || "Junior Costa";
+          const pixEnt = (pixEl && pixEl.value ? pixEl.value : "").trim();
+          const valNum = Number(valorEl && valorEl.value);
+          const payload = {
+            status: "Aceita",
+            motorista: { nome: nomeEnt, chavePix: pixEnt },
+            chavePixMotorista: pixEnt,
+            tempoChegadaMin: 6,
+            modoTempoChegada: "manual"
+          };
+          if (Number.isFinite(valNum) && valNum > 0) {
+            payload.valorBruto = Number(valNum.toFixed(2));
+          }
+          try {
+            setDiag("Diag V39: aceitando ID=" + id + "...");
+            await fs.updateDoc(fs.doc(db, "corridas", id), payload);
+            corridaAtual = Object.assign({ docId: id }, escolhido, payload);
+            renderAndamento();
+            setDiag("Diag V39: OK aceita ID=" + id);
+            setMsg("Entrega aceita! Agora clique em Enviar Valor e Aceite ao Cliente.");
+          } catch (e) {
+            setDiag("Diag V39 ERR aceitar: " + (e.code || e.message));
+            setMsg("Erro ao aceitar.");
+          }
+        };
+      });
+    }
+
+    async function iniciar() {
+      try {
+        setDiag("Diag V39: importando firebase-config.js...");
+        let cfg = null;
+        try {
+          cfg = await import("./firebase-config.js");
+        } catch (_) {
+          cfg = await import("../firebase-config.js");
+        }
+        fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+        db = cfg.db;
+        if (!db) throw new Error("db ausente");
+
+        setDiag("Diag V39: conectado! Escutando corridas...");
+
+        fs.onSnapshot(fs.collection(db, "corridas"), function (snap) {
+          const aguardando = [];
+          let ativa = null;
+          snap.forEach(function (docSnap) {
+            const d = docSnap.data();
+            const st = String(d.status || "");
+            if (st === "Finalizada" || st === "Cancelada") return;
+            const item = Object.assign({ docId: docSnap.id }, d);
+            if (st === "Aguardando motorista") {
+              aguardando.push(item);
+            } else if (!ativa) {
+              ativa = item;
+            }
+          });
+          if (ativa) {
+            corridaAtual = ativa;
+            setDiag("Diag V39: ATIVA ID=" + ativa.docId + " | cod=" + (ativa.codigo || "") + " | st=" + (ativa.status || "") + " | val=" + (ativa.valorBruto || ""));
+          } else {
+            setDiag("Diag V39: online (" + aguardando.length + " aguardando)");
+          }
+          renderChamados(aguardando);
+          renderAndamento();
+        }, function (err) {
+          setDiag("Diag V39 ERR snapshot: " + (err.code || err.message));
+        });
+      } catch (e) {
+        setDiag("Diag V39 ERR init: " + (e && e.message ? e.message : e));
+      }
+    }
+
+    iniciar();
+  </script>
+</body>
+</html>
