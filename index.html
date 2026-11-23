@@ -2,322 +2,1001 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>32 Entrega — Cliente V40</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
+  <meta name="theme-color" content="#0b192c" />
+  <link rel="manifest" href="manifest-passageiro.json?v=40" />
+  <link rel="icon" type="image/png" href="icon-512.png" />
+  <link rel="apple-touch-icon" href="icon-512.png" />
+  <title>32 Drive — Passageiro Inclusivo</title>
   <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #f8fafc;
-      color: #0f172a;
-      margin: 0;
-      padding: 16px;
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --navy-header: linear-gradient(145deg, #0b192c 0%, #13294b 70%, #0c1e38 100%);
+      --border: #94a3b8;
+      --text: #0f172a;
+      --muted: #334155;
+      --accent: #f59e0b;
+      --green: #047857;
+      --blue: #0369a1;
+      --f-base: 19px;
+      --f-label: 18px;
+      --f-btn: 19px;
+      --f-title: 22px;
     }
-    .wrap {
+    body.fonte-grande {
+      --f-base: 23px;
+      --f-label: 22px;
+      --f-btn: 22px;
+      --f-title: 26px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-size: var(--f-base);
+      line-height: 1.5;
+    }
+    header {
+      background: var(--navy-header);
+      border-bottom: 4px solid var(--accent);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      color: #ffffff;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand img {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      border: 2px solid var(--accent);
+      background: #ffffff;
+    }
+    h1 { font-size: 21px; font-weight: 900; color: var(--accent); }
+    .subtitle { font-size: 15px; color: #e2e8f0; font-weight: 600; }
+    .header-acoes { display: flex; align-items: center; gap: 8px; }
+    .btn-acess {
+      background: #ffffff;
+      color: #0b192c;
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .btn-acess.ativo {
+      background: var(--accent);
+      color: #0f172a;
+    }
+    main {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
       max-width: 720px;
+      width: 100%;
       margin: 0 auto;
+    }
+    .aviso-firebase {
+      display: none;
+      background: #fffbeb;
+      border: 2px solid #d97706;
+      color: #78350f;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: var(--f-label);
+      font-weight: 700;
+    }
+    .card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
       gap: 14px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
     }
-    .topo {
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .card-title { font-size: var(--f-title); font-weight: 900; color: #0f172a; }
+    label.campo-lbl {
+      font-size: var(--f-label);
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 6px;
+      display: block;
+    }
+    input, select {
+      width: 100%;
+      min-height: 56px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 2px solid #475569;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: var(--f-base);
+      font-weight: 700;
+    }
+    .btn-gps {
+      margin-top: 8px;
+      min-height: 54px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 2px solid var(--blue);
+      background: #e0f2fe;
+      color: #0c4a6e;
+      font-size: var(--f-label);
+      font-weight: 900;
+      cursor: pointer;
+      width: 100%;
+    }
+    .atalhos-rapidos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-atalho {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 2px solid #475569;
+      background: #f1f5f9;
+      color: #0f172a;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-atalho:hover, .btn-atalho:focus {
       background: #0b192c;
       color: #ffffff;
-      border-bottom: 4px solid #f59e0b;
+      border-color: #0b192c;
+    }
+    .chuva-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #f0f9ff;
+      border: 2px solid #0284c7;
+      border-radius: 14px;
+      padding: 14px 16px;
+      cursor: pointer;
+      min-height: 60px;
+    }
+    .chuva-toggle.ativo {
+      background: #0369a1;
+      border-color: #0c4a6e;
+      color: #ffffff;
+    }
+    .chuva-toggle input {
+      width: 28px;
+      height: 28px;
+      min-height: 28px;
+      accent-color: #0b192c;
+    }
+    .estimativa-box {
+      background: #f1f5f9;
+      border: 2px solid #475569;
       border-radius: 14px;
       padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
     }
-    .topo h1 {
-      margin: 0;
-      font-size: 20px;
-      color: #f59e0b;
+    .estimativa-lbl { font-size: var(--f-label); font-weight: 900; color: #0f172a; }
+    .estimativa-val {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--green);
+      white-space: nowrap;
+      text-align: right;
     }
-    .diag {
-      background: #0f172a;
-      color: #f8fafc;
-      border: 2px solid #f59e0b;
-      border-radius: 12px;
-      padding: 12px;
-      font-family: monospace;
-      font-size: 14px;
-      word-break: break-all;
+    .btn {
+      width: 100%;
+      min-height: 58px;
+      padding: 15px 18px;
+      border: none;
+      border-radius: 14px;
+      font-size: var(--f-btn);
+      font-weight: 900;
+      cursor: pointer;
     }
-    .card {
-      background: #ffffff;
-      border: 2px solid #cbd5e1;
+    .btn-sm {
+      min-height: 46px;
+      padding: 10px 14px;
+      font-size: 16px;
+      width: auto;
+    }
+    .btn-outline {
+      background: #e2e8f0;
+      color: #0f172a;
+      border: 2px solid #475569;
+    }
+    .btn-accent {
+      background: var(--accent);
+      color: #0f172a;
+      border: 2px solid #b45309;
+    }
+    .btn-green {
+      background: #059669;
+      color: #ffffff;
+    }
+    .status-msg { font-size: var(--f-label); font-weight: 900; color: var(--green); text-align: center; min-height: 24px; }
+    .erro-msg { font-size: var(--f-label); font-weight: 900; color: #b91c1c; text-align: center; min-height: 20px; }
+    .corrida-box {
+      background: #f8fafc;
+      border: 2px solid #64748b;
       border-radius: 14px;
       padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-    .card-topo {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    label {
-      font-weight: 800;
-      font-size: 15px;
-      display: block;
-    }
-    input, select {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px;
-      border: 2px solid #64748b;
-      border-radius: 10px;
-      font-size: 16px;
-      background: #ffffff;
-      color: #0f172a;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      border: none;
+    .alerta-aceita {
+      background: #dcfce7;
+      border: 2px solid #15803d;
+      color: #14532d;
       border-radius: 12px;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
+      padding: 14px;
+      font-weight: 900;
+      font-size: var(--f-label);
     }
-    .btn-mini {
-      width: auto;
-      padding: 8px 12px;
-      font-size: 14px;
-      border-radius: 10px;
+    .chegada-destaque {
+      background: #fef3c7;
+      border: 2px solid #d97706;
+      color: #78350f;
+      border-radius: 12px;
+      padding: 14px;
+      font-weight: 900;
+      font-size: var(--f-label);
     }
-    .btn-ouro { background: #f59e0b; color: #0f172a; }
-    .btn-cinza { background: #e2e8f0; color: #0f172a; border: 1px solid #94a3b8; }
-    .box-pedido {
-      border: 2px solid #059669;
-      background: #ecfdf5;
-      color: #064e3b;
+    .pix-box {
+      background: #eff6ff;
+      border: 2px solid #1d4ed8;
       border-radius: 12px;
       padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
-    .msg {
-      font-weight: 800;
-      color: #047857;
-      min-height: 22px;
+    .pix-chave-linha {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #ffffff;
+      border: 2px solid #60a5fa;
+      border-radius: 10px;
+      padding: 12px;
+      font-weight: 900;
+      word-break: break-all;
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="topo">
-      <h1>32 Entrega — Cliente V40</h1>
-      <div>Cassino &amp; Rio Grande</div>
-    </div>
-
-    <div class="diag" id="diag">Diag V40: iniciando...</div>
-
-    <div class="card">
-      <label for="cli-nome">Seu Nome</label>
-      <input id="cli-nome" type="text" placeholder="Ex: Cliente" value="Cliente" />
-
-      <label for="cli-origem">Endereço de Retirada</label>
-      <input id="cli-origem" type="text" placeholder="Ex: Rua Ijuí, 654" />
-
-      <label for="cli-destino">Endereço de Entrega</label>
-      <input id="cli-destino" type="text" placeholder="Ex: Rua Bagé, 234" />
-
-      <label for="cli-pagamento">Pagamento</label>
-      <select id="cli-pagamento">
-        <option value="Pix">Pix</option>
-        <option value="Dinheiro">Dinheiro</option>
-        <option value="Cartão">Cartão</option>
-      </select>
-
-      <button class="btn-ouro" type="button" id="btn-chamar">Chamar Entregador</button>
-      <div class="msg" id="msg"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-topo">
-        <strong>Sua Entrega</strong>
-        <button class="btn-cinza btn-mini" type="button" id="btn-limpar">Encerrar / Limpar</button>
+  <header>
+    <div class="brand">
+      <img src="icon-512.png" alt="32 Drive" />
+      <div>
+        <h1>32 DRIVE</h1>
+        <div class="subtitle">Inclusivo • Cassino &amp; Rio Grande</div>
       </div>
-      <div id="detalhe-pedido">Nenhum pedido ativo no momento.</div>
     </div>
-  </div>
+    <div class="header-acoes">
+      <button class="btn-acess" type="button" id="btn-fonte-grande" aria-pressed="false">
+        Letra A+
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="aviso-firebase" id="aviso-firebase"></div>
+
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">1. Pedir Corrida</div>
+        <button class="btn btn-outline btn-sm" type="button" id="btn-ler-voz">
+          Ouvir Resumo
+        </button>
+      </div>
+
+      <div>
+        <label class="campo-lbl" for="pas-nome">Seu Nome</label>
+        <input id="pas-nome" type="text" placeholder="Como podemos te chamar?" />
+      </div>
+
+      <div>
+        <label class="campo-lbl" for="pas-origem">Onde você está agora?</label>
+        <input id="pas-origem" type="text" placeholder="Rua, bairro ou toque no botão de localização" />
+        <button class="btn-gps" type="button" id="btn-gps-origem">
+          Usar Minha Localização Atual (GPS)
+        </button>
+      </div>
+
+      <div>
+        <label class="campo-lbl" for="pas-destino">Para onde você quer ir?</label>
+        <input id="pas-destino" type="text" placeholder="Escolha um lugar rápido abaixo ou digite" />
+        <div class="atalhos-rapidos" id="atalhos-destino">
+          <button class="btn-atalho" type="button" data-destino="Centro — Rio Grande">Centro</button>
+          <button class="btn-atalho" type="button" data-destino="Balneário Cassino — Av. Rio Grande">Cassino</button>
+          <button class="btn-atalho" type="button" data-destino="FURG — Campus Carreiros, Rio Grande">FURG</button>
+          <button class="btn-atalho" type="button" data-destino="Santa Casa do Rio Grande">Santa Casa</button>
+          <button class="btn-atalho" type="button" data-destino="Estação Rodoviária de Rio Grande">Rodoviária</button>
+          <button class="btn-atalho" type="button" data-destino="Shopping Praça Rio Grande">Shopping Praça</button>
+        </div>
+      </div>
+
+      <div>
+        <label class="campo-lbl" for="pas-pagamento">Como você vai pagar?</label>
+        <select id="pas-pagamento">
+          <option value="Pix">Pix</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão">Cartão</option>
+        </select>
+      </div>
+
+      <label class="chuva-toggle" id="box-chuva-toggle" for="pas-chuva">
+        <div>
+          <strong>Dia de Chuva (+25%)</strong>
+          <div style="font-size:16px;font-weight:700;" id="txt-chuva-status">Tarifa normal</div>
+        </div>
+        <input id="pas-chuva" type="checkbox" />
+      </label>
+
+      <button class="btn btn-outline" type="button" id="btn-calcular-rota">
+        Ver Valor da Viagem
+      </button>
+
+      <div class="estimativa-box">
+        <div>
+          <div class="estimativa-lbl">Valor Estimado</div>
+          <div id="detalhe-tarifa" style="font-size:16px;font-weight:700;color:var(--muted);">Preencha onde está e para onde vai</div>
+        </div>
+        <div class="estimativa-val" id="pas-valor-estimado"></div>
+      </div>
+
+      <div class="erro-msg" id="erro-rota"></div>
+
+      <button class="btn btn-accent" type="button" id="btn-solicitar-corrida">
+        Chamar Motorista
+      </button>
+      <div class="status-msg" id="msg-passageiro"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">2. Sua Viagem</div>
+        <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-corrida">
+          Limpar Tela
+        </button>
+      </div>
+      <div id="box-corrida-ativa" class="corrida-box">
+        Nenhuma corrida solicitada ainda.
+      </div>
+    </section>
+  </main>
 
   <script type="module">
-    const diagEl = document.getElementById("diag");
-    const msgEl = document.getElementById("msg");
-    const detalheEl = document.getElementById("detalhe-pedido");
-    const nomeEl = document.getElementById("cli-nome");
-    const origemEl = document.getElementById("cli-origem");
-    const destinoEl = document.getElementById("cli-destino");
-    const pagEl = document.getElementById("cli-pagamento");
-    const btnChamar = document.getElementById("btn-chamar");
-    const btnLimpar = document.getElementById("btn-limpar");
+    const avisoFirebase = document.getElementById("aviso-firebase");
+    const msgPassageiro = document.getElementById("msg-passageiro");
+    const erroRota = document.getElementById("erro-rota");
+    const boxCorridaAtiva = document.getElementById("box-corrida-ativa");
+    const elNome = document.getElementById("pas-nome");
+    const elOrigem = document.getElementById("pas-origem");
+    const elDestino = document.getElementById("pas-destino");
+    const elPagamento = document.getElementById("pas-pagamento");
+    const elChuva = document.getElementById("pas-chuva");
+    const boxChuvaToggle = document.getElementById("box-chuva-toggle");
+    const txtChuvaStatus = document.getElementById("txt-chuva-status");
+    const elValorEstimado = document.getElementById("pas-valor-estimado");
+    const elDetalheTarifa = document.getElementById("detalhe-tarifa");
+    const btnCalcularRota = document.getElementById("btn-calcular-rota");
+    const btnLimparCorrida = document.getElementById("btn-limpar-corrida");
+    const btnGpsOrigem = document.getElementById("btn-gps-origem");
+    const btnFonteGrande = document.getElementById("btn-fonte-grande");
+    const btnLerVoz = document.getElementById("btn-ler-voz");
+    const atalhosDestino = document.getElementById("atalhos-destino");
 
     let db = null;
     let fs = null;
-    let unsubDoc = null;
-    let corridaAtualId = localStorage.getItem("v40_corrida_atual_id") || "";
+    let distanciaCalculadaKm = null;
+    let tempoRotaMinutos = null;
+    let calculoTimer = null;
+    let corridaAtualId = localStorage.getItem("32drive_corrida_id") || "";
+    let corridaOcultaPasId = localStorage.getItem("32drive_pas_oculta_id") || "";
+    let ultimoStatusAvisado = "";
+    let ultimoResumoVoz = "Nenhuma corrida solicitada ainda.";
 
-    function setDiag(t) {
-      if (diagEl) diagEl.textContent = t;
+    const nomeSalvo = localStorage.getItem("32drive_pas_nome") || "";
+    if (nomeSalvo) elNome.value = nomeSalvo;
+
+    const fonteGrandeSalva = localStorage.getItem("32drive_fonte_grande") === "true";
+    function aplicarFonteGrande(ativo) {
+      document.body.classList.toggle("fonte-grande", ativo);
+      btnFonteGrande.classList.toggle("ativo", ativo);
+      btnFonteGrande.setAttribute("aria-pressed", String(ativo));
+      localStorage.setItem("32drive_fonte_grande", String(ativo));
     }
+    aplicarFonteGrande(fonteGrandeSalva);
 
-    function setMsg(t) {
-      if (msgEl) msgEl.textContent = t;
-    }
-
-    function esc(s) {
-      return String(s || "").replace(/[&<>"']/g, function (m) {
-        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m];
-      });
-    }
-
-    function formatarMoeda(v) {
-      const n = Number(v);
-      return Number.isFinite(n) && n > 0 ? "R$ " + n.toFixed(2).replace(".", ",") : "A definir pelo entregador";
-    }
-
-    function renderPedido(docId, d) {
-      if (!detalheEl) return;
-      if (!docId || !d) {
-        detalheEl.innerHTML = "Nenhum pedido ativo no momento.";
-        setDiag("Diag V40: sem pedido ativo");
-        return;
-      }
-
-      const motNome = (d.motorista && d.motorista.nome) ? d.motorista.nome : "Aguardando entregador aceitar...";
-      const pixChave = d.chavePixMotorista || (d.motorista && d.motorista.chavePix) || "";
-      const valTxt = formatarMoeda(d.valorBruto);
-
-      setDiag(
-        "Diag V40: ID=" + docId +
-        " | cod=" + (d.codigo || "") +
-        " | st=" + (d.status || "") +
-        " | val=" + (d.valorBruto || "") +
-        " | mot=" + (d.motorista && d.motorista.nome ? d.motorista.nome : "")
-      );
-
-      detalheEl.innerHTML =
-        '<div class="box-pedido">' +
-          '<div><strong>Código:</strong> ' + esc(d.codigo || "") + ' • <strong>Status:</strong> <strong>' + esc(d.status || "") + '</strong></div>' +
-          '<div><strong>Valor:</strong> <strong>' + esc(valTxt) + '</strong></div>' +
-          '<div><strong>Pagamento:</strong> ' + esc(d.pagamento || "Pix") + '</div>' +
-          '<div><strong>Retirada:</strong> ' + esc(d.origem || "") + '</div>' +
-          '<div><strong>Destino:</strong> ' + esc(d.destino || "") + '</div>' +
-          '<div><strong>Entregador:</strong> ' + esc(motNome) + '</div>' +
-          '<div><strong>Pix:</strong> ' + (pixChave ? esc(pixChave) : "Aguardando chave Pix...") + '</div>' +
-        '</div>';
-    }
-
-    function escutarPedido(docId) {
-      if (unsubDoc) {
-        unsubDoc();
-        unsubDoc = null;
-      }
-      if (!docId || !db || !fs) {
-        renderPedido("", null);
-        return;
-      }
-      unsubDoc = fs.onSnapshot(fs.doc(db, "corridas", docId), function (snap) {
-        if (!snap.exists()) {
-          corridaAtualId = "";
-          localStorage.removeItem("v40_corrida_atual_id");
-          renderPedido("", null);
-          return;
-        }
-        const d = snap.data();
-        renderPedido(snap.id, d);
-      }, function (err) {
-        setDiag("Diag V40 ERR snapshot: " + (err.code || err.message));
-      });
-    }
-
-    if (btnChamar) {
-      btnChamar.onclick = async function () {
-        if (!db || !fs) {
-          setMsg("Firebase ainda não conectado.");
-          return;
-        }
-        const origem = (origemEl && origemEl.value ? origemEl.value : "").trim();
-        const destino = (destinoEl && destinoEl.value ? destinoEl.value : "").trim();
-        const passageiro = (nomeEl && nomeEl.value ? nomeEl.value : "").trim() || "Cliente";
-        const pagamento = pagEl ? pagEl.value : "Pix";
-
-        if (!origem || !destino) {
-          setMsg("Preencha retirada e entrega.");
-          return;
-        }
-
-        const codigo = "32E-" + Math.floor(1000 + Math.random() * 9000);
-        const novoDoc = {
-          codigo: codigo,
-          passageiro: passageiro,
-          origem: origem,
-          destino: destino,
-          pagamento: pagamento,
-          status: "Aguardando motorista",
-          criadoEmTimestamp: Date.now(),
-          criadoEm: fs.serverTimestamp()
-        };
-
-        try {
-          setDiag("Diag V40: enviando pedido...");
-          const ref = await fs.addDoc(fs.collection(db, "corridas"), novoDoc);
-          corridaAtualId = ref.id;
-          localStorage.setItem("v40_corrida_atual_id", ref.id);
-          setMsg("Pedido " + codigo + " enviado!");
-          escutarPedido(ref.id);
-        } catch (e) {
-          setDiag("Diag V40 ERR criar: " + (e.code || e.message));
-          setMsg("Erro ao enviar pedido.");
-        }
-      };
-    }
-
-    if (btnLimpar) {
-      btnLimpar.onclick = async function () {
-        const idAntigo = corridaAtualId;
-        corridaAtualId = "";
-        localStorage.removeItem("v40_corrida_atual_id");
-        if (unsubDoc) {
-          unsubDoc();
-          unsubDoc = null;
-        }
-        renderPedido("", null);
-        if (idAntigo && db && fs) {
-          try {
-            await fs.updateDoc(fs.doc(db, "corridas", idAntigo), { status: "Cancelada" });
-          } catch (_) {}
-        }
-        setMsg("Tela limpa.");
-      };
-    }
-
-    async function iniciar() {
+    function falarTexto(texto) {
       try {
-        setDiag("Diag V40: conectando firebase-config.js...");
-        let cfg = null;
-        try {
-          cfg = await import("./firebase-config.js");
-        } catch (_) {
-          cfg = await import("../firebase-config.js");
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+          const fala = new SpeechSynthesisUtterance(texto);
+          fala.lang = "pt-BR";
+          window.speechSynthesis.speak(fala);
         }
-        fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-        db = cfg.db;
-        if (!db) throw new Error("db ausente");
+      } catch (_) {}
+    }
 
-        setDiag("Diag V40: conectado!");
-        if (corridaAtualId) {
-          escutarPedido(corridaAtualId);
+    const PONTOS_CONHECIDOS = [
+      { chaves: ["furg", "campus carreiros", "universidade federal"], lat: -32.0736, lon: -52.1674, nome: "FURG — Campus Carreiros, Rio Grande" },
+      { chaves: ["furg saude", "area academica", "hu furg", "hospital universitario"], lat: -32.0375, lon: -52.1045, nome: "Área Acadêmica da Saúde / HU-FURG, Rio Grande" },
+      { chaves: ["shopping praca", "praca rio grande"], lat: -32.0628, lon: -52.1489, nome: "Shopping Praça Rio Grande" },
+      { chaves: ["partage", "partage shopping"], lat: -32.0592, lon: -52.1387, nome: "Partage Shopping Rio Grande" },
+      { chaves: ["rodoviaria", "estacao rodoviaria"], lat: -32.0369, lon: -52.1072, nome: "Estação Rodoviária de Rio Grande" },
+      { chaves: ["santa casa"], lat: -32.0357, lon: -52.1021, nome: "Santa Casa do Rio Grande" },
+      { chaves: ["centro", "centro rio grande", "largo barbosa coelho"], lat: -32.0349, lon: -52.0986, nome: "Centro — Rio Grande" },
+      { chaves: ["cassino", "balneario cassino", "av rio grande cassino"], lat: -32.1829, lon: -52.1592, nome: "Balneário Cassino — Av. Rio Grande" },
+      { chaves: ["querencia"], lat: -32.1685, lon: -52.1642, nome: "Bairro Querência — Cassino" },
+      { chaves: ["molhes", "molhes da barra"], lat: -32.1614, lon: -52.0968, nome: "Molhes da Barra — Cassino" },
+      { chaves: ["cidade nova"], lat: -32.0434, lon: -52.1095, nome: "Bairro Cidade Nova — Rio Grande" },
+      { chaves: ["vila militar"], lat: -32.0462, lon: -52.1189, nome: "Vila Militar — Rio Grande" },
+      { chaves: ["parque marinha"], lat: -32.0672, lon: -52.1563, nome: "Parque Marinha — Rio Grande" },
+      { chaves: ["junção", "juncao"], lat: -32.0548, lon: -52.1311, nome: "Junção — Rio Grande" }
+    ];
+
+    function normalizarTexto(txt) {
+      return String(txt || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function buscarPontoConhecido(endereco) {
+      const norm = normalizarTexto(endereco);
+      if (!norm) return null;
+      for (const ponto of PONTOS_CONHECIDOS) {
+        for (const chave of ponto.chaves) {
+          if (norm === chave || norm.startsWith(chave + " ") || norm.endsWith(" " + chave)) {
+            return { lat: ponto.lat, lon: ponto.lon, nome: ponto.nome };
+          }
         }
-      } catch (e) {
-        setDiag("Diag V40 ERR init: " + (e && e.message ? e.message : e));
+      }
+      return null;
+    }
+
+    function expandirAbreviacoes(endereco) {
+      return String(endereco || "")
+        .replace(/\bav\.?\b/gi, "Avenida")
+        .replace(/\br\.?\b/gi, "Rua")
+        .replace(/\bpres\.?\b/gi, "Presidente")
+        .replace(/\bdr\.?\b/gi, "Doutor")
+        .replace(/\bprof\.?\b/gi, "Professor")
+        .replace(/\bsanta tereza\b/gi, "Vila Santa Tereza")
+        .trim();
+    }
+
+    function mostrarAvisoFirebase(texto) {
+      if (!avisoFirebase) return;
+      avisoFirebase.textContent = texto;
+      avisoFirebase.style.display = texto ? "block" : "none";
+    }
+
+    function formatarMoeda(valor) {
+      return "R$ " + Number(valor || 0).toFixed(2).replace(".", ",");
+    }
+
+    function atualizarVisualChuva(ativo) {
+      elChuva.checked = Boolean(ativo);
+      boxChuvaToggle.classList.toggle("ativo", Boolean(ativo));
+      txtChuvaStatus.textContent = ativo
+        ? "Ativo: acréscimo de 25% no valor"
+        : "Tarifa normal";
+    }
+
+    function calcularPrecoPelaDistancia(km, chuvaAtiva) {
+      const dist = Number(km);
+      if (!Number.isFinite(dist) || dist <= 0) return null;
+
+      let baseValor = 0;
+      let regraTexto = "";
+
+      if (dist <= 3.5) {
+        baseValor = 7.99;
+        regraTexto = dist.toFixed(1).replace(".", ",") + " km • Trecho curto";
+      } else {
+        baseValor = dist * 2.0;
+        regraTexto = dist.toFixed(1).replace(".", ",") + " km × R$ 2,00/km";
+      }
+
+      const total = chuvaAtiva ? baseValor * 1.25 : baseValor;
+      const arredondado = Number(total.toFixed(2));
+
+      return {
+        valor: arredondado,
+        detalhe: chuvaAtiva ? regraTexto + " + 25% chuva" : regraTexto
+      };
+    }
+
+    function atualizarTelaPreco() {
+      const chuvaAtiva = Boolean(elChuva.checked);
+      if (distanciaCalculadaKm === null) {
+        elValorEstimado.textContent = "";
+        elDetalheTarifa.textContent = "Preencha onde está e para onde vai";
+        return;
+      }
+      const calc = calcularPrecoPelaDistancia(distanciaCalculadaKm, chuvaAtiva);
+      if (calc) {
+        elValorEstimado.textContent = formatarMoeda(calc.valor);
+        elDetalheTarifa.textContent = calc.detalhe;
       }
     }
 
-    iniciar();
+    async function usarLocalizacaoAtual() {
+      erroRota.textContent = "";
+      if (!navigator.geolocation) {
+        erroRota.textContent = "Este aparelho não tem localização GPS ativa.";
+        return;
+      }
+      btnGpsOrigem.disabled = true;
+      btnGpsOrigem.textContent = "Buscando sua localização...";
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          try {
+            const url =
+              "https://nominatim.openstreetmap.org/reverse?format=json&lat=" +
+              encodeURIComponent(lat) +
+              "&lon=" +
+              encodeURIComponent(lon);
+            const resp = await fetch(url, { headers: { "Accept": "application/json" } });
+            if (resp.ok) {
+              const data = await resp.json();
+              const addr = data.address || {};
+              const rua = addr.road || addr.pedestrian || addr.suburb || "";
+              const num = addr.house_number ? ", " + addr.house_number : "";
+              const bairro = addr.suburb || addr.neighbourhood || "";
+              const cidade = addr.city || addr.town || addr.municipality || "Rio Grande";
+              const formatado = [rua + num, bairro, cidade].filter(Boolean).join(" — ");
+              elOrigem.value = formatado || (lat.toFixed(5) + ", " + lon.toFixed(5));
+            } else {
+              elOrigem.value = lat.toFixed(5) + ", " + lon.toFixed(5);
+            }
+            if ((elDestino.value || "").trim().length >= 3) {
+              await calcularRotaAutomatica();
+            }
+          } catch (_) {
+            elOrigem.value = lat.toFixed(5) + ", " + lon.toFixed(5);
+          } finally {
+            btnGpsOrigem.disabled = false;
+            btnGpsOrigem.textContent = "Usar Minha Localização Atual (GPS)";
+          }
+        },
+        () => {
+          erroRota.textContent = "Toque em Permitir na localização do navegador ou escolha um atalho.";
+          btnGpsOrigem.disabled = false;
+          btnGpsOrigem.textContent = "Usar Minha Localização Atual (GPS)";
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    async function consultarNominatimLocal(textoBusca) {
+      const viewbox = "-52.68,-32.35,-52.04,-31.92";
+      const url =
+        "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&bounded=1&viewbox=" +
+        encodeURIComponent(viewbox) +
+        "&q=" +
+        encodeURIComponent(textoBusca);
+
+      const resp = await fetch(url, { headers: { "Accept": "application/json" } });
+      if (!resp.ok) return null;
+      const dados = await resp.json();
+      if (!Array.isArray(dados) || !dados.length) return null;
+      return {
+        lat: Number(dados[0].lat),
+        lon: Number(dados[0].lon),
+        nome: dados[0].display_name
+      };
+    }
+
+    async function geocodificarEndereco(endereco) {
+      const conhecido = buscarPontoConhecido(endereco);
+      if (conhecido) return conhecido;
+
+      const limpo = expandirAbreviacoes(endereco);
+      const semNumero = limpo.replace(/,?\s*\d+\b/g, "").trim();
+
+      const tentativas = [
+        limpo + ", Rio Grande, RS",
+        limpo,
+        semNumero && semNumero !== limpo ? semNumero + ", Rio Grande, RS" : ""
+      ].filter(Boolean);
+
+      for (const tentativa of tentativas) {
+        const achado = await consultarNominatimLocal(tentativa);
+        if (achado) return achado;
+      }
+
+      throw new Error("Endereço não encontrado em Rio Grande / Cassino");
+    }
+
+    async function buscarRotaOSRM(pontoA, pontoB) {
+      const url =
+        "https://router.project-osrm.org/route/v1/driving/" +
+        pontoA.lon + "," + pontoA.lat + ";" +
+        pontoB.lon + "," + pontoB.lat +
+        "?overview=false";
+
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error("Falha ao calcular rota");
+      const dados = await resp.json();
+      if (!dados.routes || !dados.routes.length) {
+        throw new Error("Rota indisponível");
+      }
+      const metros = Number(dados.routes[0].distance || 0);
+      const segundos = Number(dados.routes[0].duration || 0);
+      const km = Number((metros / 1000).toFixed(2));
+      const minutosEstimados = Math.max(2, Math.round(segundos / 60) || Math.round(km * 2.2));
+      return { km, minutosEstimados };
+    }
+
+    async function calcularRotaAutomatica() {
+      const origem = (elOrigem.value || "").trim();
+      const destino = (elDestino.value || "").trim();
+      erroRota.textContent = "";
+
+      if (origem.length < 3 || destino.length < 3) {
+        distanciaCalculadaKm = null;
+        tempoRotaMinutos = null;
+        atualizarTelaPreco();
+        return;
+      }
+
+      try {
+        elDetalheTarifa.textContent = "Calculando distância e valor...";
+        btnCalcularRota.disabled = true;
+        btnCalcularRota.textContent = "Calculando...";
+
+        const [pontoA, pontoB] = await Promise.all([
+          geocodificarEndereco(origem),
+          geocodificarEndereco(destino)
+        ]);
+
+        const rota = await buscarRotaOSRM(pontoA, pontoB);
+        if (rota.km > 120) {
+          throw new Error("Distância fora da área de atendimento");
+        }
+
+        distanciaCalculadaKm = rota.km;
+        tempoRotaMinutos = rota.minutosEstimados;
+        erroRota.textContent = "";
+        atualizarTelaPreco();
+      } catch (erro) {
+        console.error(erro);
+        distanciaCalculadaKm = null;
+        tempoRotaMinutos = null;
+        atualizarTelaPreco();
+        erroRota.textContent =
+          "Não encontramos o endereço. Use a localização GPS ou toque em um dos botões rápidos.";
+      } finally {
+        btnCalcularRota.disabled = false;
+        btnCalcularRota.textContent = "Ver Valor da Viagem";
+      }
+    }
+
+    function agendarCalculoAutomatico() {
+      clearTimeout(calculoTimer);
+      calculoTimer = setTimeout(() => {
+        calcularRotaAutomatica();
+      }, 900);
+    }
+
+    function escaparHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function limparCorridaTela(mensagem = "Nenhuma corrida solicitada ainda.") {
+      if (corridaAtualId) {
+        corridaOcultaPasId = corridaAtualId;
+        localStorage.setItem("32drive_pas_oculta_id", corridaOcultaPasId);
+      }
+      corridaAtualId = "";
+      localStorage.removeItem("32drive_corrida_id");
+      ultimoStatusAvisado = "";
+      ultimoResumoVoz = mensagem;
+      boxCorridaAtiva.innerHTML = escaparHtml(mensagem);
+    }
+
+    function renderizarCorrida(c, docId = "") {
+      if (!c) {
+        boxCorridaAtiva.innerHTML = "Nenhuma corrida solicitada ainda.";
+        ultimoResumoVoz = "Nenhuma corrida solicitada ainda.";
+        return;
+      }
+
+      if (docId && docId === corridaOcultaPasId) {
+        return;
+      }
+
+      const st = String(c.status || "");
+      if (st === "Finalizada" || st === "Cancelada") {
+        limparCorridaTela("Nenhuma corrida solicitada ainda.");
+        msgPassageiro.textContent = "Viagem encerrada.";
+        return;
+      }
+
+      const foiAceita = Boolean(c.motorista && c.motorista.nome) ||
+        ["Aceita", "Motorista a caminho", "No local de embarque", "Em viagem"].includes(st);
+
+      const minutosChegada = Number(c.tempoChegadaMin || 0) || Number(c.tempoEstimadoRotaMin || 0) || null;
+      const modoChegada = c.modoTempoChegada || (c.tempoChegadaMin ? "motorista" : "estimativa da rota");
+
+      if (foiAceita && ultimoStatusAvisado !== st) {
+        ultimoStatusAvisado = st || "Aceita";
+        msgPassageiro.textContent = "Viagem aceita! " + (minutosChegada ? "Chegada em " + minutosChegada + " min." : "Motorista a caminho.");
+      }
+
+      const alertaAceitaHtml = foiAceita
+        ? '<div class="alerta-aceita">Viagem aceita! O motorista confirmou seu pedido.</div>'
+        : "";
+
+      const chegadaHtml = minutosChegada
+        ? '<div class="chegada-destaque">Tempo de chegada: <strong>' +
+            escaparHtml(minutosChegada) + ' min</strong> (' + escaparHtml(modoChegada) + ')</div>'
+        : "";
+
+      const motTexto = c.motorista && c.motorista.nome
+        ? escaparHtml(c.motorista.nome) +
+          (c.motorista.veiculo ? " • " + escaparHtml(c.motorista.veiculo) : "") +
+          (c.motorista.placa ? " (" + escaparHtml(c.motorista.placa) + ")" : "")
+        : "Aguardando motorista aceitar...";
+
+      const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
+      const chavePix = (c.chavePixMotorista || (c.motorista && c.motorista.chavePix) || "").trim();
+      const mostrarPix = String(c.pagamento || "").toLowerCase() === "pix" || Boolean(chavePix);
+
+      ultimoResumoVoz =
+        (foiAceita ? "Viagem aceita. " : "Corrida solicitada. ") +
+        "Valor " + formatarMoeda(c.valorBruto) + ". " +
+        (minutosChegada ? "Chegada em " + minutosChegada + " minutos. " : "") +
+        (c.motorista && c.motorista.nome ? "Motorista " + c.motorista.nome + "." : "Aguardando motorista.");
+
+      const pixHtml = mostrarPix
+        ? '<div class="pix-box">' +
+            '<div><strong>Pagamento Pix</strong> — Valor: <strong>' + formatarMoeda(c.valorBruto) + '</strong></div>' +
+            (chavePix
+              ? '<div class="pix-chave-linha">' +
+                  '<span id="texto-chave-pix">' + escaparHtml(chavePix) + '</span>' +
+                  '<button class="btn btn-green btn-sm" type="button" id="btn-copiar-pix">Copiar Pix</button>' +
+                '</div>'
+              : '<div style="font-size:16px;color:#1e3a8a;font-weight:700;">Aguardando o motorista enviar a chave Pix.</div>') +
+          '</div>'
+        : "";
+
+      boxCorridaAtiva.innerHTML =
+        alertaAceitaHtml +
+        chegadaHtml +
+        "<div><strong>Status:</strong> " + escaparHtml(st || "Solicitada") + " • <strong>Valor:</strong> " + formatarMoeda(c.valorBruto) + "</div>" +
+        "<div><strong>Distância:</strong> " + kmTxt + " • <strong>Pagamento:</strong> " + escaparHtml(c.pagamento || "Pix") + "</div>" +
+        "<div><strong>De:</strong> " + escaparHtml(c.origem || "—") + "<br/><strong>Para:</strong> " + escaparHtml(c.destino || "—") + "</div>" +
+        "<div><strong>Motorista:</strong> " + motTexto + "</div>" +
+        pixHtml;
+
+      const btnCopiar = document.getElementById("btn-copiar-pix");
+      if (btnCopiar && chavePix) {
+        btnCopiar.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(chavePix);
+            btnCopiar.textContent = "Copiado!";
+          } catch (_) {
+            const temp = document.createElement("textarea");
+            temp.value = chavePix;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand("copy");
+            document.body.removeChild(temp);
+            btnCopiar.textContent = "Copiado!";
+          }
+          setTimeout(() => {
+            if (btnCopiar) btnCopiar.textContent = "Copiar Pix";
+          }, 2000);
+        });
+      }
+    }
+
+    async function solicitarCorrida() {
+      const nome = (elNome.value || "").trim();
+      const origem = (elOrigem.value || "").trim();
+      const destino = (elDestino.value || "").trim();
+      const pagamento = elPagamento.value || "Pix";
+
+      if (!nome || !origem || !destino) {
+        msgPassageiro.textContent = "Preencha seu nome, onde está e para onde vai.";
+        return;
+      }
+
+      localStorage.setItem("32drive_pas_nome", nome);
+      corridaOcultaPasId = "";
+      localStorage.removeItem("32drive_pas_oculta_id");
+
+      if (distanciaCalculadaKm === null) {
+        await calcularRotaAutomatica();
+      }
+
+      if (distanciaCalculadaKm === null) {
+        msgPassageiro.textContent = "Confira onde está e para onde vai antes de chamar.";
+        return;
+      }
+
+      const calc = calcularPrecoPelaDistancia(distanciaCalculadaKm, Boolean(elChuva.checked));
+      const valorBruto = calc ? calc.valor : 7.99;
+      const codigo = "32D-" + Math.floor(1000 + Math.random() * 9000);
+      ultimoStatusAvisado = "";
+
+      const corridaLocal = {
+        codigo,
+        passageiro: nome,
+        origem,
+        destino,
+        distanciaKm: distanciaCalculadaKm,
+        tempoEstimadoRotaMin: tempoRotaMinutos || Math.max(2, Math.round(distanciaCalculadaKm * 2.2)),
+        pagamento,
+        chavePixMotorista: "",
+        valorBruto,
+        chuva: Boolean(elChuva.checked),
+        status: "Aguardando motorista",
+        motorista: null,
+        criadoEmTimestamp: Date.now()
+      };
+
+      renderizarCorrida(corridaLocal);
+
+      if (!db || !fs) {
+        msgPassageiro.textContent = "Corrida simulada (" + formatarMoeda(valorBruto) + ").";
+        return;
+      }
+
+      try {
+        msgPassageiro.textContent = "Chamando motorista...";
+        const docRef = await fs.addDoc(fs.collection(db, "corridas"), {
+          ...corridaLocal,
+          criadoEm: fs.serverTimestamp()
+        });
+        corridaAtualId = docRef.id;
+        localStorage.setItem("32drive_corrida_id", corridaAtualId);
+        msgPassageiro.textContent = "Pedido enviado! Aguardando motorista...";
+      } catch (erro) {
+        console.error(erro);
+        msgPassageiro.textContent = "Erro ao enviar pedido (" + (erro.code || erro.message || "Firestore") + ").";
+      }
+    }
+
+    btnFonteGrande.addEventListener("click", () => {
+      aplicarFonteGrande(!document.body.classList.contains("fonte-grande"));
+    });
+
+    btnLerVoz.addEventListener("click", () => {
+      falarTexto(ultimoResumoVoz);
+    });
+
+    atalhosDestino.addEventListener("click", async (ev) => {
+      const btn = ev.target.closest("button[data-destino]");
+      if (!btn) return;
+      elDestino.value = btn.getAttribute("data-destino");
+      if ((elOrigem.value || "").trim().length >= 3) {
+        await calcularRotaAutomatica();
+      }
+    });
+
+    btnGpsOrigem.addEventListener("click", usarLocalizacaoAtual);
+    elNome.addEventListener("change", () => {
+      localStorage.setItem("32drive_pas_nome", (elNome.value || "").trim());
+    });
+    elOrigem.addEventListener("input", agendarCalculoAutomatico);
+    elDestino.addEventListener("input", agendarCalculoAutomatico);
+    elOrigem.addEventListener("change", calcularRotaAutomatica);
+    elDestino.addEventListener("change", calcularRotaAutomatica);
+    btnCalcularRota.addEventListener("click", calcularRotaAutomatica);
+    btnLimparCorrida.addEventListener("click", () => {
+      limparCorridaTela("Nenhuma corrida solicitada ainda.");
+      msgPassageiro.textContent = "Tela limpa.";
+    });
+
+    elChuva.addEventListener("change", () => {
+      atualizarVisualChuva(elChuva.checked);
+      atualizarTelaPreco();
+    });
+
+    document.getElementById("btn-solicitar-corrida").addEventListener("click", solicitarCorrida);
+
+    atualizarVisualChuva(false);
+    atualizarTelaPreco();
+
+    try {
+      const configModulo = await import("./firebase-config.js");
+      fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      db = configModulo.db;
+      if (!db) throw new Error("db não exportado");
+
+      mostrarAvisoFirebase("");
+
+      fs.onSnapshot(fs.doc(db, "config", "geral"), (snap) => {
+        const chuvaGlobal = snap.exists() ? Boolean(snap.data().chuva) : false;
+        atualizarVisualChuva(chuvaGlobal);
+        atualizarTelaPreco();
+      });
+
+      fs.onSnapshot(fs.collection(db, "corridas"), (snapshot) => {
+        let encontrada = null;
+        let encontradaId = "";
+        let maisRecenteTs = -1;
+        const nomeDigitado = normalizarTexto(elNome.value);
+
+        snapshot.forEach((docSnap) => {
+          if (docSnap.id === corridaOcultaPasId) return;
+          const d = docSnap.data();
+          const st = String(d.status || "");
+          if (st === "Finalizada" || st === "Cancelada") return;
+
+          if (corridaAtualId && docSnap.id === corridaAtualId) {
+            encontrada = d;
+            encontradaId = docSnap.id;
+          } else if (!corridaAtualId && nomeDigitado && normalizarTexto(d.passageiro) === nomeDigitado) {
+            const ts = Number(d.criadoEmTimestamp || 0);
+            if (ts >= maisRecenteTs) {
+              maisRecenteTs = ts;
+              encontrada = d;
+              encontradaId = docSnap.id;
+            }
+          }
+        });
+
+        if (encontrada && encontradaId) {
+          corridaAtualId = encontradaId;
+          localStorage.setItem("32drive_corrida_id", encontradaId);
+          renderizarCorrida(encontrada, encontradaId);
+        } else if (!corridaAtualId) {
+          boxCorridaAtiva.innerHTML = "Nenhuma corrida solicitada ainda.";
+        }
+      });
+    } catch (erro) {
+      console.error(erro);
+      mostrarAvisoFirebase(
+        "Tela do Passageiro carregada. O arquivo firebase-config.js ainda não foi encontrado no repositório."
+      );
+    }
   </script>
 </body>
 </html>
