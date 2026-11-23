@@ -164,12 +164,12 @@
       gap: 8px;
     }
     .btn-din {
-      padding: 11px 8px;
+      padding: 12px 8px;
       border-radius: 10px;
       border: 2px solid #cbd5e1;
       background: #f1f5f9;
       color: #0f172a;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 900;
       cursor: pointer;
     }
@@ -283,4 +283,323 @@
     <section class="card">
       <div class="card-title">Dinâmica do Motorista (10% a 30%)</div>
       <div id="resumo-dinamica" style="font-size:15px;font-weight:700;color:var(--muted);">
-        Dinâmica atual: Normal (0%). Escolha de 10% até 30% de
+        Dinâmica atual: Normal (0%). Escolha de 10% até 30% de 5 em 5%.
+      </div>
+      <div class="dinamica-grid" id="grid-dinamica">
+        <button class="btn-din ativo" type="button" data-din="0">0% Normal</button>
+        <button class="btn-din" type="button" data-din="10">+10%</button>
+        <button class="btn-din" type="button" data-din="15">+15%</button>
+        <button class="btn-din" type="button" data-din="20">+20%</button>
+        <button class="btn-din" type="button" data-din="25">+25%</button>
+        <button class="btn-din" type="button" data-din="30">+30%</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Tempo de Chegada (Rota Automática ou Manual)</div>
+      <div class="modo-row">
+        <button class="btn-modo ativo" type="button" id="modo-auto">Automático (Rota)</button>
+        <button class="btn-modo" type="button" id="modo-manual">Manual (Minutos)</button>
+      </div>
+      <div id="resumo-tempo-modo" style="font-size:15px;font-weight:700;color:var(--muted);">
+        Modo Automático ativo: usa o tempo estimado pela rota do mapa ao aceitar.
+      </div>
+      <div class="minutos-grid" id="grid-minutos">
+        <button class="btn-min" type="button" data-min="2">2 min</button>
+        <button class="btn-min" type="button" data-min="6">6 min</button>
+        <button class="btn-min" type="button" data-min="8">8 min</button>
+        <button class="btn-min" type="button" data-min="10">10 min</button>
+        <button class="btn-min" type="button" data-min="12">12 min</button>
+        <button class="btn-min" type="button" data-min="18">18 min</button>
+        <button class="btn-min" type="button" data-min="20">20 min</button>
+      </div>
+    </section>
+
+    <section class="card" id="sec-corrida-andamento" style="display:none;">
+      <div class="card-header">
+        <div class="card-title">Corrida em Andamento</div>
+        <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-andamento">
+          Limpar Painel
+        </button>
+      </div>
+      <div id="box-corrida-andamento"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">Chamados Disponíveis</div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-chamados">
+            Limpar
+          </button>
+          <button class="btn btn-outline btn-sm" type="button" id="btn-simular-chamado">
+            Simular Chamado
+          </button>
+        </div>
+      </div>
+      <div id="lista-corridas-motorista" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="corrida-card" style="color:var(--muted);">Nenhuma corrida aguardando motorista no momento.</div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    const avisoFirebase = document.getElementById("aviso-firebase");
+    const avisoDinamica = document.getElementById("aviso-dinamica");
+    const resumoDinamica = document.getElementById("resumo-dinamica");
+    const gridDinamica = document.getElementById("grid-dinamica");
+    const botoesDin = Array.from(document.querySelectorAll(".btn-din"));
+    const msgMotorista = document.getElementById("msg-motorista");
+    const listaCorridasEl = document.getElementById("lista-corridas-motorista");
+    const secCorridaAndamento = document.getElementById("sec-corrida-andamento");
+    const boxCorridaAndamento = document.getElementById("box-corrida-andamento");
+    const btnLimparAndamento = document.getElementById("btn-limpar-andamento");
+    const btnLimparChamados = document.getElementById("btn-limpar-chamados");
+    const btnEnviarPix = document.getElementById("btn-enviar-pix");
+    const btnSalvarPerfil = document.getElementById("btn-salvar-perfil");
+
+    const elCodigo = document.getElementById("mot-codigo");
+    const elNome = document.getElementById("mot-nome");
+    const elVeiculo = document.getElementById("mot-veiculo");
+    const elPlaca = document.getElementById("mot-placa");
+    const elPix = document.getElementById("mot-pix");
+    const btnModoAuto = document.getElementById("modo-auto");
+    const btnModoManual = document.getElementById("modo-manual");
+    const resumoTempoModo = document.getElementById("resumo-tempo-modo");
+    const botoesMin = Array.from(document.querySelectorAll(".btn-min"));
+
+    const DINAMICAS_PERMITIDAS = [0, 10, 15, 20, 25, 30];
+
+    let db = null;
+    let fs = null;
+    let dinamicaPct = Number(localStorage.getItem("32drive_dinamica_pct") || "0");
+    if (DINAMICAS_PERMITIDAS.indexOf(dinamicaPct) === -1) dinamicaPct = 0;
+    let modoTempo = localStorage.getItem("32drive_modo_tempo") || "auto";
+    let minutoManualSelecionado = Number(localStorage.getItem("32drive_min_manual") || "6");
+    let corridaEmAndamento = null;
+    let chamadosLocais = [];
+    let idsOcultos = new Set(JSON.parse(localStorage.getItem("32drive_mot_ocultos_v39") || "[]"));
+
+    function salvarOcultos() {
+      localStorage.setItem("32drive_mot_ocultos_v39", JSON.stringify(Array.from(idsOcultos)));
+    }
+
+    function obterValorBaseCorrida(corrida) {
+      const baseSalvo = Number(corrida.valorBase || 0);
+      const brutoSalvo = Number(corrida.valorBruto || 0);
+      const pctAnterior = Number(corrida.dinamicaPct || 0);
+      if (baseSalvo > 0) return baseSalvo;
+      if (brutoSalvo > 0 && pctAnterior > 0) {
+        return Number((brutoSalvo / (1 + pctAnterior / 100)).toFixed(2));
+      }
+      return brutoSalvo;
+    }
+
+    function calcularValorComDinamica(corrida, pct) {
+      const percentual = typeof pct === "number" ? pct : dinamicaPct;
+      const base = obterValorBaseCorrida(corrida);
+      if (!base) return 0;
+      return Number((base * (1 + percentual / 100)).toFixed(2));
+    }
+
+    function atualizarVisualDinamica() {
+      botoesDin.forEach(function (b) {
+        b.classList.toggle("ativo", Number(b.dataset.din) === dinamicaPct);
+      });
+      if (dinamicaPct > 0) {
+        resumoDinamica.textContent = "Dinâmica ativa: +" + dinamicaPct + "% aplicada sobre o valor da corrida.";
+        avisoDinamica.textContent = "Dinâmica do motorista ativa: +" + dinamicaPct + "% nas corridas.";
+        avisoDinamica.style.display = "block";
+      } else {
+        resumoDinamica.textContent = "Dinâmica atual: Normal (0%). Escolha de 10% até 30% de 5 em 5%.";
+        avisoDinamica.textContent = "";
+        avisoDinamica.style.display = "none";
+      }
+    }
+
+    function carregarPerfilSalvo() {
+      try {
+        const salvo = JSON.parse(localStorage.getItem("32drive_motorista_perfil") || "null");
+        if (!salvo) return;
+        if (salvo.codigo) elCodigo.value = salvo.codigo;
+        if (salvo.nome) elNome.value = salvo.nome;
+        if (salvo.veiculo) elVeiculo.value = salvo.veiculo;
+        if (salvo.placa) elPlaca.value = salvo.placa;
+        if (salvo.chavePix) elPix.value = salvo.chavePix;
+      } catch (_) {}
+    }
+
+    function salvarPerfil() {
+      const perfil = {
+        codigo: (elCodigo.value || "").trim().toUpperCase(),
+        nome: (elNome.value || "").trim(),
+        veiculo: (elVeiculo.value || "").trim(),
+        placa: (elPlaca.value || "").trim().toUpperCase(),
+        chavePix: (elPix.value || "").trim()
+      };
+      localStorage.setItem("32drive_motorista_perfil", JSON.stringify(perfil));
+      return perfil;
+    }
+
+    function atualizarVisualTempo() {
+      const isManual = modoTempo === "manual";
+      btnModoAuto.classList.toggle("ativo", !isManual);
+      btnModoManual.classList.toggle("ativo", isManual);
+      botoesMin.forEach(function (b) {
+        b.classList.toggle("ativo", Number(b.dataset.min) === minutoManualSelecionado);
+      });
+      resumoTempoModo.textContent = isManual
+        ? "Modo Manual ativo: envia " + minutoManualSelecionado + " min ao aceitar/atualizar."
+        : "Modo Automático ativo: usa o tempo estimado pela rota do mapa (ou toque em um botão de minutos para ajustar na hora).";
+    }
+
+    function resolverMinutosChegada(corrida) {
+      if (modoTempo === "manual") {
+        return { minutos: minutoManualSelecionado, modo: "manual" };
+      }
+      const dist = Number(corrida.distanciaKm || 0);
+      const minRota = Number(corrida.tempoEstimadoRotaMin || 0) || Math.max(2, Math.round(dist * 2.2) || 6);
+      return { minutos: Math.max(2, minRota), modo: "automático (rota)" };
+    }
+
+    function mostrarAvisoFirebase(texto) {
+      if (!avisoFirebase) return;
+      avisoFirebase.textContent = texto;
+      avisoFirebase.style.display = texto ? "block" : "none";
+    }
+
+    function formatarMoeda(valor) {
+      return "R$ " + Number(valor || 0).toFixed(2).replace(".", ",");
+    }
+
+    function montarLinkMapa(endereco) {
+      const q = encodeURIComponent(String(endereco || "") + ", Rio Grande, RS");
+      return "https://www.google.com/maps/search/?api=1&query=" + q;
+    }
+
+    function escaparHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function limparPainelAndamento(msg) {
+      if (corridaEmAndamento && corridaEmAndamento.docId) {
+        idsOcultos.add(corridaEmAndamento.docId);
+        salvarOcultos();
+      }
+      corridaEmAndamento = null;
+      secCorridaAndamento.style.display = "none";
+      boxCorridaAndamento.innerHTML = "";
+      if (msg) msgMotorista.textContent = msg;
+    }
+
+    function renderizarCorridaAndamento() {
+      if (!corridaEmAndamento) {
+        secCorridaAndamento.style.display = "none";
+        boxCorridaAndamento.innerHTML = "";
+        return;
+      }
+      const st = String(corridaEmAndamento.status || "");
+      if (st === "Finalizada" || st === "Cancelada") {
+        limparPainelAndamento("");
+        return;
+      }
+
+      secCorridaAndamento.style.display = "flex";
+      const c = corridaEmAndamento;
+      const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
+      const pixAtual = (c.chavePixMotorista || (elPix.value || "").trim());
+      const pctCorrida = typeof c.dinamicaPct === "number" ? c.dinamicaPct : dinamicaPct;
+      const valorAtual = calcularValorComDinamica(c, pctCorrida);
+
+      let acaoHtml = "";
+      if (st === "Motorista a caminho" || st === "Aceita") {
+        acaoHtml =
+          '<button class="btn btn-primary" type="button" data-etapa="No local de embarque">Cheguei no Embarque</button>';
+      } else if (st === "No local de embarque") {
+        acaoHtml =
+          '<button class="btn btn-green" type="button" data-etapa="Em viagem">Iniciar Viagem</button>';
+      } else if (st === "Em viagem") {
+        acaoHtml =
+          '<button class="btn btn-accent" type="button" data-etapa="Finalizada">Finalizar Corrida</button>';
+      }
+
+      boxCorridaAndamento.innerHTML =
+        '<div class="corrida-card corrida-ativa">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+            '<strong>' + escaparHtml(c.codigo || "32D") + ' • ' + escaparHtml(c.passageiro || "Passageiro") + '</strong>' +
+            '<span class="valor-destaque">' + formatarMoeda(valorAtual) + '</span>' +
+          '</div>' +
+          '<div>' +
+            '<span class="tag">' + escaparHtml(st || "Em andamento") + '</span> ' +
+            '<span class="tag">' + kmTxt + '</span> ' +
+            '<span class="tag">' + escaparHtml(c.pagamento || "Pix") + '</span> ' +
+            (c.tempoChegadaMin ? '<span class="tag">Chegada: ' + escaparHtml(c.tempoChegadaMin) + ' min</span> ' : '') +
+            (pctCorrida > 0 ? '<span class="tag tag-din">Dinâmica +' + pctCorrida + '%</span>' : '') +
+          '</div>' +
+          '<div><strong>Embarque:</strong> ' + escaparHtml(c.origem || "—") + '</div>' +
+          '<div><strong>Destino:</strong> ' + escaparHtml(c.destino || "—") + '</div>' +
+          '<div><strong>Chave Pix enviada:</strong> ' + (pixAtual ? escaparHtml(pixAtual) : "Nenhuma chave enviada ainda") + '</div>' +
+          '<div class="grid-2">' +
+            '<a class="btn btn-outline" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkMapa(c.origem) + '">Abrir Embarque</a>' +
+            '<a class="btn btn-outline" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkMapa(c.destino) + '">Abrir Destino</a>' +
+          '</div>' +
+          acaoHtml +
+        '</div>';
+    }
+
+    async function enviarChavePix() {
+      const perfil = salvarPerfil();
+      const chave = (perfil.chavePix || "").trim();
+      if (!chave) {
+        msgMotorista.textContent = "Digite sua Chave Pix antes de enviar.";
+        return;
+      }
+
+      if (corridaEmAndamento) {
+        corridaEmAndamento.chavePixMotorista = chave;
+        if (corridaEmAndamento.motorista) {
+          corridaEmAndamento.motorista.chavePix = chave;
+        }
+        renderizarCorridaAndamento();
+      }
+
+      if (!db || !fs) {
+        msgMotorista.textContent = "Chave Pix salva (" + chave + ").";
+        return;
+      }
+
+      try {
+        if (corridaEmAndamento && corridaEmAndamento.docId && String(corridaEmAndamento.docId).indexOf("SIM-") !== 0) {
+          await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
+            chavePixMotorista: chave,
+            "motorista.chavePix": chave
+          });
+          msgMotorista.textContent = "Chave Pix enviada ao passageiro da corrida!";
+        } else {
+          msgMotorista.textContent = "Chave Pix salva (" + chave + ") — será enviada ao aceitar a próxima corrida.";
+        }
+      } catch (erro) {
+        console.error(erro);
+        msgMotorista.textContent = "Erro ao enviar chave Pix (" + (erro.code || erro.message || "Firestore") + ").";
+      }
+    }
+
+    function renderizarChamados(itens) {
+      const visiveis = itens.filter(function (c) {
+        const st = String(c.status || "");
+        return st === "Aguardando motorista" && !idsOcultos.has(c.docId);
+      });
+
+      if (!visiveis.length) {
+        listaCorridasEl.innerHTML =
+          '<div class="corrida-card" style="color:var(--muted);">Nenhuma corrida aguardando motorista no momento.</div>';
+        return;
+      }
+
+      listaCorridasEl.innerHTML = visiveis
+        .map(function (c) {
+          const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".",
