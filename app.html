@@ -286,12 +286,12 @@
         Dinâmica atual: Normal (0%). Escolha de 10% até 30% de 5 em 5%.
       </div>
       <div class="dinamica-grid" id="grid-dinamica">
-        <button class="btn-din ativo" type="button" data-din="0">0% Normal</button>
-        <button class="btn-din" type="button" data-din="10">+10%</button>
-        <button class="btn-din" type="button" data-din="15">+15%</button>
-        <button class="btn-din" type="button" data-din="20">+20%</button>
-        <button class="btn-din" type="button" data-din="25">+25%</button>
-        <button class="btn-din" type="button" data-din="30">+30%</button>
+        <button class="btn-din ativo" type="button" data-din="0" onclick="selecionarDinamica(0)">0% Normal</button>
+        <button class="btn-din" type="button" data-din="10" onclick="selecionarDinamica(10)">+10%</button>
+        <button class="btn-din" type="button" data-din="15" onclick="selecionarDinamica(15)">+15%</button>
+        <button class="btn-din" type="button" data-din="20" onclick="selecionarDinamica(20)">+20%</button>
+        <button class="btn-din" type="button" data-din="25" onclick="selecionarDinamica(25)">+25%</button>
+        <button class="btn-din" type="button" data-din="30" onclick="selecionarDinamica(30)">+30%</button>
       </div>
     </section>
 
@@ -332,7 +332,7 @@
           <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-chamados">
             Limpar
           </button>
-          <button class="btn btn-outline btn-sm" type="button" id="btn-simular-chamado">
+          <button class="btn btn-outline btn-sm" type="button" id="btn-simular-chamado" onclick="simularChamadoTeste()">
             Simular Chamado
           </button>
         </div>
@@ -343,11 +343,10 @@
     </section>
   </main>
 
-  <script type="module">
+  <script>
     const avisoFirebase = document.getElementById("aviso-firebase");
     const avisoDinamica = document.getElementById("aviso-dinamica");
     const resumoDinamica = document.getElementById("resumo-dinamica");
-    const gridDinamica = document.getElementById("grid-dinamica");
     const botoesDin = Array.from(document.querySelectorAll(".btn-din"));
     const msgMotorista = document.getElementById("msg-motorista");
     const listaCorridasEl = document.getElementById("lista-corridas-motorista");
@@ -416,6 +415,45 @@
         avisoDinamica.style.display = "none";
       }
     }
+
+    window.selecionarDinamica = async function (pct) {
+      pct = Number(pct);
+      if (DINAMICAS_PERMITIDAS.indexOf(pct) === -1) return;
+      dinamicaPct = pct;
+      localStorage.setItem("32drive_dinamica_pct", String(pct));
+      atualizarVisualDinamica();
+      renderizarChamados(chamadosLocais);
+
+      if (corridaEmAndamento) {
+        const valorBase = obterValorBaseCorrida(corridaEmAndamento);
+        const valorNovo = calcularValorComDinamica(corridaEmAndamento, pct);
+        corridaEmAndamento.dinamicaPct = pct;
+        corridaEmAndamento.valorBase = valorBase;
+        corridaEmAndamento.valorBruto = valorNovo;
+        renderizarCorridaAndamento();
+
+        if (String(corridaEmAndamento.docId || "").indexOf("SIM-") !== 0 && db && fs) {
+          try {
+            await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
+              dinamicaPct: pct,
+              valorBase: valorBase,
+              valorBruto: valorNovo
+            });
+            msgMotorista.textContent = pct > 0
+              ? "Dinâmica de +" + pct + "% aplicada (" + formatarMoeda(valorNovo) + ")."
+              : "Dinâmica removida (" + formatarMoeda(valorNovo) + ").";
+          } catch (_) {}
+        } else {
+          msgMotorista.textContent = pct > 0
+            ? "Dinâmica de +" + pct + "% aplicada (" + formatarMoeda(valorNovo) + ")."
+            : "Dinâmica zerada (0% Normal).";
+        }
+      } else {
+        msgMotorista.textContent = pct > 0
+          ? "Dinâmica definida em +" + pct + "%."
+          : "Dinâmica zerada (0% Normal).";
+      }
+    };
 
     function carregarPerfilSalvo() {
       try {
@@ -602,4 +640,259 @@
 
       listaCorridasEl.innerHTML = visiveis
         .map(function (c) {
-          const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".",
+          const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
+          const valorDinamica = calcularValorComDinamica(c, dinamicaPct);
+          const tagDin = dinamicaPct > 0 ? ' <span class="tag tag-din">Dinâmica +' + dinamicaPct + '%</span>' : "";
+          const prev = resolverMinutosChegada(c);
+          return (
+            '<div class="corrida-card">' +
+              '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                '<strong>' + escaparHtml(c.codigo || "Corrida") + ' • ' + escaparHtml(c.passageiro || "Passageiro") + '</strong>' +
+                '<span class="valor-destaque">' + formatarMoeda(valorDinamica) + '</span>' +
+              '</div>' +
+              '<div>' +
+                '<span class="tag">' + kmTxt + '</span> ' +
+                '<span class="tag">' + escaparHtml(c.pagamento || "Pix") + '</span> ' +
+                '<span class="tag">Chegada: ' + prev.minutos + ' min (' + prev.modo + ')</span>' +
+                tagDin +
+              '</div>' +
+              '<div><strong>Embarque:</strong> ' + escaparHtml(c.origem || "—") + '<br/><strong>Destino:</strong> ' + escaparHtml(c.destino || "—") + '</div>' +
+              '<button class="btn btn-accent" type="button" data-aceitar="' + escaparHtml(c.docId) + '">Aceitar Corrida</button>' +
+            '</div>'
+          );
+        })
+        .join("");
+    }
+
+    async function aceitarCorrida(docId) {
+      const perfil = salvarPerfil();
+      const nomeMotorista = perfil.nome || "Motorista 32 Drive";
+      const chamado = chamadosLocais.find(function (item) { return item.docId === docId; }) || {};
+      const tempoInfo = resolverMinutosChegada(chamado);
+      const valorBase = obterValorBaseCorrida(chamado);
+      const valorFinal = calcularValorComDinamica(chamado, dinamicaPct);
+
+      const dadosMotorista = {
+        codigo: perfil.codigo || "MOT-01",
+        nome: nomeMotorista,
+        veiculo: perfil.veiculo || "Veículo 32 Drive",
+        placa: perfil.placa || "32D",
+        chavePix: perfil.chavePix || ""
+      };
+
+      const payloadAtualizacao = {
+        status: "Motorista a caminho",
+        motorista: dadosMotorista,
+        tempoChegadaMin: tempoInfo.minutos,
+        modoTempoChegada: tempoInfo.modo,
+        chavePixMotorista: perfil.chavePix || "",
+        dinamicaPct: dinamicaPct,
+        valorBase: valorBase,
+        valorBruto: valorFinal
+      };
+
+      if (String(docId).indexOf("SIM-") === 0) {
+        const idxLocal = chamadosLocais.findIndex(function (item) { return item.docId === docId; });
+        if (idxLocal !== -1) chamadosLocais.splice(idxLocal, 1);
+        corridaEmAndamento = Object.assign({}, chamado, payloadAtualizacao);
+        renderizarChamados(chamadosLocais);
+        renderizarCorridaAndamento();
+        msgMotorista.textContent = "Corrida simulada aceita! Chegada em " + tempoInfo.minutos + " min.";
+        return;
+      }
+
+      if (!db || !fs || !docId) {
+        msgMotorista.textContent = "Conecte o firebase-config.js para aceitar corridas reais.";
+        return;
+      }
+
+      try {
+        await fs.updateDoc(fs.doc(db, "corridas", docId), Object.assign({}, payloadAtualizacao, {
+          aceitaEm: fs.serverTimestamp()
+        }));
+        corridaEmAndamento = Object.assign({ docId: docId }, chamado, payloadAtualizacao);
+        renderizarCorridaAndamento();
+        msgMotorista.textContent = "Corrida aceita! Passageiro avisado (" + tempoInfo.minutos + " min).";
+      } catch (erro) {
+        console.error(erro);
+        msgMotorista.textContent = "Erro ao aceitar corrida (" + (erro.code || erro.message || "Firestore") + ").";
+      }
+    }
+
+    async function avancarEtapaCorrida(novaEtapa) {
+      if (!corridaEmAndamento) return;
+
+      if (String(corridaEmAndamento.docId || "").indexOf("SIM-") === 0) {
+        if (novaEtapa === "Finalizada") {
+          msgMotorista.textContent = "Corrida simulada finalizada — painel limpo.";
+          limparPainelAndamento("");
+        } else {
+          corridaEmAndamento.status = novaEtapa;
+          msgMotorista.textContent = "Status atualizado: " + novaEtapa;
+          renderizarCorridaAndamento();
+        }
+        return;
+      }
+
+      if (!db || !fs) return;
+      try {
+        const upd = { status: novaEtapa };
+        if (novaEtapa === "Finalizada") upd.finalizadaEm = fs.serverTimestamp();
+        await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), upd);
+        if (novaEtapa === "Finalizada") {
+          msgMotorista.textContent = "Corrida finalizada! Painel limpo.";
+          limparPainelAndamento("");
+        } else {
+          msgMotorista.textContent = "Status atualizado: " + novaEtapa;
+          corridaEmAndamento.status = novaEtapa;
+          renderizarCorridaAndamento();
+        }
+      } catch (erro) {
+        console.error(erro);
+        msgMotorista.textContent = "Erro ao atualizar status (" + (erro.code || erro.message || "Firestore") + ").";
+      }
+    }
+
+    window.simularChamadoTeste = function () {
+      const fake = {
+        docId: "SIM-" + Date.now(),
+        codigo: "32D-" + Math.floor(1000 + Math.random() * 9000),
+        passageiro: "Passageiro Teste",
+        origem: "Av. Rio Grande, 450 — Cassino",
+        destino: "FURG — Campus Carreiros, Rio Grande",
+        distanciaKm: 14.5,
+        tempoEstimadoRotaMin: 22,
+        pagamento: "Pix",
+        valorBase: 29.0,
+        valorBruto: 29.0,
+        dinamicaPct: dinamicaPct,
+        status: "Aguardando motorista"
+      };
+      chamadosLocais.unshift(fake);
+      renderizarChamados(chamadosLocais);
+      msgMotorista.textContent = "Chamado de teste criado abaixo.";
+    };
+
+    carregarPerfilSalvo();
+    atualizarVisualDinamica();
+    atualizarVisualTempo();
+    renderizarChamados([]);
+
+    [elCodigo, elNome, elVeiculo, elPlaca, elPix].forEach(function (campo) {
+      campo.addEventListener("change", salvarPerfil);
+    });
+
+    btnSalvarPerfil.addEventListener("click", function () {
+      salvarPerfil();
+      msgMotorista.textContent = "Dados do motorista salvos.";
+    });
+
+    btnEnviarPix.addEventListener("click", enviarChavePix);
+    btnLimparAndamento.addEventListener("click", function () { limparPainelAndamento("Painel limpo."); });
+    btnLimparChamados.addEventListener("click", function () {
+      chamadosLocais.forEach(function (c) { idsOcultos.add(c.docId); });
+      salvarOcultos();
+      chamadosLocais = [];
+      renderizarChamados([]);
+      msgMotorista.textContent = "Lista de chamados limpa.";
+    });
+
+    btnModoAuto.addEventListener("click", function () {
+      modoTempo = "auto";
+      localStorage.setItem("32drive_modo_tempo", "auto");
+      atualizarVisualTempo();
+      renderizarChamados(chamadosLocais);
+    });
+
+    btnModoManual.addEventListener("click", function () {
+      modoTempo = "manual";
+      localStorage.setItem("32drive_modo_tempo", "manual");
+      atualizarVisualTempo();
+      renderizarChamados(chamadosLocais);
+    });
+
+    botoesMin.forEach(function (btn) {
+      btn.addEventListener("click", async function () {
+        const min = Number(btn.dataset.min);
+        minutoManualSelecionado = min;
+        modoTempo = "manual";
+        localStorage.setItem("32drive_min_manual", String(min));
+        localStorage.setItem("32drive_modo_tempo", "manual");
+        atualizarVisualTempo();
+        renderizarChamados(chamadosLocais);
+
+        if (corridaEmAndamento) {
+          corridaEmAndamento.tempoChegadaMin = min;
+          corridaEmAndamento.modoTempoChegada = "manual";
+          renderizarCorridaAndamento();
+          if (String(corridaEmAndamento.docId || "").indexOf("SIM-") !== 0 && db && fs) {
+            try {
+              await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
+                tempoChegadaMin: min,
+                modoTempoChegada: "manual"
+              });
+              msgMotorista.textContent = "Previsão de chegada atualizada para " + min + " min (manual).";
+            } catch (_) {}
+          }
+        }
+      });
+    });
+
+    listaCorridasEl.addEventListener("click", function (ev) {
+      const btn = ev.target.closest("button[data-aceitar]");
+      if (!btn) return;
+      aceitarCorrida(btn.getAttribute("data-aceitar"));
+    });
+
+    boxCorridaAndamento.addEventListener("click", function (ev) {
+      const btn = ev.target.closest("button[data-etapa]");
+      if (!btn) return;
+      avancarEtapaCorrida(btn.getAttribute("data-etapa"));
+    });
+
+    (async function conectarFirebase() {
+      try {
+        const configModulo = await import("./firebase-config.js");
+        fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+        db = configModulo.db;
+        if (!db) throw new Error("db não exportado");
+
+        mostrarAvisoFirebase("");
+
+        fs.onSnapshot(fs.collection(db, "corridas"), function (snapshot) {
+          const aguardando = [];
+          let ativaMinha = null;
+          let maisRecenteAtivaTs = -1;
+
+          snapshot.forEach(function (docSnap) {
+            if (idsOcultos.has(docSnap.id)) return;
+            const d = docSnap.data();
+            const st = String(d.status || "");
+            if (st === "Finalizada" || st === "Cancelada") return;
+
+            if (st === "Aguardando motorista") {
+              aguardando.push(Object.assign({ docId: docSnap.id }, d));
+            } else if (d.motorista && d.motorista.nome) {
+              const ts = Number(d.criadoEmTimestamp || 0);
+              if (ts >= maisRecenteAtivaTs) {
+                maisRecenteAtivaTs = ts;
+                ativaMinha = Object.assign({ docId: docSnap.id }, d);
+              }
+            }
+          });
+
+          chamadosLocais = aguardando;
+          renderizarChamados(aguardando);
+          corridaEmAndamento = ativaMinha;
+          renderizarCorridaAndamento();
+        });
+      } catch (erro) {
+        console.error(erro);
+        mostrarAvisoFirebase(
+          "Painel do Motorista carregado. Use 'Simular Chamado' para testar ou verifique o firebase-config.js para receber corridas reais."
+        );
+      }
+    })();
+  </script>
+</body>
+</html>
