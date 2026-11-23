@@ -55,7 +55,6 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      flex-wrap: wrap;
     }
     label {
       font-weight: 800;
@@ -81,7 +80,7 @@
     }
     .btn-mini {
       width: auto;
-      padding: 9px 14px;
+      padding: 8px 12px;
       font-size: 14px;
       border-radius: 10px;
     }
@@ -89,7 +88,6 @@
     .btn-verde { background: #059669; color: #ffffff; }
     .btn-laranja { background: #d97706; color: #ffffff; }
     .btn-cinza { background: #e2e8f0; color: #0f172a; border: 1px solid #94a3b8; }
-    .btn-vermelho { background: #b91c1c; color: #ffffff; }
     .item {
       border: 2px solid #94a3b8;
       border-radius: 12px;
@@ -160,10 +158,10 @@
     let fs = null;
     let corridaAtual = null;
     let ultimosAguardando = [];
-    let ocultos = new Set(JSON.parse(localStorage.getItem("v39_ocultos_ids") || "[]"));
+    let ocultos = new Set(JSON.parse(localStorage.getItem("v39_ocultos_zero") || "[]"));
 
     function salvarOcultos() {
-      localStorage.setItem("v39_ocultos_ids", JSON.stringify(Array.from(ocultos)));
+      localStorage.setItem("v39_ocultos_zero", JSON.stringify(Array.from(ocultos)));
     }
 
     function setDiag(t) {
@@ -187,7 +185,7 @@
         });
         salvarOcultos();
         renderChamados([]);
-        setMsg("Lista limpa na tela.");
+        setMsg("Lista limpa.");
       };
     }
 
@@ -199,7 +197,7 @@
         }
         corridaAtual = null;
         renderAndamento();
-        setMsg("Painel de andamento limpo.");
+        setMsg("Painel limpo.");
       };
     }
 
@@ -217,7 +215,6 @@
           '<div>Valor atual: <strong>' + (c.valorBruto ? "R$ " + Number(c.valorBruto).toFixed(2).replace(".", ",") : "Não enviado") + '</strong></div>' +
           '<button class="btn-verde" type="button" id="btn-enviar-cliente">Enviar Valor e Aceite ao Cliente</button>' +
           '<button class="btn-laranja" type="button" id="btn-finalizar">Finalizar Entrega</button>' +
-          '<button class="btn-cinza" type="button" id="btn-ocultar-ativa">Ocultar da Tela</button>' +
         '</div>';
 
       const btnEnv = document.getElementById("btn-enviar-cliente");
@@ -230,15 +227,13 @@
             status: "Aceita",
             motorista: { nome: nomeEnt, chavePix: pixEnt },
             chavePixMotorista: pixEnt,
-            tempoChegadaMin: 6,
-            modoTempoChegada: "manual",
             enviadoAoCliente: true
           };
           if (Number.isFinite(valNum) && valNum > 0) {
             payload.valorBruto = Number(valNum.toFixed(2));
           }
           try {
-            setDiag("Diag V39: gravando envio ID=" + c.docId + "...");
+            setDiag("Diag V39: gravando ID=" + c.docId + "...");
             await fs.updateDoc(fs.doc(db, "corridas", c.docId), payload);
             corridaAtual = Object.assign({}, c, payload);
             renderAndamento();
@@ -264,17 +259,6 @@
           }
         };
       }
-
-      const btnOcultar = document.getElementById("btn-ocultar-ativa");
-      if (btnOcultar) {
-        btnOcultar.onclick = function () {
-          ocultos.add(c.docId);
-          salvarOcultos();
-          corridaAtual = null;
-          renderAndamento();
-          setMsg("Entrega ocultada da tela.");
-        };
-      }
     }
 
     function renderChamados(lista) {
@@ -292,20 +276,9 @@
             '<div><strong>' + esc(c.codigo) + '</strong> • ' + esc(c.passageiro || "Cliente") + '</div>' +
             '<div>Retirada: ' + esc(c.origem) + '<br/>Destino: ' + esc(c.destino) + '</div>' +
             '<button class="btn-ouro" type="button" data-aceitar="' + esc(c.docId) + '">Aceitar Entrega</button>' +
-            '<button class="btn-cinza" type="button" data-ocultar="' + esc(c.docId) + '">Ocultar Chamado</button>' +
           '</div>'
         );
       }).join("");
-
-      chamadosEl.querySelectorAll("button[data-ocultar]").forEach(function (btn) {
-        btn.onclick = function () {
-          const id = btn.getAttribute("data-ocultar");
-          ocultos.add(id);
-          salvarOcultos();
-          renderChamados(ultimosAguardando);
-          setMsg("Chamado ocultado.");
-        };
-      });
 
       chamadosEl.querySelectorAll("button[data-aceitar]").forEach(function (btn) {
         btn.onclick = async function () {
@@ -318,9 +291,7 @@
           const payload = {
             status: "Aceita",
             motorista: { nome: nomeEnt, chavePix: pixEnt },
-            chavePixMotorista: pixEnt,
-            tempoChegadaMin: 6,
-            modoTempoChegada: "manual"
+            chavePixMotorista: pixEnt
           };
           if (Number.isFinite(valNum) && valNum > 0) {
             payload.valorBruto = Number(valNum.toFixed(2));
@@ -342,7 +313,7 @@
 
     async function iniciar() {
       try {
-        setDiag("Diag V39: importando firebase-config.js...");
+        setDiag("Diag V39: conectando firebase-config.js...");
         let cfg = null;
         try {
           cfg = await import("./firebase-config.js");
@@ -353,7 +324,7 @@
         db = cfg.db;
         if (!db) throw new Error("db ausente");
 
-        setDiag("Diag V39: conectado! Escutando corridas...");
+        setDiag("Diag V39: conectado!");
 
         fs.onSnapshot(fs.collection(db, "corridas"), function (snap) {
           const aguardando = [];
