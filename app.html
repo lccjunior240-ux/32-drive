@@ -408,6 +408,20 @@
         } catch (e) {}
       }
 
+      async function sincronizarPosicaoNasCorridasAtivas() {
+        if (!db) return;
+        const ativas = estadoMot.chamadas.filter((c) => c.status === "Aceita" || c.status === "Em viagem");
+        for (const c of ativas) {
+          try {
+            await db.collection("corridas").doc(c.id).set({
+              latMotorista: estadoMot.lat,
+              lngMotorista: estadoMot.lng,
+              motoristaAtualizadoEm: Date.now()
+            }, { merge: true });
+          } catch (e) {}
+        }
+      }
+
       async function publicarPresencaMotorista() {
         if (!db) return;
         try {
@@ -423,6 +437,7 @@
             ruaAtual: estadoMot.ruaAtual,
             atualizadoEm: Date.now()
           }, { merge: true });
+          sincronizarPosicaoNasCorridasAtivas();
         } catch (e) {}
       }
 
@@ -467,7 +482,7 @@
                 '<strong>' + escapar(c.codigo || c.id) + " • " + escapar(c.passageiro || "Passageiro") + "</strong>" +
                 '<span class="' + classeStatus(c.status) + '">' + escapar(c.status || "Aguardando motorista") + "</span>" +
               "</div>" +
-              '<div><strong>Embarque:</strong> ' + escapar(c.origem) + "<br/><strong>Para:</strong> " + escapar(c.destino) +
+              '<div><strong>Embarque:</strong> ' + escapar(c.origem) + "<br/><strong>Destino:</strong> " + escapar(c.destino) +
               ' <span class="meta-small">(' + Number(c.distanciaKm || 0).toFixed(2).replace(".", ",") + " km • GH: " + escapar(c.geohashEmbarque || "—") + ")</span></div>" +
               '<div><strong>Bruto:</strong> ' + moeda(bruto) + " • <strong>Seu ganho (80%):</strong> " + moeda(mot80) + "</div>" +
               (c.codigo4d ? '<div class="meta-small">Código 4 dígitos: <strong>' + escapar(c.codigo4d) + "</strong></div>" : "") +
@@ -490,7 +505,10 @@
           status: novoStatus,
           motoristaId: estadoMot.id,
           motoristaNome: (elMotNome.value || "").trim() || "Junior Costa",
-          motoristaVeiculo: (elMotVeiculo.value || "").trim() || "VW Voyage 1.0 • IQD8060"
+          motoristaVeiculo: (elMotVeiculo.value || "").trim() || "VW Voyage 1.0 • IQD8060",
+          latMotorista: estadoMot.lat,
+          lngMotorista: estadoMot.lng,
+          motoristaAtualizadoEm: Date.now()
         };
         Object.assign(corrida, patch);
         renderizarChamadas();
