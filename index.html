@@ -185,6 +185,10 @@
       font-size: 17px;
       font-weight: 800;
       cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .btn-green { background: var(--green); color: #ffffff; flex: 1; }
@@ -233,15 +237,19 @@
       z-index: 1;
     }
 
-    .waze-embed-wrap {
+    .waze-opcoes {
       display: none;
       flex-direction: column;
       gap: 8px;
+      background: #f8fafc;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
     }
 
-    .waze-embed-wrap iframe {
+    .waze-opcoes iframe {
       width: 100%;
-      height: 270px;
+      height: 240px;
       border: 1.5px solid var(--border);
       border-radius: 10px;
       background: #ffffff;
@@ -294,7 +302,7 @@
         <div class="acoes">
           <button type="button" class="btn btn-blue" id="btn-buscar-local">Buscar Localização</button>
           <button type="button" class="btn btn-outline" id="btn-ver-mapa">Ver Mapa</button>
-          <button type="button" class="btn btn-outline" id="btn-nova-busca">Nova Busca</button>
+          <button type="button" class="btn btn-outline" id="btn-limpar-topo">Limpar Tela</button>
         </div>
 
         <div class="valor-box">
@@ -319,13 +327,18 @@
 
         <div id="mapa-passageiro"></div>
 
-        <div class="waze-embed-wrap" id="waze-embed-box">
-          <div class="meta">Rota e tempo no Waze (após aceite do motorista):</div>
+        <div class="waze-opcoes" id="waze-opcoes-box">
+          <div class="meta">Abrir no Waze (tempo e trajeto):</div>
+          <div class="acoes">
+            <a class="btn btn-blue" id="link-waze-ate-embarque" href="https://waze.com/ul" target="_blank" rel="noopener noreferrer">Waze: Motorista → Embarque</a>
+            <a class="btn btn-accent" id="link-waze-ate-destino" href="https://waze.com/ul" target="_blank" rel="noopener noreferrer">Waze: Embarque → Destino</a>
+            <a class="btn btn-outline" id="link-waze-motorista" href="https://waze.com/ul" target="_blank" rel="noopener noreferrer">Posição do Motorista</a>
+          </div>
           <iframe id="waze-iframe" title="Mapa Waze" loading="lazy"></iframe>
         </div>
 
         <div class="acoes">
-          <a class="btn btn-blue" id="btn-link-waze-mapa" href="https://waze.com/ul" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">Abrir no Waze</a>
+          <button type="button" class="btn btn-blue" id="btn-recalcular-tempo">Atualizar Tempo / Rota</button>
           <button type="button" class="btn btn-outline" id="btn-voltar-corrida">Voltar para Corrida</button>
         </div>
       </section>
@@ -420,9 +433,11 @@
       const elAbaMapaBtn = document.getElementById("aba-btn-mapa");
       const elAbaCorrida = document.getElementById("aba-corrida");
       const elAbaMapa = document.getElementById("aba-mapa");
-      const elWazeBox = document.getElementById("waze-embed-box");
+      const elWazeOpcoesBox = document.getElementById("waze-opcoes-box");
       const elWazeIframe = document.getElementById("waze-iframe");
-      const elBtnLinkWazeMapa = document.getElementById("btn-link-waze-mapa");
+      const elLinkWazeEmbarque = document.getElementById("link-waze-ate-embarque");
+      const elLinkWazeDestino = document.getElementById("link-waze-ate-destino");
+      const elLinkWazeMotorista = document.getElementById("link-waze-motorista");
 
       function trocarAba(nome) {
         state.abaAtiva = nome;
@@ -437,7 +452,7 @@
             try { mapa.invalidateSize(); } catch (e) {}
           }, 150);
           if (state.corridaAtual) {
-            atualizarRotaMotoristaAteEmbarque(state.corridaAtual);
+            atualizarRotaMotoristaAteEmbarque(state.corridaAtual, true);
           }
         }
       }
@@ -563,9 +578,8 @@
         state.tempoChegadaMin = null;
         elInfoChegada.style.display = "none";
         elInfoChegada.textContent = "";
-        elWazeBox.style.display = "none";
+        elWazeOpcoesBox.style.display = "none";
         elWazeIframe.src = "";
-        elBtnLinkWazeMapa.href = "https://waze.com/ul";
         if (!mapa || typeof window.L === "undefined") return;
         try {
           if (marcadorMotorista) {
@@ -579,28 +593,52 @@
         } catch (e) {}
       }
 
+      function montarLinksWazeCorrida(c) {
+        const latMot = Number(c && c.latMotorista);
+        const lngMot = Number(c && c.lngMotorista);
+        const latEmb = Number((c && c.latEmbarque) || state.lat);
+        const lngEmb = Number((c && c.lngEmbarque) || state.lng);
+        const origemStr = encodeURIComponent(((c && c.origem) || REF_ENDERECO) + ", Rio Grande, RS");
+        const destinoStr = encodeURIComponent(((c && c.destino) || "") + ", Rio Grande, RS");
+
+        const temMot = !Number.isNaN(latMot) && !Number.isNaN(lngMot);
+        const linkMotorista = temMot
+          ? "https://waze.com/ul?ll=" + encodeURIComponent(latMot + "," + lngMot) + "&navigate=yes"
+          : "https://waze.com/ul?q=" + origemStr + "&navigate=yes";
+
+        const linkAteEmbarque = temMot
+          ? "https://waze.com/ul?ll=" + encodeURIComponent(latEmb + "," + lngEmb) + "&from=" + encodeURIComponent(latMot + "," + lngMot) + "&navigate=yes"
+          : (c && c.linkWaze) || ("https://waze.com/ul?q=" + origemStr + "&navigate=yes");
+
+        const linkAteDestino = "https://waze.com/ul?q=" + destinoStr + "&from=" + encodeURIComponent(latEmb + "," + lngEmb) + "&navigate=yes";
+
+        return { linkMotorista, linkAteEmbarque, linkAteDestino };
+      }
+
       function atualizarWazeNaSegundaTela(corrida) {
         const aceitaOuEmAndamento = corrida && (corrida.status === "Aceita" || corrida.status === "Em viagem");
         if (!aceitaOuEmAndamento) {
-          elWazeBox.style.display = "none";
+          elWazeOpcoesBox.style.display = "none";
           return;
         }
+        const links = montarLinksWazeCorrida(corrida);
+        elLinkWazeMotorista.href = links.linkMotorista;
+        elLinkWazeEmbarque.href = links.linkAteEmbarque;
+        elLinkWazeDestino.href = links.linkAteDestino;
+
         const latAlvo = Number(corrida.latMotorista || corrida.latEmbarque || state.lat);
         const lngAlvo = Number(corrida.lngMotorista || corrida.lngEmbarque || state.lng);
-        const linkApp = montarLinkWazePassageiro(corrida);
-        elBtnLinkWazeMapa.href = linkApp;
-
         if (!Number.isNaN(latAlvo) && !Number.isNaN(lngAlvo)) {
           const embedUrl = "https://embed.waze.com/iframe?zoom=15&lat=" +
             encodeURIComponent(latAlvo.toFixed(6)) + "&lon=" + encodeURIComponent(lngAlvo.toFixed(6)) + "&pin=1";
           if (elWazeIframe.src !== embedUrl) {
             elWazeIframe.src = embedUrl;
           }
-          elWazeBox.style.display = "flex";
+          elWazeOpcoesBox.style.display = "flex";
         }
       }
 
-      async function atualizarRotaMotoristaAteEmbarque(corrida) {
+      async function atualizarRotaMotoristaAteEmbarque(corrida, forcar) {
         if (!corrida || (corrida.status !== "Aceita" && corrida.status !== "Em viagem")) {
           limparRotaDoMotorista();
           return;
@@ -622,7 +660,7 @@
         }
 
         const chave = [corrida.status, latMot.toFixed(4), lngMot.toFixed(4), latEmb.toFixed(4), lngEmb.toFixed(4)].join("|");
-        if (chave === ultimoParMotorista && state.tempoChegadaMin !== null) {
+        if (!forcar && chave === ultimoParMotorista && state.tempoChegadaMin !== null) {
           elInfoChegada.style.display = "block";
           elInfoChegada.textContent = corrida.status === "Em viagem"
             ? "Viagem em andamento • Duração estimada: ~" + state.tempoChegadaMin + " min"
@@ -806,15 +844,6 @@
         );
       }
 
-      function montarLinkWazePassageiro(c) {
-        if (c && c.linkWaze) return c.linkWaze;
-        const destFinal = encodeURIComponent(((c && c.destino) || "") + ", Rio Grande, RS");
-        if (c && typeof c.latMotorista === "number" && typeof c.lngMotorista === "number") {
-          return "https://waze.com/ul?ll=" + encodeURIComponent(c.latMotorista + "," + c.lngMotorista) + "&q=" + destFinal + "&navigate=yes";
-        }
-        return "https://waze.com/ul?q=" + destFinal + "&navigate=yes";
-      }
-
       async function finalizarCorridaPassageiro() {
         const id = state.corridaAtualId || lerIdLocal();
         if (!id || !state.corridaAtual) return;
@@ -844,12 +873,15 @@
         const podeCancelar = st === "Aguardando motorista";
         const aceitaOuEmAndamento = st === "Aceita" || st === "Em viagem";
         const podeFinalizar = st === "Aceita" || st === "Em viagem";
+        const encerrada = st === "Finalizada" || st === "Cancelada" || st === "Recusada pelo motorista";
         const textoStatus =
           st === "Aceita" ? "Motorista aceitou • A caminho" :
           st === "Em viagem" ? "Viagem em andamento" :
           st === "Finalizada" ? "Viagem finalizada" : st;
 
-        atualizarRotaMotoristaAteEmbarque(c);
+        atualizarRotaMotoristaAteEmbarque(c, false);
+
+        const linksWaze = montarLinksWazeCorrida(c);
 
         elCaixaAtual.style.display = "flex";
         elCaixaAtual.innerHTML =
@@ -870,15 +902,16 @@
             '<div class="meta">Código de confirmação: <strong>' + escapar(c.codigo4d || "") + '</strong></div>' +
             '<div class="acoes" style="margin-top:6px;">' +
               (aceitaOuEmAndamento
-                ? '<button type="button" class="btn btn-blue" id="btn-abrir-aba-waze">Mapa / Waze</button>'
+                ? '<button type="button" class="btn btn-blue" id="btn-abrir-aba-waze">Mapa / Waze</button>' +
+                  '<a class="btn btn-outline" href="' + linksWaze.linkAteEmbarque + '" target="_blank" rel="noopener noreferrer">Waze até Embarque</a>'
                 : '') +
               (podeFinalizar
                 ? '<button type="button" class="btn btn-accent" id="btn-finalizar-passageiro">Finalizar Viagem</button>'
                 : '') +
               (podeCancelar
                 ? '<button type="button" class="btn btn-red" id="btn-cancelar-atual">Cancelar Corrida</button>'
-                : (st === "Finalizada" || st === "Cancelada" || st === "Recusada pelo motorista"
-                  ? '<button type="button" class="btn btn-outline" id="btn-encerrar-tela">Nova Chamada</button>'
+                : (encerrada
+                  ? '<button type="button" class="btn btn-green" id="btn-limpar-finalizada">Limpar Tela</button>'
                   : '')) +
             '</div>' +
           '</div>';
@@ -907,9 +940,9 @@
           });
         }
 
-        const btnEnc = document.getElementById("btn-encerrar-tela");
-        if (btnEnc) {
-          btnEnc.addEventListener("click", function () {
+        const btnLimparFin = document.getElementById("btn-limpar-finalizada");
+        if (btnLimparFin) {
+          btnLimparFin.addEventListener("click", function () {
             limparParaNovaBusca();
           });
         }
@@ -1073,9 +1106,12 @@
       elAbaMapaBtn.addEventListener("click", function () { trocarAba("mapa"); });
       document.getElementById("btn-ver-mapa").addEventListener("click", function () { trocarAba("mapa"); });
       document.getElementById("btn-voltar-corrida").addEventListener("click", function () { trocarAba("corrida"); });
+      document.getElementById("btn-limpar-topo").addEventListener("click", limparParaNovaBusca);
+      document.getElementById("btn-recalcular-tempo").addEventListener("click", function () {
+        if (state.corridaAtual) atualizarRotaMotoristaAteEmbarque(state.corridaAtual, true);
+      });
 
       document.getElementById("btn-buscar-local").addEventListener("click", buscarLocalizacaoAtual);
-      document.getElementById("btn-nova-busca").addEventListener("click", limparParaNovaBusca);
       document.getElementById("btn-chamar").addEventListener("click", chamarMotorista);
 
       document.addEventListener("visibilitychange", function () {
