@@ -29,14 +29,14 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      font-size: 14px;
-      line-height: 1.4;
+      font-size: 16px;
+      line-height: 1.45;
     }
 
     .topbar {
       background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
       border-bottom: 3px solid var(--accent);
-      padding: 12px 16px;
+      padding: 14px 16px;
       color: #ffffff;
       display: flex;
       align-items: center;
@@ -47,20 +47,20 @@
     .brand { display: flex; align-items: center; gap: 10px; }
 
     .badge-32 {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 10px;
       background: var(--accent);
       color: var(--navy);
       font-weight: 900;
-      font-size: 17px;
+      font-size: 18px;
       display: grid;
       place-items: center;
       flex-shrink: 0;
     }
 
-    .brand h1 { font-size: 16px; font-weight: 900; color: var(--accent); }
-    .brand p { font-size: 12px; color: #cbd5e1; }
+    .brand h1 { font-size: 18px; font-weight: 900; color: var(--accent); }
+    .brand p { font-size: 13px; color: #cbd5e1; }
 
     .wrap {
       width: 100%;
@@ -76,27 +76,27 @@
       background: var(--card);
       border: 1.5px solid var(--border);
       border-radius: 14px;
-      padding: 14px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
     }
 
     label {
       display: block;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 800;
       color: var(--muted);
-      margin-bottom: 3px;
+      margin-bottom: 4px;
     }
 
     input {
       width: 100%;
-      padding: 9px 11px;
+      padding: 11px 13px;
       border-radius: 9px;
       border: 1.5px solid #94a3b8;
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 700;
       color: var(--text);
       background: #ffffff;
@@ -115,8 +115,8 @@
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
       border-radius: 9px;
-      padding: 8px 10px;
-      font-size: 13px;
+      padding: 10px 12px;
+      font-size: 14px;
       font-weight: 800;
       color: var(--navy);
     }
@@ -126,8 +126,8 @@
       border: 1.5px solid #10b981;
       color: #065f46;
       border-radius: 10px;
-      padding: 9px 11px;
-      font-size: 13px;
+      padding: 10px 12px;
+      font-size: 14px;
       font-weight: 800;
       display: none;
     }
@@ -136,23 +136,23 @@
       background: var(--navy);
       color: #ffffff;
       border-radius: 12px;
-      padding: 12px 14px;
+      padding: 14px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
     }
 
-    .valor-box span { font-size: 12px; color: #cbd5e1; font-weight: 700; }
-    .valor-box strong { font-size: 22px; color: var(--accent); font-weight: 900; }
+    .valor-box span { font-size: 13px; color: #cbd5e1; font-weight: 700; }
+    .valor-box strong { font-size: 24px; color: var(--accent); font-weight: 900; }
 
     .acoes { display: flex; flex-wrap: wrap; gap: 8px; }
 
     .btn {
-      padding: 10px 14px;
+      padding: 12px 15px;
       border-radius: 10px;
       border: none;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 800;
       cursor: pointer;
     }
@@ -166,10 +166,11 @@
       border: 2px solid var(--accent);
       background: #fffbeb;
       border-radius: 12px;
-      padding: 12px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 7px;
+      font-size: 15px;
     }
 
     .viagem-atual.aceita {
@@ -179,9 +180,9 @@
 
     .status-pill {
       display: inline-block;
-      padding: 3px 9px;
+      padding: 4px 10px;
       border-radius: 999px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 900;
       background: #fef3c7;
       color: #92400e;
@@ -192,7 +193,7 @@
       color: #065f46;
     }
 
-    .meta { font-size: 12px; color: var(--muted); font-weight: 700; }
+    .meta { font-size: 14px; color: var(--muted); font-weight: 700; }
   </style>
 </head>
 <body>
@@ -297,7 +298,7 @@
         dinamicaPct: 0,
         kmCalculado: null,
         valorCalculado: null,
-        corridaAtualId: localStorage.getItem("32drive_corrida_atual") || "",
+        corridaAtualId: "",
         corridaAtual: null,
         tempoChegadaMin: null
       };
@@ -452,7 +453,7 @@
         const chave = [latMot.toFixed(4), lngMot.toFixed(4), latEmb.toFixed(4), lngEmb.toFixed(4)].join("|");
         if (chave === ultimoParMotorista && state.tempoChegadaMin !== null) {
           elInfoChegada.style.display = "block";
-          elInfoChegada.textContent = "Motorista a caminho do seu embarque • Chega em aprox. " + state.tempoChegadaMin + " min";
+          elInfoChegada.textContent = "Motorista a caminho • Chega em aprox. " + state.tempoChegadaMin + " min";
           return;
         }
         ultimoParMotorista = chave;
@@ -460,7 +461,7 @@
         const rotaInfo = await buscarRotaOSRM(latMot, lngMot, latEmb, lngEmb);
         state.tempoChegadaMin = rotaInfo.minutos;
         elInfoChegada.style.display = "block";
-        elInfoChegada.textContent = "Motorista a caminho do seu embarque • Chega em aprox. " + rotaInfo.minutos + " min";
+        elInfoChegada.textContent = "Motorista a caminho • Chega em aprox. " + rotaInfo.minutos + " min";
 
         if (!mapa || typeof window.L === "undefined") return;
         try {
@@ -526,14 +527,14 @@
           state.kmCalculado = calc.km;
           state.valorCalculado = calc;
           elValor.textContent = moeda(calc.bruto);
-          elSubValor.textContent = "Pronto para solicitar ao motorista";
+          elSubValor.textContent = "Valor calculado • Pronto para solicitar";
           return calc;
         } catch (e) {
           const calc = montarValorPorKm(4.2);
           state.kmCalculado = calc.km;
           state.valorCalculado = calc;
           elValor.textContent = moeda(calc.bruto);
-          elSubValor.textContent = "Pronto para solicitar ao motorista";
+          elSubValor.textContent = "Valor calculado • Pronto para solicitar";
           return calc;
         }
       }
@@ -640,16 +641,17 @@
         elCaixaAtual.innerHTML =
           '<div class="viagem-atual ' + (aceitaOuEmAndamento ? "aceita" : "") + '">' +
             '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
-              '<strong>' + moeda(c.valorBruto) + ' • ' + escapar(c.codigo || "") + '</strong>' +
+              '<strong>Valor: ' + moeda(c.valorBruto) + ' • ' + escapar(c.codigo || "") + '</strong>' +
               '<span class="status-pill ' + (aceitaOuEmAndamento ? "aceita" : "") + '">' + escapar(textoStatus) + '</span>' +
             '</div>' +
+            '<div><strong>Valor da corrida:</strong> ' + moeda(c.valorBruto) + '</div>' +
             '<div><strong>Embarque:</strong> ' + escapar(c.origem) + '</div>' +
             '<div><strong>Destino:</strong> ' + escapar(c.destino) + '</div>' +
             (c.motoristaNome
               ? '<div class="meta">Motorista: <strong>' + escapar(c.motoristaNome) + '</strong>' + (c.motoristaVeiculo ? ' • ' + escapar(c.motoristaVeiculo) : '') + '</div>'
               : '<div class="meta">Aguardando aceite do motorista...</div>') +
             (st === "Aceita" && state.tempoChegadaMin !== null
-              ? '<div class="meta">Tempo estimado até o embarque: <strong>~' + state.tempoChegadaMin + ' min</strong></div>'
+              ? '<div class="meta">Tempo de chegada: <strong>~' + state.tempoChegadaMin + ' min</strong></div>'
               : '') +
             '<div class="meta">Código de confirmação: <strong>' + escapar(c.codigo4d || "") + '</strong></div>' +
             '<div class="acoes" style="margin-top:4px;">' +
@@ -705,6 +707,7 @@
         }
 
         const calc = state.valorCalculado || await calcularValorDestino();
+        const idAnterior = state.corridaAtualId;
         const agora = Date.now();
         const id = "corrida_" + agora;
         const codigo4d = String(Math.floor(1000 + Math.random() * 9000));
@@ -730,9 +733,14 @@
           criadoEm: agora
         };
 
+        if (unsubscribeCorrida) {
+          unsubscribeCorrida();
+          unsubscribeCorrida = null;
+        }
+        limparRotaDoMotorista();
+
         state.corridaAtualId = id;
         state.corridaAtual = dados;
-        localStorage.setItem("32drive_corrida_atual", id);
         renderizarViagemAtual();
 
         if (!db) {
@@ -741,6 +749,9 @@
         }
 
         try {
+          if (idAnterior && idAnterior !== id) {
+            await db.collection("corridas").doc(idAnterior).set({ status: "Finalizada" }, { merge: true });
+          }
           await db.collection("corridas").doc(id).set(dados);
           elStatus.textContent = "Chamada enviada";
           observarCorridaAtual(id);
@@ -752,11 +763,11 @@
       function limparParaNovaBusca() {
         state.corridaAtualId = "";
         state.corridaAtual = null;
-        localStorage.removeItem("32drive_corrida_atual");
         if (unsubscribeCorrida) {
           unsubscribeCorrida();
           unsubscribeCorrida = null;
         }
+        limparRotaDoMotorista();
         elDestino.value = "";
         calcularValorDestino();
         renderizarViagemAtual();
@@ -777,10 +788,6 @@
             state.dinamicaPct = Number((doc.data() || {}).dinamicaPct || 0);
             if ((elDestino.value || "").trim()) calcularValorDestino();
           });
-
-          if (state.corridaAtualId) {
-            observarCorridaAtual(state.corridaAtualId);
-          }
         } catch (e) {
           elStatus.textContent = "Offline";
         }
