@@ -2,13 +2,12 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>32 Drive • Passageiro (V40 • Geohash + Firebase)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>32 Drive • Painel do Passageiro (V40 / G40)</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     :root {
       --bg: #0b192c;
-      --surface: #f1f5f9;
       --card: #ffffff;
       --navy: #0b192c;
       --navy-2: #13294b;
@@ -16,9 +15,9 @@
       --text: #0f172a;
       --muted: #475569;
       --border: #cbd5e1;
-      --green: #047857;
-      --blue: #0369a1;
-      --red: #b91c1c;
+      --green: #059669;
+      --red: #dc2626;
+      --blue: #0284c7;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,16 +29,17 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      font-size: 15px;
+      font-size: 14px;
       line-height: 1.4;
     }
 
     .topbar {
       background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
       border-bottom: 3px solid var(--accent);
-      padding: 12px 16px;
+      padding: 12px 18px;
       color: #ffffff;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
@@ -51,9 +51,8 @@
       width: 40px;
       height: 40px;
       border-radius: 10px;
-      background: var(--navy);
-      border: 2px solid var(--accent);
-      color: var(--accent);
+      background: var(--accent);
+      color: var(--navy);
       font-weight: 900;
       font-size: 18px;
       display: grid;
@@ -62,38 +61,36 @@
     }
 
     .brand h1 { font-size: 16px; font-weight: 900; color: var(--accent); }
-    .brand p { font-size: 11px; color: #cbd5e1; }
+    .brand p { font-size: 12px; color: #cbd5e1; }
 
-    .pill-v40 {
-      font-size: 11px;
-      font-weight: 900;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: var(--accent);
-      color: #0f172a;
-      white-space: nowrap;
-    }
+    .top-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 
     .container {
       width: 100%;
-      max-width: 680px;
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1.05fr 1.15fr;
+      gap: 14px;
       flex: 1;
     }
+
+    @media (max-width: 960px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    .col { display: flex; flex-direction: column; gap: 14px; }
 
     .card {
       background: var(--card);
       border: 1.5px solid var(--border);
       border-radius: 14px;
-      padding: 13px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
     }
 
     .card-title {
@@ -117,10 +114,10 @@
 
     input, select {
       width: 100%;
-      padding: 9px 11px;
-      border-radius: 9px;
+      padding: 8px 10px;
+      border-radius: 8px;
       border: 1.5px solid #94a3b8;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--text);
       background: #ffffff;
@@ -132,164 +129,84 @@
       .row-2 { grid-template-columns: 1fr; }
     }
 
-    .input-gps-row { display: flex; gap: 6px; align-items: center; }
-    .autocomplete-wrap { position: relative; }
-
-    .sugestoes-dropdown {
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0;
-      right: 0;
-      background: #ffffff;
-      border: 2px solid var(--navy);
+    #mapa-passageiro {
+      width: 100%;
+      height: 240px;
       border-radius: 10px;
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
-      z-index: 999;
-      max-height: 210px;
-      overflow-y: auto;
-      display: none;
+      border: 1.5px solid var(--border);
+      z-index: 1;
     }
 
-    .sugestoes-dropdown.aberto { display: block; }
-
-    .sugestao-item {
-      padding: 8px 11px;
-      border-bottom: 1px solid #e2e8f0;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
+    .btn {
+      padding: 9px 13px;
+      border-radius: 9px;
+      border: none;
       font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
     }
 
-    .sugestao-item:last-child { border-bottom: none; }
-    .sugestao-item:hover { background: #eff6ff; }
+    .btn-sm { padding: 6px 9px; font-size: 11px; }
+    .btn-accent { background: var(--accent); color: #0f172a; }
+    .btn-green { background: var(--green); color: #ffffff; }
+    .btn-red { background: var(--red); color: #ffffff; }
+    .btn-blue { background: var(--blue); color: #ffffff; }
+    .btn-outline { background: #e2e8f0; color: #0f172a; border: 1px solid #94a3b8; }
 
-    .sugestao-tag {
-      font-size: 11px;
-      font-weight: 900;
-      padding: 2px 7px;
-      border-radius: 6px;
-      background: #fef3c7;
-      color: #92400e;
-      white-space: nowrap;
-    }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 
-    .map-wrapper {
-      border-radius: 12px;
-      overflow: hidden;
-      border: 2px solid #94a3b8;
-    }
-
-    #mapa-passageiro { width: 100%; height: 200px; z-index: 1; }
-
-    .mapa-endereco-overlay {
-      background: #0b192c;
-      color: #ffffff;
-      padding: 8px 11px;
+    .resumo-box {
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 10px;
+      padding: 10px 12px;
       font-size: 12px;
       font-weight: 700;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 4px;
     }
 
-    .mapa-endereco-overlay strong { color: var(--accent); }
+    .resumo-box strong { color: var(--accent); }
 
-    .map-toolbar {
+    .lista-scroll {
+      max-height: 360px;
+      overflow-y: auto;
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .corrida-box {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
       gap: 6px;
       font-size: 12px;
-      font-weight: 700;
     }
 
-    .map-mode-btns { display: flex; gap: 5px; }
+    .corrida-box.ativa {
+      border-color: var(--accent);
+      background: #fffbeb;
+    }
 
-    .btn-mode {
-      padding: 5px 9px;
-      border-radius: 7px;
-      border: 1px solid #64748b;
-      background: #ffffff;
+    .tag-status {
       font-size: 11px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .btn-mode.ativo { background: var(--navy); color: #ffffff; border-color: var(--navy); }
-
-    .geohash-strip {
-      background: #0f172a;
-      color: #f8fafc;
-      border-radius: 10px;
-      padding: 8px 11px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .geohash-strip strong { color: var(--accent); }
-
-    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-
-    .chip {
-      padding: 6px 10px;
+      font-weight: 900;
+      padding: 2px 8px;
       border-radius: 999px;
-      border: 1.5px solid #94a3b8;
-      background: #f8fafc;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
+      background: #e2e8f0;
+      color: #0f172a;
     }
 
-    .chip.selecionado { background: var(--navy); color: #ffffff; border-color: var(--navy); }
+    .tag-status.aguardando { background: #fef3c7; color: #92400e; }
+    .tag-status.aceita { background: #d1fae5; color: #065f46; }
+    .tag-status.recusada { background: #fee2e2; color: #991b1b; }
 
-    .btn {
-      padding: 10px 13px;
-      border-radius: 10px;
-      border: none;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-    .btn-sm { padding: 7px 10px; font-size: 12px; }
-    .btn-primary { background: var(--navy); color: #ffffff; }
-    .btn-green { background: #059669; color: #ffffff; }
-    .btn-blue { background: var(--blue); color: #ffffff; }
-    .btn-red { background: #dc2626; color: #ffffff; }
-    .btn-outline { background: #e2e8f0; color: #0f172a; border: 1px solid #94a3b8; }
-
-    .price-preview {
-      background: #f8fafc;
-      border: 1.5px dashed #64748b;
-      border-radius: 12px;
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .price-big { font-size: 22px; font-weight: 900; color: var(--green); }
     .meta-small { font-size: 12px; color: var(--muted); font-weight: 700; }
-
-    .status-banner {
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-weight: 800;
-      font-size: 13px;
-      background: #eff6ff;
-      border: 1.5px solid #93c5fd;
-      color: #1e3a8a;
-    }
-
-    .status-banner.alerta { background: #fffbeb; border-color: #fcd34d; color: #92400e; }
-    .status-banner.sucesso { background: #ecfdf5; border-color: #6ee7b7; color: #065f46; }
-    .status-banner.recusada { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
   </style>
 </head>
 <body>
@@ -297,117 +214,82 @@
     <div class="brand">
       <div class="badge-32">32</div>
       <div>
-        <h1>32 DRIVE • PASSAGEIRO (V40)</h1>
-        <p>Latitude 32°S • Geohash • GPS por Rua • Tempo Real</p>
+        <h1>32 DRIVE • PASSAGEIRO (V40 / G40)</h1>
+        <p>Balneário Cassino • Rio Grande (32°S) • Chamadas em Tempo Real</p>
       </div>
     </div>
-    <span class="pill-v40">V40</span>
+
+    <div class="top-actions">
+      <button type="button" class="btn btn-accent btn-sm" id="btn-gps-passageiro">📍 Usar Meu GPS</button>
+      <span class="meta-small" id="status-firebase-pas" style="color:#fde68a;">Conectando ao Firestore...</span>
+    </div>
   </header>
 
   <main class="container">
-    <!-- 1. EMBARQUE (GPS), DESTINO & MAPA -->
-    <section class="card">
-      <div class="card-title">
-        <span>1. Embarque (GPS), Destino &amp; Mapa</span>
-        <span class="meta-small" id="status-gps-rota">Pronto</span>
-      </div>
-
-      <div class="map-toolbar">
-        <span>Clique no mapa define:</span>
-        <div class="map-mode-btns">
-          <button type="button" class="btn-mode ativo" data-map-mode="destino">Destino</button>
-          <button type="button" class="btn-mode" data-map-mode="embarque">Embarque</button>
+    <div class="col">
+      <section class="card">
+        <div class="card-title">
+          <span>1. Solicitar Corrida</span>
+          <span class="meta-small" id="info-dinamica-pas">Dinâmica: +0%</span>
         </div>
-      </div>
 
-      <div class="map-wrapper">
-        <div id="mapa-passageiro"></div>
-        <div class="mapa-endereco-overlay">
-          <div>Embarque: <strong id="overlay-embarque">Balneário Cassino — Av. Rio Grande</strong></div>
-          <div>Destino: <strong id="overlay-destino">Santa Casa de Rio Grande — Centro</strong></div>
-        </div>
-      </div>
-
-      <div class="geohash-strip" id="pas-geohash-info">
-        Geohash Embarque: <strong>—</strong> • Motoristas online no setor: <strong>0</strong>
-      </div>
-
-      <div class="row-2">
-        <div>
-          <label for="pas-nome">Seu Nome</label>
-          <input id="pas-nome" type="text" value="Passageiro Teste" />
-        </div>
-        <div>
-          <label for="pas-pagamento">Forma de Pagamento</label>
-          <select id="pas-pagamento">
-            <option value="Pix">Pix direto ao motorista</option>
-            <option value="Dinheiro">Dinheiro</option>
-            <option value="Cartão">Cartão (maquininha)</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label for="pas-origem">Embarque (GPS, 1ª letra ou rua + nº)</label>
-        <div class="autocomplete-wrap">
-          <div class="input-gps-row">
-            <input id="pas-origem" type="text" autocomplete="off" value="Balneário Cassino — Av. Rio Grande" />
-            <button type="button" class="btn btn-blue btn-sm" id="btn-gps-embarque" title="Usar minha localização atual">📍 GPS</button>
+        <div class="row-2">
+          <div>
+            <label for="pas-nome">Seu Nome</label>
+            <input id="pas-nome" type="text" value="Passageiro 32" />
           </div>
-          <div class="sugestoes-dropdown" id="sugestoes-origem"></div>
-        </div>
-      </div>
-
-      <div>
-        <label for="pas-destino">Destino (1ª letra, rua ou rua + nº)</label>
-        <div class="autocomplete-wrap">
-          <div class="input-gps-row">
-            <input id="pas-destino" type="text" autocomplete="off" value="Santa Casa de Rio Grande — Centro" />
-            <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-destino" title="Limpar destino">✕</button>
+          <div>
+            <label for="pas-distancia">Distância Estimada (km)</label>
+            <input id="pas-distancia" type="number" step="0.1" min="0.5" value="2.8" />
           </div>
-          <div class="sugestoes-dropdown" id="sugestoes-destino"></div>
         </div>
-      </div>
 
-      <div>
-        <label>Destinos Pré-Estabelecidos com Preço</label>
-        <div class="chips" id="rotas-rapidas"></div>
-      </div>
-
-      <div class="row-2">
         <div>
-          <label for="pas-km">Distância Estimada (km)</label>
-          <input id="pas-km" type="number" step="0.01" min="0.1" value="19.20" />
+          <label for="pas-origem">Origem (Embarque)</label>
+          <input id="pas-origem" type="text" value="Av. Rio Grande, Balneário Cassino - Rio Grande, RS" />
         </div>
-        <div>
-          <label for="pas-codigo-4d">Código de 4 Dígitos (opcional)</label>
-          <input id="pas-codigo-4d" type="text" maxlength="4" placeholder="Ex.: 4821" />
-        </div>
-      </div>
 
-      <div class="price-preview">
         <div>
-          <div class="meta-small" id="pas-resumo-calc">A partir de 3,51 km: 19,20 km × R$ 2,00 (sem R$ 7,99)</div>
-          <div class="price-big" id="pas-preco-estimado">R$ 38,40</div>
-          <div class="meta-small" id="pas-elegivel-txt">Trecho ≥ 15 km • Elegível para desconto</div>
+          <label for="pas-destino">Destino</label>
+          <input id="pas-destino" type="text" value="Centro - Rio Grande, RS" />
         </div>
-        <button type="button" class="btn btn-primary" id="btn-chamar-motorista">Chamar Motorista</button>
-      </div>
-    </section>
 
-    <!-- 2. VIAGEM / CONVERSA -->
-    <section class="card">
-      <div class="card-title">
-        <span>2. Sua Viagem / Conversa</span>
+        <div class="resumo-box" id="resumo-tarifa-pas">
+          <div>Valor estimado: <strong id="pas-valor-total">R$ 7,99</strong> (<span id="pas-faixa-desc">Até 3,50 km: tarifa base R$ 7,99</span>)</div>
+          <div class="meta-small" style="color:#cbd5e1;">Repasse 80% Motorista: <span id="pas-repasse-mot">R$ 6,39</span> • 20% 32 Drive: <span id="pas-taxa-app">R$ 1,60</span></div>
+        </div>
+
         <div class="chips">
-          <span class="meta-small" id="pas-codigo-corrida">—</span>
-          <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-conversa-pas">Limpar Conversa</button>
+          <button type="button" class="btn btn-green" id="btn-chamar-motorista" style="flex:1;">🚗 Chamar Motorista</button>
+          <button type="button" class="btn btn-outline" id="btn-limpar-campos">Limpar Campos</button>
         </div>
-      </div>
-      <div id="pas-viagem-box">
-        <div class="meta-small">Nenhuma corrida ativa. Escolha um destino ou use o GPS e toque em <strong>Chamar Motorista</strong>.</div>
-      </div>
-    </section>
+      </section>
+
+      <section class="card">
+        <div class="card-title">
+          <span>2. Mapa de Embarque (Geohash)</span>
+          <span class="meta-small" id="info-geohash-pas">GH: —</span>
+        </div>
+        <div id="mapa-passageiro"></div>
+        <div class="meta-small" id="coords-passageiro">Lat: -32.1856, Lng: -52.1658</div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="card">
+        <div class="card-title">
+          <span>3. Minhas Chamadas em Tempo Real</span>
+          <div class="chips">
+            <span class="meta-small" id="contador-chamadas-pas">0 chamadas</span>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-conversa-pas">Limpar Conversa</button>
+          </div>
+        </div>
+
+        <div class="lista-scroll" id="lista-chamadas-pas">
+          <div class="meta-small">Nenhuma chamada enviada ainda. Preencha origem/destino e toque em "Chamar Motorista".</div>
+        </div>
+      </section>
+    </div>
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -415,46 +297,29 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
-    // =========================================================================
-    // 1. CONFIGURAÇÃO DO FIREBASE (MESMO PROJETO DO G39 / ADMIN)
-    // =========================================================================
     const firebaseConfig = {
-      apiKey: "COLE_AQUI_SUA_API_KEY",
-      authDomain: "COLE_AQUI_SEU_AUTH_DOMAIN",
-      projectId: "COLE_AQUI_SEU_PROJECT_ID",
-      storageBucket: "COLE_AQUI_SEU_STORAGE_BUCKET",
-      messagingSenderId: "COLE_AQUI_SEU_SENDER_ID",
-      appId: "COLE_AQUI_SEU_APP_ID"
+      apiKey: "AIzaSyDlKouGeTQ7_NNgIRCLSYl66zB-J-9TzHs",
+      authDomain: "drive-4745f.firebaseapp.com",
+      databaseURL: "https://drive-4745f-default-rtdb.firebaseio.com",
+      projectId: "drive-4745f",
+      storageBucket: "drive-4745f.firebasestorage.app",
+      messagingSenderId: "762959482484",
+      appId: "1:762959482484:web:f40e2cb51020a61195cb21",
+      measurementId: "G-V5PZCVKTCJ"
     };
 
-    // Regras de tarifa da 32 Drive:
-    // Até 3,50 km: R$ 7,99 fixo
-    // A partir de 3,51 km: R$ 2,00 por km (sem somar R$ 7,99)
-    const TARIFA_CURTA_ATE_350 = 7.99;
-    const LIMITE_KM_TARIFA_CURTA = 3.50;
-    const VALOR_KM_ACIMA = 2.00;
-    const STORAGE_LOCAIS_KEY = "32drive_pas_v40_locais";
-
-    const LOCAIS_PADRAO = [
-      { id: "p1", titulo: "Santa Casa de Rio Grande", endereco: "Santa Casa de Rio Grande — Centro, Rio Grande", lat: -32.0350, lon: -52.0986, kmRef: 19.20 },
-      { id: "p2", titulo: "FURG — Campus Carreiros", endereco: "FURG — Campus Carreiros, Rio Grande", lat: -32.0785, lon: -52.1640, kmRef: 16.50 },
-      { id: "p3", titulo: "Centro / Praça Tamandaré", endereco: "Praça Tamandaré — Centro, Rio Grande", lat: -32.0365, lon: -52.1030, kmRef: 20.50 },
-      { id: "p4", titulo: "Estátua de Iemanjá (Cassino)", endereco: "Estátua de Iemanjá — Balneário Cassino", lat: -32.1760, lon: -52.1520, kmRef: 2.60 },
-      { id: "p5", titulo: "Supermercado Guanabara (Cassino)", endereco: "Supermercado Guanabara — Balneário Cassino", lat: -32.1815, lon: -52.1695, kmRef: 1.90 },
-      { id: "p6", titulo: "Partage Shopping Rio Grande", endereco: "Partage Shopping — Rio Grande", lat: -32.0725, lon: -52.1485, kmRef: 15.80 }
-    ];
-
     const GEOHASH_BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
-    function codificarGeohash(lat, lon, precisao = 6) {
-      let idx = 0, bit = 0, evenBit = true, geohash = "";
-      let latMin = -90, latMax = 90, lonMin = -180, lonMax = 180;
-      while (geohash.length < precisao) {
+    function encodeGeohash(lat, lon, precision) {
+      precision = precision || 6;
+      var idx = 0, bit = 0, evenBit = true, geohash = "";
+      var latMin = -90, latMax = 90, lonMin = -180, lonMax = 180;
+      while (geohash.length < precision) {
         if (evenBit) {
-          const lonMid = (lonMin + lonMax) / 2;
+          var lonMid = (lonMin + lonMax) / 2;
           if (lon >= lonMid) { idx = idx * 2 + 1; lonMin = lonMid; }
           else { idx = idx * 2; lonMax = lonMid; }
         } else {
-          const latMid = (latMin + latMax) / 2;
+          var latMid = (latMin + latMax) / 2;
           if (lat >= latMid) { idx = idx * 2 + 1; latMin = latMid; }
           else { idx = idx * 2; latMax = latMid; }
         }
@@ -468,60 +333,37 @@
       return geohash;
     }
 
-    function carregarLocaisSalvos() {
-      try {
-        const raw = localStorage.getItem(STORAGE_LOCAIS_KEY);
-        const lista = raw ? JSON.parse(raw) : [];
-        if (Array.isArray(lista) && lista.length) return lista;
-      } catch (e) {}
-      return LOCAIS_PADRAO.slice();
-    }
-
-    function salvarLocais(lista) {
-      try {
-        localStorage.setItem(STORAGE_LOCAIS_KEY, JSON.stringify(lista.slice(0, 60)));
-      } catch (e) {}
-    }
-
-    const estado = {
-      dinamicaAdminPct: 0,
-      kmMinDesconto: 15,
-      motoristasNoSetor: 0,
-      corridaAtual: null,
-      modoCliqueMapa: "destino",
-      rotaSelecionadaId: "p1",
-      locaisSalvos: carregarLocaisSalvos(),
-      coords: {
-        lat1: -32.1865,
-        lon1: -52.1642,
-        lat2: -32.0350,
-        lon2: -52.0986
-      }
+    const estadoPas = {
+      lat: -32.1856,
+      lng: -52.1658,
+      geohash: "",
+      geohashSetor: "",
+      dinamicaPct: 0,
+      chamadas: [],
+      ocultasTelaPas: {}
     };
 
-    let db = null;
-    let unsubCorrida = null;
-    let mapa = null, markerEmbarque = null, markerDestino = null, linhaRota = null;
-    let timerBuscaGeo = null;
+    estadoPas.geohash = encodeGeohash(estadoPas.lat, estadoPas.lng, 6);
+    estadoPas.geohashSetor = estadoPas.geohash.slice(0, 4);
 
-    const elStatusGpsRota = document.getElementById("status-gps-rota");
-    const elOverlayEmbarque = document.getElementById("overlay-embarque");
-    const elOverlayDestino = document.getElementById("overlay-destino");
-    const elPasGeohashInfo = document.getElementById("pas-geohash-info");
+    let db = null;
+    let mapaPas = null;
+    let marcadorPas = null;
+
+    const elStatusFirebase = document.getElementById("status-firebase-pas");
+    const elInfoDinamica = document.getElementById("info-dinamica-pas");
     const elPasNome = document.getElementById("pas-nome");
-    const elPasPagamento = document.getElementById("pas-pagamento");
+    const elPasDistancia = document.getElementById("pas-distancia");
     const elPasOrigem = document.getElementById("pas-origem");
     const elPasDestino = document.getElementById("pas-destino");
-    const elPasCodigo4d = document.getElementById("pas-codigo-4d");
-    const elSugOrigem = document.getElementById("sugestoes-origem");
-    const elSugDestino = document.getElementById("sugestoes-destino");
-    const elRotasRapidas = document.getElementById("rotas-rapidas");
-    const elPasKm = document.getElementById("pas-km");
-    const elPasResumoCalc = document.getElementById("pas-resumo-calc");
-    const elPasPrecoEstimado = document.getElementById("pas-preco-estimado");
-    const elPasElegivelTxt = document.getElementById("pas-elegivel-txt");
-    const elPasCodigo = document.getElementById("pas-codigo-corrida");
-    const elPasViagemBox = document.getElementById("pas-viagem-box");
+    const elValorTotal = document.getElementById("pas-valor-total");
+    const elFaixaDesc = document.getElementById("pas-faixa-desc");
+    const elRepasseMot = document.getElementById("pas-repasse-mot");
+    const elTaxaApp = document.getElementById("pas-taxa-app");
+    const elInfoGeohash = document.getElementById("info-geohash-pas");
+    const elCoordsPas = document.getElementById("coords-passageiro");
+    const elListaChamadas = document.getElementById("lista-chamadas-pas");
+    const elContadorChamadas = document.getElementById("contador-chamadas-pas");
 
     function moeda(v) {
       return "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
@@ -535,501 +377,103 @@
         .replace(/"/g, "&quot;");
     }
 
-    function normalizarTexto(txt) {
-      return String(txt || "")
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim();
+    function classeStatus(st) {
+      if (st === "Aguardando motorista") return "tag-status aguardando";
+      if (st === "Aceita" || st === "Em viagem" || st === "Finalizada") return "tag-status aceita";
+      if (st === "Recusada pelo passageiro" || st === "Cancelada" || st === "Recusada pelo motorista") return "tag-status recusada";
+      return "tag-status";
     }
 
-    function extrairNumeroCasa(texto) {
-      const m = String(texto || "").match(/(?:,\s*|\s+n[º°.]?\s*|\s+)(\d{1,5}[a-zA-Z]?)\b/);
-      return m ? m[1] : "";
+    function calcularTarifa() {
+      const km = Math.max(0.1, Number(elPasDistancia.value || 1));
+      let valorBase = 7.99;
+      let faixa = "Até 3,50 km: tarifa base R$ 7,99";
+
+      if (km > 3.5) {
+        valorBase = Number((km * 2.0).toFixed(2));
+        faixa = "Acima de 3,50 km: R$ 2,00/km (sem taxa fixa)";
+      }
+
+      const fator = 1 + Number(estadoPas.dinamicaPct || 0) / 100;
+      const valorBruto = Number((valorBase * fator).toFixed(2));
+      const repasseMotorista = Number((valorBruto * 0.8).toFixed(2));
+      const taxaPlataforma = Number((valorBruto - repasseMotorista).toFixed(2));
+
+      elInfoDinamica.textContent = "Dinâmica: +" + Number(estadoPas.dinamicaPct || 0) + "%";
+      elValorTotal.textContent = moeda(valorBruto);
+      elFaixaDesc.textContent = faixa + (estadoPas.dinamicaPct > 0 ? " + " + estadoPas.dinamicaPct + "% dinâmica" : "");
+      elRepasseMot.textContent = moeda(repasseMotorista);
+      elTaxaApp.textContent = moeda(taxaPlataforma);
+
+      return { km, valorBase, valorBruto, repasseMotorista, taxaPlataforma };
     }
 
-    function distanciaHaversineKm(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const toRad = (g) => (g * Math.PI) / 180;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
+    function iniciarMapa() {
+      if (typeof L === "undefined") return;
+      mapaPas = L.map("mapa-passageiro").setView([estadoPas.lat, estadoPas.lng], 14);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap"
+      }).addTo(mapaPas);
+      marcadorPas = L.marker([estadoPas.lat, estadoPas.lng], { draggable: true }).addTo(mapaPas).bindPopup("Embarque");
 
-    function calcularTarifaInicial(km, dinamicaPct) {
-      const dist = Math.max(0.1, Number(km || 0.1));
-      const basePura =
-        dist <= LIMITE_KM_TARIFA_CURTA
-          ? TARIFA_CURTA_ATE_350
-          : Number((dist * VALOR_KM_ACIMA).toFixed(2));
-      const pct = Number(dinamicaPct || 0);
-      const bruto = Number((basePura * (1 + pct / 100)).toFixed(2));
-      const motorista80 = Number((bruto * 0.8).toFixed(2));
-      const plataforma20 = Number((bruto - motorista80).toFixed(2));
-      return { valorBase: basePura, dinamicaPct: pct, valorBruto: bruto, repasseMotorista: motorista80, taxaPlataforma: plataforma20 };
-    }
-
-    function recalcularDivisao8020(valorFinal) {
-      const bruto = Number(Math.max(0, valorFinal).toFixed(2));
-      const motorista80 = Number((bruto * 0.8).toFixed(2));
-      const plataforma20 = Number((bruto - motorista80).toFixed(2));
-      return { valorBruto: bruto, repasseMotorista: motorista80, taxaPlataforma: plataforma20 };
-    }
-
-    function registrarNovoLocalNaLista(endereco, lat, lon, kmRef) {
-      const limpo = String(endereco || "").trim();
-      if (!limpo) return;
-      const norm = normalizarTexto(limpo);
-      if (estado.locaisSalvos.some((item) => normalizarTexto(item.endereco) === norm)) return;
-      estado.locaisSalvos.unshift({
-        id: "loc-" + Date.now(),
-        titulo: limpo.split("—")[0].split(",")[0].trim() || limpo,
-        endereco: limpo,
-        lat: Number.isFinite(Number(lat)) ? Number(lat) : estado.coords.lat2,
-        lon: Number.isFinite(Number(lon)) ? Number(lon) : estado.coords.lon2,
-        kmRef: Number(kmRef || elPasKm.value || 3.0)
+      marcadorPas.on("dragend", function () {
+        const pt = marcadorPas.getLatLng();
+        atualizarPosicao(pt.lat, pt.lng);
       });
-      salvarLocais(estado.locaisSalvos);
+
+      mapaPas.on("click", function (ev) {
+        atualizarPosicao(ev.latlng.lat, ev.latlng.lng);
+      });
     }
 
-    async function resolverNomeRuaPorCoords(lat, lon) {
-      try {
-        const url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" + encodeURIComponent(lat) + "&lon=" + encodeURIComponent(lon);
-        const resp = await fetch(url, { headers: { "Accept": "application/json" } });
-        const data = await resp.json();
-        if (data && data.address) {
-          const rua = data.address.road || data.address.pedestrian || data.address.amenity || data.address.suburb || "";
-          const num = data.address.house_number ? ", " + data.address.house_number : "";
-          const bairro = data.address.suburb || data.address.neighbourhood || data.address.city_district || "";
-          const cidade = data.address.city || data.address.town || "Rio Grande";
-          const montado = [(rua + num).trim(), bairro && bairro !== rua ? bairro : cidade].filter(Boolean).join(" — ");
-          if (montado) return montado;
-        }
-      } catch (e) {}
-      return "Lat " + lat.toFixed(4) + ", Lon " + lon.toFixed(4);
-    }
+    function atualizarPosicao(lat, lng) {
+      estadoPas.lat = Number(lat);
+      estadoPas.lng = Number(lng);
+      estadoPas.geohash = encodeGeohash(estadoPas.lat, estadoPas.lng, 6);
+      estadoPas.geohashSetor = estadoPas.geohash.slice(0, 4);
 
-    async function buscarEnderecosRuaNumero(termo) {
-      const q = encodeURIComponent(termo + ", Rio Grande, RS, Brasil");
-      try {
-        const url = "https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=br&q=" + q;
-        const resp = await fetch(url, { headers: { "Accept": "application/json" } });
-        const lista = await resp.json();
-        if (!Array.isArray(lista)) return [];
-        const numDigitado = extrairNumeroCasa(termo);
-        return lista.map((item) => {
-          const addr = item.address || {};
-          const rua = addr.road || addr.pedestrian || addr.amenity || item.display_name.split(",")[0].trim();
-          const num = numDigitado || addr.house_number || "";
-          const bairro = addr.suburb || addr.neighbourhood || addr.city_district || "Rio Grande";
-          return {
-            titulo: rua + (num ? ", " + num : ""),
-            endereco: (rua + (num ? ", " + num : "")) + (bairro && bairro !== rua ? " — " + bairro : ""),
-            lat: Number(item.lat),
-            lon: Number(item.lon)
-          };
-        });
-      } catch (e) {
-        return [];
+      elInfoGeohash.textContent = "GH: " + estadoPas.geohash + " (Setor " + estadoPas.geohashSetor + ")";
+      elCoordsPas.textContent = "Lat: " + estadoPas.lat.toFixed(4) + ", Lng: " + estadoPas.lng.toFixed(4);
+
+      if (mapaPas && marcadorPas) {
+        marcadorPas.setLatLng([estadoPas.lat, estadoPas.lng]);
+        mapaPas.setView([estadoPas.lat, estadoPas.lng], 14);
       }
     }
 
-    function inicializarMapa() {
-      if (!window.L) return;
-      mapa = L.map("mapa-passageiro").setView([estado.coords.lat1, estado.coords.lon1], 12);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap", maxZoom: 19 }).addTo(mapa);
+    function renderizarChamadas() {
+      const visiveis = estadoPas.chamadas.filter((c) => !estadoPas.ocultasTelaPas[c.id]);
+      elContadorChamadas.textContent = visiveis.length + " chamada(s)";
 
-      mapa.on("click", async function (ev) {
-        const lat = Number(ev.latlng.lat.toFixed(5));
-        const lon = Number(ev.latlng.lng.toFixed(5));
-        elStatusGpsRota.textContent = "Buscando rua...";
-        const nomeRua = await resolverNomeRuaPorCoords(lat, lon);
-
-        if (estado.modoCliqueMapa === "embarque") {
-          estado.coords.lat1 = lat;
-          estado.coords.lon1 = lon;
-          elPasOrigem.value = nomeRua;
-          registrarNovoLocalNaLista(nomeRua, lat, lon);
-        } else {
-          estado.coords.lat2 = lat;
-          estado.coords.lon2 = lon;
-          elPasDestino.value = nomeRua;
-          registrarNovoLocalNaLista(nomeRua, lat, lon);
-        }
-
-        const kmAtual = Math.max(0.2, Number((distanciaHaversineKm(estado.coords.lat1, estado.coords.lon1, estado.coords.lat2, estado.coords.lon2) * 1.22).toFixed(2)));
-        elPasKm.value = kmAtual.toFixed(2);
-        atualizarMarcadoresMapa();
-        renderizarTudo();
-        elStatusGpsRota.textContent = nomeRua + " • " + kmAtual.toFixed(2).replace(".", ",") + " km";
-      });
-
-      atualizarMarcadoresMapa();
-    }
-
-    function atualizarMarcadoresMapa() {
-      if (!mapa || !window.L) return;
-      const p1 = [estado.coords.lat1, estado.coords.lon1];
-      const p2 = [estado.coords.lat2, estado.coords.lon2];
-      if (!markerEmbarque) markerEmbarque = L.circleMarker(p1, { radius: 8, color: "#0b192c", weight: 2, fillColor: "#f59e0b", fillOpacity: 1 }).addTo(mapa);
-      else markerEmbarque.setLatLng(p1);
-      if (!markerDestino) markerDestino = L.circleMarker(p2, { radius: 8, color: "#065f46", weight: 2, fillColor: "#10b981", fillOpacity: 1 }).addTo(mapa);
-      else markerDestino.setLatLng(p2);
-      if (linhaRota) mapa.removeLayer(linhaRota);
-      linhaRota = L.polyline([p1, p2], { color: "#0369a1", weight: 3 }).addTo(mapa);
-      mapa.fitBounds(linhaRota.getBounds(), { padding: [20, 20] });
-    }
-
-    function abrirSugestoesPorLetra(tipoCampo, texto) {
-      const dropdown = tipoCampo === "origem" ? elSugOrigem : elSugDestino;
-      const termoBruto = String(texto || "").trim();
-      const termo = normalizarTexto(termoBruto);
-      if (!termo) { dropdown.classList.remove("aberto"); dropdown.innerHTML = ""; return; }
-
-      const numDigitado = extrairNumeroCasa(termoBruto);
-      const termoSemNum = normalizarTexto(numDigitado ? termoBruto.replace(numDigitado, "") : termoBruto);
-
-      const matches = estado.locaisSalvos
-        .filter((item) => {
-          const nTit = normalizarTexto(item.titulo);
-          const nEnd = normalizarTexto(item.endereco);
-          return nTit.indexOf(termo) !== -1 || nEnd.indexOf(termo) !== -1 || (termoSemNum && (nTit.indexOf(termoSemNum) !== -1 || nEnd.indexOf(termoSemNum) !== -1));
-        })
-        .slice(0, 6)
-        .map((item) => {
-          let enderecoFinal = item.endereco;
-          if (numDigitado && item.endereco.indexOf(numDigitado) === -1) {
-            const partes = item.endereco.split("—");
-            partes[0] = partes[0].trim() + ", " + numDigitado;
-            enderecoFinal = partes.join(" — ");
-          }
-          return { titulo: item.titulo + (numDigitado ? ", " + numDigitado : ""), endereco: enderecoFinal, lat: item.lat, lon: item.lon, kmRef: item.kmRef };
-        });
-
-      renderizarSugestoes(dropdown, tipoCampo, matches);
-
-      clearTimeout(timerBuscaGeo);
-      if (termo.length >= 2) {
-        timerBuscaGeo = setTimeout(async function () {
-          const geoLista = await buscarEnderecosRuaNumero(termoBruto);
-          const combinados = matches.slice();
-          geoLista.forEach((g) => {
-            if (!combinados.some((m) => normalizarTexto(m.endereco) === normalizarTexto(g.endereco))) combinados.push(g);
-          });
-          renderizarSugestoes(dropdown, tipoCampo, combinados.slice(0, 7));
-        }, 300);
+      if (!visiveis.length) {
+        elListaChamadas.innerHTML = '<div class="meta-small">Nenhuma chamada visível na tela. Toque em "Chamar Motorista" para enviar ao Firestore.</div>';
+        return;
       }
-    }
 
-    function renderizarSugestoes(dropdown, tipoCampo, itens) {
-      if (!itens.length) { dropdown.classList.remove("aberto"); dropdown.innerHTML = ""; return; }
-      dropdown.innerHTML = itens.map((item, idx) => {
-        const kmEst = Number.isFinite(Number(item.kmRef)) ? Number(item.kmRef) : Math.max(0.5, Number((distanciaHaversineKm(estado.coords.lat1, estado.coords.lon1, item.lat, item.lon) * 1.22).toFixed(2)));
-        const preco = calcularTarifaInicial(kmEst, estado.dinamicaAdminPct).valorBruto;
-        return '<div class="sugestao-item" data-tipo="' + tipoCampo + '" data-idx="' + idx + '"><div><strong>' + escapar(item.titulo) + '</strong><br/><span class="meta-small">' + escapar(item.endereco) + '</span></div><span class="sugestao-tag">' + moeda(preco) + "</span></div>";
-      }).join("");
-      dropdown._itens = itens;
-      dropdown.classList.add("aberto");
-    }
+      elListaChamadas.innerHTML = visiveis.map((c) => {
+        const bruto = Number(c.valorBruto || 0);
+        const podeDecidir = c.status === "Aguardando motorista" || c.status === "Aceita";
 
-    function renderizarChipsDestinos() {
-      elRotasRapidas.innerHTML = LOCAIS_PADRAO.map((loc) => {
-        const preco = calcularTarifaInicial(loc.kmRef, estado.dinamicaAdminPct).valorBruto;
-        const ativo = estado.rotaSelecionadaId === loc.id ? "selecionado" : "";
-        return '<button type="button" class="chip ' + ativo + '" data-padrao-id="' + loc.id + '">' + escapar(loc.titulo) + " • " + moeda(preco) + "</button>";
+        return (
+          '<div class="corrida-box ' + (podeDecidir ? "ativa" : "") + '" data-id="' + escapar(c.id) + '">' +
+            '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
+              '<strong>' + escapar(c.codigo || c.id) + " • " + moeda(bruto) + "</strong>" +
+              '<span class="' + classeStatus(c.status) + '">' + escapar(c.status || "Aguardando motorista") + "</span>" +
+            "</div>" +
+            '<div><strong>De:</strong> ' + escapar(c.origem) + "<br/><strong>Para:</strong> " + escapar(c.destino) +
+            ' <span class="meta-small">(' + Number(c.distanciaKm || 0).toFixed(2).replace(".", ",") + " km)</span></div>" +
+            (c.motoristaNome ? '<div class="meta-small">Motorista: <strong>' + escapar(c.motoristaNome) + "</strong> • " + escapar(c.motoristaVeiculo || "") + "</div>" : "") +
+            '<div class="meta-small">Código de confirmação (4 dígitos): <strong>' + escapar(c.codigo4d || "—") + "</strong></div>" +
+            (podeDecidir
+              ? '<div class="chips" style="margin-top:4px;">' +
+                  '<button type="button" class="btn btn-red btn-sm btn-cancelar-pas">Cancelar / Recusar</button>' +
+                "</div>"
+              : "") +
+          "</div>"
+        );
       }).join("");
     }
 
-    function atualizarGeohashInfo() {
-      const gh6 = codificarGeohash(estado.coords.lat1, estado.coords.lon1, 6);
-      elPasGeohashInfo.innerHTML =
-        "Geohash Embarque: <strong>" + gh6 + "</strong> • Setor: <strong>" + gh6.slice(0, 4) +
-        "</strong> • Motoristas online no setor: <strong>" + estado.motoristasNoSetor + "</strong>";
-    }
-
-    function atualizarPreview() {
-      elOverlayEmbarque.textContent = (elPasOrigem.value || "").trim() || "Embarque";
-      elOverlayDestino.textContent = (elPasDestino.value || "").trim() || "Destino";
-      const km = Math.max(0.1, Number(elPasKm.value || 0.1));
-      const calc = calcularTarifaInicial(km, estado.dinamicaAdminPct);
-      elPasResumoCalc.textContent =
-        km <= LIMITE_KM_TARIFA_CURTA
-          ? "Até 3,50 km: R$ 7,99"
-          : "A partir de 3,51 km: " + km.toFixed(2).replace(".", ",") + " km × R$ 2,00 (sem R$ 7,99)";
-      elPasPrecoEstimado.textContent = moeda(calc.valorBruto);
-      elPasElegivelTxt.textContent =
-        km >= estado.kmMinDesconto
-          ? "Trecho ≥ " + estado.kmMinDesconto + " km • Elegível para ajuste"
-          : "Trecho < " + estado.kmMinDesconto + " km • Tarifa protegida";
-    }
-
-    function renderizarViagem() {
-      const c = estado.corridaAtual;
-      if (!c) {
-        elPasCodigo.textContent = "—";
-        elPasViagemBox.innerHTML = '<div class="meta-small">Conversa limpa. Escolha um destino ou use o GPS e toque em <strong>Chamar Motorista</strong>.</div>';
-        return;
-      }
-
-      elPasCodigo.textContent = c.codigo + (c.codigo4d ? " • Cód: " + c.codigo4d : "");
-      let classe = "status-banner";
-      let texto = "Status: " + c.status;
-
-      if (c.status === "Aguardando motorista") {
-        classe = "status-banner alerta";
-        texto = "Aguardando motorista no Geohash " + (c.geohashEmbarque || "") + "...";
-      } else if (c.status === "Recusada pelo passageiro") {
-        classe = "status-banner recusada";
-        texto = "Você recusou " + moeda(c.valorBruto) + ". Aguardando contraproposta do motorista...";
-      } else if (c.status === "Contraproposta enviada") {
-        classe = "status-banner sucesso";
-        texto = "Contraproposta do motorista recebida! Confira o novo valor abaixo.";
-      } else if (c.status === "Aceita" || c.status === "Motorista a caminho" || c.status === "Em viagem" || c.status === "Finalizada") {
-        classe = "status-banner sucesso";
-        texto = c.status + (c.status === "Finalizada" ? " • Viagem concluída!" : "");
-      }
-
-      let botoes = "";
-      if (c.status === "Aguardando motorista") {
-        botoes = '<button type="button" class="btn btn-red btn-sm" id="btn-pas-recusar">Recusar / Outro app está mais barato</button>';
-      } else if (c.status === "Contraproposta enviada") {
-        botoes =
-          '<button type="button" class="btn btn-green btn-sm" id="btn-pas-aceitar-contra">Aceitar Novo Valor (' + moeda(c.valorBruto) + ')</button>' +
-          '<button type="button" class="btn btn-outline btn-sm" id="btn-pas-encerrar">Encerrar</button>';
-      } else if (c.status === "Recusada pelo passageiro" || c.status === "Finalizada" || c.status === "Cancelada") {
-        botoes = '<button type="button" class="btn btn-outline btn-sm" id="btn-pas-limpar">Nova Corrida</button>';
-      }
-
-      elPasViagemBox.innerHTML =
-        '<div class="' + classe + '">' + escapar(texto) + "</div>" +
-        '<div><strong>De:</strong> ' + escapar(c.origem) + "<br/><strong>Para:</strong> " + escapar(c.destino) +
-        ' <span class="meta-small">(' + Number(c.distanciaKm || 0).toFixed(2).replace(".", ",") + " km)</span></div>" +
-        '<div class="price-big">' + moeda(c.valorBruto) + "</div>" +
-        (c.motoristaNome ? '<div class="meta-small"><strong>Motorista:</strong> ' + escapar(c.motoristaNome) + " (" + escapar(c.motoristaVeiculo || "") + ") • <strong>Pix:</strong> " + escapar(c.motoristaPix || "") + "</div>" : "") +
-        '<div class="chips">' + botoes + "</div>";
-    }
-
-    function renderizarTudo() {
-      atualizarGeohashInfo();
-      renderizarChipsDestinos();
-      atualizarPreview();
-      renderizarViagem();
-    }
-
-    function escutarDocumentoCorrida(docId) {
-      if (unsubCorrida) { unsubCorrida(); unsubCorrida = null; }
-      if (!db || !docId) return;
-      unsubCorrida = db.collection("corridas").doc(docId).onSnapshot((doc) => {
-        if (!doc.exists) return;
-        const d = Object.assign({ id: doc.id }, doc.data());
-        if (d.ocultaPassageiro) {
-          estado.corridaAtual = null;
-        } else {
-          estado.corridaAtual = d;
-        }
-        renderizarTudo();
-      });
-    }
-
-    function conectarFirebase() {
-      if (!firebaseConfig.apiKey || firebaseConfig.apiKey.indexOf("COLE_AQUI") !== -1) return;
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-
-      db.collection("config").doc("32drive_dinamica").onSnapshot((doc) => {
-        if (doc.exists) {
-          const d = doc.data() || {};
-          estado.dinamicaAdminPct = Number(d.dinamicaPct || 0);
-          estado.kmMinDesconto = Number(d.kmMinDesconto || 15);
-          renderizarTudo();
-        }
-      });
-
-      db.collection("motoristas_online").where("online", "==", true).onSnapshot((snap) => {
-        const setorAtual = codificarGeohash(estado.coords.lat1, estado.coords.lon1, 4);
-        let count = 0;
-        snap.forEach((doc) => {
-          const m = doc.data() || {};
-          if (!m.geohashSetor || m.geohashSetor === setorAtual) count += 1;
-        });
-        estado.motoristasNoSetor = count;
-        atualizarGeohashInfo();
-      });
-    }
-
-    // Eventos
-    document.getElementById("btn-gps-embarque").addEventListener("click", function () {
-      if (!navigator.geolocation) return;
-      elStatusGpsRota.textContent = "Buscando rua no GPS...";
-      navigator.geolocation.getCurrentPosition(async function (pos) {
-        const lat = Number(pos.coords.latitude.toFixed(5));
-        const lon = Number(pos.coords.longitude.toFixed(5));
-        estado.coords.lat1 = lat;
-        estado.coords.lon1 = lon;
-        const rua = await resolverNomeRuaPorCoords(lat, lon);
-        elPasOrigem.value = rua;
-        registrarNovoLocalNaLista(rua, lat, lon);
-        const kmCalc = Math.max(0.2, Number((distanciaHaversineKm(lat, lon, estado.coords.lat2, estado.coords.lon2) * 1.22).toFixed(2)));
-        elPasKm.value = kmCalc.toFixed(2);
-        if (mapa) mapa.setView([lat, lon], 15);
-        atualizarMarcadoresMapa();
-        renderizarTudo();
-        elStatusGpsRota.textContent = rua;
-      });
-    });
-
-    document.getElementById("btn-limpar-destino").addEventListener("click", function () {
-      elPasDestino.value = "";
-      elSugDestino.classList.remove("aberto");
-      atualizarPreview();
-      elPasDestino.focus();
-    });
-
-    document.getElementById("btn-limpar-conversa-pas").addEventListener("click", async function () {
-      if (db && estado.corridaAtual && estado.corridaAtual.id) {
-        try { await db.collection("corridas").doc(estado.corridaAtual.id).set({ ocultaPassageiro: true }, { merge: true }); } catch (e) {}
-      }
-      if (unsubCorrida) { unsubCorrida(); unsubCorrida = null; }
-      estado.corridaAtual = null;
-      elPasCodigo4d.value = "";
-      renderizarTudo();
-      elStatusGpsRota.textContent = "Conversa limpa";
-    });
-
-    document.querySelector(".map-mode-btns").addEventListener("click", function (ev) {
-      const btn = ev.target.closest("button[data-map-mode]");
-      if (!btn) return;
-      estado.modoCliqueMapa = btn.getAttribute("data-map-mode");
-      document.querySelectorAll(".btn-mode").forEach((b) => b.classList.remove("ativo"));
-      btn.classList.add("ativo");
-    });
-
-    elPasOrigem.addEventListener("input", () => { abrirSugestoesPorLetra("origem", elPasOrigem.value); atualizarPreview(); });
-    elPasDestino.addEventListener("input", () => { abrirSugestoesPorLetra("destino", elPasDestino.value); atualizarPreview(); });
-
-    document.addEventListener("click", function (ev) {
-      const sug = ev.target.closest(".sugestao-item");
-      if (sug) {
-        const tipo = sug.getAttribute("data-tipo");
-        const idx = Number(sug.getAttribute("data-idx"));
-        const item = (tipo === "origem" ? elSugOrigem : elSugDestino)._itens[idx];
-        if (item) {
-          if (tipo === "origem") {
-            elPasOrigem.value = item.endereco;
-            estado.coords.lat1 = item.lat;
-            estado.coords.lon1 = item.lon;
-          } else {
-            elPasDestino.value = item.endereco;
-            estado.coords.lat2 = item.lat;
-            estado.coords.lon2 = item.lon;
-            if (Number.isFinite(Number(item.kmRef))) elPasKm.value = Number(item.kmRef).toFixed(2);
-          }
-          registrarNovoLocalNaLista(item.endereco, item.lat, item.lon, item.kmRef);
-          atualizarMarcadoresMapa();
-          renderizarTudo();
-        }
-        elSugOrigem.classList.remove("aberto");
-        elSugDestino.classList.remove("aberto");
-        return;
-      }
-      if (!ev.target.closest(".autocomplete-wrap")) {
-        elSugOrigem.classList.remove("aberto");
-        elSugDestino.classList.remove("aberto");
-      }
-    });
-
-    elRotasRapidas.addEventListener("click", function (ev) {
-      const chip = ev.target.closest("button[data-padrao-id]");
-      if (!chip) return;
-      const loc = LOCAIS_PADRAO.find((l) => l.id === chip.getAttribute("data-padrao-id"));
-      if (!loc) return;
-      estado.rotaSelecionadaId = loc.id;
-      elPasDestino.value = loc.endereco;
-      elPasKm.value = Number(loc.kmRef).toFixed(2);
-      estado.coords.lat2 = loc.lat;
-      estado.coords.lon2 = loc.lon;
-      registrarNovoLocalNaLista(loc.endereco, loc.lat, loc.lon, loc.kmRef);
-      atualizarMarcadoresMapa();
-      renderizarTudo();
-    });
-
-    elPasKm.addEventListener("input", atualizarPreview);
-
-    document.getElementById("btn-chamar-motorista").addEventListener("click", async function () {
-      const km = Math.max(0.1, Number(elPasKm.value || 0.1));
-      const origem = (elPasOrigem.value || "").trim() || "Balneário Cassino";
-      const destino = (elPasDestino.value || "").trim() || "Rio Grande";
-      const codigo4d = (elPasCodigo4d.value || "").trim().slice(0, 4);
-      const geohashEmbarque = codificarGeohash(estado.coords.lat1, estado.coords.lon1, 6);
-      const calc = calcularTarifaInicial(km, estado.dinamicaAdminPct);
-      const codigo = "32D-" + Math.floor(1000 + Math.random() * 9000);
-
-      registrarNovoLocalNaLista(origem, estado.coords.lat1, estado.coords.lon1);
-      registrarNovoLocalNaLista(destino, estado.coords.lat2, estado.coords.lon2, km);
-
-      const novaCorrida = {
-        id: codigo,
-        codigo,
-        codigo4d,
-        passageiro: (elPasNome.value || "").trim() || "Passageiro",
-        pagamento: elPasPagamento.value,
-        origem,
-        destino,
-        origemLat: estado.coords.lat1,
-        origemLon: estado.coords.lon1,
-        geohashEmbarque,
-        geohashSetor: geohashEmbarque.slice(0, 4),
-        distanciaKm: km,
-        valorBase: calc.valorBase,
-        dinamicaPct: calc.dinamicaPct,
-        valorBruto: calc.valorBruto,
-        repasseMotorista: calc.repasseMotorista,
-        taxaPlataforma: calc.taxaPlataforma,
-        status: "Aguardando motorista",
-        ocultaPassageiro: false
-      };
-
-      estado.corridaAtual = novaCorrida;
-      renderizarTudo();
-
-      if (db) {
-        try {
-          await db.collection("corridas").doc(codigo).set(novaCorrida, { merge: true });
-          escutarDocumentoCorrida(codigo);
-        } catch (e) {}
-      }
-    });
-
-    elPasViagemBox.addEventListener("click", async function (ev) {
-      const c = estado.corridaAtual;
-      if (!c) return;
-
-      if (ev.target.id === "btn-pas-recusar") {
-        c.status = "Recusada pelo passageiro";
-      } else if (ev.target.id === "btn-pas-aceitar-contra") {
-        Object.assign(c, recalcularDivisao8020(c.valorBruto), { status: "Aceita" });
-      } else if (ev.target.id === "btn-pas-encerrar") {
-        c.status = "Cancelada";
-      } else if (ev.target.id === "btn-pas-limpar") {
-        if (unsubCorrida) { unsubCorrida(); unsubCorrida = null; }
-        estado.corridaAtual = null;
-        renderizarTudo();
-        return;
-      }
-
-      renderizarTudo();
-      if (db && c.id) {
-        try { await db.collection("corridas").doc(c.id).set(c, { merge: true }); } catch (e) {}
-      }
-    });
-
-    conectarFirebase();
-    renderizarTudo();
-    inicializarMapa();
-  </script>
-</body>
-</html>
+    async function enviarChamadaMotorista() {
+      const origem = (elPasOrigem.value || "").trim() || "Balneário Cassino, Rio Grande - RS";
+      const destino = (elPasDestino.value || "").trim() || "Centro, Rio Grande -
