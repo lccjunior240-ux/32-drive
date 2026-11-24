@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>32 Drive • Passageiro</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     :root {
       --bg: #f1f5f9;
@@ -61,32 +60,6 @@
     .brand h1 { font-size: 20px; font-weight: 900; color: var(--navy); }
     .brand p { font-size: 14px; color: var(--muted); font-weight: 600; }
 
-    .tabs-bar {
-      background: #ffffff;
-      border-bottom: 1.5px solid var(--border);
-      padding: 8px 14px;
-      display: flex;
-      gap: 8px;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 11px 14px;
-      border-radius: 10px;
-      border: 1.5px solid var(--border);
-      background: #f8fafc;
-      color: var(--muted);
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .tab-btn.ativa {
-      background: var(--navy);
-      color: #ffffff;
-      border-color: var(--navy);
-    }
-
     .wrap {
       width: 100%;
       max-width: 680px;
@@ -97,11 +70,8 @@
       gap: 14px;
     }
 
-    .tela-aba { display: none; flex-direction: column; gap: 14px; }
-    .tela-aba.ativa { display: flex; }
-
     .card {
-      background: var(--card);
+      background: #ffffff;
       border: 1.5px solid var(--border);
       border-radius: 14px;
       padding: 16px;
@@ -119,7 +89,7 @@
       margin-bottom: 4px;
     }
 
-    input, select {
+    input {
       width: 100%;
       padding: 12px 14px;
       border-radius: 9px;
@@ -130,14 +100,19 @@
       background: #ffffff;
     }
 
-    .desconto-box {
-      display: none;
-      flex-direction: column;
-      gap: 4px;
+    .passageiro-resumo {
       background: #f8fafc;
       border: 1.5px solid var(--border);
       border-radius: 10px;
-      padding: 10px 12px;
+      padding: 11px 13px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .rua-box {
@@ -148,17 +123,6 @@
       font-size: 16px;
       font-weight: 800;
       color: var(--navy);
-    }
-
-    .chegada-box {
-      background: #ecfdf5;
-      border: 1.5px solid #10b981;
-      color: #065f46;
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-size: 17px;
-      font-weight: 800;
-      display: none;
     }
 
     .valor-box {
@@ -191,6 +155,7 @@
       justify-content: center;
     }
 
+    .btn-sm { padding: 9px 13px; font-size: 15px; }
     .btn-green { background: var(--green); color: #ffffff; flex: 1; }
     .btn-blue { background: var(--blue); color: #ffffff; }
     .btn-red { background: var(--red); color: #ffffff; }
@@ -228,33 +193,6 @@
       color: #065f46;
     }
 
-    #mapa-passageiro {
-      width: 100%;
-      height: 290px;
-      border-radius: 10px;
-      border: 1.5px solid var(--border);
-      background: #e2e8f0;
-      z-index: 1;
-    }
-
-    .waze-opcoes {
-      display: none;
-      flex-direction: column;
-      gap: 8px;
-      background: #f8fafc;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-    }
-
-    .waze-opcoes iframe {
-      width: 100%;
-      height: 240px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      background: #ffffff;
-    }
-
     .meta { font-size: 16px; color: var(--muted); font-weight: 700; }
   </style>
 </head>
@@ -270,82 +208,81 @@
     <span class="meta" id="status-conexao">Conectando...</span>
   </header>
 
-  <nav class="tabs-bar" aria-label="Telas do passageiro">
-    <button type="button" class="tab-btn ativa" id="aba-btn-corrida">Corrida</button>
-    <button type="button" class="tab-btn" id="aba-btn-mapa">Mapa / Waze</button>
-  </nav>
-
   <main class="wrap">
-    <section class="tela-aba ativa" id="aba-corrida">
-      <section class="card">
-        <div>
-          <label for="pas-origem">Local de Embarque (Rua)</label>
-          <input id="pas-origem" type="text" value="Avenida Rio Grande, 96 — Balneário Cassino, Rio Grande - RS" />
-        </div>
+    <!-- TELA 1: CADASTRO INICIAL DO PASSAGEIRO -->
+    <section class="card" id="tela-cadastro" style="display:none;">
+      <div>
+        <strong style="font-size:20px; color:#0b192c;">Cadastro do Passageiro</strong>
+        <div class="meta">Preencha seus dados uma vez. Depois eles entram automaticamente ao abrir o app.</div>
+      </div>
 
-        <div>
-          <label for="pas-destino">Endereço Final (Para onde você vai?)</label>
-          <input id="pas-destino" type="text" placeholder="Digite o endereço de destino" />
-        </div>
+      <div>
+        <label for="cad-nome">Nome Completo</label>
+        <input id="cad-nome" type="text" placeholder="Ex.: Maria Silva" />
+      </div>
 
-        <div class="desconto-box" id="box-desconto-15km">
-          <label for="pas-desconto">Desconto disponível (acima de 15 km)</label>
-          <select id="pas-desconto">
-            <option value="0">Sem desconto</option>
-            <option value="10">Desconto de 10%</option>
-            <option value="15">Desconto de 15%</option>
-          </select>
-        </div>
+      <div>
+        <label for="cad-whats">WhatsApp (com DDD)</label>
+        <input id="cad-whats" type="tel" placeholder="Ex.: 53999998888" />
+      </div>
 
-        <div class="rua-box" id="rua-atual-texto">Referência: Avenida Rio Grande, 96 — Balneário Cassino, Rio Grande - RS</div>
+      <div>
+        <label for="cad-email">E-mail (opcional)</label>
+        <input id="cad-email" type="email" placeholder="Ex.: maria@email.com" />
+      </div>
 
-        <div class="acoes">
-          <button type="button" class="btn btn-blue" id="btn-buscar-local">Buscar Localização</button>
-          <button type="button" class="btn btn-outline" id="btn-ver-mapa">Ver Mapa</button>
-          <button type="button" class="btn btn-outline" id="btn-limpar-topo">Limpar Tela</button>
-        </div>
+      <div>
+        <label for="cad-endereco">Endereço Principal (opcional)</label>
+        <input id="cad-endereco" type="text" placeholder="Ex.: Rua das Acácias, 120" />
+      </div>
 
-        <div class="valor-box">
-          <div>
-            <div>Valor da viagem</div>
-            <span id="sub-valor-texto">Informe o endereço final para calcular</span>
-          </div>
-          <strong id="valor-corrida">—</strong>
-        </div>
+      <div class="meta" id="msg-cadastro" style="color:#b91c1c;"></div>
 
-        <div class="acoes">
-          <button type="button" class="btn btn-green" id="btn-chamar">Solicitar Corrida</button>
-        </div>
-      </section>
-
-      <section class="card" id="caixa-viagem-atual" style="display:none;"></section>
+      <div class="acoes">
+        <button type="button" class="btn btn-green" id="btn-salvar-cadastro">Salvar e Continuar</button>
+      </div>
     </section>
 
-    <section class="tela-aba" id="aba-mapa">
-      <section class="card">
-        <div class="chegada-box" id="info-chegada-motorista"></div>
+    <!-- TELA 2: PAINEL DEFINITIVO DA CORRIDA -->
+    <section class="card" id="tela-corrida">
+      <div class="passageiro-resumo">
+        <div id="resumo-dados-passageiro">Passageiro não cadastrado</div>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-editar-cadastro">Meu Cadastro</button>
+      </div>
 
-        <div id="mapa-passageiro"></div>
+      <div>
+        <label for="pas-origem">Local de Embarque (Rua)</label>
+        <input id="pas-origem" type="text" value="Avenida Rio Grande, 96 — Balneário Cassino, Rio Grande - RS" />
+      </div>
 
-        <div class="waze-opcoes" id="waze-opcoes-box">
-          <div class="meta">Abrir no Waze (tempo e trajeto):</div>
-          <div class="acoes">
-            <a class="btn btn-blue" id="link-waze-ate-embarque" href="https://waze.com/ul" target="_blank" rel="noopener noreferrer">Waze: Motorista → Embarque</a>
-            <a class="btn btn-accent" id="link-waze-ate-destino" href="https://waze.com/ul" target="_blank" rel="noopener noreferrer">Waze: Embarque → Destino</a>
-            <a class="btn btn-outline" id="link-waze-motorista" href="https://waze.com/ul" target="_blank" rel="noopener noreferrer">Posição do Motorista</a>
-          </div>
-          <iframe id="waze-iframe" title="Mapa Waze" loading="lazy"></iframe>
+      <div>
+        <label for="pas-destino">Endereço Final (Para onde você vai?)</label>
+        <input id="pas-destino" type="text" placeholder="Digite o endereço de destino" />
+      </div>
+
+      <div class="rua-box" id="rua-atual-texto">Referência: Avenida Rio Grande, 96 — Balneário Cassino, Rio Grande - RS</div>
+
+      <div class="acoes">
+        <button type="button" class="btn btn-blue" id="btn-buscar-local">Buscar Localização</button>
+        <button type="button" class="btn btn-outline" id="btn-limpar-topo">Limpar Tela</button>
+      </div>
+
+      <div class="valor-box">
+        <div>
+          <div>Valor da viagem</div>
+          <span id="sub-valor-texto">Informe o endereço final para calcular</span>
         </div>
+        <strong id="valor-corrida">—</strong>
+      </div>
 
-        <div class="acoes">
-          <button type="button" class="btn btn-blue" id="btn-recalcular-tempo">Atualizar Tempo / Rota</button>
-          <button type="button" class="btn btn-outline" id="btn-voltar-corrida">Voltar para Corrida</button>
-        </div>
-      </section>
+      <div class="acoes">
+        <button type="button" class="btn btn-green" id="btn-chamar">Solicitar Corrida</button>
+      </div>
     </section>
+
+    <section class="card" id="caixa-viagem-atual" style="display:none;"></section>
   </main>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
@@ -363,6 +300,7 @@
       };
 
       const STORAGE_KEY_CORRIDA = "32drive_corrida_ativa_id";
+      const STORAGE_KEY_CADASTRO = "32drive_cadastro_passageiro";
       const REF_LAT = -32.1856;
       const REF_LNG = -52.1658;
       const REF_ENDERECO = "Avenida Rio Grande, 96 — Balneário Cassino, Rio Grande - RS";
@@ -403,58 +341,131 @@
         valorCalculado: null,
         corridaAtualId: "",
         corridaAtual: null,
-        tempoChegadaMin: null,
-        abaAtiva: "corrida"
+        cadastro: { nome: "", whats: "", email: "", endereco: "" }
       };
       state.geohash = encodeGeohash(state.lat, state.lng, 6);
       state.geohashSetor = state.geohash.slice(0, 4);
 
       let db = null;
-      let mapa = null;
-      let marcador = null;
-      let marcadorMotorista = null;
-      let rotaLayer = null;
-      let rotaMotoristaLayer = null;
       let unsubscribeCorrida = null;
       let timerCalculo = null;
-      let ultimoParMotorista = "";
+
+      const elTelaCadastro = document.getElementById("tela-cadastro");
+      const elTelaCorrida = document.getElementById("tela-corrida");
+      const elCadNome = document.getElementById("cad-nome");
+      const elCadWhats = document.getElementById("cad-whats");
+      const elCadEmail = document.getElementById("cad-email");
+      const elCadEndereco = document.getElementById("cad-endereco");
+      const elMsgCadastro = document.getElementById("msg-cadastro");
+      const elResumoPassageiro = document.getElementById("resumo-dados-passageiro");
 
       const elOrigem = document.getElementById("pas-origem");
       const elDestino = document.getElementById("pas-destino");
-      const elBoxDesconto = document.getElementById("box-desconto-15km");
-      const elSelectDesconto = document.getElementById("pas-desconto");
       const elRuaTexto = document.getElementById("rua-atual-texto");
-      const elInfoChegada = document.getElementById("info-chegada-motorista");
       const elSubValor = document.getElementById("sub-valor-texto");
       const elValor = document.getElementById("valor-corrida");
       const elStatus = document.getElementById("status-conexao");
       const elCaixaAtual = document.getElementById("caixa-viagem-atual");
-      const elAbaCorridaBtn = document.getElementById("aba-btn-corrida");
-      const elAbaMapaBtn = document.getElementById("aba-btn-mapa");
-      const elAbaCorrida = document.getElementById("aba-corrida");
-      const elAbaMapa = document.getElementById("aba-mapa");
-      const elWazeOpcoesBox = document.getElementById("waze-opcoes-box");
-      const elWazeIframe = document.getElementById("waze-iframe");
-      const elLinkWazeEmbarque = document.getElementById("link-waze-ate-embarque");
-      const elLinkWazeDestino = document.getElementById("link-waze-ate-destino");
-      const elLinkWazeMotorista = document.getElementById("link-waze-motorista");
 
-      function trocarAba(nome) {
-        state.abaAtiva = nome;
-        const isMapa = nome === "mapa";
-        elAbaCorridaBtn.classList.toggle("ativa", !isMapa);
-        elAbaMapaBtn.classList.toggle("ativa", isMapa);
-        elAbaCorrida.classList.toggle("ativa", !isMapa);
-        elAbaMapa.classList.toggle("ativa", isMapa);
+      function moeda(v) {
+        return "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
+      }
 
-        if (isMapa && mapa) {
-          setTimeout(function () {
-            try { mapa.invalidateSize(); } catch (e) {}
-          }, 150);
-          if (state.corridaAtual) {
-            atualizarRotaMotoristaAteEmbarque(state.corridaAtual, true);
+      function escapar(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function abrirTelaCadastro(forcar) {
+        elCadNome.value = state.cadastro.nome || "";
+        elCadWhats.value = state.cadastro.whats || "";
+        elCadEmail.value = state.cadastro.email || "";
+        elCadEndereco.value = state.cadastro.endereco || "";
+        elMsgCadastro.textContent = "";
+
+        const temBasico = Boolean((state.cadastro.nome || "").trim() && (state.cadastro.whats || "").replace(/\D/g, "").length >= 8);
+        if (forcar || !temBasico) {
+          elTelaCadastro.style.display = "flex";
+          elTelaCorrida.style.display = "none";
+          elCaixaAtual.style.display = "none";
+        } else {
+          elTelaCadastro.style.display = "none";
+          elTelaCorrida.style.display = "flex";
+          if (state.corridaAtual && state.corridaAtualId) {
+            elCaixaAtual.style.display = "flex";
           }
         }
+      }
+
+      function atualizarResumoPassageiroNaTela() {
+        const nome = (state.cadastro.nome || "").trim();
+        const whats = (state.cadastro.whats || "").trim();
+        if (nome || whats) {
+          elResumoPassageiro.innerHTML =
+            "<span><strong>" + escapar(nome || "Passageiro") + "</strong>" +
+            (whats ? " • WhatsApp: <strong>" + escapar(whats) + "</strong>" : "") +
+            "</span>";
+        } else {
+          elResumoPassageiro.textContent = "Complete seu cadastro para enviar Nome e WhatsApp";
+        }
+      }
+
+      function salvarCadastro() {
+        const nome = (elCadNome.value || "").trim();
+        const whats = (elCadWhats.value || "").trim();
+        const email = (elCadEmail.value || "").trim();
+        const endereco = (elCadEndereco.value || "").trim();
+        const digitos = whats.replace(/\D/g, "");
+
+        if (!nome) {
+          elMsgCadastro.textContent = "Digite seu nome completo.";
+          elCadNome.focus();
+          return;
+        }
+        if (digitos.length < 8) {
+          elMsgCadastro.textContent = "Digite um WhatsApp válido com DDD.";
+          elCadWhats.focus();
+          return;
+        }
+
+        state.cadastro = { nome, whats, email, endereco };
+        try {
+          localStorage.setItem(STORAGE_KEY_CADASTRO, JSON.stringify(state.cadastro));
+        } catch (e) {}
+
+        if (endereco) {
+          elOrigem.value = endereco;
+          state.rua = endereco;
+          elRuaTexto.textContent = "Embarque salvo: " + endereco;
+        }
+
+        atualizarResumoPassageiroNaTela();
+        abrirTelaCadastro(false);
+      }
+
+      function carregarCadastro() {
+        try {
+          const bruto = localStorage.getItem(STORAGE_KEY_CADASTRO);
+          if (bruto) {
+            const parsed = JSON.parse(bruto);
+            state.cadastro = {
+              nome: String(parsed.nome || ""),
+              whats: String(parsed.whats || ""),
+              email: String(parsed.email || ""),
+              endereco: String(parsed.endereco || "")
+            };
+            if (state.cadastro.endereco) {
+              elOrigem.value = state.cadastro.endereco;
+              state.rua = state.cadastro.endereco;
+              elRuaTexto.textContent = "Embarque salvo: " + state.cadastro.endereco;
+            }
+          }
+        } catch (e) {}
+        atualizarResumoPassageiroNaTela();
+        abrirTelaCadastro(false);
       }
 
       function salvarIdLocal(id) {
@@ -472,18 +483,6 @@
         }
       }
 
-      function moeda(v) {
-        return "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
-      }
-
-      function escapar(str) {
-        return String(str || "")
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
-      }
-
       function haversineKm(lat1, lon1, lat2, lon2) {
         const R = 6371;
         const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -497,21 +496,15 @@
 
       function montarValorPorKm(km) {
         const dist = Math.max(0.5, Number(km || 1));
-        const acima15 = dist >= 15;
-        elBoxDesconto.style.display = acima15 ? "flex" : "none";
-        if (!acima15) elSelectDesconto.value = "0";
-
         let base = 7.99;
         if (dist > 3.5) {
           base = Number((dist * 2.0).toFixed(2));
         }
-
-        const descPct = acima15 ? Number(elSelectDesconto.value || 0) : 0;
         const comDinamica = base * (1 + Number(state.dinamicaPct || 0) / 100);
-        const bruto = Number((comDinamica * (1 - descPct / 100)).toFixed(2));
+        const bruto = Number(comDinamica.toFixed(2));
         const mot80 = Number((bruto * 0.8).toFixed(2));
         const app20 = Number((bruto - mot80).toFixed(2));
-        return { km: Number(dist.toFixed(2)), base, descontoPct: descPct, bruto, mot80, app20 };
+        return { km: Number(dist.toFixed(2)), base, bruto, mot80, app20 };
       }
 
       async function geocodificarDestino(textoDestino) {
@@ -539,174 +532,15 @@
       async function buscarRotaOSRM(lat1, lng1, lat2, lng2) {
         try {
           const url = "https://router.project-osrm.org/route/v1/driving/" +
-            lng1 + "," + lat1 + ";" + lng2 + "," + lat2 + "?overview=full&geometries=geojson";
+            lng1 + "," + lat1 + ";" + lng2 + "," + lat2 + "?overview=false";
           const res = await fetch(url);
           const data = await res.json();
           if (data && data.routes && data.routes.length > 0) {
             const rota = data.routes[0];
-            const km = Number((rota.distance / 1000).toFixed(2));
-            const minutos = Math.max(1, Math.round((rota.duration || (rota.distance / 8.5)) / 60));
-            return { km, minutos, geometry: rota.geometry };
+            return { km: Number((rota.distance / 1000).toFixed(2)) };
           }
         } catch (e) {}
-        const kmFallback = Number(haversineKm(lat1, lng1, lat2, lng2).toFixed(2));
-        const minFallback = Math.max(1, Math.round((kmFallback / 32) * 60));
-        return { km: kmFallback, minutos: minFallback, geometry: null };
-      }
-
-      function desenharRotaNoMapa(geometry, lat2, lng2) {
-        if (!mapa || typeof window.L === "undefined") return;
-        try {
-          if (rotaLayer) {
-            mapa.removeLayer(rotaLayer);
-            rotaLayer = null;
-          }
-          if (geometry && geometry.coordinates && geometry.coordinates.length > 1) {
-            const coords = geometry.coordinates.map(function (c) { return [c[1], c[0]]; });
-            rotaLayer = window.L.polyline(coords, { color: "#0284c7", weight: 5 }).addTo(mapa);
-            mapa.fitBounds(rotaLayer.getBounds(), { padding: [20, 20] });
-          } else if (typeof lat2 === "number" && typeof lng2 === "number") {
-            rotaLayer = window.L.polyline([[state.lat, state.lng], [lat2, lng2]], { color: "#0284c7", weight: 4, dashArray: "6,6" }).addTo(mapa);
-            mapa.fitBounds(rotaLayer.getBounds(), { padding: [20, 20] });
-          }
-          mapa.invalidateSize();
-        } catch (e) {}
-      }
-
-      function limparRotaDoMotorista() {
-        ultimoParMotorista = "";
-        state.tempoChegadaMin = null;
-        elInfoChegada.style.display = "none";
-        elInfoChegada.textContent = "";
-        elWazeOpcoesBox.style.display = "none";
-        elWazeIframe.src = "";
-        if (!mapa || typeof window.L === "undefined") return;
-        try {
-          if (marcadorMotorista) {
-            mapa.removeLayer(marcadorMotorista);
-            marcadorMotorista = null;
-          }
-          if (rotaMotoristaLayer) {
-            mapa.removeLayer(rotaMotoristaLayer);
-            rotaMotoristaLayer = null;
-          }
-        } catch (e) {}
-      }
-
-      function montarLinksWazeCorrida(c) {
-        const latMot = Number(c && c.latMotorista);
-        const lngMot = Number(c && c.lngMotorista);
-        const latEmb = Number((c && c.latEmbarque) || state.lat);
-        const lngEmb = Number((c && c.lngEmbarque) || state.lng);
-        const origemStr = encodeURIComponent(((c && c.origem) || REF_ENDERECO) + ", Rio Grande, RS");
-        const destinoStr = encodeURIComponent(((c && c.destino) || "") + ", Rio Grande, RS");
-
-        const temMot = !Number.isNaN(latMot) && !Number.isNaN(lngMot);
-        const linkMotorista = temMot
-          ? "https://waze.com/ul?ll=" + encodeURIComponent(latMot + "," + lngMot) + "&navigate=yes"
-          : "https://waze.com/ul?q=" + origemStr + "&navigate=yes";
-
-        const linkAteEmbarque = temMot
-          ? "https://waze.com/ul?ll=" + encodeURIComponent(latEmb + "," + lngEmb) + "&from=" + encodeURIComponent(latMot + "," + lngMot) + "&navigate=yes"
-          : (c && c.linkWaze) || ("https://waze.com/ul?q=" + origemStr + "&navigate=yes");
-
-        const linkAteDestino = "https://waze.com/ul?q=" + destinoStr + "&from=" + encodeURIComponent(latEmb + "," + lngEmb) + "&navigate=yes";
-
-        return { linkMotorista, linkAteEmbarque, linkAteDestino };
-      }
-
-      function atualizarWazeNaSegundaTela(corrida) {
-        const aceitaOuEmAndamento = corrida && (corrida.status === "Aceita" || corrida.status === "Em viagem");
-        if (!aceitaOuEmAndamento) {
-          elWazeOpcoesBox.style.display = "none";
-          return;
-        }
-        const links = montarLinksWazeCorrida(corrida);
-        elLinkWazeMotorista.href = links.linkMotorista;
-        elLinkWazeEmbarque.href = links.linkAteEmbarque;
-        elLinkWazeDestino.href = links.linkAteDestino;
-
-        const latAlvo = Number(corrida.latMotorista || corrida.latEmbarque || state.lat);
-        const lngAlvo = Number(corrida.lngMotorista || corrida.lngEmbarque || state.lng);
-        if (!Number.isNaN(latAlvo) && !Number.isNaN(lngAlvo)) {
-          const embedUrl = "https://embed.waze.com/iframe?zoom=15&lat=" +
-            encodeURIComponent(latAlvo.toFixed(6)) + "&lon=" + encodeURIComponent(lngAlvo.toFixed(6)) + "&pin=1";
-          if (elWazeIframe.src !== embedUrl) {
-            elWazeIframe.src = embedUrl;
-          }
-          elWazeOpcoesBox.style.display = "flex";
-        }
-      }
-
-      async function atualizarRotaMotoristaAteEmbarque(corrida, forcar) {
-        if (!corrida || (corrida.status !== "Aceita" && corrida.status !== "Em viagem")) {
-          limparRotaDoMotorista();
-          return;
-        }
-
-        atualizarWazeNaSegundaTela(corrida);
-
-        const latMot = Number(corrida.latMotorista);
-        const lngMot = Number(corrida.lngMotorista);
-        const latEmb = Number(corrida.latEmbarque || state.lat);
-        const lngEmb = Number(corrida.lngEmbarque || state.lng);
-
-        if (Number.isNaN(latMot) || Number.isNaN(lngMot)) {
-          elInfoChegada.style.display = "block";
-          elInfoChegada.textContent = corrida.status === "Em viagem"
-            ? "Viagem em andamento até o destino"
-            : "Motorista aceitou • Calculando tempo de chegada...";
-          return;
-        }
-
-        const chave = [corrida.status, latMot.toFixed(4), lngMot.toFixed(4), latEmb.toFixed(4), lngEmb.toFixed(4)].join("|");
-        if (!forcar && chave === ultimoParMotorista && state.tempoChegadaMin !== null) {
-          elInfoChegada.style.display = "block";
-          elInfoChegada.textContent = corrida.status === "Em viagem"
-            ? "Viagem em andamento • Duração estimada: ~" + state.tempoChegadaMin + " min"
-            : "Motorista a caminho • Chega em aprox. " + state.tempoChegadaMin + " min";
-          return;
-        }
-        ultimoParMotorista = chave;
-
-        const rotaInfo = await buscarRotaOSRM(latMot, lngMot, latEmb, lngEmb);
-        state.tempoChegadaMin = rotaInfo.minutos;
-        elInfoChegada.style.display = "block";
-        elInfoChegada.textContent = corrida.status === "Em viagem"
-          ? "Viagem em andamento • Duração estimada: ~" + rotaInfo.minutos + " min"
-          : "Motorista a caminho • Chega em aprox. " + rotaInfo.minutos + " min";
-
-        if (!mapa || typeof window.L === "undefined") return;
-        try {
-          if (!marcadorMotorista) {
-            marcadorMotorista = window.L.circleMarker([latMot, lngMot], {
-              radius: 9,
-              color: "#065f46",
-              weight: 3,
-              fillColor: "#10b981",
-              fillOpacity: 0.95
-            }).addTo(mapa).bindPopup("Motorista");
-          } else {
-            marcadorMotorista.setLatLng([latMot, lngMot]);
-          }
-
-          if (rotaMotoristaLayer) {
-            mapa.removeLayer(rotaMotoristaLayer);
-            rotaMotoristaLayer = null;
-          }
-
-          if (rotaInfo.geometry && rotaInfo.geometry.coordinates && rotaInfo.geometry.coordinates.length > 1) {
-            const coords = rotaInfo.geometry.coordinates.map(function (c) { return [c[1], c[0]]; });
-            rotaMotoristaLayer = window.L.polyline(coords, { color: "#059669", weight: 5 }).addTo(mapa);
-            const bounds = window.L.latLngBounds(coords);
-            bounds.extend([latEmb, lngEmb]);
-            mapa.fitBounds(bounds, { padding: [24, 24] });
-          } else {
-            rotaMotoristaLayer = window.L.polyline([[latMot, lngMot], [latEmb, lngEmb]], { color: "#059669", weight: 4, dashArray: "5,5" }).addTo(mapa);
-            mapa.fitBounds([[latMot, lngMot], [latEmb, lngEmb]], { padding: [24, 24] });
-          }
-          mapa.invalidateSize();
-        } catch (e) {}
+        return { km: Number(haversineKm(lat1, lng1, lat2, lng2).toFixed(2)) };
       }
 
       async function calcularValorDestino() {
@@ -714,13 +548,8 @@
         if (!destinoTexto) {
           state.kmCalculado = null;
           state.valorCalculado = null;
-          elBoxDesconto.style.display = "none";
           elValor.textContent = "—";
           elSubValor.textContent = "Informe o endereço final para calcular";
-          if (rotaLayer && mapa) {
-            mapa.removeLayer(rotaLayer);
-            rotaLayer = null;
-          }
           return null;
         }
 
@@ -728,22 +557,17 @@
         try {
           const destCoords = await geocodificarDestino(destinoTexto);
           let kmEstimado = 4.2;
-          let geom = null;
 
           if (destCoords) {
             const rotaInfo = await buscarRotaOSRM(state.lat, state.lng, destCoords.lat, destCoords.lng);
             kmEstimado = rotaInfo.km;
-            geom = rotaInfo.geometry;
-            desenharRotaNoMapa(geom, destCoords.lat, destCoords.lng);
           }
 
           const calc = montarValorPorKm(kmEstimado);
           state.kmCalculado = calc.km;
           state.valorCalculado = calc;
           elValor.textContent = moeda(calc.bruto);
-          elSubValor.textContent = calc.descontoPct > 0
-            ? "Valor com desconto de " + calc.descontoPct + "%"
-            : "Valor calculado • Pronto para solicitar";
+          elSubValor.textContent = "Valor calculado • Pronto para solicitar";
           return calc;
         } catch (e) {
           const calc = montarValorPorKm(4.2);
@@ -757,9 +581,9 @@
 
       async function atualizarNomeRua(lat, lng, preencherInput, usarReferenciaPadrao) {
         if (usarReferenciaPadrao) {
-          state.rua = REF_ENDERECO;
-          elRuaTexto.textContent = "Referência: " + REF_ENDERECO;
-          if (preencherInput) elOrigem.value = REF_ENDERECO;
+          state.rua = state.cadastro.endereco || REF_ENDERECO;
+          elRuaTexto.textContent = "Referência: " + state.rua;
+          if (preencherInput) elOrigem.value = state.rua;
           return;
         }
 
@@ -778,70 +602,53 @@
             elOrigem.value = state.rua;
           }
         } catch (e) {
-          state.rua = REF_ENDERECO;
+          state.rua = state.cadastro.endereco || REF_ENDERECO;
           elRuaTexto.textContent = "Referência: " + state.rua;
           if (!elOrigem.value.trim()) elOrigem.value = state.rua;
         }
       }
 
-      function moverMapa(lat, lng, preencherInput, usarReferenciaPadrao) {
+      function definirPosicao(lat, lng, preencherInput, usarReferenciaPadrao) {
         state.lat = Number(lat);
         state.lng = Number(lng);
         state.geohash = encodeGeohash(state.lat, state.lng, 6);
         state.geohashSetor = state.geohash.slice(0, 4);
-
-        if (mapa && marcador) {
-          try {
-            marcador.setLatLng([state.lat, state.lng]);
-            mapa.setView([state.lat, state.lng], 15);
-            mapa.invalidateSize();
-          } catch (e) {}
-        }
         atualizarNomeRua(state.lat, state.lng, preencherInput, Boolean(usarReferenciaPadrao));
-      }
-
-      function iniciarMapa() {
-        try {
-          if (typeof window.L === "undefined") return;
-          mapa = window.L.map("mapa-passageiro").setView([state.lat, state.lng], 14);
-          window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: "© OpenStreetMap"
-          }).addTo(mapa);
-          marcador = window.L.marker([state.lat, state.lng], { draggable: true }).addTo(mapa).bindPopup("Embarque");
-
-          marcador.on("dragend", function () {
-            const p = marcador.getLatLng();
-            moverMapa(p.lat, p.lng, true, false);
-            if ((elDestino.value || "").trim()) calcularValorDestino();
-          });
-
-          mapa.on("click", function (ev) {
-            moverMapa(ev.latlng.lat, ev.latlng.lng, true, false);
-            if ((elDestino.value || "").trim()) calcularValorDestino();
-          });
-
-          setTimeout(function () {
-            if (mapa) mapa.invalidateSize();
-          }, 300);
-        } catch (e) {}
       }
 
       function buscarLocalizacaoAtual() {
         elRuaTexto.textContent = "Localização: buscando GPS...";
         if (!navigator.geolocation) {
-          moverMapa(REF_LAT, REF_LNG, true, true);
+          definirPosicao(REF_LAT, REF_LNG, true, true);
           return;
         }
         navigator.geolocation.getCurrentPosition(
           function (pos) {
-            moverMapa(pos.coords.latitude, pos.coords.longitude, true, false);
+            definirPosicao(pos.coords.latitude, pos.coords.longitude, true, false);
             if ((elDestino.value || "").trim()) calcularValorDestino();
           },
           function () {
-            moverMapa(REF_LAT, REF_LNG, true, true);
+            definirPosicao(REF_LAT, REF_LNG, true, true);
           },
           { enableHighAccuracy: true, timeout: 8000 }
         );
+      }
+
+      function montarLinksWazeCorrida(c) {
+        const latMot = Number(c && c.latMotorista);
+        const lngMot = Number(c && c.lngMotorista);
+        const latEmb = Number((c && c.latEmbarque) || state.lat);
+        const lngEmb = Number((c && c.lngEmbarque) || state.lng);
+        const origemStr = encodeURIComponent(((c && c.origem) || REF_ENDERECO) + ", Rio Grande, RS");
+        const destinoStr = encodeURIComponent(((c && c.destino) || "") + ", Rio Grande, RS");
+        const temMot = !Number.isNaN(latMot) && !Number.isNaN(lngMot);
+
+        const linkAteEmbarque = temMot
+          ? "https://waze.com/ul?ll=" + encodeURIComponent(latEmb + "," + lngEmb) + "&from=" + encodeURIComponent(latMot + "," + lngMot) + "&navigate=yes"
+          : (c && c.linkWaze) || ("https://waze.com/ul?q=" + origemStr + "&navigate=yes");
+
+        const linkAteDestino = "https://waze.com/ul?q=" + destinoStr + "&from=" + encodeURIComponent(latEmb + "," + lngEmb) + "&navigate=yes";
+        return { linkAteEmbarque, linkAteDestino };
       }
 
       async function finalizarCorridaPassageiro() {
@@ -862,8 +669,7 @@
       function renderizarViagemAtual() {
         const c = state.corridaAtual;
         const id = state.corridaAtualId || lerIdLocal();
-        if (!c || !id) {
-          limparRotaDoMotorista();
+        if (!c || !id || elTelaCorrida.style.display === "none") {
           elCaixaAtual.style.display = "none";
           elCaixaAtual.innerHTML = "";
           return;
@@ -879,8 +685,6 @@
           st === "Em viagem" ? "Viagem em andamento" :
           st === "Finalizada" ? "Viagem finalizada" : st;
 
-        atualizarRotaMotoristaAteEmbarque(c, false);
-
         const linksWaze = montarLinksWazeCorrida(c);
 
         elCaixaAtual.style.display = "flex";
@@ -890,20 +694,19 @@
               '<strong>Valor: ' + moeda(c.valorBruto) + ' • ' + escapar(c.codigo || "") + '</strong>' +
               '<span class="status-pill ' + (aceitaOuEmAndamento ? "aceita" : "") + '">' + escapar(textoStatus) + '</span>' +
             '</div>' +
-            '<div><strong>Valor da corrida:</strong> ' + moeda(c.valorBruto) + '</div>' +
+            (c.passageiroNome || c.passageiroWhats
+              ? '<div><strong>Passageiro:</strong> ' + escapar(c.passageiroNome || "") + (c.passageiroWhats ? ' • <strong>WhatsApp:</strong> ' + escapar(c.passageiroWhats) : '') + '</div>'
+              : '') +
             '<div><strong>Embarque:</strong> ' + escapar(c.origem) + '</div>' +
             '<div><strong>Destino:</strong> ' + escapar(c.destino) + '</div>' +
             (c.motoristaNome
               ? '<div class="meta">Motorista: <strong>' + escapar(c.motoristaNome) + '</strong>' + (c.motoristaVeiculo ? ' • ' + escapar(c.motoristaVeiculo) : '') + '</div>'
               : '<div class="meta">Aguardando aceite do motorista...</div>') +
-            (aceitaOuEmAndamento && state.tempoChegadaMin !== null
-              ? '<div class="meta">Tempo estimado: <strong>~' + state.tempoChegadaMin + ' min</strong></div>'
-              : '') +
             '<div class="meta">Código de confirmação: <strong>' + escapar(c.codigo4d || "") + '</strong></div>' +
             '<div class="acoes" style="margin-top:6px;">' +
               (aceitaOuEmAndamento
-                ? '<button type="button" class="btn btn-blue" id="btn-abrir-aba-waze">Mapa / Waze</button>' +
-                  '<a class="btn btn-outline" href="' + linksWaze.linkAteEmbarque + '" target="_blank" rel="noopener noreferrer">Waze até Embarque</a>'
+                ? '<a class="btn btn-blue" href="' + linksWaze.linkAteEmbarque + '" target="_blank" rel="noopener noreferrer">Waze: Motorista → Embarque</a>' +
+                  '<a class="btn btn-outline" href="' + linksWaze.linkAteDestino + '" target="_blank" rel="noopener noreferrer">Waze: Embarque → Destino</a>'
                 : '') +
               (podeFinalizar
                 ? '<button type="button" class="btn btn-accent" id="btn-finalizar-passageiro">Finalizar Viagem</button>'
@@ -915,13 +718,6 @@
                   : '')) +
             '</div>' +
           '</div>';
-
-        const btnAbaWaze = document.getElementById("btn-abrir-aba-waze");
-        if (btnAbaWaze) {
-          btnAbaWaze.addEventListener("click", function () {
-            trocarAba("mapa");
-          });
-        }
 
         const btnFinPas = document.getElementById("btn-finalizar-passageiro");
         if (btnFinPas) {
@@ -942,9 +738,7 @@
 
         const btnLimparFin = document.getElementById("btn-limpar-finalizada");
         if (btnLimparFin) {
-          btnLimparFin.addEventListener("click", function () {
-            limparParaNovaBusca();
-          });
+          btnLimparFin.addEventListener("click", limparParaNovaBusca);
         }
       }
 
@@ -985,8 +779,17 @@
       }
 
       async function chamarMotorista() {
-        const origem = (elOrigem.value || "").trim() || REF_ENDERECO;
+        const nomePas = (state.cadastro.nome || "").trim();
+        const whatsPas = (state.cadastro.whats || "").trim();
+        const origem = (elOrigem.value || "").trim() || state.cadastro.endereco || REF_ENDERECO;
         const destino = (elDestino.value || "").trim();
+
+        if (!nomePas || whatsPas.replace(/\D/g, "").length < 8) {
+          abrirTelaCadastro(true);
+          elMsgCadastro.textContent = "Preencha seu Nome e WhatsApp para solicitar a corrida.";
+          return;
+        }
+
         if (!destino) {
           elSubValor.textContent = "Digite o endereço final antes de solicitar";
           elDestino.focus();
@@ -1003,12 +806,14 @@
           id: id,
           codigo: "32-" + String(agora).slice(-5),
           codigo4d: codigo4d,
-          passageiro: "Passageiro 32",
+          passageiro: nomePas,
+          passageiroNome: nomePas,
+          passageiroWhats: whatsPas,
+          passageiroEmail: state.cadastro.email || "",
           origem: origem,
           destino: destino,
           distanciaKm: calc.km,
           valorBase: calc.base,
-          descontoPct: calc.descontoPct || 0,
           dinamicaPct: Number(state.dinamicaPct || 0),
           valorBruto: calc.bruto,
           repasseMotorista: calc.mot80,
@@ -1025,7 +830,6 @@
           unsubscribeCorrida();
           unsubscribeCorrida = null;
         }
-        limparRotaDoMotorista();
 
         state.corridaAtualId = id;
         state.corridaAtual = dados;
@@ -1057,23 +861,15 @@
           unsubscribeCorrida();
           unsubscribeCorrida = null;
         }
-        limparRotaDoMotorista();
         elDestino.value = "";
-        elSelectDesconto.value = "0";
-        elBoxDesconto.style.display = "none";
-        moverMapa(REF_LAT, REF_LNG, true, true);
         calcularValorDestino();
         renderizarViagemAtual();
-        trocarAba("corrida");
       }
 
       function retomarAoVoltarParaTela() {
         const idSalvo = state.corridaAtualId || lerIdLocal();
         if (idSalvo) {
           observarCorridaAtual(idSalvo);
-        }
-        if (mapa) {
-          try { mapa.invalidateSize(); } catch (e) {}
         }
       }
 
@@ -1102,15 +898,12 @@
         }
       }
 
-      elAbaCorridaBtn.addEventListener("click", function () { trocarAba("corrida"); });
-      elAbaMapaBtn.addEventListener("click", function () { trocarAba("mapa"); });
-      document.getElementById("btn-ver-mapa").addEventListener("click", function () { trocarAba("mapa"); });
-      document.getElementById("btn-voltar-corrida").addEventListener("click", function () { trocarAba("corrida"); });
-      document.getElementById("btn-limpar-topo").addEventListener("click", limparParaNovaBusca);
-      document.getElementById("btn-recalcular-tempo").addEventListener("click", function () {
-        if (state.corridaAtual) atualizarRotaMotoristaAteEmbarque(state.corridaAtual, true);
+      document.getElementById("btn-salvar-cadastro").addEventListener("click", salvarCadastro);
+      document.getElementById("btn-editar-cadastro").addEventListener("click", function () {
+        abrirTelaCadastro(true);
       });
 
+      document.getElementById("btn-limpar-topo").addEventListener("click", limparParaNovaBusca);
       document.getElementById("btn-buscar-local").addEventListener("click", buscarLocalizacaoAtual);
       document.getElementById("btn-chamar").addEventListener("click", chamarMotorista);
 
@@ -1125,12 +918,8 @@
         timerCalculo = setTimeout(calcularValorDestino, 500);
       });
 
-      elSelectDesconto.addEventListener("change", function () {
-        if ((elDestino.value || "").trim()) calcularValorDestino();
-      });
-
-      iniciarMapa();
-      moverMapa(REF_LAT, REF_LNG, true, true);
+      definirPosicao(REF_LAT, REF_LNG, true, true);
+      carregarCadastro();
       conectarFirebase();
     })();
   </script>
