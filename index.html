@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>32 Drive • Painel do Passageiro (V40 / G40)</title>
+  <title>32 Drive • Passageiro</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     :root {
@@ -36,10 +36,9 @@
     .topbar {
       background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
       border-bottom: 3px solid var(--accent);
-      padding: 12px 18px;
+      padding: 12px 16px;
       color: #ffffff;
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
@@ -48,13 +47,13 @@
     .brand { display: flex; align-items: center; gap: 10px; }
 
     .badge-32 {
-      width: 40px;
-      height: 40px;
+      width: 38px;
+      height: 38px;
       border-radius: 10px;
       background: var(--accent);
       color: var(--navy);
       font-weight: 900;
-      font-size: 18px;
+      font-size: 17px;
       display: grid;
       place-items: center;
       flex-shrink: 0;
@@ -63,24 +62,15 @@
     .brand h1 { font-size: 16px; font-weight: 900; color: var(--accent); }
     .brand p { font-size: 12px; color: #cbd5e1; }
 
-    .top-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-
-    .container {
+    .wrap {
       width: 100%;
-      max-width: 1180px;
+      max-width: 680px;
       margin: 0 auto;
       padding: 14px;
-      display: grid;
-      grid-template-columns: 1.05fr 1.15fr;
+      display: flex;
+      flex-direction: column;
       gap: 14px;
-      flex: 1;
     }
-
-    @media (max-width: 960px) {
-      .container { grid-template-columns: 1fr; }
-    }
-
-    .col { display: flex; flex-direction: column; gap: 14px; }
 
     .card {
       background: var(--card);
@@ -93,17 +83,6 @@
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
     }
 
-    .card-title {
-      font-size: 15px;
-      font-weight: 900;
-      color: var(--navy);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
     label {
       display: block;
       font-size: 12px;
@@ -112,123 +91,103 @@
       margin-bottom: 3px;
     }
 
-    input, select {
+    input {
       width: 100%;
-      padding: 8px 10px;
-      border-radius: 8px;
+      padding: 9px 11px;
+      border-radius: 9px;
       border: 1.5px solid #94a3b8;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--text);
       background: #ffffff;
     }
 
-    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .row-2 { display: grid; grid-template-columns: 1fr 110px; gap: 8px; }
 
-    @media (max-width: 520px) {
+    @media (max-width: 480px) {
       .row-2 { grid-template-columns: 1fr; }
     }
 
     #mapa-passageiro {
       width: 100%;
-      height: 250px;
+      height: 240px;
       border-radius: 10px;
       border: 1.5px solid var(--border);
       background: #e2e8f0;
       z-index: 1;
     }
 
-    .btn {
-      padding: 9px 13px;
+    .rua-box {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
       border-radius: 9px;
-      border: none;
+      padding: 8px 10px;
       font-size: 13px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .valor-box {
+      background: var(--navy);
+      color: #ffffff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .valor-box span { font-size: 12px; color: #cbd5e1; font-weight: 700; }
+    .valor-box strong { font-size: 22px; color: var(--accent); font-weight: 900; }
+
+    .acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .btn {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
       font-weight: 800;
       cursor: pointer;
     }
 
-    .btn-sm { padding: 6px 9px; font-size: 11px; }
-    .btn-accent { background: var(--accent); color: #0f172a; }
-    .btn-green { background: var(--green); color: #ffffff; }
-    .btn-red { background: var(--red); color: #ffffff; }
+    .btn-green { background: var(--green); color: #ffffff; flex: 1; }
     .btn-blue { background: var(--blue); color: #ffffff; }
-    .btn-outline { background: #e2e8f0; color: #0f172a; border: 1px solid #94a3b8; }
+    .btn-red { background: var(--red); color: #ffffff; }
+    .btn-outline { background: #e2e8f0; color: var(--text); border: 1px solid #94a3b8; }
 
-    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-
-    .tabela-precos {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-      background: #f8fafc;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .tabela-precos th, .tabela-precos td {
-      border: 1px solid #cbd5e1;
-      padding: 6px 8px;
-      text-align: left;
-    }
-
-    .tabela-precos th {
-      background: #0b192c;
-      color: #f59e0b;
-      font-weight: 800;
-    }
-
-    .resumo-box {
-      background: #0f172a;
-      color: #f8fafc;
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 12px;
-      font-weight: 700;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .resumo-box strong { color: var(--accent); }
-
-    .lista-scroll {
-      max-height: 360px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .corrida-box {
-      border: 1.5px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 10px;
-      background: #f8fafc;
+    .viagem-atual {
+      border: 2px solid var(--accent);
+      background: #fffbeb;
+      border-radius: 12px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      font-size: 12px;
     }
 
-    .corrida-box.ativa {
-      border-color: var(--accent);
-      background: #fffbeb;
+    .viagem-atual.aceita {
+      border-color: var(--green);
+      background: #ecfdf5;
     }
 
-    .tag-status {
-      font-size: 11px;
-      font-weight: 900;
-      padding: 2px 8px;
+    .status-pill {
+      display: inline-block;
+      padding: 3px 9px;
       border-radius: 999px;
-      background: #e2e8f0;
-      color: #0f172a;
+      font-size: 12px;
+      font-weight: 900;
+      background: #fef3c7;
+      color: #92400e;
     }
 
-    .tag-status.aguardando { background: #fef3c7; color: #92400e; }
-    .tag-status.aceita { background: #d1fae5; color: #065f46; }
-    .tag-status.recusada { background: #fee2e2; color: #991b1b; }
+    .status-pill.aceita {
+      background: #d1fae5;
+      color: #065f46;
+    }
 
-    .meta-small { font-size: 12px; color: var(--muted); font-weight: 700; }
+    .meta { font-size: 12px; color: var(--muted); font-weight: 700; }
   </style>
 </head>
 <body>
@@ -236,104 +195,54 @@
     <div class="brand">
       <div class="badge-32">32</div>
       <div>
-        <h1>32 DRIVE • PASSAGEIRO (V40 / G40)</h1>
-        <p>Balneário Cassino • Rio Grande (32°S) • Chamadas em Tempo Real</p>
+        <h1>32 DRIVE</h1>
+        <p>Balneário Cassino • Rio Grande</p>
       </div>
     </div>
-
-    <div class="top-actions">
-      <button type="button" class="btn btn-accent btn-sm" id="btn-gps-passageiro">Localização Atual</button>
-      <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-tela-pas">Limpar Tela</button>
-      <span class="meta-small" id="status-firebase-pas" style="color:#fde68a;">Iniciando...</span>
-    </div>
+    <span class="meta" id="status-conexao" style="color:#fde68a;">Conectando...</span>
   </header>
 
-  <main class="container">
-    <div class="col">
-      <section class="card">
-        <div class="card-title">
-          <span>1. Solicitar Corrida</span>
-          <span class="meta-small" id="info-dinamica-pas">Dinâmica: +0%</span>
-        </div>
+  <main class="wrap">
+    <section class="card">
+      <div>
+        <label for="pas-origem">Local de Embarque (Rua)</label>
+        <input id="pas-origem" type="text" placeholder="Buscando sua rua atual..." />
+      </div>
 
-        <div class="row-2">
-          <div>
-            <label for="pas-nome">Seu Nome</label>
-            <input id="pas-nome" type="text" value="Passageiro 32" />
-          </div>
-          <div>
-            <label for="pas-distancia">Distância Estimada (km)</label>
-            <input id="pas-distancia" type="number" step="0.1" min="0.5" value="2.8" />
-          </div>
-        </div>
-
+      <div class="row-2">
         <div>
-          <label for="pas-origem">Endereço de Origem (Embarque)</label>
-          <input id="pas-origem" type="text" value="Av. Rio Grande, Balneário Cassino - Rio Grande, RS" />
+          <label for="pas-destino">Para onde você vai?</label>
+          <input id="pas-destino" type="text" placeholder="Digite o destino" />
         </div>
-
         <div>
-          <label for="pas-destino">Endereço de Destino</label>
-          <input id="pas-destino" type="text" value="Centro - Rio Grande, RS" />
+          <label for="pas-km">Trecho (km)</label>
+          <input id="pas-km" type="number" step="0.1" min="0.5" value="2.8" />
         </div>
+      </div>
 
-        <table class="tabela-precos">
-          <thead>
-            <tr>
-              <th>Faixa de Quilometragem</th>
-              <th>Tabela de Preço 32 Drive</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Até 3,50 km</td>
-              <td><strong>R$ 7,99</strong> (tarifa mínima)</td>
-            </tr>
-            <tr>
-              <td>Acima de 3,50 km (≥ 3,51 km)</td>
-              <td><strong>R$ 2,00 / km</strong> (substitui a tarifa de R$ 7,99)</td>
-            </tr>
-          </tbody>
-        </table>
+      <div id="mapa-passageiro"></div>
 
-        <div class="resumo-box" id="resumo-tarifa-pas">
-          <div>Valor estimado: <strong id="pas-valor-total">R$ 7,99</strong> (<span id="pas-faixa-desc">Até 3,50 km: tarifa base R$ 7,99</span>)</div>
-          <div class="meta-small" style="color:#cbd5e1;">Repasse 80% Motorista: <span id="pas-repasse-mot">R$ 6,39</span> • 20% 32 Drive: <span id="pas-taxa-app">R$ 1,60</span></div>
+      <div class="rua-box" id="rua-atual-texto">Rua atual: carregando localização...</div>
+
+      <div class="acoes">
+        <button type="button" class="btn btn-blue" id="btn-buscar-local">Buscar Localização Atual</button>
+        <button type="button" class="btn btn-outline" id="btn-nova-busca">Nova Busca</button>
+      </div>
+
+      <div class="valor-box">
+        <div>
+          <div>Valor da corrida</div>
+          <span>Pronto para chamar</span>
         </div>
+        <strong id="valor-corrida">R$ 7,99</strong>
+      </div>
 
-        <div class="chips">
-          <button type="button" class="btn btn-green" id="btn-chamar-motorista" style="flex:1;">Chamar Motorista</button>
-          <button type="button" class="btn btn-outline" id="btn-localizacao-card">Localização Atual</button>
-          <button type="button" class="btn btn-outline" id="btn-limpar-campos">Limpar Tela</button>
-        </div>
-      </section>
+      <div class="acoes">
+        <button type="button" class="btn btn-green" id="btn-chamar">Chamar Motorista</button>
+      </div>
+    </section>
 
-      <section class="card">
-        <div class="card-title">
-          <span>2. Mapa & Endereço de Embarque</span>
-          <span class="meta-small" id="info-geohash-pas">GH: —</span>
-        </div>
-        <div id="mapa-passageiro"></div>
-        <div class="meta-small" id="endereco-atual-pas">Endereço atual: Balneário Cassino, Rio Grande - RS</div>
-        <div class="meta-small" id="coords-passageiro">Lat: -32.1856, Lng: -52.1658</div>
-      </section>
-    </div>
-
-    <div class="col">
-      <section class="card">
-        <div class="card-title">
-          <span>3. Minhas Chamadas em Tempo Real</span>
-          <div class="chips">
-            <span class="meta-small" id="contador-chamadas-pas">0 chamadas</span>
-            <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-conversa-pas">Limpar Conversa</button>
-          </div>
-        </div>
-
-        <div class="lista-scroll" id="lista-chamadas-pas">
-          <div class="meta-small">Nenhuma chamada enviada ainda. Preencha origem/destino e toque em "Chamar Motorista".</div>
-        </div>
-      </section>
-    </div>
+    <section class="card" id="caixa-viagem-atual" style="display:none;"></section>
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -341,364 +250,336 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDlKouGeTQ7_NNgIRCLSYl66zB-J-9TzHs",
-      authDomain: "drive-4745f.firebaseapp.com",
-      databaseURL: "https://drive-4745f-default-rtdb.firebaseio.com",
-      projectId: "drive-4745f",
-      storageBucket: "drive-4745f.firebasestorage.app",
-      messagingSenderId: "762959482484",
-      appId: "1:762959482484:web:f40e2cb51020a61195cb21",
-      measurementId: "G-V5PZCVKTCJ"
-    };
-
-    const GEOHASH_BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
-    function encodeGeohash(lat, lon, precision) {
-      precision = precision || 6;
-      var idx = 0, bit = 0, evenBit = true, geohash = "";
-      var latMin = -90, latMax = 90, lonMin = -180, lonMax = 180;
-      while (geohash.length < precision) {
-        if (evenBit) {
-          var lonMid = (lonMin + lonMax) / 2;
-          if (lon >= lonMid) { idx = idx * 2 + 1; lonMin = lonMid; }
-          else { idx = idx * 2; lonMax = lonMid; }
-        } else {
-          var latMid = (latMin + latMax) / 2;
-          if (lat >= latMid) { idx = idx * 2 + 1; latMin = latMid; }
-          else { idx = idx * 2; latMax = latMid; }
-        }
-        evenBit = !evenBit;
-        if (++bit === 5) {
-          geohash += GEOHASH_BASE32.charAt(idx);
-          bit = 0;
-          idx = 0;
-        }
-      }
-      return geohash;
-    }
-
-    const estadoPas = {
-      lat: -32.1856,
-      lng: -52.1658,
-      geohash: "",
-      geohashSetor: "",
-      enderecoAtual: "Balneário Cassino, Rio Grande - RS",
-      dinamicaPct: 0,
-      chamadas: [],
-      ocultasTelaPas: {}
-    };
-
-    estadoPas.geohash = encodeGeohash(estadoPas.lat, estadoPas.lng, 6);
-    estadoPas.geohashSetor = estadoPas.geohash.slice(0, 4);
-
-    let db = null;
-    let mapaPas = null;
-    let marcadorPas = null;
-
-    const elStatusFirebase = document.getElementById("status-firebase-pas");
-    const elInfoDinamica = document.getElementById("info-dinamica-pas");
-    const elPasNome = document.getElementById("pas-nome");
-    const elPasDistancia = document.getElementById("pas-distancia");
-    const elPasOrigem = document.getElementById("pas-origem");
-    const elPasDestino = document.getElementById("pas-destino");
-    const elValorTotal = document.getElementById("pas-valor-total");
-    const elFaixaDesc = document.getElementById("pas-faixa-desc");
-    const elRepasseMot = document.getElementById("pas-repasse-mot");
-    const elTaxaApp = document.getElementById("pas-taxa-app");
-    const elInfoGeohash = document.getElementById("info-geohash-pas");
-    const elEnderecoAtual = document.getElementById("endereco-atual-pas");
-    const elCoordsPas = document.getElementById("coords-passageiro");
-    const elListaChamadas = document.getElementById("lista-chamadas-pas");
-    const elContadorChamadas = document.getElementById("contador-chamadas-pas");
-
-    function moeda(v) {
-      return "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
-    }
-
-    function escapar(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-    }
-
-    function classeStatus(st) {
-      if (st === "Aguardando motorista") return "tag-status aguardando";
-      if (st === "Aceita" || st === "Em viagem" || st === "Finalizada") return "tag-status aceita";
-      if (st === "Recusada pelo passageiro" || st === "Cancelada" || st === "Recusada pelo motorista") return "tag-status recusada";
-      return "tag-status";
-    }
-
-    function calcularTarifa() {
-      const km = Math.max(0.1, Number(elPasDistancia.value || 1));
-      let valorBase = 7.99;
-      let faixa = "Até 3,50 km: tarifa base R$ 7,99";
-
-      if (km > 3.5) {
-        valorBase = Number((km * 2.0).toFixed(2));
-        faixa = "Acima de 3,50 km: R$ 2,00/km (sem taxa fixa)";
-      }
-
-      const fator = 1 + Number(estadoPas.dinamicaPct || 0) / 100;
-      const valorBruto = Number((valorBase * fator).toFixed(2));
-      const repasseMotorista = Number((valorBruto * 0.8).toFixed(2));
-      const taxaPlataforma = Number((valorBruto - repasseMotorista).toFixed(2));
-
-      elInfoDinamica.textContent = "Dinâmica: +" + Number(estadoPas.dinamicaPct || 0) + "%";
-      elValorTotal.textContent = moeda(valorBruto);
-      elFaixaDesc.textContent = faixa + (estadoPas.dinamicaPct > 0 ? " + " + estadoPas.dinamicaPct + "% dinâmica" : "");
-      elRepasseMot.textContent = moeda(repasseMotorista);
-      elTaxaApp.textContent = moeda(taxaPlataforma);
-
-      return { km, valorBase, valorBruto, repasseMotorista, taxaPlataforma };
-    }
-
-    function iniciarMapa() {
-      try {
-        if (typeof L === "undefined") {
-          elEnderecoAtual.textContent = "Mapa offline — verifique conexão com a internet";
-          return;
-        }
-        mapaPas = L.map("mapa-passageiro").setView([estadoPas.lat, estadoPas.lng], 14);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: "© OpenStreetMap"
-        }).addTo(mapaPas);
-        marcadorPas = L.marker([estadoPas.lat, estadoPas.lng], { draggable: true }).addTo(mapaPas).bindPopup("Embarque");
-
-        marcadorPas.on("dragend", function () {
-          const pt = marcadorPas.getLatLng();
-          atualizarPosicao(pt.lat, pt.lng, true);
-        });
-
-        mapaPas.on("click", function (ev) {
-          atualizarPosicao(ev.latlng.lat, ev.latlng.lng, true);
-        });
-
-        setTimeout(function () {
-          if (mapaPas) mapaPas.invalidateSize();
-        }, 250);
-      } catch (e) {}
-    }
-
-    async function buscarEndereco(lat, lng, preencherOrigem) {
-      try {
-        const res = await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" + encodeURIComponent(lat) + "&lon=" + encodeURIComponent(lng));
-        const data = await res.json();
-        const addr = data && data.address ? data.address : {};
-        const rua = addr.road || addr.pedestrian || addr.suburb || addr.neighbourhood || "";
-        const numero = addr.house_number ? ", " + addr.house_number : "";
-        const bairro = addr.suburb || addr.neighbourhood || "";
-        const cidade = addr.city || addr.town || addr.village || "Rio Grande";
-        const texto = (rua ? rua + numero : "") + (bairro && bairro !== rua ? " • " + bairro : "") + (rua || bairro ? " — " : "") + cidade + " - RS";
-        estadoPas.enderecoAtual = texto;
-        elEnderecoAtual.textContent = "Endereço atual: " + texto;
-        if (preencherOrigem) elPasOrigem.value = texto;
-      } catch (e) {
-        estadoPas.enderecoAtual = "Lat " + lat.toFixed(4) + ", Lng " + lng.toFixed(4);
-        elEnderecoAtual.textContent = "Endereço atual: " + estadoPas.enderecoAtual;
-      }
-    }
-
-    function atualizarPosicao(lat, lng, preencherOrigem) {
-      estadoPas.lat = Number(lat);
-      estadoPas.lng = Number(lng);
-      estadoPas.geohash = encodeGeohash(estadoPas.lat, estadoPas.lng, 6);
-      estadoPas.geohashSetor = estadoPas.geohash.slice(0, 4);
-
-      elInfoGeohash.textContent = "GH: " + estadoPas.geohash + " (Setor " + estadoPas.geohashSetor + ")";
-      elCoordsPas.textContent = "Lat: " + estadoPas.lat.toFixed(4) + ", Lng: " + estadoPas.lng.toFixed(4);
-
-      if (mapaPas && marcadorPas) {
-        marcadorPas.setLatLng([estadoPas.lat, estadoPas.lng]);
-        mapaPas.setView([estadoPas.lat, estadoPas.lng], 15);
-        mapaPas.invalidateSize();
-      }
-      buscarEndereco(estadoPas.lat, estadoPas.lng, Boolean(preencherOrigem));
-    }
-
-    function acionarLocalizacaoAtual() {
-      elStatusFirebase.textContent = "Buscando GPS...";
-      if (!navigator.geolocation) {
-        atualizarPosicao(estadoPas.lat, estadoPas.lng, true);
-        elStatusFirebase.textContent = "GPS padrão (Cassino)";
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        function (pos) {
-          atualizarPosicao(pos.coords.latitude, pos.coords.longitude, true);
-          elStatusFirebase.textContent = "GPS atualizado";
-        },
-        function () {
-          atualizarPosicao(estadoPas.lat, estadoPas.lng, true);
-          elStatusFirebase.textContent = "GPS bloqueado — usando Cassino";
-        },
-        { enableHighAccuracy: true, timeout: 8000 }
-      );
-    }
-
-    function limparTelaCompleta() {
-      elPasOrigem.value = "";
-      elPasDestino.value = "";
-      elPasDistancia.value = "2.8";
-      estadoPas.chamadas.forEach((c) => {
-        estadoPas.ocultasTelaPas[c.id] = true;
-      });
-      calcularTarifa();
-      renderizarChamadas();
-    }
-
-    function renderizarChamadas() {
-      const visiveis = estadoPas.chamadas.filter((c) => !estadoPas.ocultasTelaPas[c.id]);
-      elContadorChamadas.textContent = visiveis.length + " chamada(s)";
-
-      if (!visiveis.length) {
-        elListaChamadas.innerHTML = '<div class="meta-small">Tela limpa. Preencha origem/destino e toque em "Chamar Motorista".</div>';
-        return;
-      }
-
-      elListaChamadas.innerHTML = visiveis.map((c) => {
-        const bruto = Number(c.valorBruto || 0);
-        const podeDecidir = c.status === "Aguardando motorista" || c.status === "Aceita";
-
-        return (
-          '<div class="corrida-box ' + (podeDecidir ? "ativa" : "") + '" data-id="' + escapar(c.id) + '">' +
-            '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
-              '<strong>' + escapar(c.codigo || c.id) + " • " + moeda(bruto) + "</strong>" +
-              '<span class="' + classeStatus(c.status) + '">' + escapar(c.status || "Aguardando motorista") + "</span>" +
-            "</div>" +
-            '<div><strong>De:</strong> ' + escapar(c.origem) + "<br/><strong>Para:</strong> " + escapar(c.destino) +
-            ' <span class="meta-small">(' + Number(c.distanciaKm || 0).toFixed(2).replace(".", ",") + " km)</span></div>" +
-            (c.motoristaNome ? '<div class="meta-small">Motorista: <strong>' + escapar(c.motoristaNome) + "</strong> • " + escapar(c.motoristaVeiculo || "") + "</div>" : "") +
-            '<div class="meta-small">Código de confirmação (4 dígitos): <strong>' + escapar(c.codigo4d || "—") + "</strong></div>" +
-            (podeDecidir
-              ? '<div class="chips" style="margin-top:4px;">' +
-                  '<button type="button" class="btn btn-red btn-sm btn-cancelar-pas">Cancelar / Recusar</button>' +
-                "</div>"
-              : "") +
-          "</div>"
-        );
-      }).join("");
-    }
-
-    async function enviarChamadaMotorista() {
-      const origem = (elPasOrigem.value || "").trim() || estadoPas.enderecoAtual || "Balneário Cassino, Rio Grande - RS";
-      const destino = (elPasDestino.value || "").trim() || "Centro, Rio Grande - RS";
-      const nome = (elPasNome.value || "").trim() || "Passageiro 32";
-      const calc = calcularTarifa();
-      const agora = Date.now();
-      const idCorrida = "corrida_" + agora;
-      const codigo4d = String(Math.floor(1000 + Math.random() * 9000));
-
-      const novaCorrida = {
-        id: idCorrida,
-        codigo: "32-" + String(agora).slice(-5),
-        codigo4d: codigo4d,
-        passageiro: nome,
-        origem: origem,
-        destino: destino,
-        distanciaKm: calc.km,
-        valorBase: calc.valorBase,
-        dinamicaPct: Number(estadoPas.dinamicaPct || 0),
-        valorBruto: calc.valorBruto,
-        repasseMotorista: calc.repasseMotorista,
-        taxaPlataforma: calc.taxaPlataforma,
-        latEmbarque: estadoPas.lat,
-        lngEmbarque: estadoPas.lng,
-        geohashEmbarque: estadoPas.geohash,
-        geohashSetor: estadoPas.geohashSetor,
-        status: "Aguardando motorista",
-        criadoEm: agora
+    (function () {
+      const firebaseConfig = {
+        apiKey: "AIzaSyDlKouGeTQ7_NNgIRCLSYl66zB-J-9TzHs",
+        authDomain: "drive-4745f.firebaseapp.com",
+        databaseURL: "https://drive-4745f-default-rtdb.firebaseio.com",
+        projectId: "drive-4745f",
+        storageBucket: "drive-4745f.firebasestorage.app",
+        messagingSenderId: "762959482484",
+        appId: "1:762959482484:web:f40e2cb51020a61195cb21",
+        measurementId: "G-V5PZCVKTCJ"
       };
 
-      estadoPas.chamadas.unshift(novaCorrida);
-      renderizarChamadas();
-
-      if (!db) {
-        elStatusFirebase.textContent = "Sem conexão Firestore (modo local)";
-        return;
+      const GEOHASH_BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
+      function encodeGeohash(lat, lon, precision) {
+        precision = precision || 6;
+        let idx = 0, bit = 0, evenBit = true, geohash = "";
+        let latMin = -90, latMax = 90, lonMin = -180, lonMax = 180;
+        while (geohash.length < precision) {
+          if (evenBit) {
+            const lonMid = (lonMin + lonMax) / 2;
+            if (lon >= lonMid) { idx = idx * 2 + 1; lonMin = lonMid; }
+            else { idx = idx * 2; lonMax = lonMid; }
+          } else {
+            const latMid = (latMin + latMax) / 2;
+            if (lat >= latMid) { idx = idx * 2 + 1; latMin = latMid; }
+            else { idx = idx * 2; latMax = latMid; }
+          }
+          evenBit = !evenBit;
+          if (++bit === 5) {
+            geohash += GEOHASH_BASE32.charAt(idx);
+            bit = 0;
+            idx = 0;
+          }
+        }
+        return geohash;
       }
 
-      try {
-        await db.collection("corridas").doc(idCorrida).set(novaCorrida);
-        elStatusFirebase.textContent = "Chamada enviada ao Firestore!";
-      } catch (err) {
-        elStatusFirebase.textContent = "Firestore bloqueado/erro: " + (err && err.code ? err.code : "verifique regras");
+      const state = {
+        lat: -32.1856,
+        lng: -52.1658,
+        geohash: "",
+        geohashSetor: "",
+        rua: "Balneário Cassino, Rio Grande - RS",
+        dinamicaPct: 0,
+        corridaAtualId: localStorage.getItem("32drive_corrida_atual") || "",
+        corridaAtual: null
+      };
+      state.geohash = encodeGeohash(state.lat, state.lng, 6);
+      state.geohashSetor = state.geohash.slice(0, 4);
+
+      let db = null;
+      let mapa = null;
+      let marcador = null;
+      let unsubscribeCorrida = null;
+
+      const elOrigem = document.getElementById("pas-origem");
+      const elDestino = document.getElementById("pas-destino");
+      const elKm = document.getElementById("pas-km");
+      const elRuaTexto = document.getElementById("rua-atual-texto");
+      const elValor = document.getElementById("valor-corrida");
+      const elStatus = document.getElementById("status-conexao");
+      const elCaixaAtual = document.getElementById("caixa-viagem-atual");
+
+      function moeda(v) {
+        return "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
       }
-    }
 
-    function conectarFirebase() {
-      try {
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        db = firebase.firestore();
-        elStatusFirebase.textContent = "Firestore Conectado (drive-4745f)";
+      function escapar(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
 
-        db.collection("config").doc("32drive_dinamica").onSnapshot(
-          (doc) => {
+      function calcularValor() {
+        const km = Math.max(0.1, Number(elKm.value || 1));
+        let base = 7.99;
+        if (km > 3.5) {
+          base = Number((km * 2.0).toFixed(2));
+        }
+        const bruto = Number((base * (1 + Number(state.dinamicaPct || 0) / 100)).toFixed(2));
+        const mot80 = Number((bruto * 0.8).toFixed(2));
+        const app20 = Number((bruto - mot80).toFixed(2));
+        elValor.textContent = moeda(bruto);
+        return { km, base, bruto, mot80, app20 };
+      }
+
+      async function atualizarNomeRua(lat, lng, preencherInput) {
+        try {
+          const r = await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" + encodeURIComponent(lat) + "&lon=" + encodeURIComponent(lng));
+          const data = await r.json();
+          const a = data && data.address ? data.address : {};
+          const rua = a.road || a.pedestrian || a.suburb || a.neighbourhood || "";
+          const num = a.house_number ? ", " + a.house_number : "";
+          const bairro = a.suburb || a.neighbourhood || "";
+          const cidade = a.city || a.town || a.village || "Rio Grande";
+          const linha = (rua ? rua + num : "") + (bairro && bairro !== rua ? " • " + bairro : "") + (rua || bairro ? " — " : "") + cidade + " - RS";
+          state.rua = linha;
+          elRuaTexto.textContent = "Rua atual: " + linha;
+          if (preencherInput || !elOrigem.value.trim()) {
+            elOrigem.value = linha;
+          }
+        } catch (e) {
+          state.rua = "Balneário Cassino, Rio Grande - RS";
+          elRuaTexto.textContent = "Rua atual: " + state.rua;
+          if (!elOrigem.value.trim()) elOrigem.value = state.rua;
+        }
+      }
+
+      function moverMapa(lat, lng, preencherInput) {
+        state.lat = Number(lat);
+        state.lng = Number(lng);
+        state.geohash = encodeGeohash(state.lat, state.lng, 6);
+        state.geohashSetor = state.geohash.slice(0, 4);
+
+        if (mapa && marcador) {
+          try {
+            marcador.setLatLng([state.lat, state.lng]);
+            mapa.setView([state.lat, state.lng], 15);
+            mapa.invalidateSize();
+          } catch (e) {}
+        }
+        atualizarNomeRua(state.lat, state.lng, preencherInput);
+      }
+
+      function iniciarMapa() {
+        try {
+          if (typeof window.L === "undefined") return;
+          mapa = window.L.map("mapa-passageiro").setView([state.lat, state.lng], 14);
+          window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "© OpenStreetMap"
+          }).addTo(mapa);
+          marcador = window.L.marker([state.lat, state.lng], { draggable: true }).addTo(mapa);
+
+          marcador.on("dragend", function () {
+            const p = marcador.getLatLng();
+            moverMapa(p.lat, p.lng, true);
+          });
+
+          mapa.on("click", function (ev) {
+            moverMapa(ev.latlng.lat, ev.latlng.lng, true);
+          });
+
+          setTimeout(function () {
+            if (mapa) mapa.invalidateSize();
+          }, 300);
+        } catch (e) {}
+      }
+
+      function buscarLocalizacaoAtual() {
+        elRuaTexto.textContent = "Rua atual: buscando GPS...";
+        if (!navigator.geolocation) {
+          moverMapa(state.lat, state.lng, true);
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            moverMapa(pos.coords.latitude, pos.coords.longitude, true);
+          },
+          function () {
+            moverMapa(state.lat, state.lng, true);
+          },
+          { enableHighAccuracy: true, timeout: 8000 }
+        );
+      }
+
+      function renderizarViagemAtual() {
+        const c = state.corridaAtual;
+        if (!c || !state.corridaAtualId) {
+          elCaixaAtual.style.display = "none";
+          elCaixaAtual.innerHTML = "";
+          return;
+        }
+
+        const st = c.status || "Aguardando motorista";
+        const aceitaOuEmAndamento = st === "Aceita" || st === "Em viagem" || st === "Finalizada";
+        const textoStatus =
+          st === "Aceita" ? "Motorista a caminho • Viagem iniciando" :
+          st === "Em viagem" ? "Viagem em andamento" :
+          st === "Finalizada" ? "Viagem finalizada" : st;
+
+        elCaixaAtual.style.display = "flex";
+        elCaixaAtual.innerHTML =
+          '<div class="viagem-atual ' + (aceitaOuEmAndamento ? "aceita" : "") + '">' +
+            '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
+              '<strong>' + moeda(c.valorBruto) + ' • ' + escapar(c.codigo || "") + '</strong>' +
+              '<span class="status-pill ' + (aceitaOuEmAndamento ? "aceita" : "") + '">' + escapar(textoStatus) + '</span>' +
+            '</div>' +
+            '<div><strong>Embarque:</strong> ' + escapar(c.origem) + '</div>' +
+            '<div><strong>Destino:</strong> ' + escapar(c.destino) + '</div>' +
+            (c.motoristaNome
+              ? '<div class="meta">Motorista: <strong>' + escapar(c.motoristaNome) + '</strong>' + (c.motoristaVeiculo ? ' • ' + escapar(c.motoristaVeiculo) : '') + '</div>'
+              : '<div class="meta">Aguardando aceite do motorista...</div>') +
+            '<div class="meta">Código de confirmação: <strong>' + escapar(c.codigo4d || "") + '</strong></div>' +
+            '<div class="acoes" style="margin-top:4px;">' +
+              (st === "Aguardando motorista" || st === "Aceita"
+                ? '<button type="button" class="btn btn-red" id="btn-cancelar-atual">Cancelar Corrida</button>'
+                : '<button type="button" class="btn btn-outline" id="btn-encerrar-tela">Nova Chamada</button>') +
+            '</div>' +
+          '</div>';
+
+        const btnCanc = document.getElementById("btn-cancelar-atual");
+        if (btnCanc) {
+          btnCanc.addEventListener("click", async function () {
+            state.corridaAtual.status = "Cancelada";
+            renderizarViagemAtual();
+            if (db && state.corridaAtualId) {
+              try { await db.collection("corridas").doc(state.corridaAtualId).set({ status: "Cancelada" }, { merge: true }); } catch (e) {}
+            }
+          });
+        }
+
+        const btnEnc = document.getElementById("btn-encerrar-tela");
+        if (btnEnc) {
+          btnEnc.addEventListener("click", function () {
+            limparParaNovaBusca();
+          });
+        }
+      }
+
+      function observarCorridaAtual(id) {
+        if (unsubscribeCorrida) {
+          unsubscribeCorrida();
+          unsubscribeCorrida = null;
+        }
+        if (!db || !id) return;
+
+        unsubscribeCorrida = db.collection("corridas").doc(id).onSnapshot(function (doc) {
+          if (!doc.exists) return;
+          state.corridaAtual = Object.assign({ id: doc.id }, doc.data());
+          renderizarViagemAtual();
+        });
+      }
+
+      async function chamarMotorista() {
+        const origem = (elOrigem.value || "").trim() || state.rua || "Balneário Cassino, Rio Grande - RS";
+        const destino = (elDestino.value || "").trim() || "Centro, Rio Grande - RS";
+        const calc = calcularValor();
+        const agora = Date.now();
+        const id = "corrida_" + agora;
+        const codigo4d = String(Math.floor(1000 + Math.random() * 9000));
+
+        const dados = {
+          id: id,
+          codigo: "32-" + String(agora).slice(-5),
+          codigo4d: codigo4d,
+          passageiro: "Passageiro 32",
+          origem: origem,
+          destino: destino,
+          distanciaKm: calc.km,
+          valorBase: calc.base,
+          dinamicaPct: Number(state.dinamicaPct || 0),
+          valorBruto: calc.bruto,
+          repasseMotorista: calc.mot80,
+          taxaPlataforma: calc.app20,
+          latEmbarque: state.lat,
+          lngEmbarque: state.lng,
+          geohashEmbarque: state.geohash,
+          geohashSetor: state.geohashSetor,
+          status: "Aguardando motorista",
+          criadoEm: agora
+        };
+
+        state.corridaAtualId = id;
+        state.corridaAtual = dados;
+        localStorage.setItem("32drive_corrida_atual", id);
+        renderizarViagemAtual();
+
+        if (!db) {
+          elStatus.textContent = "Sem conexão";
+          return;
+        }
+
+        try {
+          await db.collection("corridas").doc(id).set(dados);
+          elStatus.textContent = "Chamada enviada";
+          observarCorridaAtual(id);
+        } catch (e) {
+          elStatus.textContent = "Erro ao enviar";
+        }
+      }
+
+      function limparParaNovaBusca() {
+        state.corridaAtualId = "";
+        state.corridaAtual = null;
+        localStorage.removeItem("32drive_corrida_atual");
+        if (unsubscribeCorrida) {
+          unsubscribeCorrida();
+          unsubscribeCorrida = null;
+        }
+        elDestino.value = "";
+        renderizarViagemAtual();
+      }
+
+      function conectarFirebase() {
+        try {
+          if (!window.firebase || !window.firebase.firestore) {
+            elStatus.textContent = "Modo local";
+            return;
+          }
+          if (!window.firebase.apps.length) window.firebase.initializeApp(firebaseConfig);
+          db = window.firebase.firestore();
+          elStatus.textContent = "Online";
+
+          db.collection("config").doc("32drive_dinamica").onSnapshot(function (doc) {
             if (!doc.exists) return;
-            const d = doc.data() || {};
-            estadoPas.dinamicaPct = Number(d.dinamicaPct || 0);
-            calcularTarifa();
-          },
-          (err) => {
-            elStatusFirebase.textContent = "Regra Firestore: " + (err && err.code ? err.code : "permissão negada");
+            state.dinamicaPct = Number((doc.data() || {}).dinamicaPct || 0);
+            calcularValor();
+          });
+
+          if (state.corridaAtualId) {
+            observarCorridaAtual(state.corridaAtualId);
           }
-        );
-
-        db.collection("corridas").onSnapshot(
-          (snap) => {
-            elStatusFirebase.textContent = "Firestore Conectado (drive-4745f)";
-            const lista = [];
-            snap.forEach((doc) => lista.push(Object.assign({ id: doc.id }, doc.data())));
-            lista.sort((a, b) => Number(b.criadoEm || 0) - Number(a.criadoEm || 0));
-            estadoPas.chamadas = lista;
-            renderizarChamadas();
-          },
-          (err) => {
-            elStatusFirebase.textContent = "Regra Firestore: " + (err && err.code ? err.code : "permissão negada");
-          }
-        );
-      } catch (e) {
-        elStatusFirebase.textContent = "Erro ao iniciar Firebase";
+        } catch (e) {
+          elStatus.textContent = "Offline";
+        }
       }
-    }
 
-    document.getElementById("btn-gps-passageiro").addEventListener("click", acionarLocalizacaoAtual);
-    document.getElementById("btn-localizacao-card").addEventListener("click", acionarLocalizacaoAtual);
-    document.getElementById("btn-limpar-tela-pas").addEventListener("click", limparTelaCompleta);
-    document.getElementById("btn-limpar-campos").addEventListener("click", limparTelaCompleta);
+      document.getElementById("btn-buscar-local").addEventListener("click", buscarLocalizacaoAtual);
+      document.getElementById("btn-nova-busca").addEventListener("click", limparParaNovaBusca);
+      document.getElementById("btn-chamar").addEventListener("click", chamarMotorista);
+      elKm.addEventListener("input", calcularValor);
+      elKm.addEventListener("change", calcularValor);
 
-    elPasDistancia.addEventListener("input", calcularTarifa);
-    elPasDistancia.addEventListener("change", calcularTarifa);
-    document.getElementById("btn-chamar-motorista").addEventListener("click", enviarChamadaMotorista);
-
-    document.getElementById("btn-limpar-conversa-pas").addEventListener("click", function () {
-      estadoPas.chamadas.forEach((c) => {
-        estadoPas.ocultasTelaPas[c.id] = true;
-      });
-      renderizarChamadas();
-    });
-
-    elListaChamadas.addEventListener("click", async function (ev) {
-      if (!ev.target.classList.contains("btn-cancelar-pas")) return;
-      const box = ev.target.closest(".corrida-box");
-      if (!box) return;
-      const corridaId = box.getAttribute("data-id");
-      const corrida = estadoPas.chamadas.find((c) => c.id === corridaId);
-      if (!corrida) return;
-
-      corrida.status = "Cancelada";
-      if (db) {
-        try { await db.collection("corridas").doc(corridaId).set({ status: "Cancelada" }, { merge: true }); } catch (e) {}
-      }
-      renderizarChamadas();
-    });
-
-    iniciarMapa();
-    atualizarPosicao(estadoPas.lat, estadoPas.lng, false);
-    calcularTarifa();
-    conectarFirebase();
-    renderizarChamadas();
+      iniciarMapa();
+      moverMapa(state.lat, state.lng, true);
+      calcularValor();
+      conectarFirebase();
+    })();
   </script>
 </body>
 </html>
