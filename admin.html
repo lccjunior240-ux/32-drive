@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>32 Drive • Painel Admin (V39 + V40)</title>
+  <title>32 Drive • Painel Admin</title>
   <style>
     :root {
       --bg: #0b192c;
@@ -16,6 +16,7 @@
       --border: #cbd5e1;
       --green: #059669;
       --red: #dc2626;
+      --blue: #0284c7;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,14 +28,14 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      font-size: 14px;
-      line-height: 1.4;
+      font-size: 16px;
+      line-height: 1.45;
     }
 
     .topbar {
       background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
       border-bottom: 3px solid var(--accent);
-      padding: 12px 18px;
+      padding: 14px 18px;
       color: #ffffff;
       display: flex;
       flex-wrap: wrap;
@@ -46,21 +47,20 @@
     .brand { display: flex; align-items: center; gap: 10px; }
 
     .badge-32 {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 10px;
-      background: var(--navy);
-      border: 2px solid var(--accent);
-      color: var(--accent);
+      background: var(--accent);
+      color: var(--navy);
       font-weight: 900;
-      font-size: 18px;
+      font-size: 19px;
       display: grid;
       place-items: center;
       flex-shrink: 0;
     }
 
-    .brand h1 { font-size: 16px; font-weight: 900; color: var(--accent); }
-    .brand p { font-size: 12px; color: #cbd5e1; }
+    .brand h1 { font-size: 18px; font-weight: 900; color: var(--accent); }
+    .brand p { font-size: 13px; color: #cbd5e1; }
 
     .top-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 
@@ -85,15 +85,15 @@
       background: var(--card);
       border: 1.5px solid var(--border);
       border-radius: 14px;
-      padding: 14px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
     }
 
     .card-title {
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 900;
       color: var(--navy);
       display: flex;
@@ -105,24 +105,24 @@
 
     label {
       display: block;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 800;
       color: var(--muted);
-      margin-bottom: 3px;
+      margin-bottom: 4px;
     }
 
     input, select {
       width: 100%;
-      padding: 8px 10px;
-      border-radius: 8px;
+      padding: 10px 12px;
+      border-radius: 9px;
       border: 1.5px solid #94a3b8;
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 700;
       color: var(--text);
       background: #ffffff;
     }
 
-    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
     @media (max-width: 520px) {
       .row-2 { grid-template-columns: 1fr; }
@@ -132,47 +132,48 @@
       background: #0f172a;
       color: #f8fafc;
       border-radius: 10px;
-      padding: 9px 11px;
-      font-size: 12px;
+      padding: 11px 13px;
+      font-size: 14px;
       font-weight: 700;
     }
 
     .resumo-box strong { color: var(--accent); }
 
     .btn {
-      padding: 9px 13px;
-      border-radius: 9px;
+      padding: 10px 14px;
+      border-radius: 10px;
       border: none;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 800;
       cursor: pointer;
     }
 
-    .btn-sm { padding: 6px 9px; font-size: 11px; }
+    .btn-sm { padding: 7px 11px; font-size: 13px; }
     .btn-accent { background: var(--accent); color: #0f172a; }
     .btn-green { background: var(--green); color: #ffffff; }
     .btn-red { background: var(--red); color: #ffffff; }
+    .btn-blue { background: var(--blue); color: #ffffff; }
     .btn-outline { background: #e2e8f0; color: #0f172a; border: 1px solid #94a3b8; }
 
-    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 
     .lista-scroll {
-      max-height: 380px;
+      max-height: 440px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .item-box {
       border: 1.5px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 10px;
+      border-radius: 12px;
+      padding: 12px;
       background: #f8fafc;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      font-size: 12px;
+      font-size: 14px;
     }
 
     .item-box.ativa {
@@ -181,9 +182,9 @@
     }
 
     .tag-status {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 900;
-      padding: 2px 8px;
+      padding: 3px 9px;
       border-radius: 999px;
       background: #e2e8f0;
       color: #0f172a;
@@ -193,7 +194,17 @@
     .tag-status.aceita { background: #d1fae5; color: #065f46; }
     .tag-status.recusada { background: #fee2e2; color: #991b1b; }
 
-    .meta-small { font-size: 12px; color: var(--muted); font-weight: 700; }
+    .meta-small { font-size: 13px; color: var(--muted); font-weight: 700; }
+
+    .painel-finalizadas {
+      display: none;
+      border: 2px solid var(--green);
+      background: #f0fdf4;
+      border-radius: 12px;
+      padding: 12px;
+      flex-direction: column;
+      gap: 8px;
+    }
   </style>
 </head>
 <body>
@@ -201,14 +212,15 @@
     <div class="brand">
       <div class="badge-32">32</div>
       <div>
-        <h1>32 DRIVE • PAINEL ADMIN (V39 + V40)</h1>
-        <p>Acesso Direto • Chamadas em Tempo Real • Geohash • 80/20</p>
+        <h1>32 DRIVE • PAINEL ADMIN</h1>
+        <p>Chamadas, Finalizadas e Repasses 80/20</p>
       </div>
     </div>
 
     <div class="top-actions">
-      <button type="button" class="btn btn-accent btn-sm" id="btn-abrir-passageiro-v40">Passageiro V40</button>
-      <button type="button" class="btn btn-outline btn-sm" id="btn-abrir-motorista-g39">Motorista G39</button>
+      <button type="button" class="btn btn-green btn-sm" id="btn-abrir-finalizadas">Corridas Finalizadas</button>
+      <button type="button" class="btn btn-accent btn-sm" id="btn-abrir-passageiro">Passageiro</button>
+      <button type="button" class="btn btn-outline btn-sm" id="btn-abrir-motorista">Motorista</button>
       <span class="meta-small" id="status-firebase-admin" style="color:#fde68a;">Iniciando...</span>
     </div>
   </header>
@@ -217,7 +229,7 @@
     <div class="col">
       <section class="card">
         <div class="card-title">
-          <span>1. Regras Operacionais (Separadas do V39)</span>
+          <span>Regras Operacionais</span>
           <button type="button" class="btn btn-green btn-sm" id="btn-salvar-regras">Salvar Regras</button>
         </div>
 
@@ -249,13 +261,13 @@
         </div>
 
         <div class="resumo-box">
-          Tarifa base: até 3,50 km = <strong>R$ 7,99</strong> | ≥ 3,51 km = <strong>R$ 2,00/km</strong> (sem R$ 7,99) • Rateio: <strong>80% Motorista / 20% 32 Drive</strong>
+          Tarifa: até 3,50 km = <strong>R$ 7,99</strong> | ≥ 3,51 km = <strong>R$ 2,00/km</strong> • Rateio: <strong>80% Motorista / 20% 32 Drive</strong>
         </div>
       </section>
 
       <section class="card">
         <div class="card-title">
-          <span>2. Motoristas Online (Geohash)</span>
+          <span>Motoristas Online</span>
           <span class="meta-small" id="contador-motoristas">0 online</span>
         </div>
         <div class="lista-scroll" id="lista-motoristas-box"></div>
@@ -263,18 +275,29 @@
     </div>
 
     <div class="col">
+      <section class="card painel-finalizadas" id="secao-finalizadas">
+        <div class="card-title">
+          <span>Corridas Finalizadas e Valores Repassados</span>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-fechar-finalizadas">Fechar</button>
+        </div>
+        <div class="resumo-box" id="resumo-repasses-finalizadas">
+          Total Bruto: <strong>R$ 0,00</strong> • 80% Motorista: <strong>R$ 0,00</strong> • 20% 32 Drive: <strong>R$ 0,00</strong>
+        </div>
+        <div class="lista-scroll" id="lista-finalizadas-box"></div>
+      </section>
+
       <section class="card">
         <div class="card-title">
-          <span>3. Chamadas Recebidas em Tempo Real</span>
+          <span>Chamadas em Tempo Real</span>
           <div class="chips">
             <span class="meta-small" id="contador-chamadas-admin">0 chamadas</span>
             <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-conversa-admin">Limpar Tela</button>
-            <button type="button" class="btn btn-red btn-sm" id="btn-apagar-testes-firestore">Apagar Testes no Banco</button>
+            <button type="button" class="btn btn-red btn-sm" id="btn-apagar-testes-firestore">Apagar Testes</button>
           </div>
         </div>
 
         <div class="lista-scroll" id="lista-chamadas-admin">
-          <div class="meta-small">Aguardando chamadas do Passageiro (V40) chegarem no Firestore...</div>
+          <div class="meta-small">Aguardando chamadas do Passageiro...</div>
         </div>
       </section>
     </div>
@@ -284,174 +307,224 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDlKouGeTQ7_NNgIRCLSYl66zB-J-9TzHs",
-      authDomain: "drive-4745f.firebaseapp.com",
-      databaseURL: "https://drive-4745f-default-rtdb.firebaseio.com",
-      projectId: "drive-4745f",
-      storageBucket: "drive-4745f.firebasestorage.app",
-      messagingSenderId: "762959482484",
-      appId: "1:762959482484:web:f40e2cb51020a61195cb21",
-      measurementId: "G-V5PZCVKTCJ"
-    };
-
-    const URL_PASSAGEIRO_V40 = "index.html";
-    const URL_MOTORISTA_G39 = "app.html?v=39";
-
-    const estado = {
-      regras: {
-        dinamicaPct: 0,
-        kmMinDesconto: 15,
-        maxKmEmbarque: 5,
-        limiteDescontosMes: 3
-      },
-      motoristasOnline: [],
-      chamadas: [],
-      ocultasTelaAdmin: {}
-    };
-
-    let db = null;
-
-    const elCfgDinamica = document.getElementById("cfg-dinamica");
-    const elCfgKmMin = document.getElementById("cfg-km-min");
-    const elCfgMaxEmb = document.getElementById("cfg-max-emb");
-    const elCfgCotaMes = document.getElementById("cfg-cota-mes");
-    const elListaMotoristas = document.getElementById("lista-motoristas-box");
-    const elContadorMotoristas = document.getElementById("contador-motoristas");
-    const elListaChamadas = document.getElementById("lista-chamadas-admin");
-    const elContadorChamadas = document.getElementById("contador-chamadas-admin");
-    const elStatusFirebase = document.getElementById("status-firebase-admin");
-
-    function moeda(v) {
-      return "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
-    }
-
-    function escapar(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-    }
-
-    function classeStatus(st) {
-      if (st === "Aguardando motorista") return "tag-status aguardando";
-      if (st === "Aceita" || st === "Em viagem" || st === "Finalizada") return "tag-status aceita";
-      if (st === "Recusada pelo passageiro" || st === "Cancelada") return "tag-status recusada";
-      return "tag-status";
-    }
-
-    async function salvarRegrasNoFirestore() {
-      estado.regras = {
-        dinamicaPct: Number(elCfgDinamica.value || 0),
-        kmMinDesconto: Math.max(1, Number(elCfgKmMin.value || 15)),
-        maxKmEmbarque: Math.max(1, Number(elCfgMaxEmb.value || 5)),
-        limiteDescontosMes: Math.max(0, Number(elCfgCotaMes.value || 3))
+    (function () {
+      const firebaseConfig = {
+        apiKey: "AIzaSyDlKouGeTQ7_NNgIRCLSYl66zB-J-9TzHs",
+        authDomain: "drive-4745f.firebaseapp.com",
+        databaseURL: "https://drive-4745f-default-rtdb.firebaseio.com",
+        projectId: "drive-4745f",
+        storageBucket: "drive-4745f.firebasestorage.app",
+        messagingSenderId: "762959482484",
+        appId: "1:762959482484:web:f40e2cb51020a61195cb21",
+        measurementId: "G-V5PZCVKTCJ"
       };
 
-      if (!db) {
-        elStatusFirebase.textContent = "Regras aplicadas localmente (Dinâmica +" + estado.regras.dinamicaPct + "%)";
-        return;
+      const estado = {
+        regras: {
+          dinamicaPct: 0,
+          kmMinDesconto: 15,
+          maxKmEmbarque: 5,
+          limiteDescontosMes: 3
+        },
+        motoristasOnline: [],
+        chamadas: [],
+        ocultasTelaAdmin: {},
+        mostrarFinalizadas: false
+      };
+
+      let db = null;
+
+      const elCfgDinamica = document.getElementById("cfg-dinamica");
+      const elCfgKmMin = document.getElementById("cfg-km-min");
+      const elCfgMaxEmb = document.getElementById("cfg-max-emb");
+      const elCfgCotaMes = document.getElementById("cfg-cota-mes");
+      const elListaMotoristas = document.getElementById("lista-motoristas-box");
+      const elContadorMotoristas = document.getElementById("contador-motoristas");
+      const elListaChamadas = document.getElementById("lista-chamadas-admin");
+      const elContadorChamadas = document.getElementById("contador-chamadas-admin");
+      const elStatusFirebase = document.getElementById("status-firebase-admin");
+      const elSecaoFinalizadas = document.getElementById("secao-finalizadas");
+      const elResumoFinalizadas = document.getElementById("resumo-repasses-finalizadas");
+      const elListaFinalizadas = document.getElementById("lista-finalizadas-box");
+
+      function moeda(v) {
+        return "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
       }
 
-      try {
-        await db.collection("config").doc("32drive_dinamica").set(estado.regras, { merge: true });
-        elStatusFirebase.textContent = "Regras salvas no Firestore (drive-4745f)";
-      } catch (e) {
-        elStatusFirebase.textContent = "Erro ao salvar regras no Firestore";
-      }
-    }
-
-    async function apagarTodasChamadasDoFirestore() {
-      if (!db) {
-        estado.chamadas = [];
-        renderizarChamadas();
-        return;
+      function escapar(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
       }
 
-      try {
-        elStatusFirebase.textContent = "Apagando chamadas do Firestore...";
-        const snap = await db.collection("corridas").get();
-        const batch = db.batch();
-        snap.forEach((doc) => {
-          batch.delete(doc.ref);
+      function classeStatus(st) {
+        if (st === "Aguardando motorista") return "tag-status aguardando";
+        if (st === "Aceita" || st === "Em viagem" || st === "Finalizada") return "tag-status aceita";
+        if (st === "Recusada pelo passageiro" || st === "Cancelada" || st === "Recusada pelo motorista") return "tag-status recusada";
+        return "tag-status";
+      }
+
+      function renderizarFinalizadas() {
+        elSecaoFinalizadas.style.display = estado.mostrarFinalizadas ? "flex" : "none";
+        if (!estado.mostrarFinalizadas) return;
+
+        const finalizadas = estado.chamadas.filter((c) => c.status === "Finalizada");
+        let totalBruto = 0;
+        let total80 = 0;
+        let total20 = 0;
+
+        finalizadas.forEach((c) => {
+          const bruto = Number(c.valorBruto || 0);
+          const mot80 = Number(c.repasseMotorista || bruto * 0.8);
+          const app20 = Number(c.taxaPlataforma || bruto - mot80);
+          totalBruto += bruto;
+          total80 += mot80;
+          total20 += app20;
         });
-        await batch.commit();
-        estado.chamadas = [];
-        estado.ocultasTelaAdmin = {};
-        renderizarChamadas();
-        elStatusFirebase.textContent = "Todas as chamadas de teste foram apagadas!";
-      } catch (err) {
-        elStatusFirebase.textContent = "Erro ao apagar no Firestore: " + (err && err.code ? err.code : "verifique regras");
-      }
-    }
 
-    function renderizarMotoristas() {
-      const ativos = estado.motoristasOnline.filter((m) => m.online !== false);
-      elContadorMotoristas.textContent = ativos.length + " online";
-      if (!ativos.length) {
-        elListaMotoristas.innerHTML = '<div class="meta-small">Nenhum motorista online no momento.</div>';
-        return;
-      }
+        elResumoFinalizadas.innerHTML =
+          "Total Bruto: <strong>" + moeda(totalBruto) + "</strong> • " +
+          "80% Motorista: <strong>" + moeda(total80) + "</strong> • " +
+          "20% 32 Drive: <strong>" + moeda(total20) + "</strong>";
 
-      elListaMotoristas.innerHTML = ativos.map((m) => (
-        '<div class="item-box">' +
-          '<div><strong>' + escapar(m.nome || m.id) + "</strong> • Setor GH: <strong>" + escapar(m.geohashSetor || (m.geohash || "").slice(0, 4) || "—") + "</strong> (" + escapar(m.geohash || "—") + ")</div>" +
-          '<div class="meta-small">' + escapar(m.veiculo || "") + " • " + escapar(m.ruaAtual || "") + "</div>" +
-        "</div>"
-      )).join("");
-    }
+        if (!finalizadas.length) {
+          elListaFinalizadas.innerHTML = '<div class="meta-small">Nenhuma corrida finalizada registrada até o momento.</div>';
+          return;
+        }
 
-    function renderizarChamadas() {
-      const visiveis = estado.chamadas.filter((c) => !estado.ocultasTelaAdmin[c.id]);
-      elContadorChamadas.textContent = visiveis.length + " chamada(s)";
-
-      if (!visiveis.length) {
-        elListaChamadas.innerHTML = '<div class="meta-small">Painel limpo. Quando o Passageiro (V40) chamar, a solicitação aparece aqui.</div>';
-        return;
+        elListaFinalizadas.innerHTML = finalizadas.map((c) => {
+          const bruto = Number(c.valorBruto || 0);
+          const mot80 = Number(c.repasseMotorista || bruto * 0.8);
+          const app20 = Number(c.taxaPlataforma || bruto - mot80);
+          return (
+            '<div class="item-box">' +
+              '<div style="display:flex; justify-content:space-between; gap:8px;">' +
+                '<strong>' + escapar(c.codigo || c.id) + " • " + moeda(bruto) + "</strong>" +
+                '<span class="tag-status aceita">Finalizada</span>' +
+              "</div>" +
+              '<div><strong>Embarque:</strong> ' + escapar(c.origem) + "<br/><strong>Destino:</strong> " + escapar(c.destino) + "</div>" +
+              '<div><strong>Repasse 80% Motorista:</strong> ' + moeda(mot80) + " • <strong>20% 32 Drive:</strong> " + moeda(app20) + "</div>" +
+              '<div class="meta-small">Motorista: ' + escapar(c.motoristaNome || "Junior Costa") + "</div>" +
+            "</div>"
+          );
+        }).join("");
       }
 
-      const opcoesMotoristas = estado.motoristasOnline
-        .filter((m) => m.online !== false)
-        .map((m) => '<option value="' + escapar(m.id) + '">' + escapar(m.nome || m.id) + " (" + escapar(m.geohashSetor || "") + ")</option>")
-        .join("");
+      async function salvarRegrasNoFirestore() {
+        estado.regras = {
+          dinamicaPct: Number(elCfgDinamica.value || 0),
+          kmMinDesconto: Math.max(1, Number(elCfgKmMin.value || 15)),
+          maxKmEmbarque: Math.max(1, Number(elCfgMaxEmb.value || 5)),
+          limiteDescontosMes: Math.max(0, Number(elCfgCotaMes.value || 3))
+        };
 
-      elListaChamadas.innerHTML = visiveis.map((c) => {
-        const bruto = Number(c.valorBruto || 0);
-        const mot80 = Number(c.repasseMotorista || bruto * 0.8);
-        const app20 = Number(c.taxaPlataforma || bruto - mot80);
+        if (!db) {
+          elStatusFirebase.textContent = "Regras aplicadas localmente";
+          return;
+        }
 
-        return (
-          '<div class="item-box ' + (c.status === "Aguardando motorista" ? "ativa" : "") + '" data-id="' + escapar(c.id) + '">' +
-            '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
-              '<strong>' + escapar(c.codigo || c.id) + " • " + escapar(c.passageiro || "Passageiro") + "</strong>" +
-              '<span class="' + classeStatus(c.status) + '">' + escapar(c.status || "Aguardando motorista") + "</span>" +
-            "</div>" +
-            '<div><strong>De:</strong> ' + escapar(c.origem) + "<br/><strong>Para:</strong> " + escapar(c.destino) +
-            ' <span class="meta-small">(' + Number(c.distanciaKm || 0).toFixed(2).replace(".", ",") + " km • GH: " + escapar(c.geohashEmbarque || "—") + ")</span></div>" +
-            '<div><strong>Valor Base:</strong> ' + moeda(c.valorBase) + " → <strong>Bruto:</strong> " + moeda(bruto) +
-            " | 80% Mot: <strong>" + moeda(mot80) + "</strong> • 20% 32 Drive: <strong>" + moeda(app20) + "</strong></div>" +
-            (c.codigo4d ? '<div class="meta-small">Código 4 dígitos: <strong>' + escapar(c.codigo4d) + "</strong></div>" : "") +
-            '<div class="chips" style="margin-top:4px;">' +
-              '<select class="sel-despacho" style="max-width:210px; padding:5px 8px; font-size:12px;">' +
-                '<option value="">Despachar p/ motorista...</option>' + opcoesMotoristas +
-              "</select>" +
-              '<button type="button" class="btn btn-green btn-sm btn-despachar">Atribuir / Aceitar</button>' +
-              '<button type="button" class="btn btn-red btn-sm btn-cancelar-admin">Cancelar</button>' +
-            "</div>" +
+        try {
+          await db.collection("config").doc("32drive_dinamica").set(estado.regras, { merge: true });
+          elStatusFirebase.textContent = "Regras salvas no Firestore";
+        } catch (e) {
+          elStatusFirebase.textContent = "Erro ao salvar regras";
+        }
+      }
+
+      async function apagarTodasChamadasDoFirestore() {
+        if (!db) {
+          estado.chamadas = [];
+          renderizarChamadas();
+          renderizarFinalizadas();
+          return;
+        }
+
+        try {
+          elStatusFirebase.textContent = "Apagando testes...";
+          const snap = await db.collection("corridas").get();
+          const batch = db.batch();
+          snap.forEach((doc) => batch.delete(doc.ref));
+          await batch.commit();
+          estado.chamadas = [];
+          estado.ocultasTelaAdmin = {};
+          renderizarChamadas();
+          renderizarFinalizadas();
+          elStatusFirebase.textContent = "Testes apagados";
+        } catch (err) {
+          elStatusFirebase.textContent = "Erro ao apagar testes";
+        }
+      }
+
+      function renderizarMotoristas() {
+        const ativos = estado.motoristasOnline.filter((m) => m.online !== false);
+        elContadorMotoristas.textContent = ativos.length + " online";
+        if (!ativos.length) {
+          elListaMotoristas.innerHTML = '<div class="meta-small">Nenhum motorista online no momento.</div>';
+          return;
+        }
+
+        elListaMotoristas.innerHTML = ativos.map((m) => (
+          '<div class="item-box">' +
+            '<div><strong>' + escapar(m.nome || m.id) + "</strong> • GH: <strong>" + escapar(m.geohash || "—") + "</strong></div>" +
+            '<div class="meta-small">' + escapar(m.veiculo || "") + " • " + escapar(m.ruaAtual || "") + "</div>" +
           "</div>"
-        );
-      }).join("");
-    }
+        )).join("");
+      }
 
-    function conectarFirebase() {
-      try {
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        db = firebase.firestore();
-        elStatusFirebase.textContent = "Firestore Conectado (drive-4745f)";
+      function renderizarChamadas() {
+        const visiveis = estado.chamadas.filter((c) => !estado.ocultasTelaAdmin[c.id]);
+        elContadorChamadas.textContent = visiveis.length + " chamada(s)";
 
-        db.collection("config").doc("32drive_dinamica").onSnapshot(
-          (doc) => {
+        if (!visiveis.length) {
+          elListaChamadas.innerHTML = '<div class="meta-small">Nenhuma chamada visível no momento.</div>';
+          return;
+        }
+
+        const opcoesMotoristas = estado.motoristasOnline
+          .filter((m) => m.online !== false)
+          .map((m) => '<option value="' + escapar(m.id) + '">' + escapar(m.nome || m.id) + "</option>")
+          .join("");
+
+        elListaChamadas.innerHTML = visiveis.map((c) => {
+          const bruto = Number(c.valorBruto || 0);
+          const mot80 = Number(c.repasseMotorista || bruto * 0.8);
+          const app20 = Number(c.taxaPlataforma || bruto - mot80);
+
+          return (
+            '<div class="item-box ' + (c.status === "Aguardando motorista" ? "ativa" : "") + '" data-id="' + escapar(c.id) + '">' +
+              '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
+                '<strong>' + escapar(c.codigo || c.id) + " • " + moeda(bruto) + "</strong>" +
+                '<span class="' + classeStatus(c.status) + '">' + escapar(c.status || "Aguardando motorista") + "</span>" +
+              "</div>" +
+              '<div><strong>Embarque:</strong> ' + escapar(c.origem) + "<br/><strong>Destino:</strong> " + escapar(c.destino) + "</div>" +
+              '<div><strong>Valor:</strong> ' + moeda(bruto) + " | 80% Mot: <strong>" + moeda(mot80) + "</strong> • 20% 32 Drive: <strong>" + moeda(app20) + "</strong></div>" +
+              (c.codigo4d ? '<div class="meta-small">Código 4 dígitos: <strong>' + escapar(c.codigo4d) + "</strong></div>" : "") +
+              '<div class="chips" style="margin-top:4px;">' +
+                '<select class="sel-despacho" style="max-width:210px; padding:6px 8px; font-size:13px;">' +
+                  '<option value="">Despachar p/ motorista...</option>' + opcoesMotoristas +
+                "</select>" +
+                '<button type="button" class="btn btn-green btn-sm btn-despachar">Aceitar / Atribuir</button>' +
+                '<button type="button" class="btn btn-blue btn-sm btn-finalizar-admin">Finalizar</button>' +
+                '<button type="button" class="btn btn-red btn-sm btn-cancelar-admin">Cancelar</button>' +
+              "</div>" +
+            "</div>"
+          );
+        }).join("");
+      }
+
+      function conectarFirebase() {
+        try {
+          if (!window.firebase || !window.firebase.firestore) {
+            elStatusFirebase.textContent = "Modo local";
+            return;
+          }
+          if (!window.firebase.apps.length) window.firebase.initializeApp(firebaseConfig);
+          db = window.firebase.firestore();
+          elStatusFirebase.textContent = "Firestore Conectado";
+
+          db.collection("config").doc("32drive_dinamica").onSnapshot(function (doc) {
             if (!doc.exists) return;
             const d = doc.data() || {};
             estado.regras = Object.assign({}, estado.regras, d);
@@ -459,102 +532,105 @@
             elCfgKmMin.value = String(estado.regras.kmMinDesconto || 15);
             elCfgMaxEmb.value = String(estado.regras.maxKmEmbarque || 5);
             elCfgCotaMes.value = String(estado.regras.limiteDescontosMes || 3);
-          },
-          (err) => {
-            elStatusFirebase.textContent = "Regra Firestore: " + (err && err.code ? err.code : "permissão negada");
-          }
-        );
+          });
 
-        db.collection("motoristas_online").onSnapshot(
-          (snap) => {
+          db.collection("motoristas_online").onSnapshot(function (snap) {
             const lista = [];
             snap.forEach((doc) => lista.push(Object.assign({ id: doc.id }, doc.data())));
             estado.motoristasOnline = lista;
             renderizarMotoristas();
             renderizarChamadas();
-          },
-          (err) => {
-            elStatusFirebase.textContent = "Regra Firestore: " + (err && err.code ? err.code : "permissão negada");
-          }
-        );
+          });
 
-        db.collection("corridas").onSnapshot(
-          (snap) => {
-            elStatusFirebase.textContent = "Firestore Conectado (drive-4745f)";
+          db.collection("corridas").onSnapshot(function (snap) {
+            elStatusFirebase.textContent = "Firestore Conectado";
             const lista = [];
             snap.forEach((doc) => lista.push(Object.assign({ id: doc.id }, doc.data())));
             lista.sort((a, b) => Number(b.criadoEm || 0) - Number(a.criadoEm || 0));
             estado.chamadas = lista;
             renderizarChamadas();
-          },
-          (err) => {
-            elStatusFirebase.textContent = "Regra Firestore: " + (err && err.code ? err.code : "permissão negada");
-          }
-        );
-      } catch (e) {
-        elStatusFirebase.textContent = "Erro ao iniciar Firebase";
+            renderizarFinalizadas();
+          });
+        } catch (e) {
+          elStatusFirebase.textContent = "Erro Firebase";
+        }
       }
-    }
 
-    document.getElementById("btn-abrir-passageiro-v40").addEventListener("click", function () {
-      window.open(URL_PASSAGEIRO_V40, "_blank", "noopener,noreferrer");
-    });
-
-    document.getElementById("btn-abrir-motorista-g39").addEventListener("click", function () {
-      window.open(URL_MOTORISTA_G39, "_blank", "noopener,noreferrer");
-    });
-
-    document.getElementById("btn-salvar-regras").addEventListener("click", salvarRegrasNoFirestore);
-    [elCfgDinamica, elCfgKmMin, elCfgMaxEmb, elCfgCotaMes].forEach((el) => {
-      el.addEventListener("change", salvarRegrasNoFirestore);
-    });
-
-    document.getElementById("btn-limpar-conversa-admin").addEventListener("click", function () {
-      estado.chamadas.forEach((c) => {
-        estado.ocultasTelaAdmin[c.id] = true;
+      document.getElementById("btn-abrir-finalizadas").addEventListener("click", function () {
+        estado.mostrarFinalizadas = !estado.mostrarFinalizadas;
+        renderizarFinalizadas();
       });
+
+      document.getElementById("btn-fechar-finalizadas").addEventListener("click", function () {
+        estado.mostrarFinalizadas = false;
+        renderizarFinalizadas();
+      });
+
+      document.getElementById("btn-abrir-passageiro").addEventListener("click", function () {
+        window.open("index.html", "_blank", "noopener,noreferrer");
+      });
+
+      document.getElementById("btn-abrir-motorista").addEventListener("click", function () {
+        window.open("app.html?v=39", "_blank", "noopener,noreferrer");
+      });
+
+      document.getElementById("btn-salvar-regras").addEventListener("click", salvarRegrasNoFirestore);
+      document.getElementById("btn-limpar-conversa-admin").addEventListener("click", function () {
+        estado.chamadas.forEach((c) => {
+          estado.ocultasTelaAdmin[c.id] = true;
+        });
+        renderizarChamadas();
+      });
+      document.getElementById("btn-apagar-testes-firestore").addEventListener("click", apagarTodasChamadasDoFirestore);
+
+      elListaChamadas.addEventListener("click", async function (ev) {
+        const box = ev.target.closest(".item-box");
+        if (!box) return;
+        const corridaId = box.getAttribute("data-id");
+        const corrida = estado.chamadas.find((c) => c.id === corridaId);
+        if (!corrida) return;
+
+        if (ev.target.classList.contains("btn-despachar")) {
+          const sel = box.querySelector(".sel-despacho");
+          const motId = (sel && sel.value) || "mot_junior_costa";
+          const motObj = estado.motoristasOnline.find((m) => m.id === motId) || { id: motId, nome: "Junior Costa", veiculo: "VW Voyage 1.0 • IQD8060" };
+          const patch = {
+            status: "Aceita",
+            motoristaId: motObj.id,
+            motoristaNome: motObj.nome || motObj.id,
+            motoristaVeiculo: motObj.veiculo || ""
+          };
+          Object.assign(corrida, patch);
+          if (db) {
+            try { await db.collection("corridas").doc(corridaId).set(patch, { merge: true }); } catch (e) {}
+          }
+          renderizarChamadas();
+          return;
+        }
+
+        if (ev.target.classList.contains("btn-finalizar-admin")) {
+          corrida.status = "Finalizada";
+          if (db) {
+            try { await db.collection("corridas").doc(corridaId).set({ status: "Finalizada" }, { merge: true }); } catch (e) {}
+          }
+          renderizarChamadas();
+          renderizarFinalizadas();
+          return;
+        }
+
+        if (ev.target.classList.contains("btn-cancelar-admin")) {
+          corrida.status = "Cancelada";
+          if (db) {
+            try { await db.collection("corridas").doc(corridaId).set({ status: "Cancelada" }, { merge: true }); } catch (e) {}
+          }
+          renderizarChamadas();
+        }
+      });
+
+      conectarFirebase();
+      renderizarMotoristas();
       renderizarChamadas();
-    });
-
-    document.getElementById("btn-apagar-testes-firestore").addEventListener("click", apagarTodasChamadasDoFirestore);
-
-    elListaChamadas.addEventListener("click", async function (ev) {
-      const box = ev.target.closest(".item-box");
-      if (!box) return;
-      const corridaId = box.getAttribute("data-id");
-      const corrida = estado.chamadas.find((c) => c.id === corridaId);
-      if (!corrida) return;
-
-      if (ev.target.classList.contains("btn-despachar")) {
-        const sel = box.querySelector(".sel-despacho");
-        const motId = (sel && sel.value) || "mot_junior_costa";
-        const motObj = estado.motoristasOnline.find((m) => m.id === motId) || { id: motId, nome: "Junior Costa", veiculo: "VW Voyage 1.0 • IQD8060" };
-        const patch = {
-          status: "Aceita",
-          motoristaId: motObj.id,
-          motoristaNome: motObj.nome || motObj.id,
-          motoristaVeiculo: motObj.veiculo || ""
-        };
-        Object.assign(corrida, patch);
-        if (db) {
-          try { await db.collection("corridas").doc(corridaId).set(patch, { merge: true }); } catch (e) {}
-        }
-        renderizarChamadas();
-        return;
-      }
-
-      if (ev.target.classList.contains("btn-cancelar-admin")) {
-        corrida.status = "Cancelada";
-        if (db) {
-          try { await db.collection("corridas").doc(corridaId).set({ status: "Cancelada" }, { merge: true }); } catch (e) {}
-        }
-        renderizarChamadas();
-      }
-    });
-
-    conectarFirebase();
-    renderizarMotoristas();
-    renderizarChamadas();
+    })();
   </script>
 </body>
 </html>
