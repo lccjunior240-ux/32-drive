@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>32 Drive • Painel do Motorista (G39)</title>
+  <title>32 Drive • Painel Motorista (G39)</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     :root {
@@ -17,6 +17,7 @@
       --border: #cbd5e1;
       --green: #059669;
       --red: #dc2626;
+      --blue: #0284c7;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -70,7 +71,7 @@
       margin: 0 auto;
       padding: 14px;
       display: grid;
-      grid-template-columns: 1.15fr 1fr;
+      grid-template-columns: 1.05fr 1.15fr;
       gap: 14px;
       flex: 1;
     }
@@ -103,11 +104,37 @@
       flex-wrap: wrap;
     }
 
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1.5px solid #94a3b8;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      background: #ffffff;
+    }
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    @media (max-width: 520px) {
+      .row-2 { grid-template-columns: 1fr; }
+    }
+
     #mapa-motorista {
       width: 100%;
-      height: 270px;
+      height: 250px;
       border-radius: 10px;
       border: 1.5px solid var(--border);
+      background: #e2e8f0;
       z-index: 1;
     }
 
@@ -124,6 +151,7 @@
     .btn-accent { background: var(--accent); color: #0f172a; }
     .btn-green { background: var(--green); color: #ffffff; }
     .btn-red { background: var(--red); color: #ffffff; }
+    .btn-blue { background: var(--blue); color: #ffffff; }
     .btn-outline { background: #e2e8f0; color: #0f172a; border: 1px solid #94a3b8; }
 
     .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -132,22 +160,25 @@
       background: #0f172a;
       color: #f8fafc;
       border-radius: 10px;
-      padding: 9px 11px;
+      padding: 10px 12px;
       font-size: 12px;
       font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .resumo-box strong { color: var(--accent); }
 
     .lista-scroll {
-      max-height: 410px;
+      max-height: 400px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    .chamada-box {
+    .corrida-box {
       border: 1.5px solid #cbd5e1;
       border-radius: 10px;
       padding: 10px;
@@ -158,8 +189,8 @@
       font-size: 12px;
     }
 
-    .chamada-box.pendente {
-      border-color: #f59e0b;
+    .corrida-box.ativa {
+      border-color: var(--accent);
       background: #fffbeb;
     }
 
@@ -172,193 +203,4 @@
       color: #0f172a;
     }
 
-    .tag-status.aguardando { background: #fef3c7; color: #92400e; }
-    .tag-status.aceita { background: #d1fae5; color: #065f46; }
-    .tag-status.recusada { background: #fee2e2; color: #991b1b; }
-
-    .meta-small { font-size: 12px; color: var(--muted); font-weight: 700; }
-  </style>
-</head>
-<body>
-  <header class="topbar">
-    <div class="brand">
-      <div class="badge-32">32</div>
-      <div>
-        <h1>32 DRIVE • PAINEL MOTORISTA (G39)</h1>
-        <p id="subtitulo-motorista">Junior Costa • Balneário Cassino / Rio Grande • 80% Motorista</p>
-      </div>
-    </div>
-
-    <div class="top-actions">
-      <button type="button" class="btn btn-green btn-sm" id="btn-toggle-online">🟢 Online</button>
-      <button type="button" class="btn btn-accent btn-sm" id="btn-atualizar-gps">📍 Atualizar GPS</button>
-      <span class="meta-small" id="status-firebase-mot" style="color:#fde68a;">Conectando ao Firestore...</span>
-    </div>
-  </header>
-
-  <main class="container">
-    <div class="col">
-      <section class="card">
-        <div class="card-title">
-          <span>Mapa & Posição Atual (Geohash)</span>
-          <span class="meta-small" id="info-geohash-mot">GH: —</span>
-        </div>
-        <div id="mapa-motorista"></div>
-        <div class="meta-small" id="endereco-motorista">Localização: aguardando GPS...</div>
-      </section>
-
-      <section class="card">
-        <div class="card-title"><span>Resumo de Ganhos & Regras</span></div>
-        <div class="resumo-box" id="resumo-ganhos-mot">
-          Ganhos no painel (80%): <strong>R$ 0,00</strong> • Dinâmica atual: <strong>0%</strong><br/>
-          Tarifa: até 3,50 km = <strong>R$ 7,99</strong> | ≥ 3,51 km = <strong>R$ 2,00/km</strong> (sem R$ 7,99)
-        </div>
-      </section>
-    </div>
-
-    <div class="col">
-      <section class="card">
-        <div class="card-title">
-          <span>Chamadas em Tempo Real</span>
-          <div class="chips">
-            <span class="meta-small" id="contador-chamadas-mot">0 chamadas</span>
-            <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-conversa-mot">Limpar Conversa</button>
-          </div>
-        </div>
-        <div class="lista-scroll" id="lista-chamadas-mot">
-          <div class="meta-small">Aguardando novas chamadas...</div>
-        </div>
-      </section>
-    </div>
-  </main>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDlKouGeTQ7_NNgIRCLSYl66zB-J-9TzHs",
-      authDomain: "drive-4745f.firebaseapp.com",
-      databaseURL: "https://drive-4745f-default-rtdb.firebaseio.com",
-      projectId: "drive-4745f",
-      storageBucket: "drive-4745f.firebasestorage.app",
-      messagingSenderId: "762959482484",
-      appId: "1:762959482484:web:f40e2cb51020a61195cb21",
-      measurementId: "G-V5PZCVKTCJ"
-    };
-
-    const GEOHASH_BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
-    function encodeGeohash(lat, lon, precision) {
-      precision = precision || 6;
-      var idx = 0, bit = 0, evenBit = true, geohash = "";
-      var latMin = -90, latMax = 90, lonMin = -180, lonMax = 180;
-      while (geohash.length < precision) {
-        if (evenBit) {
-          var lonMid = (lonMin + lonMax) / 2;
-          if (lon >= lonMid) { idx = idx * 2 + 1; lonMin = lonMid; }
-          else { idx = idx * 2; lonMax = lonMid; }
-        } else {
-          var latMid = (latMin + latMax) / 2;
-          if (lat >= latMid) { idx = idx * 2 + 1; latMin = latMid; }
-          else { idx = idx * 2; latMax = latMid; }
-        }
-        evenBit = !evenBit;
-        if (++bit === 5) {
-          geohash += GEOHASH_BASE32.charAt(idx);
-          bit = 0;
-          idx = 0;
-        }
-      }
-      return geohash;
-    }
-
-    const motoristaPerfil = {
-      id: "mot_junior_costa",
-      nome: "Junior Costa",
-      veiculo: "VW Voyage 1.0 • IQD8060"
-    };
-
-    const estadoMot = {
-      online: true,
-      lat: -32.1856,
-      lng: -52.1658,
-      geohash: "",
-      geohashSetor: "",
-      ruaAtual: "Balneário Cassino, Rio Grande - RS",
-      dinamicaPct: 0,
-      corridas: [],
-      ocultasTelaMot: {}
-    };
-
-    estadoMot.geohash = encodeGeohash(estadoMot.lat, estadoMot.lng, 6);
-    estadoMot.geohashSetor = estadoMot.geohash.slice(0, 4);
-
-    let db = null;
-    let mapa = null;
-    let marcador = null;
-
-    const elStatusFirebase = document.getElementById("status-firebase-mot");
-    const elBtnToggleOnline = document.getElementById("btn-toggle-online");
-    const elInfoGeohash = document.getElementById("info-geohash-mot");
-    const elEnderecoMot = document.getElementById("endereco-motorista");
-    const elResumoGanhos = document.getElementById("resumo-ganhos-mot");
-    const elListaChamadas = document.getElementById("lista-chamadas-mot");
-    const elContadorChamadas = document.getElementById("contador-chamadas-mot");
-
-    function moeda(v) {
-      return "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
-    }
-
-    function escapar(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-    }
-
-    function classeStatus(st) {
-      if (st === "Aguardando motorista") return "tag-status aguardando";
-      if (st === "Aceita" || st === "Em viagem" || st === "Finalizada") return "tag-status aceita";
-      if (st === "Recusada pelo passageiro" || st === "Cancelada") return "tag-status recusada";
-      return "tag-status";
-    }
-
-    function iniciarMapa() {
-      if (typeof L === "undefined") return;
-      mapa = L.map("mapa-motorista").setView([estadoMot.lat, estadoMot.lng], 14);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap"
-      }).addTo(mapa);
-      marcador = L.marker([estadoMot.lat, estadoMot.lng]).addTo(mapa).bindPopup("Motorista Online");
-    }
-
-    async function buscarRuaNominatim(lat, lng) {
-      try {
-        const res = await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" + encodeURIComponent(lat) + "&lon=" + encodeURIComponent(lng));
-        const data = await res.json();
-        const addr = data && data.address ? data.address : {};
-        const rua = addr.road || addr.suburb || addr.neighbourhood || "";
-        const cidade = addr.city || addr.town || addr.village || "Rio Grande";
-        estadoMot.ruaAtual = (rua ? rua + " — " : "") + cidade;
-      } catch (e) {
-        estadoMot.ruaAtual = "Lat " + lat.toFixed(4) + ", Lng " + lng.toFixed(4);
-      }
-      elEnderecoMot.textContent = "Localização: " + estadoMot.ruaAtual;
-    }
-
-    async function publicarPresencaMotorista() {
-      estadoMot.geohash = encodeGeohash(estadoMot.lat, estadoMot.lng, 6);
-      estadoMot.geohashSetor = estadoMot.geohash.slice(0, 4);
-      elInfoGeohash.textContent = "GH: " + estadoMot.geohash + " (Setor " + estadoMot.geohashSetor + ")";
-
-      if (mapa && marcador) {
-        marcador.setLatLng([estadoMot.lat, estadoMot.lng]);
-        mapa.setView([estadoMot.lat, estadoMot.lng], 14);
-      }
-
-      if (!db) return;
-      try {
-        await db.collection("motoristas_online").doc(motoristaPerfil.id).set({
-          id: motorista
+    .tag-status
