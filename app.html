@@ -111,7 +111,7 @@
       margin-bottom: 4px;
     }
 
-    input {
+    input, select, textarea {
       width: 100%;
       padding: 11px 13px;
       border-radius: 9px;
@@ -120,6 +120,7 @@
       font-weight: 700;
       color: var(--text);
       background: #ffffff;
+      font-family: inherit;
     }
 
     .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -202,6 +203,15 @@
     .tag-status.recusada { background: #fee2e2; color: #991b1b; }
 
     .meta-small { font-size: 15px; color: var(--muted); font-weight: 700; }
+
+    .aviso-status {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 15px;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -210,19 +220,21 @@
       <div class="badge-32">32</div>
       <div>
         <h1>32 DRIVE • MOTORISTA</h1>
-        <p>Junior Costa • Balneário Cassino / Rio Grande</p>
+        <p id="subtitulo-motorista">Junior Costa • Balneário Cassino / Rio Grande</p>
       </div>
     </div>
 
     <div class="top-actions">
       <button type="button" class="btn btn-green btn-sm" id="btn-toggle-online">Online</button>
       <button type="button" class="btn btn-accent btn-sm" id="btn-gps-motorista">Atualizar GPS</button>
+      <button type="button" class="btn btn-outline btn-sm" id="btn-abrir-config">Meu Cadastro</button>
       <span class="meta-small" id="status-firebase-mot" style="color:#fde68a;">Iniciando...</span>
     </div>
   </header>
 
   <main class="container">
     <div class="col">
+      <!-- BLOCO 1: DADOS E POSIÇÃO DO MOTORISTA -->
       <section class="card">
         <div class="card-title">
           <span>Dados do Motorista e Posição</span>
@@ -233,15 +245,75 @@
         <div class="row-2">
           <div>
             <label for="mot-nome">Motorista</label>
-            <input id="mot-nome" type="text" value="Junior Costa" />
+            <input id="mot-nome" type="text" value="Luiz Carlos Costa Junior" />
           </div>
           <div>
             <label for="mot-veiculo">Veículo / Placa</label>
             <input id="mot-veiculo" type="text" value="VW Voyage 1.0 • IQD8060" />
           </div>
         </div>
+
+        <div class="aviso-status" id="resumo-situacao-cadastro">
+          Situação do cadastro: <strong>Aprovado (Teste / Operação)</strong> • CRLV 2026 em dia
+        </div>
       </section>
 
+      <!-- BLOCO 2: CONFIGURAÇÃO / CADASTRO DO MOTORISTA (CNH, EAR OPCIONAL, WHATS, EMAIL) -->
+      <section class="card" id="card-config-motorista" style="display:none;">
+        <div class="card-title">
+          <span>Configuração e Documentos do Motorista</span>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-fechar-config">Fechar</button>
+        </div>
+        <div class="meta-small">Preencha seus dados. O EAR é opcional e pode ser aprovado sem EAR para testes e início de operação.</div>
+
+        <div class="row-2">
+          <div>
+            <label for="cfg-nome">Nome Completo</label>
+            <input id="cfg-nome" type="text" value="Luiz Carlos Costa Junior" />
+          </div>
+          <div>
+            <label for="cfg-whats">WhatsApp (com DDD)</label>
+            <input id="cfg-whats" type="tel" placeholder="53999089980" />
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div>
+            <label for="cfg-email">E-mail</label>
+            <input id="cfg-email" type="email" placeholder="seuemail@gmail.com" />
+          </div>
+          <div>
+            <label for="cfg-veiculo">Veículo / Placa</label>
+            <input id="cfg-veiculo" type="text" value="VW Voyage 1.0 • IQD8060" />
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div>
+            <label for="cfg-cnh">Número da CNH</label>
+            <input id="cfg-cnh" type="text" placeholder="Digite o número da CNH" />
+          </div>
+          <div>
+            <label for="cfg-ear">EAR (Opcional)</label>
+            <select id="cfg-ear">
+              <option value="Sem EAR (Liberado para teste/operação)">Sem EAR (Liberado)</option>
+              <option value="Possui EAR na CNH">Possui EAR na CNH</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="cfg-doc-carro">Documento do Veículo (CRLV)</label>
+          <input id="cfg-doc-carro" type="text" value="CRLV Exercício 2026 • Placa IQD8060 (Em dia)" />
+        </div>
+
+        <div class="chips">
+          <button type="button" class="btn btn-green btn-sm" id="btn-salvar-config-mot">Salvar e Enviar Cadastro</button>
+        </div>
+        <div class="meta-small" id="msg-config-mot"></div>
+      </section>
+
+      <!-- BLOCO 3: RESUMO DE GANHOS -->
       <section class="card">
         <div class="card-title">
           <span>Resumo de Ganhos</span>
@@ -253,9 +325,23 @@
           <div class="meta-small" style="color:#cbd5e1;">Repasse 80% Motorista / 20% 32 Drive</div>
         </div>
       </section>
+
+      <!-- BLOCO 4: APROVAÇÃO DE CADASTROS DE MOTORISTAS (ACEITAR / RECUSAR / OBSERVAÇÃO) -->
+      <section class="card">
+        <div class="card-title">
+          <span>Aprovação de Motoristas</span>
+          <span class="meta-small" id="contador-cadastros-mot">0 cadastro(s)</span>
+        </div>
+        <div class="meta-small">Aceite (inclusive sem EAR) ou recuse informando qual documento faltou.</div>
+
+        <div class="lista-scroll" id="lista-cadastros-mot" style="max-height:360px;">
+          <div class="meta-small">Nenhum cadastro pendente no momento.</div>
+        </div>
+      </section>
     </div>
 
     <div class="col">
+      <!-- BLOCO 5: CHAMADAS EM TEMPO REAL (CONGELADO) -->
       <section class="card">
         <div class="card-title">
           <span>Chamadas em Tempo Real</span>
@@ -287,6 +373,8 @@
         appId: "1:762959482484:web:f40e2cb51020a61195cb21",
         measurementId: "G-V5PZCVKTCJ"
       };
+
+      const STORAGE_KEY_MOT_CAD = "32drive_cadastro_motorista_local";
 
       const GEOHASH_BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
       function encodeGeohash(lat, lon, precision) {
@@ -323,6 +411,7 @@
         ruaAtual: "Balneário Cassino, Rio Grande - RS",
         dinamicaPct: 0,
         chamadas: [],
+        cadastrosMotoristas: [],
         ocultasTelaMot: {}
       };
 
@@ -337,11 +426,26 @@
       const elCoordsMot = document.getElementById("coords-motorista");
       const elMotNome = document.getElementById("mot-nome");
       const elMotVeiculo = document.getElementById("mot-veiculo");
+      const elSubtituloMot = document.getElementById("subtitulo-motorista");
+      const elResumoSituacao = document.getElementById("resumo-situacao-cadastro");
+
+      const elCardConfig = document.getElementById("card-config-motorista");
+      const elCfgNome = document.getElementById("cfg-nome");
+      const elCfgWhats = document.getElementById("cfg-whats");
+      const elCfgEmail = document.getElementById("cfg-email");
+      const elCfgVeiculo = document.getElementById("cfg-veiculo");
+      const elCfgCnh = document.getElementById("cfg-cnh");
+      const elCfgEar = document.getElementById("cfg-ear");
+      const elCfgDocCarro = document.getElementById("cfg-doc-carro");
+      const elMsgConfig = document.getElementById("msg-config-mot");
+
       const elGanhos80 = document.getElementById("ganhos-80-mot");
       const elDinamicaAtual = document.getElementById("dinamica-atual-mot");
       const elQtdFinalizadas = document.getElementById("qtd-finalizadas-mot");
       const elListaChamadas = document.getElementById("lista-chamadas-mot");
       const elContadorChamadas = document.getElementById("contador-chamadas-mot");
+      const elListaCadastros = document.getElementById("lista-cadastros-mot");
+      const elContadorCadastros = document.getElementById("contador-cadastros-mot");
 
       function moeda(v) {
         return "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
@@ -360,6 +464,164 @@
         if (!numeros) return "";
         if (numeros.length <= 11 && !numeros.startsWith("55")) return "55" + numeros;
         return numeros;
+      }
+
+      function carregarConfigLocalMotorista() {
+        try {
+          const bruto = localStorage.getItem(STORAGE_KEY_MOT_CAD);
+          if (!bruto) return;
+          const d = JSON.parse(bruto);
+          if (d.nome) {
+            elCfgNome.value = d.nome;
+            elMotNome.value = d.nome;
+            elSubtituloMot.textContent = d.nome + " • Balneário Cassino / Rio Grande";
+          }
+          if (d.whats) elCfgWhats.value = d.whats;
+          if (d.email) elCfgEmail.value = d.email;
+          if (d.veiculo) {
+            elCfgVeiculo.value = d.veiculo;
+            elMotVeiculo.value = d.veiculo;
+          }
+          if (d.cnh) elCfgCnh.value = d.cnh;
+          if (d.ear) elCfgEar.value = d.ear;
+          if (d.docCarro) elCfgDocCarro.value = d.docCarro;
+          atualizarTextoSituacao(d.statusCadastro || "Aprovado", d.observacao || "");
+        } catch (e) {}
+      }
+
+      function atualizarTextoSituacao(statusCad, obs) {
+        const st = statusCad || "Aprovado";
+        if (st === "Recusado") {
+          elResumoSituacao.innerHTML =
+            'Situação do cadastro: <strong style="color:#dc2626;">Recusado</strong>' +
+            (obs ? ' • <strong>Motivo / Doc. faltante:</strong> ' + escapar(obs) : '');
+        } else if (st === "Em análise") {
+          elResumoSituacao.innerHTML =
+            'Situação do cadastro: <strong style="color:#b45309;">Em análise</strong>' +
+            (obs ? ' • <strong>Obs.:</strong> ' + escapar(obs) : '');
+        } else {
+          elResumoSituacao.innerHTML =
+            'Situação do cadastro: <strong style="color:#059669;">Aprovado</strong>' +
+            (obs ? ' • <strong>Obs.:</strong> ' + escapar(obs) : ' • Liberado para operar');
+        }
+      }
+
+      async function salvarCadastroMotorista() {
+        const nome = (elCfgNome.value || "").trim() || "Luiz Carlos Costa Junior";
+        const whats = (elCfgWhats.value || "").trim();
+        const email = (elCfgEmail.value || "").trim();
+        const veiculo = (elCfgVeiculo.value || "").trim() || "VW Voyage 1.0 • IQD8060";
+        const cnh = (elCfgCnh.value || "").trim();
+        const ear = elCfgEar.value || "Sem EAR (Liberado)";
+        const docCarro = (elCfgDocCarro.value || "").trim();
+
+        const cadId = "cad_" + (limparTelefoneWhats(whats) || estadoMot.id);
+        const dados = {
+          id: cadId,
+          motoristaId: estadoMot.id,
+          nome: nome,
+          whats: whats,
+          email: email,
+          veiculo: veiculo,
+          cnh: cnh,
+          ear: ear,
+          docCarro: docCarro,
+          statusCadastro: "Em análise",
+          observacao: "",
+          atualizadoEm: Date.now()
+        };
+
+        elMotNome.value = nome;
+        elMotVeiculo.value = veiculo;
+        elSubtituloMot.textContent = nome + " • Balneário Cassino / Rio Grande";
+
+        try {
+          localStorage.setItem(STORAGE_KEY_MOT_CAD, JSON.stringify(dados));
+        } catch (e) {}
+
+        elMsgConfig.textContent = "Cadastro salvo localmente.";
+        atualizarTextoSituacao(dados.statusCadastro, dados.observacao);
+
+        if (db) {
+          try {
+            await db.collection("motoristas_cadastros").doc(cadId).set(dados, { merge: true });
+            elMsgConfig.textContent = "Cadastro salvo e enviado para aprovação!";
+          } catch (e) {
+            elMsgConfig.textContent = "Salvo no celular (sem resposta do Firestore).";
+          }
+        }
+        publicarPresencaMotorista();
+      }
+
+      function renderizarCadastrosMotoristas() {
+        const lista = estadoMot.cadastrosMotoristas || [];
+        elContadorCadastros.textContent = lista.length + " cadastro(s)";
+
+        if (!lista.length) {
+          elListaCadastros.innerHTML = '<div class="meta-small">Nenhum cadastro de motorista enviado ainda.</div>';
+          return;
+        }
+
+        elListaCadastros.innerHTML = lista.map((m) => {
+          const st = m.statusCadastro || "Em análise";
+          const cls = st === "Aprovado" ? "tag-status aceita" : (st === "Recusado" ? "tag-status recusada" : "tag-status aguardando");
+          return (
+            '<div class="corrida-box" data-cad-id="' + escapar(m.id) + '">' +
+              '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
+                '<strong>' + escapar(m.nome || "Motorista") + '</strong>' +
+                '<span class="' + cls + '">' + escapar(st) + '</span>' +
+              '</div>' +
+              '<div class="meta-small">' +
+                'WhatsApp: ' + escapar(m.whats || "—") + ' • E-mail: ' + escapar(m.email || "—") +
+              '</div>' +
+              '<div class="meta-small">' +
+                'CNH: <strong>' + escapar(m.cnh || "Não informada") + '</strong> • EAR: <strong>' + escapar(m.ear || "Sem EAR") + '</strong>' +
+              '</div>' +
+              '<div class="meta-small">' +
+                'Veículo: ' + escapar(m.veiculo || "—") + ' • Doc.: ' + escapar(m.docCarro || "—") +
+              '</div>' +
+              '<div>' +
+                '<label>Observação / Documento que faltou:</label>' +
+                '<input type="text" class="inp-obs-cadastro" value="' + escapar(m.observacao || "") + '" placeholder="Ex.: Faltou foto da CNH / Aprovado sem EAR" />' +
+              '</div>' +
+              '<div class="chips">' +
+                '<button type="button" class="btn btn-green btn-sm btn-aprovar-cad">Aceitar Cadastro</button>' +
+                '<button type="button" class="btn btn-red btn-sm btn-recusar-cad">Recusar</button>' +
+              '</div>' +
+            '</div>'
+          );
+        }).join("");
+      }
+
+      async function decidirCadastroMotorista(cadId, novoStatus, obsTexto) {
+        const item = estadoMot.cadastrosMotoristas.find((x) => x.id === cadId);
+        if (item) {
+          item.statusCadastro = novoStatus;
+          item.observacao = obsTexto;
+        }
+        renderizarCadastrosMotoristas();
+
+        try {
+          const bruto = localStorage.getItem(STORAGE_KEY_MOT_CAD);
+          if (bruto) {
+            const local = JSON.parse(bruto);
+            if (local.id === cadId) {
+              local.statusCadastro = novoStatus;
+              local.observacao = obsTexto;
+              localStorage.setItem(STORAGE_KEY_MOT_CAD, JSON.stringify(local));
+              atualizarTextoSituacao(novoStatus, obsTexto);
+            }
+          }
+        } catch (e) {}
+
+        if (!db) return;
+        try {
+          await db.collection("motoristas_cadastros").doc(cadId).set({
+            statusCadastro: novoStatus,
+            observacao: obsTexto,
+            avaliadoEm: Date.now()
+          }, { merge: true });
+        } catch (e) {}
       }
 
       function montarLinkWazeEmbarque(c, latMot, lngMot) {
@@ -395,7 +657,7 @@
       function montarLinkWhatsAppRota(c) {
         const linkWaze = montarLinkWazeEmbarque(c, estadoMot.lat, estadoMot.lng);
         const linkDestino = montarLinkWazeDestino(c, estadoMot.lat, estadoMot.lng);
-        const nomeMot = (elMotNome.value || "").trim() || "Junior Costa";
+        const nomeMot = (elMotNome.value || "").trim() || "Luiz Carlos Costa Junior";
         const veiculoMot = (elMotVeiculo.value || "").trim() || "VW Voyage 1.0 • IQD8060";
         const texto =
           "32 Drive — " + nomeMot + " (" + veiculoMot + ") está a caminho!\n" +
@@ -448,7 +710,7 @@
         try {
           await db.collection("motoristas_online").doc(estadoMot.id).set({
             id: estadoMot.id,
-            nome: (elMotNome.value || "").trim() || "Junior Costa",
+            nome: (elMotNome.value || "").trim() || "Luiz Carlos Costa Junior",
             veiculo: (elMotVeiculo.value || "").trim() || "VW Voyage 1.0 • IQD8060",
             online: estadoMot.online,
             lat: estadoMot.lat,
@@ -525,7 +787,7 @@
         const patch = {
           status: novoStatus,
           motoristaId: estadoMot.id,
-          motoristaNome: (elMotNome.value || "").trim() || "Junior Costa",
+          motoristaNome: (elMotNome.value || "").trim() || "Luiz Carlos Costa Junior",
           motoristaVeiculo: (elMotVeiculo.value || "").trim() || "VW Voyage 1.0 • IQD8060",
           latMotorista: estadoMot.lat,
           lngMotorista: estadoMot.lng,
@@ -573,10 +835,51 @@
             renderizarChamadas();
             atualizarResumoGanhos();
           });
+
+          db.collection("motoristas_cadastros").onSnapshot(function (snap) {
+            const lista = [];
+            snap.forEach((doc) => lista.push(Object.assign({ id: doc.id }, doc.data())));
+            lista.sort((a, b) => Number(b.atualizadoEm || 0) - Number(a.atualizadoEm || 0));
+            estadoMot.cadastrosMotoristas = lista;
+            renderizarCadastrosMotoristas();
+
+            try {
+              const bruto = localStorage.getItem(STORAGE_KEY_MOT_CAD);
+              if (bruto) {
+                const local = JSON.parse(bruto);
+                const meu = lista.find((x) => x.id === local.id);
+                if (meu) {
+                  atualizarTextoSituacao(meu.statusCadastro, meu.observacao || "");
+                }
+              }
+            } catch (e) {}
+          });
         } catch (e) {
           elStatusFirebase.textContent = "Erro Firebase";
         }
       }
+
+      document.getElementById("btn-abrir-config").addEventListener("click", function () {
+        elCardConfig.style.display = elCardConfig.style.display === "none" ? "flex" : "none";
+      });
+      document.getElementById("btn-fechar-config").addEventListener("click", function () {
+        elCardConfig.style.display = "none";
+      });
+      document.getElementById("btn-salvar-config-mot").addEventListener("click", salvarCadastroMotorista);
+
+      elListaCadastros.addEventListener("click", function (ev) {
+        const box = ev.target.closest("[data-cad-id]");
+        if (!box) return;
+        const cadId = box.getAttribute("data-cad-id");
+        const inpObs = box.querySelector(".inp-obs-cadastro");
+        const obsTexto = inpObs ? inpObs.value.trim() : "";
+
+        if (ev.target.classList.contains("btn-aprovar-cad")) {
+          decidirCadastroMotorista(cadId, "Aprovado", obsTexto || "Aprovado (sem EAR)");
+        } else if (ev.target.classList.contains("btn-recusar-cad")) {
+          decidirCadastroMotorista(cadId, "Recusado", obsTexto || "Documentação incompleta");
+        }
+      });
 
       elBtnOnline.addEventListener("click", function () {
         estadoMot.online = !estadoMot.online;
@@ -618,9 +921,11 @@
         else if (ev.target.classList.contains("btn-recusar-mot")) atualizarStatusCorrida(corridaId, "Recusada pelo motorista");
       });
 
+      carregarConfigLocalMotorista();
       atualizarPosicaoMot(estadoMot.lat, estadoMot.lng);
       conectarFirebase();
       renderizarChamadas();
+      renderizarCadastrosMotoristas();
       atualizarResumoGanhos();
     })();
   </script>
