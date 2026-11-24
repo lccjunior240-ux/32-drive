@@ -131,9 +131,10 @@
 
     #mapa-passageiro {
       width: 100%;
-      height: 240px;
+      height: 250px;
       border-radius: 10px;
       border: 1.5px solid var(--border);
+      background: #e2e8f0;
       z-index: 1;
     }
 
@@ -154,6 +155,27 @@
     .btn-outline { background: #e2e8f0; color: #0f172a; border: 1px solid #94a3b8; }
 
     .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .tabela-precos {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: #f8fafc;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .tabela-precos th, .tabela-precos td {
+      border: 1px solid #cbd5e1;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .tabela-precos th {
+      background: #0b192c;
+      color: #f59e0b;
+      font-weight: 800;
+    }
 
     .resumo-box {
       background: #0f172a;
@@ -220,8 +242,9 @@
     </div>
 
     <div class="top-actions">
-      <button type="button" class="btn btn-accent btn-sm" id="btn-gps-passageiro">📍 Usar Meu GPS</button>
-      <span class="meta-small" id="status-firebase-pas" style="color:#fde68a;">Conectando ao Firestore...</span>
+      <button type="button" class="btn btn-accent btn-sm" id="btn-gps-passageiro">Localização Atual</button>
+      <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-tela-pas">Limpar Tela</button>
+      <span class="meta-small" id="status-firebase-pas" style="color:#fde68a;">Iniciando...</span>
     </div>
   </header>
 
@@ -245,14 +268,33 @@
         </div>
 
         <div>
-          <label for="pas-origem">Origem (Embarque)</label>
+          <label for="pas-origem">Endereço de Origem (Embarque)</label>
           <input id="pas-origem" type="text" value="Av. Rio Grande, Balneário Cassino - Rio Grande, RS" />
         </div>
 
         <div>
-          <label for="pas-destino">Destino</label>
+          <label for="pas-destino">Endereço de Destino</label>
           <input id="pas-destino" type="text" value="Centro - Rio Grande, RS" />
         </div>
+
+        <table class="tabela-precos">
+          <thead>
+            <tr>
+              <th>Faixa de Quilometragem</th>
+              <th>Tabela de Preço 32 Drive</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Até 3,50 km</td>
+              <td><strong>R$ 7,99</strong> (tarifa mínima)</td>
+            </tr>
+            <tr>
+              <td>Acima de 3,50 km (≥ 3,51 km)</td>
+              <td><strong>R$ 2,00 / km</strong> (substitui a tarifa de R$ 7,99)</td>
+            </tr>
+          </tbody>
+        </table>
 
         <div class="resumo-box" id="resumo-tarifa-pas">
           <div>Valor estimado: <strong id="pas-valor-total">R$ 7,99</strong> (<span id="pas-faixa-desc">Até 3,50 km: tarifa base R$ 7,99</span>)</div>
@@ -260,17 +302,19 @@
         </div>
 
         <div class="chips">
-          <button type="button" class="btn btn-green" id="btn-chamar-motorista" style="flex:1;">🚗 Chamar Motorista</button>
-          <button type="button" class="btn btn-outline" id="btn-limpar-campos">Limpar Campos</button>
+          <button type="button" class="btn btn-green" id="btn-chamar-motorista" style="flex:1;">Chamar Motorista</button>
+          <button type="button" class="btn btn-outline" id="btn-localizacao-card">Localização Atual</button>
+          <button type="button" class="btn btn-outline" id="btn-limpar-campos">Limpar Tela</button>
         </div>
       </section>
 
       <section class="card">
         <div class="card-title">
-          <span>2. Mapa de Embarque (Geohash)</span>
+          <span>2. Mapa & Endereço de Embarque</span>
           <span class="meta-small" id="info-geohash-pas">GH: —</span>
         </div>
         <div id="mapa-passageiro"></div>
+        <div class="meta-small" id="endereco-atual-pas">Endereço atual: Balneário Cassino, Rio Grande - RS</div>
         <div class="meta-small" id="coords-passageiro">Lat: -32.1856, Lng: -52.1658</div>
       </section>
     </div>
@@ -338,6 +382,7 @@
       lng: -52.1658,
       geohash: "",
       geohashSetor: "",
+      enderecoAtual: "Balneário Cassino, Rio Grande - RS",
       dinamicaPct: 0,
       chamadas: [],
       ocultasTelaPas: {}
@@ -361,6 +406,7 @@
     const elRepasseMot = document.getElementById("pas-repasse-mot");
     const elTaxaApp = document.getElementById("pas-taxa-app");
     const elInfoGeohash = document.getElementById("info-geohash-pas");
+    const elEnderecoAtual = document.getElementById("endereco-atual-pas");
     const elCoordsPas = document.getElementById("coords-passageiro");
     const elListaChamadas = document.getElementById("lista-chamadas-pas");
     const elContadorChamadas = document.getElementById("contador-chamadas-pas");
@@ -409,24 +455,52 @@
     }
 
     function iniciarMapa() {
-      if (typeof L === "undefined") return;
-      mapaPas = L.map("mapa-passageiro").setView([estadoPas.lat, estadoPas.lng], 14);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap"
-      }).addTo(mapaPas);
-      marcadorPas = L.marker([estadoPas.lat, estadoPas.lng], { draggable: true }).addTo(mapaPas).bindPopup("Embarque");
+      try {
+        if (typeof L === "undefined") {
+          elEnderecoAtual.textContent = "Mapa offline — verifique conexão com a internet";
+          return;
+        }
+        mapaPas = L.map("mapa-passageiro").setView([estadoPas.lat, estadoPas.lng], 14);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "© OpenStreetMap"
+        }).addTo(mapaPas);
+        marcadorPas = L.marker([estadoPas.lat, estadoPas.lng], { draggable: true }).addTo(mapaPas).bindPopup("Embarque");
 
-      marcadorPas.on("dragend", function () {
-        const pt = marcadorPas.getLatLng();
-        atualizarPosicao(pt.lat, pt.lng);
-      });
+        marcadorPas.on("dragend", function () {
+          const pt = marcadorPas.getLatLng();
+          atualizarPosicao(pt.lat, pt.lng, true);
+        });
 
-      mapaPas.on("click", function (ev) {
-        atualizarPosicao(ev.latlng.lat, ev.latlng.lng);
-      });
+        mapaPas.on("click", function (ev) {
+          atualizarPosicao(ev.latlng.lat, ev.latlng.lng, true);
+        });
+
+        setTimeout(function () {
+          if (mapaPas) mapaPas.invalidateSize();
+        }, 250);
+      } catch (e) {}
     }
 
-    function atualizarPosicao(lat, lng) {
+    async function buscarEndereco(lat, lng, preencherOrigem) {
+      try {
+        const res = await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" + encodeURIComponent(lat) + "&lon=" + encodeURIComponent(lng));
+        const data = await res.json();
+        const addr = data && data.address ? data.address : {};
+        const rua = addr.road || addr.pedestrian || addr.suburb || addr.neighbourhood || "";
+        const numero = addr.house_number ? ", " + addr.house_number : "";
+        const bairro = addr.suburb || addr.neighbourhood || "";
+        const cidade = addr.city || addr.town || addr.village || "Rio Grande";
+        const texto = (rua ? rua + numero : "") + (bairro && bairro !== rua ? " • " + bairro : "") + (rua || bairro ? " — " : "") + cidade + " - RS";
+        estadoPas.enderecoAtual = texto;
+        elEnderecoAtual.textContent = "Endereço atual: " + texto;
+        if (preencherOrigem) elPasOrigem.value = texto;
+      } catch (e) {
+        estadoPas.enderecoAtual = "Lat " + lat.toFixed(4) + ", Lng " + lng.toFixed(4);
+        elEnderecoAtual.textContent = "Endereço atual: " + estadoPas.enderecoAtual;
+      }
+    }
+
+    function atualizarPosicao(lat, lng, preencherOrigem) {
       estadoPas.lat = Number(lat);
       estadoPas.lng = Number(lng);
       estadoPas.geohash = encodeGeohash(estadoPas.lat, estadoPas.lng, 6);
@@ -437,8 +511,41 @@
 
       if (mapaPas && marcadorPas) {
         marcadorPas.setLatLng([estadoPas.lat, estadoPas.lng]);
-        mapaPas.setView([estadoPas.lat, estadoPas.lng], 14);
+        mapaPas.setView([estadoPas.lat, estadoPas.lng], 15);
+        mapaPas.invalidateSize();
       }
+      buscarEndereco(estadoPas.lat, estadoPas.lng, Boolean(preencherOrigem));
+    }
+
+    function acionarLocalizacaoAtual() {
+      elStatusFirebase.textContent = "Buscando GPS...";
+      if (!navigator.geolocation) {
+        atualizarPosicao(estadoPas.lat, estadoPas.lng, true);
+        elStatusFirebase.textContent = "GPS padrão (Cassino)";
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          atualizarPosicao(pos.coords.latitude, pos.coords.longitude, true);
+          elStatusFirebase.textContent = "GPS atualizado";
+        },
+        function () {
+          atualizarPosicao(estadoPas.lat, estadoPas.lng, true);
+          elStatusFirebase.textContent = "GPS bloqueado — usando Cassino";
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
+
+    function limparTelaCompleta() {
+      elPasOrigem.value = "";
+      elPasDestino.value = "";
+      elPasDistancia.value = "2.8";
+      estadoPas.chamadas.forEach((c) => {
+        estadoPas.ocultasTelaPas[c.id] = true;
+      });
+      calcularTarifa();
+      renderizarChamadas();
     }
 
     function renderizarChamadas() {
@@ -446,7 +553,7 @@
       elContadorChamadas.textContent = visiveis.length + " chamada(s)";
 
       if (!visiveis.length) {
-        elListaChamadas.innerHTML = '<div class="meta-small">Nenhuma chamada visível na tela. Toque em "Chamar Motorista" para enviar ao Firestore.</div>';
+        elListaChamadas.innerHTML = '<div class="meta-small">Tela limpa. Preencha origem/destino e toque em "Chamar Motorista".</div>';
         return;
       }
 
@@ -475,5 +582,123 @@
     }
 
     async function enviarChamadaMotorista() {
-      const origem = (elPasOrigem.value || "").trim() || "Balneário Cassino, Rio Grande - RS";
-      const destino = (elPasDestino.value || "").trim() || "Centro, Rio Grande -
+      const origem = (elPasOrigem.value || "").trim() || estadoPas.enderecoAtual || "Balneário Cassino, Rio Grande - RS";
+      const destino = (elPasDestino.value || "").trim() || "Centro, Rio Grande - RS";
+      const nome = (elPasNome.value || "").trim() || "Passageiro 32";
+      const calc = calcularTarifa();
+      const agora = Date.now();
+      const idCorrida = "corrida_" + agora;
+      const codigo4d = String(Math.floor(1000 + Math.random() * 9000));
+
+      const novaCorrida = {
+        id: idCorrida,
+        codigo: "32-" + String(agora).slice(-5),
+        codigo4d: codigo4d,
+        passageiro: nome,
+        origem: origem,
+        destino: destino,
+        distanciaKm: calc.km,
+        valorBase: calc.valorBase,
+        dinamicaPct: Number(estadoPas.dinamicaPct || 0),
+        valorBruto: calc.valorBruto,
+        repasseMotorista: calc.repasseMotorista,
+        taxaPlataforma: calc.taxaPlataforma,
+        latEmbarque: estadoPas.lat,
+        lngEmbarque: estadoPas.lng,
+        geohashEmbarque: estadoPas.geohash,
+        geohashSetor: estadoPas.geohashSetor,
+        status: "Aguardando motorista",
+        criadoEm: agora
+      };
+
+      estadoPas.chamadas.unshift(novaCorrida);
+      renderizarChamadas();
+
+      if (!db) {
+        elStatusFirebase.textContent = "Sem conexão Firestore (modo local)";
+        return;
+      }
+
+      try {
+        await db.collection("corridas").doc(idCorrida).set(novaCorrida);
+        elStatusFirebase.textContent = "Chamada enviada ao Firestore!";
+      } catch (err) {
+        elStatusFirebase.textContent = "Firestore bloqueado/erro: " + (err && err.code ? err.code : "verifique regras");
+      }
+    }
+
+    function conectarFirebase() {
+      try {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        elStatusFirebase.textContent = "Firestore Conectado (drive-4745f)";
+
+        db.collection("config").doc("32drive_dinamica").onSnapshot(
+          (doc) => {
+            if (!doc.exists) return;
+            const d = doc.data() || {};
+            estadoPas.dinamicaPct = Number(d.dinamicaPct || 0);
+            calcularTarifa();
+          },
+          (err) => {
+            elStatusFirebase.textContent = "Regra Firestore: " + (err && err.code ? err.code : "permissão negada");
+          }
+        );
+
+        db.collection("corridas").onSnapshot(
+          (snap) => {
+            elStatusFirebase.textContent = "Firestore Conectado (drive-4745f)";
+            const lista = [];
+            snap.forEach((doc) => lista.push(Object.assign({ id: doc.id }, doc.data())));
+            lista.sort((a, b) => Number(b.criadoEm || 0) - Number(a.criadoEm || 0));
+            estadoPas.chamadas = lista;
+            renderizarChamadas();
+          },
+          (err) => {
+            elStatusFirebase.textContent = "Regra Firestore: " + (err && err.code ? err.code : "permissão negada");
+          }
+        );
+      } catch (e) {
+        elStatusFirebase.textContent = "Erro ao iniciar Firebase";
+      }
+    }
+
+    document.getElementById("btn-gps-passageiro").addEventListener("click", acionarLocalizacaoAtual);
+    document.getElementById("btn-localizacao-card").addEventListener("click", acionarLocalizacaoAtual);
+    document.getElementById("btn-limpar-tela-pas").addEventListener("click", limparTelaCompleta);
+    document.getElementById("btn-limpar-campos").addEventListener("click", limparTelaCompleta);
+
+    elPasDistancia.addEventListener("input", calcularTarifa);
+    elPasDistancia.addEventListener("change", calcularTarifa);
+    document.getElementById("btn-chamar-motorista").addEventListener("click", enviarChamadaMotorista);
+
+    document.getElementById("btn-limpar-conversa-pas").addEventListener("click", function () {
+      estadoPas.chamadas.forEach((c) => {
+        estadoPas.ocultasTelaPas[c.id] = true;
+      });
+      renderizarChamadas();
+    });
+
+    elListaChamadas.addEventListener("click", async function (ev) {
+      if (!ev.target.classList.contains("btn-cancelar-pas")) return;
+      const box = ev.target.closest(".corrida-box");
+      if (!box) return;
+      const corridaId = box.getAttribute("data-id");
+      const corrida = estadoPas.chamadas.find((c) => c.id === corridaId);
+      if (!corrida) return;
+
+      corrida.status = "Cancelada";
+      if (db) {
+        try { await db.collection("corridas").doc(corridaId).set({ status: "Cancelada" }, { merge: true }); } catch (e) {}
+      }
+      renderizarChamadas();
+    });
+
+    iniciarMapa();
+    atualizarPosicao(estadoPas.lat, estadoPas.lng, false);
+    calcularTarifa();
+    conectarFirebase();
+    renderizarChamadas();
+  </script>
+</body>
+</html>
