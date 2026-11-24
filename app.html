@@ -3,24 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0b192c" />
-  <link rel="manifest" href="manifest.json?v=39" />
-  <link rel="icon" type="image/png" href="icon-512.png" />
-  <link rel="apple-touch-icon" href="icon-512.png" />
-  <title>32 Drive — Motorista</title>
+  <title>32 Drive • App Motorista (G39 • Geohash + Firebase)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     :root {
-      --bg: #f1f5f9;
+      --bg: #0b192c;
+      --surface: #f1f5f9;
       --card: #ffffff;
-      --navy-header: linear-gradient(145deg, #0b192c 0%, #13294b 70%, #0c1e38 100%);
-      --border: #cbd5e1;
+      --navy: #0b192c;
+      --navy-2: #13294b;
+      --accent: #f59e0b;
       --text: #0f172a;
       --muted: #475569;
-      --accent: #f59e0b;
-      --green: #059669;
-      --blue: #0284c7;
+      --border: #cbd5e1;
+      --green: #047857;
+      --blue: #0369a1;
+      --red: #b91c1c;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
@@ -28,627 +30,391 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      font-size: 18px;
-      line-height: 1.45;
+      font-size: 15px;
+      line-height: 1.4;
     }
-    header {
-      background: var(--navy-header);
-      border-bottom: 3px solid var(--accent);
-      padding: 16px;
+
+    .topbar {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+      border-bottom: 3px solid #10b981;
+      padding: 12px 16px;
+      color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      color: #ffffff;
     }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand img {
-      width: 46px;
-      height: 46px;
-      border-radius: 11px;
+
+    .brand { display: flex; align-items: center; gap: 10px; }
+
+    .badge-32 {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--navy);
       border: 2px solid var(--accent);
-      background: #ffffff;
+      color: var(--accent);
+      font-weight: 900;
+      font-size: 18px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
     }
-    h1 { font-size: 20px; font-weight: 900; color: var(--accent); }
-    .subtitle { font-size: 15px; color: #dbeafe; }
-    .badge {
+
+    .brand h1 { font-size: 16px; font-weight: 900; color: var(--accent); }
+    .brand p { font-size: 11px; color: #cbd5e1; }
+
+    .pill-status {
+      font-size: 11px;
+      font-weight: 900;
+      padding: 5px 10px;
+      border-radius: 999px;
       background: #10b981;
       color: #052e16;
-      font-weight: 800;
-      font-size: 14px;
-      padding: 7px 12px;
-      border-radius: 999px;
       white-space: nowrap;
     }
-    main {
-      flex: 1;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-width: 720px;
+
+    .pill-status.offline { background: #ef4444; color: #ffffff; }
+
+    .container {
       width: 100%;
+      max-width: 680px;
       margin: 0 auto;
-    }
-    .aviso-firebase {
-      display: none;
-      background: #fffbeb;
-      border: 2px solid #f59e0b;
-      color: #78350f;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 15px;
-      font-weight: 700;
-    }
-    .aviso-dinamica {
-      display: none;
-      background: #fef3c7;
-      border: 2px solid #d97706;
-      color: #78350f;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 15px;
-      font-weight: 800;
-    }
-    .card {
-      background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+      flex: 1;
     }
-    .card-header {
+
+    .card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--navy);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      flex-wrap: wrap;
     }
-    .card-title { font-size: 19px; font-weight: 900; color: #0f172a; }
-    label { font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: block; }
-    input {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: 2px solid #94a3b8;
-      background: #ffffff;
-      color: #0f172a;
-      font-size: 17px;
-      font-weight: 600;
-    }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .modo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .btn-modo {
-      padding: 11px 12px;
-      border-radius: 10px;
-      border: 2px solid #94a3b8;
-      background: #f8fafc;
-      color: #0f172a;
-      font-size: 15px;
+
+    label {
+      display: block;
+      font-size: 12px;
       font-weight: 800;
-      cursor: pointer;
+      color: var(--muted);
+      margin-bottom: 3px;
     }
-    .btn-modo.ativo {
-      background: #0b192c;
-      border-color: #0b192c;
-      color: #ffffff;
-    }
-    .minutos-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-    }
-    .btn-min {
-      padding: 11px 8px;
-      border-radius: 10px;
-      border: 2px solid #cbd5e1;
-      background: #f1f5f9;
-      color: #0f172a;
-      font-size: 15px;
-      font-weight: 900;
-      cursor: pointer;
-    }
-    .btn-min.ativo {
-      background: var(--accent);
-      border-color: #d97706;
-      color: #0f172a;
-    }
-    .dinamica-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-    .btn-din {
-      padding: 12px 8px;
-      border-radius: 10px;
-      border: 2px solid #cbd5e1;
-      background: #f1f5f9;
-      color: #0f172a;
-      font-size: 16px;
-      font-weight: 900;
-      cursor: pointer;
-    }
-    .btn-din.ativo {
-      background: var(--accent);
-      border-color: #b45309;
-      color: #0f172a;
-    }
-    .desconto-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-    }
-    .btn-desc {
-      padding: 11px 6px;
-      border-radius: 10px;
-      border: 2px solid #cbd5e1;
-      background: #f1f5f9;
-      color: #0f172a;
-      font-size: 15px;
-      font-weight: 900;
-      cursor: pointer;
-    }
-    .btn-desc.ativo {
-      background: #10b981;
-      border-color: #047857;
-      color: #052e16;
-    }
-    .btn {
+
+    input, select {
       width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 12px;
-      font-size: 17px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    .btn-sm {
-      padding: 9px 12px;
+      padding: 9px 11px;
+      border-radius: 9px;
+      border: 1.5px solid #94a3b8;
       font-size: 14px;
-      width: auto;
+      font-weight: 700;
+      color: var(--text);
+      background: #ffffff;
     }
-    .btn-primary { background: #0b192c; color: #ffffff; }
-    .btn-green { background: #10b981; color: #052e16; }
-    .btn-accent { background: var(--accent); color: #0f172a; }
-    .btn-blue { background: var(--blue); color: #ffffff; }
-    .btn-outline { background: #e2e8f0; color: #0f172a; border: 2px solid #94a3b8; }
-    .status-msg { font-size: 16px; font-weight: 800; color: #047857; text-align: center; min-height: 20px; }
-    .corrida-card {
-      background: #f8fafc;
-      border: 2px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    @media (max-width: 520px) {
+      .row-2 { grid-template-columns: 1fr; }
+    }
+
+    .geohash-strip {
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-size: 12px;
+      font-weight: 700;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 4px;
     }
-    .corrida-ativa {
-      background: #ecfdf5;
-      border: 2px solid #10b981;
+
+    .geohash-strip strong { color: var(--accent); }
+
+    .map-wrapper {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid #94a3b8;
     }
-    .tag {
-      display: inline-block;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: 13px;
+
+    #mapa-motorista { width: 100%; height: 190px; z-index: 1; }
+
+    .btn {
+      padding: 10px 13px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
       font-weight: 800;
-      background: #e2e8f0;
-      color: #0f172a;
+      cursor: pointer;
     }
-    .tag-din {
-      background: #d97706;
-      color: #ffffff;
+
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-sm { padding: 7px 10px; font-size: 12px; }
+    .btn-primary { background: var(--navy); color: #ffffff; }
+    .btn-accent { background: var(--accent); color: #0f172a; }
+    .btn-green { background: #059669; color: #ffffff; }
+    .btn-blue { background: var(--blue); color: #ffffff; }
+    .btn-red { background: #dc2626; color: #ffffff; }
+    .btn-outline { background: #e2e8f0; color: #0f172a; border: 1px solid #94a3b8; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .price-big { font-size: 22px; font-weight: 900; color: var(--green); }
+    .meta-small { font-size: 12px; color: var(--muted); font-weight: 700; }
+
+    .status-banner {
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 13px;
+      background: #eff6ff;
+      border: 1.5px solid #93c5fd;
+      color: #1e3a8a;
     }
-    .tag-desc {
-      background: #047857;
-      color: #ffffff;
+
+    .status-banner.alerta { background: #fffbeb; border-color: #fcd34d; color: #92400e; }
+    .status-banner.sucesso { background: #ecfdf5; border-color: #6ee7b7; color: #065f46; }
+    .status-banner.recusada { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+
+    .ajuste-box {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
-    .valor-destaque {
-      font-size: 22px;
+
+    .ajuste-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .btn-ajuste {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1.5px solid #475569;
+      background: #ffffff;
       font-weight: 900;
-      color: var(--green);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .btn-ajuste.ativo { background: var(--navy); color: #ffffff; border-color: var(--navy); }
+    .btn-ajuste:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .contra-box { display: flex; gap: 6px; align-items: center; }
+    .contra-box input { max-width: 140px; padding: 7px 9px; font-size: 13px; }
+
+    .repasse-bar {
+      font-size: 12px;
+      font-weight: 800;
+      color: #1e293b;
+      background: #e2e8f0;
+      padding: 7px 9px;
+      border-radius: 8px;
+    }
+
+    .corrida-item {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 11px;
+      padding: 10px;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
   </style>
 </head>
 <body>
-  <header>
+  <header class="topbar">
     <div class="brand">
-      <img src="icon-512.png" alt="32 Drive" />
+      <div class="badge-32">32</div>
       <div>
-        <h1>32 DRIVE — Motorista</h1>
-        <div class="subtitle">Painel de Corridas • Cassino &amp; Rio Grande</div>
+        <h1>32 DRIVE • MOTORISTA (G39)</h1>
+        <p>Geohash • Tempo Real Firebase • Dinâmica via Admin • 80/20</p>
       </div>
     </div>
-    <span class="badge" id="badge-motorista">Ativo</span>
+    <span class="pill-status" id="badge-status-online">ONLINE</span>
   </header>
 
-  <main>
-    <div class="aviso-dinamica" id="aviso-dinamica"></div>
-    <div class="aviso-firebase" id="aviso-firebase"></div>
-
+  <main class="container">
+    <!-- BLOCO 1: IDENTIFICAÇÃO, GPS & GEOHASH -->
     <section class="card">
-      <div class="card-title">Identificação &amp; Pix do Motorista</div>
-      <div class="grid-2">
+      <div class="card-title">
+        <span>1. Localização &amp; Geohash do Motorista</span>
+        <div class="chips">
+          <button type="button" class="btn btn-blue btn-sm" id="btn-gps-motorista">📍 Atualizar GPS</button>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-alternar-online">Ficar Offline</button>
+        </div>
+      </div>
+
+      <div class="geohash-strip" id="box-geohash-status">
+        <div>Rua atual: <strong id="mot-rua-atual">Balneário Cassino — Av. Rio Grande</strong></div>
+        <div>Geohash (6): <strong id="mot-geohash-cod">—</strong> • Setor (4): <strong id="mot-geohash-setor">—</strong> • Admin Dinâmica: <strong id="mot-dinamica-admin">0%</strong></div>
+      </div>
+
+      <div class="map-wrapper">
+        <div id="mapa-motorista"></div>
+      </div>
+
+      <div class="row-2">
         <div>
-          <label for="mot-codigo">Código</label>
-          <input id="mot-codigo" type="text" placeholder="Ex: MOT-01" />
+          <label for="mot-id">ID do Motorista (Firestore)</label>
+          <input id="mot-id" type="text" value="mot_junior_costa" />
         </div>
         <div>
-          <label for="mot-placa">Placa</label>
-          <input id="mot-placa" type="text" placeholder="Ex: IQD8060" />
+          <label for="mot-nome">Nome do Motorista</label>
+          <input id="mot-nome" type="text" value="Junior Costa" />
         </div>
       </div>
-      <div>
-        <label for="mot-nome">Nome do Motorista</label>
-        <input id="mot-nome" type="text" placeholder="Ex: Junior Costa" />
-      </div>
-      <div>
-        <label for="mot-veiculo">Veículo</label>
-        <input id="mot-veiculo" type="text" placeholder="Ex: VW Voyage 1.0 Prata" />
-      </div>
-      <div>
-        <label for="mot-pix">Sua Chave Pix</label>
-        <input id="mot-pix" type="text" placeholder="CPF, celular, e-mail ou chave aleatória" />
-        <button class="btn btn-blue" style="margin-top:8px;" type="button" id="btn-enviar-pix">
-          Enviar Chave Pix ao Passageiro
-        </button>
-      </div>
-      <button class="btn btn-green" type="button" id="btn-salvar-perfil">
-        Salvar Dados do Motorista
-      </button>
-      <div class="status-msg" id="msg-motorista"></div>
-    </section>
 
-    <section class="card">
-      <div class="card-title">Dinâmica do Motorista (10% a 30%)</div>
-      <div id="resumo-dinamica" style="font-size:15px;font-weight:700;color:var(--muted);">
-        Dinâmica atual: Normal (0%). Escolha de 10% até 30% de 5 em 5%.
-      </div>
-      <div class="dinamica-grid" id="grid-dinamica">
-        <button class="btn-din ativo" type="button" data-din="0" onclick="selecionarDinamica(0)">0% Normal</button>
-        <button class="btn-din" type="button" data-din="10" onclick="selecionarDinamica(10)">+10%</button>
-        <button class="btn-din" type="button" data-din="15" onclick="selecionarDinamica(15)">+15%</button>
-        <button class="btn-din" type="button" data-din="20" onclick="selecionarDinamica(20)">+20%</button>
-        <button class="btn-din" type="button" data-din="25" onclick="selecionarDinamica(25)">+25%</button>
-        <button class="btn-din" type="button" data-din="30" onclick="selecionarDinamica(30)">+30%</button>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="card-header">
-        <div class="card-title">Descontos (% ou R$)</div>
-        <button class="btn btn-outline btn-sm" type="button" onclick="selecionarDesconto('none', 0)">
-          Sem Desconto
-        </button>
-      </div>
-      <div id="resumo-desconto" style="font-size:15px;font-weight:700;color:var(--muted);">
-        Desconto atual: Nenhum (R$ 0,00). Escolha em % ou valor fixo em reais.
-      </div>
-      <div class="desconto-grid" id="grid-desconto">
-        <button class="btn-desc" type="button" data-desc-tipo="pct" data-desc-val="5" onclick="selecionarDesconto('pct', 5)">-5%</button>
-        <button class="btn-desc" type="button" data-desc-tipo="pct" data-desc-val="10" onclick="selecionarDesconto('pct', 10)">-10%</button>
-        <button class="btn-desc" type="button" data-desc-tipo="pct" data-desc-val="15" onclick="selecionarDesconto('pct', 15)">-15%</button>
-        <button class="btn-desc" type="button" data-desc-tipo="pct" data-desc-val="20" onclick="selecionarDesconto('pct', 20)">-20%</button>
-        <button class="btn-desc" type="button" data-desc-tipo="fixo" data-desc-val="2" onclick="selecionarDesconto('fixo', 2)">-R$ 2,00</button>
-        <button class="btn-desc" type="button" data-desc-tipo="fixo" data-desc-val="5" onclick="selecionarDesconto('fixo', 5)">-R$ 5,00</button>
-        <button class="btn-desc" type="button" data-desc-tipo="fixo" data-desc-val="10" onclick="selecionarDesconto('fixo', 10)">-R$ 10,00</button>
-        <button class="btn-desc ativo" type="button" data-desc-tipo="none" data-desc-val="0" onclick="selecionarDesconto('none', 0)">0% / R$ 0</button>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="card-title">Tempo de Chegada (Rota Automática ou Manual)</div>
-      <div class="modo-row">
-        <button class="btn-modo ativo" type="button" id="modo-auto">Automático (Rota)</button>
-        <button class="btn-modo" type="button" id="modo-manual">Manual (Minutos)</button>
-      </div>
-      <div id="resumo-tempo-modo" style="font-size:15px;font-weight:700;color:var(--muted);">
-        Modo Automático ativo: usa o tempo estimado pela rota do mapa ao aceitar.
-      </div>
-      <div class="minutos-grid" id="grid-minutos">
-        <button class="btn-min" type="button" data-min="2">2 min</button>
-        <button class="btn-min" type="button" data-min="6">6 min</button>
-        <button class="btn-min" type="button" data-min="8">8 min</button>
-        <button class="btn-min" type="button" data-min="10">10 min</button>
-        <button class="btn-min" type="button" data-min="12">12 min</button>
-        <button class="btn-min" type="button" data-min="18">18 min</button>
-        <button class="btn-min" type="button" data-min="20">20 min</button>
-      </div>
-    </section>
-
-    <section class="card" id="sec-corrida-andamento" style="display:none;">
-      <div class="card-header">
-        <div class="card-title">Corrida em Andamento</div>
-        <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-andamento">
-          Limpar Painel
-        </button>
-      </div>
-      <div id="box-corrida-andamento"></div>
-    </section>
-
-    <section class="card">
-      <div class="card-header">
-        <div class="card-title">Chamados Disponíveis</div>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn-outline btn-sm" type="button" id="btn-limpar-chamados">
-            Limpar
-          </button>
-          <button class="btn btn-outline btn-sm" type="button" id="btn-simular-chamado" onclick="simularChamadoTeste()">
-            Simular Chamado
-          </button>
+      <div class="row-2">
+        <div>
+          <label for="mot-veiculo">Veículo &amp; Placa</label>
+          <input id="mot-veiculo" type="text" value="VW Voyage 1.0 • IQD8060" />
+        </div>
+        <div>
+          <label for="mot-pix">Chave Pix (Recebimento Direto)</label>
+          <input id="mot-pix" type="text" value="jr.gas.cassino@pix.com.br" />
         </div>
       </div>
-      <div id="lista-corridas-motorista" style="display:flex;flex-direction:column;gap:12px;">
-        <div class="corrida-card" style="color:var(--muted);">Nenhuma corrida aguardando motorista no momento.</div>
+    </section>
+
+    <!-- BLOCO 2: CORRIDA ATIVA / CONVERSA -->
+    <section class="card">
+      <div class="card-title">
+        <span>2. Corrida Ativa / Conversa</span>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-conversa-mot">Limpar Conversa</button>
+      </div>
+      <div id="corrida-ativa-box">
+        <div class="meta-small">Nenhuma corrida ativa selecionada. Aguardando chamados no seu Geohash...</div>
+      </div>
+    </section>
+
+    <!-- BLOCO 3: CHAMADOS DISPONÍVEIS NO GEOHASH -->
+    <section class="card">
+      <div class="card-title">
+        <span>3. Chamados Abertos no Setor (Geohash)</span>
+        <span class="meta-small" id="contador-chamados">0 chamados</span>
+      </div>
+      <div id="lista-chamados-box">
+        <div class="meta-small">Nenhum chamado pendente no momento.</div>
       </div>
     </section>
   </main>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Firebase SDK Compat (Firestore) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
   <script>
-    const avisoFirebase = document.getElementById("aviso-firebase");
-    const avisoDinamica = document.getElementById("aviso-dinamica");
-    const resumoDinamica = document.getElementById("resumo-dinamica");
-    const resumoDesconto = document.getElementById("resumo-desconto");
-    const botoesDin = Array.from(document.querySelectorAll(".btn-din"));
-    const botoesDesc = Array.from(document.querySelectorAll(".btn-desc"));
-    const msgMotorista = document.getElementById("msg-motorista");
-    const listaCorridasEl = document.getElementById("lista-corridas-motorista");
-    const secCorridaAndamento = document.getElementById("sec-corrida-andamento");
-    const boxCorridaAndamento = document.getElementById("box-corrida-andamento");
-    const btnLimparAndamento = document.getElementById("btn-limpar-andamento");
-    const btnLimparChamados = document.getElementById("btn-limpar-chamados");
-    const btnEnviarPix = document.getElementById("btn-enviar-pix");
-    const btnSalvarPerfil = document.getElementById("btn-salvar-perfil");
+    // =========================================================================
+    // 1. CONFIGURAÇÃO DO SEU PROJETO FIREBASE (PREENCHA ANTES DE SUBIR NO GITHUB)
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "COLE_AQUI_SUA_API_KEY",
+      authDomain: "COLE_AQUI_SEU_AUTH_DOMAIN",
+      projectId: "COLE_AQUI_SEU_PROJECT_ID",
+      storageBucket: "COLE_AQUI_SEU_STORAGE_BUCKET",
+      messagingSenderId: "COLE_AQUI_SEU_SENDER_ID",
+      appId: "COLE_AQUI_SEU_APP_ID"
+    };
 
-    const elCodigo = document.getElementById("mot-codigo");
-    const elNome = document.getElementById("mot-nome");
-    const elVeiculo = document.getElementById("mot-veiculo");
-    const elPlaca = document.getElementById("mot-placa");
-    const elPix = document.getElementById("mot-pix");
-    const btnModoAuto = document.getElementById("modo-auto");
-    const btnModoManual = document.getElementById("modo-manual");
-    const resumoTempoModo = document.getElementById("resumo-tempo-modo");
-    const botoesMin = Array.from(document.querySelectorAll(".btn-min"));
+    // Regras de tarifa da 32 Drive:
+    // Até 3,50 km: R$ 7,99 fixo
+    // A partir de 3,51 km: R$ 2,00 por km (sem somar R$ 7,99)
+    const TARIFA_CURTA_ATE_350 = 7.99;
+    const LIMITE_KM_TARIFA_CURTA = 3.50;
+    const VALOR_KM_ACIMA = 2.00;
 
-    const DINAMICAS_PERMITIDAS = [0, 10, 15, 20, 25, 30];
+    // =========================================================================
+    // 2. GEOHASH BASE32 PURO
+    // =========================================================================
+    const GEOHASH_BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
+    function codificarGeohash(lat, lon, precisao = 6) {
+      let idx = 0, bit = 0, evenBit = true, geohash = "";
+      let latMin = -90, latMax = 90, lonMin = -180, lonMax = 180;
+      while (geohash.length < precisao) {
+        if (evenBit) {
+          const lonMid = (lonMin + lonMax) / 2;
+          if (lon >= lonMid) { idx = idx * 2 + 1; lonMin = lonMid; }
+          else { idx = idx * 2; lonMax = lonMid; }
+        } else {
+          const latMid = (latMin + latMax) / 2;
+          if (lat >= latMid) { idx = idx * 2 + 1; latMin = latMid; }
+          else { idx = idx * 2; latMax = latMid; }
+        }
+        evenBit = !evenBit;
+        if (++bit === 5) {
+          geohash += GEOHASH_BASE32.charAt(idx);
+          bit = 0;
+          idx = 0;
+        }
+      }
+      return geohash;
+    }
+
+    // =========================================================================
+    // 3. ESTADO DO APP MOTORISTA (G39)
+    // =========================================================================
+    const estado = {
+      online: true,
+      lat: -32.1865,
+      lon: -52.1642,
+      ruaAtual: "Balneário Cassino — Av. Rio Grande",
+      geohash6: "",
+      geohash4: "",
+      // Regras controladas pelo Painel Admin (lidas de config/32drive_dinamica)
+      adminRegras: {
+        dinamicaPct: 0,
+        kmMinDesconto: 15,
+        maxKmEmbarque: 5,
+        limiteDescontosMes: 3
+      },
+      chamadosAbertos: [],
+      corridaAtiva: null
+    };
 
     let db = null;
-    let fs = null;
-    let dinamicaPct = Number(localStorage.getItem("32drive_dinamica_pct") || "0");
-    if (DINAMICAS_PERMITIDAS.indexOf(dinamicaPct) === -1) dinamicaPct = 0;
+    let mapa = null;
+    let markerMotorista = null;
+    let markerEmbarque = null;
 
-    let descontoTipo = localStorage.getItem("32drive_desconto_tipo") || "none";
-    let descontoValor = Number(localStorage.getItem("32drive_desconto_val") || "0");
-    if (["none", "pct", "fixo"].indexOf(descontoTipo) === -1 || isNaN(descontoValor) || descontoValor < 0) {
-      descontoTipo = "none";
-      descontoValor = 0;
+    const elMotId = document.getElementById("mot-id");
+    const elMotNome = document.getElementById("mot-nome");
+    const elMotVeiculo = document.getElementById("mot-veiculo");
+    const elMotPix = document.getElementById("mot-pix");
+    const elMotRuaAtual = document.getElementById("mot-rua-atual");
+    const elMotGeohashCod = document.getElementById("mot-geohash-cod");
+    const elMotGeohashSetor = document.getElementById("mot-geohash-setor");
+    const elMotDinamicaAdmin = document.getElementById("mot-dinamica-admin");
+    const elBadgeOnline = document.getElementById("badge-status-online");
+    const elCorridaAtivaBox = document.getElementById("corrida-ativa-box");
+    const elListaChamadosBox = document.getElementById("lista-chamados-box");
+    const elContadorChamados = document.getElementById("contador-chamados");
+
+    function moeda(v) {
+      return "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
     }
 
-    let modoTempo = localStorage.getItem("32drive_modo_tempo") || "auto";
-    let minutoManualSelecionado = Number(localStorage.getItem("32drive_min_manual") || "6");
-    let corridaEmAndamento = null;
-    let chamadosLocais = [];
-    let idsOcultos = new Set(JSON.parse(localStorage.getItem("32drive_mot_ocultos_v39") || "[]"));
-
-    function salvarOcultos() {
-      localStorage.setItem("32drive_mot_ocultos_v39", JSON.stringify(Array.from(idsOcultos)));
-    }
-
-    function formatarMoeda(valor) {
-      return "R$ " + Number(valor || 0).toFixed(2).replace(".", ",");
-    }
-
-    function formatarRotuloDesconto(tipo, val) {
-      if (tipo === "pct" && Number(val) > 0) return "-" + Number(val) + "%";
-      if (tipo === "fixo" && Number(val) > 0) return "-" + formatarMoeda(val);
-      return "";
-    }
-
-    function obterValorBaseCorrida(corrida) {
-      const baseSalvo = Number(corrida.valorBase || 0);
-      const brutoSalvo = Number(corrida.valorBruto || 0);
-      const pctAnterior = Number(corrida.dinamicaPct || 0);
-      if (baseSalvo > 0) return baseSalvo;
-      if (brutoSalvo > 0 && pctAnterior > 0) {
-        return Number((brutoSalvo / (1 + pctAnterior / 100)).toFixed(2));
-      }
-      return brutoSalvo;
-    }
-
-    function calcularValorFinal(corrida, pct, tipoDesc, valDesc) {
-      const percentual = typeof pct === "number" ? pct : dinamicaPct;
-      const dTipo = typeof tipoDesc === "string" ? tipoDesc : descontoTipo;
-      const dVal = typeof valDesc === "number" ? valDesc : descontoValor;
-      const base = obterValorBaseCorrida(corrida);
-      if (!base) return 0;
-
-      let subtotal = base * (1 + percentual / 100);
-      if (dTipo === "pct" && dVal > 0) {
-        subtotal = subtotal * (1 - dVal / 100);
-      } else if (dTipo === "fixo" && dVal > 0) {
-        subtotal = subtotal - dVal;
-      }
-      return Number(Math.max(0, subtotal).toFixed(2));
-    }
-
-    function atualizarVisualDinamica() {
-      botoesDin.forEach(function (b) {
-        b.classList.toggle("ativo", Number(b.dataset.din) === dinamicaPct);
-      });
-      if (dinamicaPct > 0) {
-        resumoDinamica.textContent = "Dinâmica ativa: +" + dinamicaPct + "% aplicada sobre o valor da corrida.";
-        avisoDinamica.textContent = "Dinâmica do motorista ativa: +" + dinamicaPct + "% nas corridas.";
-        avisoDinamica.style.display = "block";
-      } else {
-        resumoDinamica.textContent = "Dinâmica atual: Normal (0%). Escolha de 10% até 30% de 5 em 5%.";
-        avisoDinamica.textContent = "";
-        avisoDinamica.style.display = "none";
-      }
-    }
-
-    function atualizarVisualDesconto() {
-      botoesDesc.forEach(function (b) {
-        const bTipo = b.dataset.descTipo;
-        const bVal = Number(b.dataset.descVal);
-        const ativo = (descontoTipo === "none" && bTipo === "none") ||
-          (bTipo === descontoTipo && bVal === descontoValor && descontoTipo !== "none");
-        b.classList.toggle("ativo", ativo);
-      });
-      const rotulo = formatarRotuloDesconto(descontoTipo, descontoValor);
-      if (rotulo) {
-        resumoDesconto.textContent = "Desconto ativo: " + rotulo + " aplicado no valor final.";
-      } else {
-        resumoDesconto.textContent = "Desconto atual: Nenhum (R$ 0,00). Escolha em % ou valor fixo em reais.";
-      }
-    }
-
-    window.selecionarDinamica = async function (pct) {
-      pct = Number(pct);
-      if (DINAMICAS_PERMITIDAS.indexOf(pct) === -1) return;
-      dinamicaPct = pct;
-      localStorage.setItem("32drive_dinamica_pct", String(pct));
-      atualizarVisualDinamica();
-      renderizarChamados(chamadosLocais);
-
-      if (corridaEmAndamento) {
-        const valorBase = obterValorBaseCorrida(corridaEmAndamento);
-        const valorNovo = calcularValorFinal(corridaEmAndamento, pct, descontoTipo, descontoValor);
-        corridaEmAndamento.dinamicaPct = pct;
-        corridaEmAndamento.descontoTipo = descontoTipo;
-        corridaEmAndamento.descontoValor = descontoValor;
-        corridaEmAndamento.valorBase = valorBase;
-        corridaEmAndamento.valorBruto = valorNovo;
-        renderizarCorridaAndamento();
-
-        if (String(corridaEmAndamento.docId || "").indexOf("SIM-") !== 0 && db && fs) {
-          try {
-            await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
-              dinamicaPct: pct,
-              descontoTipo: descontoTipo,
-              descontoValor: descontoValor,
-              valorBase: valorBase,
-              valorBruto: valorNovo
-            });
-            msgMotorista.textContent = pct > 0
-              ? "Dinâmica de +" + pct + "% aplicada (" + formatarMoeda(valorNovo) + ")."
-              : "Dinâmica removida (" + formatarMoeda(valorNovo) + ").";
-          } catch (_) {}
-        } else {
-          msgMotorista.textContent = pct > 0
-            ? "Dinâmica de +" + pct + "% aplicada (" + formatarMoeda(valorNovo) + ")."
-            : "Dinâmica zerada (0% Normal).";
-        }
-      } else {
-        msgMotorista.textContent = pct > 0
-          ? "Dinâmica definida em +" + pct + "%."
-          : "Dinâmica zerada (0% Normal).";
-      }
-    };
-
-    window.selecionarDesconto = async function (tipo, val) {
-      val = Number(val) || 0;
-      if (["none", "pct", "fixo"].indexOf(tipo) === -1 || val <= 0) {
-        tipo = "none";
-        val = 0;
-      }
-      descontoTipo = tipo;
-      descontoValor = val;
-      localStorage.setItem("32drive_desconto_tipo", descontoTipo);
-      localStorage.setItem("32drive_desconto_val", String(descontoValor));
-      atualizarVisualDesconto();
-      renderizarChamados(chamadosLocais);
-
-      const rotulo = formatarRotuloDesconto(descontoTipo, descontoValor);
-
-      if (corridaEmAndamento) {
-        const pctAtual = typeof corridaEmAndamento.dinamicaPct === "number" ? corridaEmAndamento.dinamicaPct : dinamicaPct;
-        const valorBase = obterValorBaseCorrida(corridaEmAndamento);
-        const valorNovo = calcularValorFinal(corridaEmAndamento, pctAtual, descontoTipo, descontoValor);
-        corridaEmAndamento.descontoTipo = descontoTipo;
-        corridaEmAndamento.descontoValor = descontoValor;
-        corridaEmAndamento.valorBase = valorBase;
-        corridaEmAndamento.valorBruto = valorNovo;
-        renderizarCorridaAndamento();
-
-        if (String(corridaEmAndamento.docId || "").indexOf("SIM-") !== 0 && db && fs) {
-          try {
-            await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
-              descontoTipo: descontoTipo,
-              descontoValor: descontoValor,
-              valorBase: valorBase,
-              valorBruto: valorNovo
-            });
-          } catch (_) {}
-        }
-      }
-
-      msgMotorista.textContent = rotulo
-        ? "Desconto " + rotulo + " aplicado."
-        : "Desconto removido.";
-    };
-
-    function carregarPerfilSalvo() {
-      try {
-        const salvo = JSON.parse(localStorage.getItem("32drive_motorista_perfil") || "null");
-        if (!salvo) return;
-        if (salvo.codigo) elCodigo.value = salvo.codigo;
-        if (salvo.nome) elNome.value = salvo.nome;
-        if (salvo.veiculo) elVeiculo.value = salvo.veiculo;
-        if (salvo.placa) elPlaca.value = salvo.placa;
-        if (salvo.chavePix) elPix.value = salvo.chavePix;
-      } catch (_) {}
-    }
-
-    function salvarPerfil() {
-      const perfil = {
-        codigo: (elCodigo.value || "").trim().toUpperCase(),
-        nome: (elNome.value || "").trim(),
-        veiculo: (elVeiculo.value || "").trim(),
-        placa: (elPlaca.value || "").trim().toUpperCase(),
-        chavePix: (elPix.value || "").trim()
-      };
-      localStorage.setItem("32drive_motorista_perfil", JSON.stringify(perfil));
-      return perfil;
-    }
-
-    function atualizarVisualTempo() {
-      const isManual = modoTempo === "manual";
-      btnModoAuto.classList.toggle("ativo", !isManual);
-      btnModoManual.classList.toggle("ativo", isManual);
-      botoesMin.forEach(function (b) {
-        b.classList.toggle("ativo", Number(b.dataset.min) === minutoManualSelecionado);
-      });
-      resumoTempoModo.textContent = isManual
-        ? "Modo Manual ativo: envia " + minutoManualSelecionado + " min ao aceitar/atualizar."
-        : "Modo Automático ativo: usa o tempo estimado pela rota do mapa (ou toque em um botão de minutos para ajustar na hora).";
-    }
-
-    function resolverMinutosChegada(corrida) {
-      if (modoTempo === "manual") {
-        return { minutos: minutoManualSelecionado, modo: "manual" };
-      }
-      const dist = Number(corrida.distanciaKm || 0);
-      const minRota = Number(corrida.tempoEstimadoRotaMin || 0) || Math.max(2, Math.round(dist * 2.2) || 6);
-      return { minutos: Math.max(2, minRota), modo: "automático (rota)" };
-    }
-
-    function mostrarAvisoFirebase(texto) {
-      if (!avisoFirebase) return;
-      avisoFirebase.textContent = texto;
-      avisoFirebase.style.display = texto ? "block" : "none";
-    }
-
-    function montarLinkMapa(endereco) {
-      const q = encodeURIComponent(String(endereco || "") + ", Rio Grande, RS");
-      return "https://www.google.com/maps/search/?api=1&query=" + q;
-    }
-
-    function escaparHtml(str) {
+    function escapar(str) {
       return String(str || "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -656,388 +422,394 @@
         .replace(/"/g, "&quot;");
     }
 
-    function limparPainelAndamento(msg) {
-      if (corridaEmAndamento && corridaEmAndamento.docId) {
-        idsOcultos.add(corridaEmAndamento.docId);
-        salvarOcultos();
-      }
-      corridaEmAndamento = null;
-      secCorridaAndamento.style.display = "none";
-      boxCorridaAndamento.innerHTML = "";
-      if (msg) msgMotorista.textContent = msg;
+    function distanciaHaversineKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const toRad = (g) => (g * Math.PI) / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    function renderizarCorridaAndamento() {
-      if (!corridaEmAndamento) {
-        secCorridaAndamento.style.display = "none";
-        boxCorridaAndamento.innerHTML = "";
-        return;
-      }
-      const st = String(corridaEmAndamento.status || "");
-      if (st === "Finalizada" || st === "Cancelada") {
-        limparPainelAndamento("");
-        return;
-      }
-
-      secCorridaAndamento.style.display = "flex";
-      const c = corridaEmAndamento;
-      const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
-      const pixAtual = (c.chavePixMotorista || (elPix.value || "").trim());
-      const pctCorrida = typeof c.dinamicaPct === "number" ? c.dinamicaPct : dinamicaPct;
-      const dTipoCorrida = typeof c.descontoTipo === "string" ? c.descontoTipo : descontoTipo;
-      const dValCorrida = typeof c.descontoValor === "number" ? c.descontoValor : descontoValor;
-      const rotuloDesc = formatarRotuloDesconto(dTipoCorrida, dValCorrida);
-      const valorAtual = calcularValorFinal(c, pctCorrida, dTipoCorrida, dValCorrida);
-
-      let acaoHtml = "";
-      if (st === "Motorista a caminho" || st === "Aceita") {
-        acaoHtml =
-          '<button class="btn btn-primary" type="button" data-etapa="No local de embarque">Cheguei no Embarque</button>';
-      } else if (st === "No local de embarque") {
-        acaoHtml =
-          '<button class="btn btn-green" type="button" data-etapa="Em viagem">Iniciar Viagem</button>';
-      } else if (st === "Em viagem") {
-        acaoHtml =
-          '<button class="btn btn-accent" type="button" data-etapa="Finalizada">Finalizar Corrida</button>';
-      }
-
-      boxCorridaAndamento.innerHTML =
-        '<div class="corrida-card corrida-ativa">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-            '<strong>' + escaparHtml(c.codigo || "32D") + ' • ' + escaparHtml(c.passageiro || "Passageiro") + '</strong>' +
-            '<span class="valor-destaque">' + formatarMoeda(valorAtual) + '</span>' +
-          '</div>' +
-          '<div>' +
-            '<span class="tag">' + escaparHtml(st || "Em andamento") + '</span> ' +
-            '<span class="tag">' + kmTxt + '</span> ' +
-            '<span class="tag">' + escaparHtml(c.pagamento || "Pix") + '</span> ' +
-            (c.tempoChegadaMin ? '<span class="tag">Chegada: ' + escaparHtml(c.tempoChegadaMin) + ' min</span> ' : '') +
-            (pctCorrida > 0 ? '<span class="tag tag-din">Dinâmica +' + pctCorrida + '%</span> ' : '') +
-            (rotuloDesc ? '<span class="tag tag-desc">Desc. ' + escaparHtml(rotuloDesc) + '</span>' : '') +
-          '</div>' +
-          '<div><strong>Embarque:</strong> ' + escaparHtml(c.origem || "—") + '</div>' +
-          '<div><strong>Destino:</strong> ' + escaparHtml(c.destino || "—") + '</div>' +
-          '<div><strong>Chave Pix enviada:</strong> ' + (pixAtual ? escaparHtml(pixAtual) : "Nenhuma chave enviada ainda") + '</div>' +
-          '<div class="grid-2">' +
-            '<a class="btn btn-outline" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkMapa(c.origem) + '">Abrir Embarque</a>' +
-            '<a class="btn btn-outline" style="text-align:center;text-decoration:none;font-size:15px;" target="_blank" rel="noopener" href="' + montarLinkMapa(c.destino) + '">Abrir Destino</a>' +
-          '</div>' +
-          acaoHtml +
-        '</div>';
+    function recalcularDivisao8020(valorFinal) {
+      const bruto = Number(Math.max(0, valorFinal).toFixed(2));
+      const motorista80 = Number((bruto * 0.8).toFixed(2));
+      const plataforma20 = Number((bruto - motorista80).toFixed(2));
+      return { valorBruto: bruto, repasseMotorista: motorista80, taxaPlataforma: plataforma20 };
     }
 
-    async function enviarChavePix() {
-      const perfil = salvarPerfil();
-      const chave = (perfil.chavePix || "").trim();
-      if (!chave) {
-        msgMotorista.textContent = "Digite sua Chave Pix antes de enviar.";
-        return;
-      }
+    function podeDarDesconto(c) {
+      const kmViagem = Number(c.distanciaKm || 0);
+      const kmEmb = Number(c.kmAteEmbarque || 0);
+      const minKm = Number(estado.adminRegras.kmMinDesconto || 15);
+      const maxEmb = Number(estado.adminRegras.maxKmEmbarque || 5);
+      const usadosMes = Number(c.descontosPassageiroMes || 0);
+      const limiteMes = Number(estado.adminRegras.limiteDescontosMes || 3);
+      return kmViagem >= minKm && kmEmb <= maxEmb && usadosMes < limiteMes;
+    }
 
-      if (corridaEmAndamento) {
-        corridaEmAndamento.chavePixMotorista = chave;
-        if (corridaEmAndamento.motorista) {
-          corridaEmAndamento.motorista.chavePix = chave;
-        }
-        renderizarCorridaAndamento();
-      }
-
-      if (!db || !fs) {
-        msgMotorista.textContent = "Chave Pix salva (" + chave + ").";
-        return;
-      }
-
+    async function resolverNomeRuaPorCoords(lat, lon) {
       try {
-        if (corridaEmAndamento && corridaEmAndamento.docId && String(corridaEmAndamento.docId).indexOf("SIM-") !== 0) {
-          await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
-            chavePixMotorista: chave,
-            "motorista.chavePix": chave
-          });
-          msgMotorista.textContent = "Chave Pix enviada ao passageiro da corrida!";
-        } else {
-          msgMotorista.textContent = "Chave Pix salva (" + chave + ") — será enviada ao aceitar a próxima corrida.";
+        const url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" + encodeURIComponent(lat) + "&lon=" + encodeURIComponent(lon);
+        const resp = await fetch(url, { headers: { "Accept": "application/json" } });
+        const data = await resp.json();
+        if (data && data.address) {
+          const rua = data.address.road || data.address.pedestrian || data.address.amenity || data.address.suburb || "";
+          const num = data.address.house_number ? ", " + data.address.house_number : "";
+          const bairro = data.address.suburb || data.address.neighbourhood || data.address.city_district || "";
+          const cidade = data.address.city || data.address.town || "Rio Grande";
+          const montado = [(rua + num).trim(), bairro && bairro !== rua ? bairro : cidade].filter(Boolean).join(" — ");
+          if (montado) return montado;
         }
-      } catch (erro) {
-        console.error(erro);
-        msgMotorista.textContent = "Erro ao enviar chave Pix (" + (erro.code || erro.message || "Firestore") + ").";
+      } catch (e) {}
+      return "Lat " + lat.toFixed(4) + ", Lon " + lon.toFixed(4);
+    }
+
+    function inicializarMapa() {
+      if (!window.L) return;
+      mapa = L.map("mapa-motorista").setView([estado.lat, estado.lon], 14);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap",
+        maxZoom: 19
+      }).addTo(mapa);
+      atualizarMarcadoresMapa();
+    }
+
+    function atualizarMarcadoresMapa() {
+      if (!mapa || !window.L) return;
+      const posMot = [estado.lat, estado.lon];
+      if (!markerMotorista) {
+        markerMotorista = L.circleMarker(posMot, {
+          radius: 9,
+          color: "#052e16",
+          weight: 2,
+          fillColor: "#10b981",
+          fillOpacity: 1
+        }).addTo(mapa).bindPopup("Sua posição (Motorista)");
+      } else {
+        markerMotorista.setLatLng(posMot);
+      }
+
+      if (estado.corridaAtiva && Number.isFinite(Number(estado.corridaAtiva.origemLat))) {
+        const posEmb = [Number(estado.corridaAtiva.origemLat), Number(estado.corridaAtiva.origemLon)];
+        if (!markerEmbarque) {
+          markerEmbarque = L.circleMarker(posEmb, {
+            radius: 8,
+            color: "#0b192c",
+            weight: 2,
+            fillColor: "#f59e0b",
+            fillOpacity: 1
+          }).addTo(mapa).bindPopup("Embarque do Passageiro");
+        } else {
+          markerEmbarque.setLatLng(posEmb);
+        }
+        mapa.fitBounds(L.latLngBounds([posMot, posEmb]), { padding: [25, 25] });
+      } else {
+        if (markerEmbarque) {
+          mapa.removeLayer(markerEmbarque);
+          markerEmbarque = null;
+        }
+        mapa.setView(posMot, 14);
       }
     }
 
-    function renderizarChamados(itens) {
-      const visiveis = itens.filter(function (c) {
-        const st = String(c.status || "");
-        return st === "Aguardando motorista" && !idsOcultos.has(c.docId);
+    async function publicarPosicaoMotoristaFirestore() {
+      estado.geohash6 = codificarGeohash(estado.lat, estado.lon, 6);
+      estado.geohash4 = estado.geohash6.slice(0, 4);
+
+      elMotRuaAtual.textContent = estado.ruaAtual;
+      elMotGeohashCod.textContent = estado.geohash6;
+      elMotGeohashSetor.textContent = estado.geohash4;
+      elMotDinamicaAdmin.textContent = "+" + estado.adminRegras.dinamicaPct + "%";
+
+      if (!db) return;
+      const motId = (elMotId.value || "mot_junior_costa").trim();
+      try {
+        await db.collection("motoristas_online").doc(motId).set({
+          id: motId,
+          nome: (elMotNome.value || "Junior Costa").trim(),
+          veiculo: (elMotVeiculo.value || "").trim(),
+          chavePix: (elMotPix.value || "").trim(),
+          online: estado.online,
+          lat: estado.lat,
+          lon: estado.lon,
+          geohash: estado.geohash6,
+          geohashSetor: estado.geohash4,
+          ruaAtual: estado.ruaAtual,
+          atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+      } catch (e) {}
+    }
+
+    function conectarFirebase() {
+      if (!firebaseConfig.apiKey || firebaseConfig.apiKey.indexOf("COLE_AQUI") !== -1) {
+        return;
+      }
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      db = firebase.firestore();
+
+      // 1. Escuta regras centrais do Painel Admin (separadas do motorista)
+      db.collection("config").doc("32drive_dinamica").onSnapshot((doc) => {
+        if (doc.exists) {
+          const d = doc.data() || {};
+          estado.adminRegras.dinamicaPct = Number(d.dinamicaPct || 0);
+          estado.adminRegras.kmMinDesconto = Number(d.kmMinDesconto || 15);
+          estado.adminRegras.maxKmEmbarque = Number(d.maxKmEmbarque || 5);
+          estado.adminRegras.limiteDescontosMes = Number(d.limiteDescontosMes || 3);
+          elMotDinamicaAdmin.textContent = "+" + estado.adminRegras.dinamicaPct + "%";
+          renderizarTudo();
+        }
       });
 
-      if (!visiveis.length) {
-        listaCorridasEl.innerHTML =
-          '<div class="corrida-card" style="color:var(--muted);">Nenhuma corrida aguardando motorista no momento.</div>';
-        return;
-      }
+      // 2. Escuta corridas em tempo real
+      db.collection("corridas").onSnapshot((snap) => {
+        const motId = (elMotId.value || "mot_junior_costa").trim();
+        const abertas = [];
+        let minhaAtiva = null;
 
-      listaCorridasEl.innerHTML = visiveis
-        .map(function (c) {
-          const kmTxt = c.distanciaKm ? Number(c.distanciaKm).toFixed(1).replace(".", ",") + " km" : "—";
-          const valorFinal = calcularValorFinal(c, dinamicaPct, descontoTipo, descontoValor);
-          const tagDin = dinamicaPct > 0 ? ' <span class="tag tag-din">Dinâmica +' + dinamicaPct + '%</span>' : "";
-          const rotuloDesc = formatarRotuloDesconto(descontoTipo, descontoValor);
-          const tagDesc = rotuloDesc ? ' <span class="tag tag-desc">Desc. ' + escaparHtml(rotuloDesc) + '</span>' : "";
-          const prev = resolverMinutosChegada(c);
-          return (
-            '<div class="corrida-card">' +
-              '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                '<strong>' + escaparHtml(c.codigo || "Corrida") + ' • ' + escaparHtml(c.passageiro || "Passageiro") + '</strong>' +
-                '<span class="valor-destaque">' + formatarMoeda(valorFinal) + '</span>' +
-              '</div>' +
-              '<div>' +
-                '<span class="tag">' + kmTxt + '</span> ' +
-                '<span class="tag">' + escaparHtml(c.pagamento || "Pix") + '</span> ' +
-                '<span class="tag">Chegada: ' + prev.minutos + ' min (' + prev.modo + ')</span>' +
-                tagDin +
-                tagDesc +
-              '</div>' +
-              '<div><strong>Embarque:</strong> ' + escaparHtml(c.origem || "—") + '<br/><strong>Destino:</strong> ' + escaparHtml(c.destino || "—") + '</div>' +
-              '<button class="btn btn-accent" type="button" data-aceitar="' + escaparHtml(c.docId) + '">Aceitar Corrida</button>' +
-            '</div>'
-          );
-        })
-        .join("");
-    }
-
-    async function aceitarCorrida(docId) {
-      const perfil = salvarPerfil();
-      const nomeMotorista = perfil.nome || "Motorista 32 Drive";
-      const chamado = chamadosLocais.find(function (item) { return item.docId === docId; }) || {};
-      const tempoInfo = resolverMinutosChegada(chamado);
-      const valorBase = obterValorBaseCorrida(chamado);
-      const valorFinal = calcularValorFinal(chamado, dinamicaPct, descontoTipo, descontoValor);
-
-      const dadosMotorista = {
-        codigo: perfil.codigo || "MOT-01",
-        nome: nomeMotorista,
-        veiculo: perfil.veiculo || "Veículo 32 Drive",
-        placa: perfil.placa || "32D",
-        chavePix: perfil.chavePix || ""
-      };
-
-      const payloadAtualizacao = {
-        status: "Motorista a caminho",
-        motorista: dadosMotorista,
-        tempoChegadaMin: tempoInfo.minutos,
-        modoTempoChegada: tempoInfo.modo,
-        chavePixMotorista: perfil.chavePix || "",
-        dinamicaPct: dinamicaPct,
-        descontoTipo: descontoTipo,
-        descontoValor: descontoValor,
-        valorBase: valorBase,
-        valorBruto: valorFinal
-      };
-
-      if (String(docId).indexOf("SIM-") === 0) {
-        const idxLocal = chamadosLocais.findIndex(function (item) { return item.docId === docId; });
-        if (idxLocal !== -1) chamadosLocais.splice(idxLocal, 1);
-        corridaEmAndamento = Object.assign({}, chamado, payloadAtualizacao);
-        renderizarChamados(chamadosLocais);
-        renderizarCorridaAndamento();
-        msgMotorista.textContent = "Corrida simulada aceita! Chegada em " + tempoInfo.minutos + " min.";
-        return;
-      }
-
-      if (!db || !fs || !docId) {
-        msgMotorista.textContent = "Conecte o firebase-config.js para aceitar corridas reais.";
-        return;
-      }
-
-      try {
-        await fs.updateDoc(fs.doc(db, "corridas", docId), Object.assign({}, payloadAtualizacao, {
-          aceitaEm: fs.serverTimestamp()
-        }));
-        corridaEmAndamento = Object.assign({ docId: docId }, chamado, payloadAtualizacao);
-        renderizarCorridaAndamento();
-        msgMotorista.textContent = "Corrida aceita! Passageiro avisado (" + tempoInfo.minutos + " min).";
-      } catch (erro) {
-        console.error(erro);
-        msgMotorista.textContent = "Erro ao aceitar corrida (" + (erro.code || erro.message || "Firestore") + ").";
-      }
-    }
-
-    async function avancarEtapaCorrida(novaEtapa) {
-      if (!corridaEmAndamento) return;
-
-      if (String(corridaEmAndamento.docId || "").indexOf("SIM-") === 0) {
-        if (novaEtapa === "Finalizada") {
-          msgMotorista.textContent = "Corrida simulada finalizada — painel limpo.";
-          limparPainelAndamento("");
-        } else {
-          corridaEmAndamento.status = novaEtapa;
-          msgMotorista.textContent = "Status atualizado: " + novaEtapa;
-          renderizarCorridaAndamento();
-        }
-        return;
-      }
-
-      if (!db || !fs) return;
-      try {
-        const upd = { status: novaEtapa };
-        if (novaEtapa === "Finalizada") upd.finalizadaEm = fs.serverTimestamp();
-        await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), upd);
-        if (novaEtapa === "Finalizada") {
-          msgMotorista.textContent = "Corrida finalizada! Painel limpo.";
-          limparPainelAndamento("");
-        } else {
-          msgMotorista.textContent = "Status atualizado: " + novaEtapa;
-          corridaEmAndamento.status = novaEtapa;
-          renderizarCorridaAndamento();
-        }
-      } catch (erro) {
-        console.error(erro);
-        msgMotorista.textContent = "Erro ao atualizar status (" + (erro.code || erro.message || "Firestore") + ").";
-      }
-    }
-
-    window.simularChamadoTeste = function () {
-      const fake = {
-        docId: "SIM-" + Date.now(),
-        codigo: "32D-" + Math.floor(1000 + Math.random() * 9000),
-        passageiro: "Passageiro Teste",
-        origem: "Av. Rio Grande, 450 — Cassino",
-        destino: "FURG — Campus Carreiros, Rio Grande",
-        distanciaKm: 14.5,
-        tempoEstimadoRotaMin: 22,
-        pagamento: "Pix",
-        valorBase: 29.0,
-        valorBruto: 29.0,
-        dinamicaPct: dinamicaPct,
-        descontoTipo: descontoTipo,
-        descontoValor: descontoValor,
-        status: "Aguardando motorista"
-      };
-      chamadosLocais.unshift(fake);
-      renderizarChamados(chamadosLocais);
-      msgMotorista.textContent = "Chamado de teste criado abaixo.";
-    };
-
-    carregarPerfilSalvo();
-    atualizarVisualDinamica();
-    atualizarVisualDesconto();
-    atualizarVisualTempo();
-    renderizarChamados([]);
-
-    [elCodigo, elNome, elVeiculo, elPlaca, elPix].forEach(function (campo) {
-      campo.addEventListener("change", salvarPerfil);
-    });
-
-    btnSalvarPerfil.addEventListener("click", function () {
-      salvarPerfil();
-      msgMotorista.textContent = "Dados do motorista salvos.";
-    });
-
-    btnEnviarPix.addEventListener("click", enviarChavePix);
-    btnLimparAndamento.addEventListener("click", function () { limparPainelAndamento("Painel limpo."); });
-    btnLimparChamados.addEventListener("click", function () {
-      chamadosLocais.forEach(function (c) { idsOcultos.add(c.docId); });
-      salvarOcultos();
-      chamadosLocais = [];
-      renderizarChamados([]);
-      msgMotorista.textContent = "Lista de chamados limpa.";
-    });
-
-    btnModoAuto.addEventListener("click", function () {
-      modoTempo = "auto";
-      localStorage.setItem("32drive_modo_tempo", "auto");
-      atualizarVisualTempo();
-      renderizarChamados(chamadosLocais);
-    });
-
-    btnModoManual.addEventListener("click", function () {
-      modoTempo = "manual";
-      localStorage.setItem("32drive_modo_tempo", "manual");
-      atualizarVisualTempo();
-      renderizarChamados(chamadosLocais);
-    });
-
-    botoesMin.forEach(function (btn) {
-      btn.addEventListener("click", async function () {
-        const min = Number(btn.dataset.min);
-        minutoManualSelecionado = min;
-        modoTempo = "manual";
-        localStorage.setItem("32drive_min_manual", String(min));
-        localStorage.setItem("32drive_modo_tempo", "manual");
-        atualizarVisualTempo();
-        renderizarChamados(chamadosLocais);
-
-        if (corridaEmAndamento) {
-          corridaEmAndamento.tempoChegadaMin = min;
-          corridaEmAndamento.modoTempoChegada = "manual";
-          renderizarCorridaAndamento();
-          if (String(corridaEmAndamento.docId || "").indexOf("SIM-") !== 0 && db && fs) {
-            try {
-              await fs.updateDoc(fs.doc(db, "corridas", corridaEmAndamento.docId), {
-                tempoChegadaMin: min,
-                modoTempoChegada: "manual"
-              });
-              msgMotorista.textContent = "Previsão de chegada atualizada para " + min + " min (manual).";
-            } catch (_) {}
+        snap.forEach((doc) => {
+          const c = Object.assign({ id: doc.id }, doc.data());
+          if (Number.isFinite(Number(c.origemLat)) && Number.isFinite(Number(c.origemLon))) {
+            c.kmAteEmbarque = Math.max(0.1, Number((distanciaHaversineKm(estado.lat, estado.lon, Number(c.origemLat), Number(c.origemLon)) * 1.2).toFixed(1)));
+          } else {
+            c.kmAteEmbarque = Number(c.kmAteEmbarque || 1.5);
           }
-        }
+
+          const ghCorrida = String(c.geohashEmbarque || "");
+          const mesmoSetor = !ghCorrida || !estado.geohash4 || ghCorrida.slice(0, 4) === estado.geohash4;
+
+          if (c.motoristaId === motId && c.status !== "Finalizada" && c.status !== "Cancelada" && !c.ocultaMotorista) {
+            minhaAtiva = c;
+          } else if (c.status === "Aguardando motorista" && mesmoSetor) {
+            abertas.push(c);
+          }
+        });
+
+        estado.chamadosAbertos = abertas;
+        if (minhaAtiva) estado.corridaAtiva = minhaAtiva;
+        atualizarMarcadoresMapa();
+        renderizarTudo();
+      });
+    }
+
+    async function atualizarCorridaFirestore(corridaId, patch) {
+      if (!db || !corridaId) return;
+      try {
+        await db.collection("corridas").doc(corridaId).set(patch, { merge: true });
+      } catch (e) {}
+    }
+
+    function renderizarCorridaAtiva() {
+      const c = estado.corridaAtiva;
+      if (!c) {
+        elCorridaAtivaBox.innerHTML = '<div class="meta-small">Conversa limpa. Selecione um chamado abaixo ou aguarde uma solicitação no seu Geohash.</div>';
+        return;
+      }
+
+      const liberado = podeDarDesconto(c);
+      const podeEditar = c.status === "Aguardando motorista" || c.status === "Recusada pelo passageiro";
+      const minKm = Number(estado.adminRegras.kmMinDesconto || 15);
+      const maxEmb = Number(estado.adminRegras.maxKmEmbarque || 5);
+      const maxMes = Number(estado.adminRegras.limiteDescontosMes || 3);
+
+      let motivo = "";
+      if (Number(c.distanciaKm) < minKm) motivo = "Sem desconto: viagem < " + minKm + " km.";
+      else if (Number(c.kmAteEmbarque) > maxEmb) motivo = "Sem desconto: embarque a " + c.kmAteEmbarque + " km (> " + maxEmb + " km).";
+      else if (Number(c.descontosPassageiroMes || 0) >= maxMes) motivo = "Sem desconto: passageiro atingiu cota de " + maxMes + " no mês.";
+      else motivo = "Liberado pelo Admin: viagem ≥ " + minKm + " km e embarque ≤ " + maxEmb + " km.";
+
+      let acoes = "";
+      if (c.status === "Aguardando motorista") {
+        acoes =
+          '<button type="button" class="btn btn-green" id="btn-aceitar-corrida">' +
+            (c.codigo4d ? "Aprovar Direto / Aceitar (" : "Aceitar Corrida (") + moeda(c.valorBruto) + ")</button>" +
+          '<button type="button" class="btn btn-red btn-sm" id="btn-recusar-corrida">Recusar</button>';
+      } else if (c.status === "Recusada pelo passageiro") {
+        acoes =
+          '<button type="button" class="btn btn-accent btn-sm" id="btn-enviar-contra" ' + (liberado ? "" : "disabled") + '>Enviar Contraproposta (' + moeda(c.valorBruto) + ")</button>" +
+          '<button type="button" class="btn btn-outline btn-sm" id="btn-recusar-corrida">Encerrar</button>';
+      } else if (c.status === "Contraproposta enviada") {
+        acoes = '<button type="button" class="btn btn-outline btn-sm" id="btn-recusar-corrida">Cancelar Proposta</button>';
+      } else if (c.status === "Aceita") {
+        acoes = '<button type="button" class="btn btn-blue btn-sm" data-prox-status="Motorista a caminho">Sinalizar A Caminho</button>';
+      } else if (c.status === "Motorista a caminho") {
+        acoes = '<button type="button" class="btn btn-blue btn-sm" data-prox-status="Em viagem">Iniciar Viagem</button>';
+      } else if (c.status === "Em viagem") {
+        acoes = '<button type="button" class="btn btn-green btn-sm" data-prox-status="Finalizada">Finalizar Viagem</button>';
+      } else {
+        acoes = '<button type="button" class="btn btn-outline btn-sm" id="btn-fechar-ativa">Fechar</button>';
+      }
+
+      elCorridaAtivaBox.innerHTML =
+        (c.status === "Recusada pelo passageiro" ? '<div class="status-banner recusada">⚠️ Passageiro recusou ' + moeda(c.valorBruto) + ". Envie contraproposta ou encerre.</div>" : "") +
+        (c.codigo4d ? '<div class="status-banner alerta">Código de 4 dígitos do passageiro: <strong>' + escapar(c.codigo4d) + "</strong></div>" : "") +
+        '<div><strong>Passageiro:</strong> ' + escapar(c.passageiro) + " • <strong>Pagto:</strong> " + escapar(c.pagamento || "Pix") + "</div>" +
+        '<div><strong>Embarque:</strong> ' + escapar(c.origem) + "<br/><strong>Destino:</strong> " + escapar(c.destino) + "</div>" +
+        '<div class="meta-small">Distância: <strong>' + Number(c.distanciaKm || 0).toFixed(2).replace(".", ",") + " km</strong> • Até embarque: <strong>" + Number(c.kmAteEmbarque || 0).toFixed(1).replace(".", ",") + " km</strong> • GH: <strong>" + escapar(c.geohashEmbarque || "—") + "</strong></div>" +
+        '<div class="price-big">' + moeda(c.valorBruto) + ' <span class="meta-small">(Base: ' + moeda(c.valorBase) + ")</span></div>" +
+        '<div class="ajuste-box">' +
+          '<div class="ajuste-btns">' +
+            '<button type="button" class="btn-ajuste ' + (c.ajusteTipo === "-5%" ? "ativo" : "") + '" data-pct="-5" ' + (liberado && podeEditar ? "" : "disabled") + ">-5%</button>" +
+            '<button type="button" class="btn-ajuste ' + (c.ajusteTipo === "-10%" ? "ativo" : "") + '" data-pct="-10" ' + (liberado && podeEditar ? "" : "disabled") + ">-10%</button>" +
+            '<button type="button" class="btn-ajuste ' + (c.ajusteTipo === "base" ? "ativo" : "") + '" data-pct="0" ' + (liberado && podeEditar ? "" : "disabled") + ">Valor Base</button>" +
+          "</div>" +
+          '<div class="contra-box">' +
+            '<input type="number" step="0.50" min="1" id="input-abatimento-reais" placeholder="Abater R$ (ex: 9.50)" ' + (liberado && podeEditar ? "" : "disabled") + " />" +
+            '<button type="button" class="btn btn-outline btn-sm" id="btn-aplicar-reais" ' + (liberado && podeEditar ? "" : "disabled") + ">Abater R$</button>" +
+          "</div>" +
+          '<div class="meta-small">' + escapar(motivo) + "</div>" +
+          '<div class="repasse-bar">80/20 sobre valor fechado: Motorista <strong>' + moeda(c.repasseMotorista) + "</strong> • 32 Drive <strong>" + moeda(c.taxaPlataforma) + "</strong></div>" +
+        "</div>" +
+        '<div class="chips">' + acoes + "</div>";
+    }
+
+    function renderizarChamadosAbertos() {
+      elContadorChamados.textContent = estado.chamadosAbertos.length + " chamado(s)";
+      if (!estado.chamadosAbertos.length) {
+        elListaChamadosBox.innerHTML = '<div class="meta-small">Nenhum chamado aberto no setor Geohash ' + escapar(estado.geohash4) + ".</div>";
+        return;
+      }
+
+      elListaChamadosBox.innerHTML = estado.chamadosAbertos.map((ch, idx) => (
+        '<div class="corrida-item">' +
+          '<div><strong>' + escapar(ch.passageiro || "Passageiro") + "</strong> • " + moeda(ch.valorBruto) + ' <span class="meta-small">(' + Number(ch.distanciaKm || 0).toFixed(2).replace(".", ",") + " km)</span></div>" +
+          '<div class="meta-small">De: ' + escapar(ch.origem) + "<br/>Para: " + escapar(ch.destino) + " • Embarque a " + Number(ch.kmAteEmbarque || 0).toFixed(1).replace(".", ",") + " km</div>" +
+          '<div><button type="button" class="btn btn-primary btn-sm" data-abrir-idx="' + idx + '">Abrir / Atender Chamado</button></div>' +
+        "</div>"
+      )).join("");
+    }
+
+    function renderizarTudo() {
+      renderizarCorridaAtiva();
+      renderizarChamadosAbertos();
+    }
+
+    // =========================================================================
+    // 4. EVENTOS DO MOTORISTA
+    // =========================================================================
+    document.getElementById("btn-gps-motorista").addEventListener("click", function () {
+      if (!navigator.geolocation) return;
+      elMotRuaAtual.textContent = "Localizando rua pelo GPS...";
+      navigator.geolocation.getCurrentPosition(async function (pos) {
+        estado.lat = Number(pos.coords.latitude.toFixed(5));
+        estado.lon = Number(pos.coords.longitude.toFixed(5));
+        estado.ruaAtual = await resolverNomeRuaPorCoords(estado.lat, estado.lon);
+        atualizarMarcadoresMapa();
+        await publicarPosicaoMotoristaFirestore();
       });
     });
 
-    listaCorridasEl.addEventListener("click", function (ev) {
-      const btn = ev.target.closest("button[data-aceitar]");
-      if (!btn) return;
-      aceitarCorrida(btn.getAttribute("data-aceitar"));
+    document.getElementById("btn-alternar-online").addEventListener("click", async function () {
+      estado.online = !estado.online;
+      elBadgeOnline.textContent = estado.online ? "ONLINE" : "OFFLINE";
+      elBadgeOnline.classList.toggle("offline", !estado.online);
+      this.textContent = estado.online ? "Ficar Offline" : "Ficar Online";
+      await publicarPosicaoMotoristaFirestore();
     });
 
-    boxCorridaAndamento.addEventListener("click", function (ev) {
-      const btn = ev.target.closest("button[data-etapa]");
-      if (!btn) return;
-      avancarEtapaCorrida(btn.getAttribute("data-etapa"));
-    });
-
-    (async function conectarFirebase() {
-      try {
-        const configModulo = await import("./firebase-config.js");
-        fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-        db = configModulo.db;
-        if (!db) throw new Error("db não exportado");
-
-        mostrarAvisoFirebase("");
-
-        fs.onSnapshot(fs.collection(db, "corridas"), function (snapshot) {
-          const aguardando = [];
-          let ativaMinha = null;
-          let maisRecenteAtivaTs = -1;
-
-          snapshot.forEach(function (docSnap) {
-            if (idsOcultos.has(docSnap.id)) return;
-            const d = docSnap.data();
-            const st = String(d.status || "");
-            if (st === "Finalizada" || st === "Cancelada") return;
-
-            if (st === "Aguardando motorista") {
-              aguardando.push(Object.assign({ docId: docSnap.id }, d));
-            } else if (d.motorista && d.motorista.nome) {
-              const ts = Number(d.criadoEmTimestamp || 0);
-              if (ts >= maisRecenteAtivaTs) {
-                maisRecenteAtivaTs = ts;
-                ativaMinha = Object.assign({ docId: docSnap.id }, d);
-              }
-            }
-          });
-
-          chamadosLocais = aguardando;
-          renderizarChamados(aguardando);
-          corridaEmAndamento = ativaMinha;
-          renderizarCorridaAndamento();
-        });
-      } catch (erro) {
-        console.error(erro);
-        mostrarAvisoFirebase(
-          "Painel do Motorista carregado. Use 'Simular Chamado' para testar ou verifique o firebase-config.js para receber corridas reais."
-        );
+    // Botão Limpar Conversa do Motorista
+    document.getElementById("btn-limpar-conversa-mot").addEventListener("click", async function () {
+      if (estado.corridaAtiva && estado.corridaAtiva.id) {
+        await atualizarCorridaFirestore(estado.corridaAtiva.id, { ocultaMotorista: true });
       }
-    })();
+      estado.corridaAtiva = null;
+      atualizarMarcadoresMapa();
+      renderizarTudo();
+    });
+
+    elListaChamadosBox.addEventListener("click", function (ev) {
+      const btn = ev.target.closest("button[data-abrir-idx]");
+      if (!btn) return;
+      const ch = estado.chamadosAbertos[Number(btn.getAttribute("data-abrir-idx"))];
+      if (!ch) return;
+      estado.corridaAtiva = Object.assign({}, ch);
+      atualizarMarcadoresMapa();
+      renderizarTudo();
+    });
+
+    elCorridaAtivaBox.addEventListener("click", async function (ev) {
+      const c = estado.corridaAtiva;
+      if (!c) return;
+      const motId = (elMotId.value || "mot_junior_costa").trim();
+
+      const btnPct = ev.target.closest("button[data-pct]");
+      if (btnPct) {
+        if (!podeDarDesconto(c)) return;
+        const pct = Number(btnPct.getAttribute("data-pct"));
+        const div = recalcularDivisao8020(Number((Number(c.valorBase) * (1 + pct / 100)).toFixed(2)));
+        Object.assign(c, div, { ajusteTipo: pct === 0 ? "base" : pct + "%" });
+        renderizarTudo();
+        return;
+      }
+
+      if (ev.target.id === "btn-aplicar-reais") {
+        if (!podeDarDesconto(c)) return;
+        const inp = document.getElementById("input-abatimento-reais");
+        const abat = Math.max(0, Number(inp && inp.value ? inp.value : 0));
+        if (!abat) return;
+        const div = recalcularDivisao8020(Math.max(TARIFA_CURTA_ATE_350, Number((Number(c.valorBase) - abat).toFixed(2))));
+        Object.assign(c, div, { ajusteTipo: "reais" });
+        renderizarTudo();
+        return;
+      }
+
+      if (ev.target.id === "btn-aceitar-corrida") {
+        c.status = "Aceita";
+        c.motoristaId = motId;
+        c.motoristaNome = (elMotNome.value || "Junior Costa").trim();
+        c.motoristaVeiculo = (elMotVeiculo.value || "").trim();
+        c.motoristaPix = (elMotPix.value || "").trim();
+        await atualizarCorridaFirestore(c.id, c);
+        renderizarTudo();
+        return;
+      }
+
+      if (ev.target.id === "btn-enviar-contra") {
+        if (!podeDarDesconto(c)) return;
+        c.status = "Contraproposta enviada";
+        c.motoristaId = motId;
+        c.motoristaNome = (elMotNome.value || "Junior Costa").trim();
+        c.motoristaVeiculo = (elMotVeiculo.value || "").trim();
+        c.motoristaPix = (elMotPix.value || "").trim();
+        await atualizarCorridaFirestore(c.id, c);
+        renderizarTudo();
+        return;
+      }
+
+      const btnProx = ev.target.closest("button[data-prox-status]");
+      if (btnProx) {
+        c.status = btnProx.getAttribute("data-prox-status");
+        await atualizarCorridaFirestore(c.id, { status: c.status });
+        renderizarTudo();
+        return;
+      }
+
+      if (ev.target.id === "btn-recusar-corrida") {
+        c.status = "Cancelada";
+        await atualizarCorridaFirestore(c.id, { status: "Cancelada" });
+        estado.corridaAtiva = null;
+        atualizarMarcadoresMapa();
+        renderizarTudo();
+        return;
+      }
+
+      if (ev.target.id === "btn-fechar-ativa") {
+        estado.corridaAtiva = null;
+        atualizarMarcadoresMapa();
+        renderizarTudo();
+      }
+    });
+
+    // Inicialização
+    inicializarMapa();
+    conectarFirebase();
+    publicarPosicaoMotoristaFirestore();
+    renderizarTudo();
   </script>
 </body>
 </html>
