@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>32 Drive • Painel Motorista</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     :root {
       --bg: #0b192c;
@@ -71,7 +70,7 @@
       margin: 0 auto;
       padding: 14px;
       display: grid;
-      grid-template-columns: 1.05fr 1.15fr;
+      grid-template-columns: 1fr 1.2fr;
       gap: 14px;
       flex: 1;
     }
@@ -129,15 +128,6 @@
       .row-2 { grid-template-columns: 1fr; }
     }
 
-    #mapa-motorista {
-      width: 100%;
-      height: 250px;
-      border-radius: 10px;
-      border: 1.5px solid var(--border);
-      background: #e2e8f0;
-      z-index: 1;
-    }
-
     .btn {
       padding: 12px 16px;
       border-radius: 10px;
@@ -151,7 +141,7 @@
       justify-content: center;
     }
 
-    .btn-sm { padding: 9px 13px; font-size: 15px; }
+    .btn-sm { padding: 10px 14px; font-size: 15px; }
     .btn-accent { background: var(--accent); color: #0f172a; }
     .btn-green { background: var(--green); color: #ffffff; }
     .btn-red { background: var(--red); color: #ffffff; }
@@ -175,7 +165,7 @@
     .resumo-box strong { color: var(--accent); }
 
     .lista-scroll {
-      max-height: 480px;
+      max-height: 520px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -235,10 +225,9 @@
     <div class="col">
       <section class="card">
         <div class="card-title">
-          <span>Mapa e Posição Atual</span>
+          <span>Dados do Motorista e Posição</span>
           <span class="meta-small" id="info-geohash-mot">GH: —</span>
         </div>
-        <div id="mapa-motorista"></div>
         <div class="meta-small" id="coords-motorista">Localização: Balneário Cassino, Rio Grande - RS</div>
 
         <div class="row-2">
@@ -283,7 +272,6 @@
     </div>
   </main>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
@@ -342,8 +330,6 @@
       estadoMot.geohashSetor = estadoMot.geohash.slice(0, 4);
 
       let db = null;
-      let mapaMot = null;
-      let marcadorMot = null;
 
       const elStatusFirebase = document.getElementById("status-firebase-mot");
       const elBtnOnline = document.getElementById("btn-toggle-online");
@@ -367,6 +353,13 @@
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;")
           .replace(/"/g, "&quot;");
+      }
+
+      function limparTelefoneWhats(tel) {
+        const numeros = String(tel || "").replace(/\D/g, "");
+        if (!numeros) return "";
+        if (numeros.length <= 11 && !numeros.startsWith("55")) return "55" + numeros;
+        return numeros;
       }
 
       function montarLinkWazeEmbarque(c, latMot, lngMot) {
@@ -399,6 +392,23 @@
         return "https://waze.com/ul?q=" + destFinal + "&navigate=yes";
       }
 
+      function montarLinkWhatsAppRota(c) {
+        const linkWaze = montarLinkWazeEmbarque(c, estadoMot.lat, estadoMot.lng);
+        const linkDestino = montarLinkWazeDestino(c, estadoMot.lat, estadoMot.lng);
+        const nomeMot = (elMotNome.value || "").trim() || "Junior Costa";
+        const veiculoMot = (elMotVeiculo.value || "").trim() || "VW Voyage 1.0 • IQD8060";
+        const texto =
+          "32 Drive — " + nomeMot + " (" + veiculoMot + ") está a caminho!\n" +
+          "Embarque: " + (c.origem || "") + "\n" +
+          "Destino: " + (c.destino || "") + "\n" +
+          "Waze (até você): " + linkWaze + "\n" +
+          "Waze (até o destino): " + linkDestino;
+        const fone = limparTelefoneWhats(c.passageiroWhats || c.whatsapp || "");
+        return fone
+          ? "https://wa.me/" + fone + "?text=" + encodeURIComponent(texto)
+          : "https://wa.me/?text=" + encodeURIComponent(texto);
+      }
+
       function classeStatus(st) {
         if (st === "Aguardando motorista") return "tag-status aguardando";
         if (st === "Aceita" || st === "Em viagem") return "tag-status aceita";
@@ -415,33 +425,6 @@
         elGanhos80.textContent = moeda(soma80);
         elDinamicaAtual.textContent = Number(estadoMot.dinamicaPct || 0) + "%";
         elQtdFinalizadas.textContent = finalizadas.length + " finalizada(s)";
-      }
-
-      function iniciarMapa() {
-        try {
-          if (typeof window.L === "undefined") {
-            elCoordsMot.textContent = "Lat: " + estadoMot.lat.toFixed(4) + ", Lng: " + estadoMot.lng.toFixed(4) + " (Mapa sem conexão no momento)";
-            return;
-          }
-          mapaMot = window.L.map("mapa-motorista").setView([estadoMot.lat, estadoMot.lng], 14);
-          window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: "© OpenStreetMap"
-          }).addTo(mapaMot);
-          marcadorMot = window.L.marker([estadoMot.lat, estadoMot.lng], { draggable: true }).addTo(mapaMot).bindPopup("Motorista");
-
-          marcadorMot.on("dragend", function () {
-            const pt = marcadorMot.getLatLng();
-            atualizarPosicaoMot(pt.lat, pt.lng);
-          });
-
-          mapaMot.on("click", function (ev) {
-            atualizarPosicaoMot(ev.latlng.lat, ev.latlng.lng);
-          });
-
-          setTimeout(function () {
-            if (mapaMot) mapaMot.invalidateSize();
-          }, 300);
-        } catch (e) {}
       }
 
       async function sincronizarPosicaoNasCorridasAtivas() {
@@ -487,14 +470,6 @@
 
         elInfoGeohash.textContent = "GH: " + estadoMot.geohash + " (" + estadoMot.geohashSetor + ")";
         elCoordsMot.textContent = "Lat: " + estadoMot.lat.toFixed(4) + ", Lng: " + estadoMot.lng.toFixed(4);
-
-        if (mapaMot && marcadorMot) {
-          try {
-            marcadorMot.setLatLng([estadoMot.lat, estadoMot.lng]);
-            mapaMot.setView([estadoMot.lat, estadoMot.lng], 15);
-            mapaMot.invalidateSize();
-          } catch (e) {}
-        }
         publicarPresencaMotorista();
       }
 
@@ -514,6 +489,9 @@
           const podeIniciar = c.status === "Aceita";
           const podeFinalizar = c.status === "Em viagem" || c.status === "Aceita";
           const linkWaze = c.linkWaze || montarLinkWazeEmbarque(c, estadoMot.lat, estadoMot.lng);
+          const linkWhats = montarLinkWhatsAppRota(c);
+          const nomePas = c.passageiroNome || c.passageiro || "";
+          const whatsPas = c.passageiroWhats || c.whatsapp || "";
 
           return (
             '<div class="corrida-box ' + (podeAceitar || podeIniciar ? "ativa" : "") + '" data-id="' + escapar(c.id) + '">' +
@@ -521,12 +499,16 @@
                 '<strong>' + moeda(bruto) + " • " + escapar(c.codigo || c.id) + "</strong>" +
                 '<span class="' + classeStatus(c.status) + '">' + escapar(c.status || "Aguardando motorista") + "</span>" +
               "</div>" +
+              (nomePas || whatsPas
+                ? '<div><strong>Passageiro:</strong> ' + escapar(nomePas) + (whatsPas ? ' • <strong>WhatsApp:</strong> ' + escapar(whatsPas) : '') + "</div>"
+                : "") +
               '<div><strong>Embarque:</strong> ' + escapar(c.origem) + "<br/><strong>Destino:</strong> " + escapar(c.destino) + "</div>" +
               '<div><strong>Valor da corrida:</strong> ' + moeda(bruto) + " • <strong>Seu ganho (80%):</strong> " + moeda(mot80) + "</div>" +
               (c.codigo4d ? '<div class="meta-small">Código 4 dígitos: <strong>' + escapar(c.codigo4d) + "</strong></div>" : "") +
               '<div class="chips" style="margin-top:6px;">' +
                 (podeAceitar ? '<button type="button" class="btn btn-green btn-sm btn-aceitar-mot">Aceitar Corrida</button>' : "") +
                 (podeIniciar ? '<button type="button" class="btn btn-blue btn-sm btn-iniciar-mot">Iniciar Viagem</button>' : "") +
+                '<a class="btn btn-green btn-sm" href="' + linkWhats + '" target="_blank" rel="noopener noreferrer">Enviar Waze no WhatsApp</a>' +
                 '<a class="btn btn-outline btn-sm" href="' + linkWaze + '" target="_blank" rel="noopener noreferrer">Abrir Waze</a>' +
                 (podeFinalizar ? '<button type="button" class="btn btn-accent btn-sm btn-finalizar-mot">Finalizar</button>' : "") +
                 (podeAceitar ? '<button type="button" class="btn btn-red btn-sm btn-recusar-mot">Recusar</button>' : "") +
@@ -636,7 +618,6 @@
         else if (ev.target.classList.contains("btn-recusar-mot")) atualizarStatusCorrida(corridaId, "Recusada pelo motorista");
       });
 
-      iniciarMapa();
       atualizarPosicaoMot(estadoMot.lat, estadoMot.lng);
       conectarFirebase();
       renderizarChamadas();
