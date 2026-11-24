@@ -2,24 +2,26 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0b192c" />
-  <link rel="icon" type="image/png" href="icon-512.png" />
-  <link rel="apple-touch-icon" href="icon-512.png" />
-  <title>32 Drive — Painel Administrativo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>32 Drive • Painel Admin (Integração V39 + V40 + Geohash + Firebase)</title>
   <style>
     :root {
-      --bg: #ffffff;
+      --bg: #0b192c;
+      --surface: #f1f5f9;
       --card: #ffffff;
-      --navy-header: linear-gradient(145deg, #0b192c 0%, #13294b 70%, #0c1e38 100%);
-      --border: #cbd5e1;
+      --navy: #0b192c;
+      --navy-2: #13294b;
+      --accent: #f59e0b;
       --text: #0f172a;
       --muted: #475569;
-      --accent: #f59e0b;
-      --green: #059669;
-      --red: #dc2626;
+      --border: #cbd5e1;
+      --green: #047857;
+      --blue: #0369a1;
+      --red: #b91c1c;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
@@ -27,101 +29,492 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      font-size: 18px;
-      line-height: 1.45;
+      font-size: 14px;
+      line-height: 1.4;
     }
-    header {
-      background: var(--navy-header);
+
+    .topbar {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
       border-bottom: 3px solid var(--accent);
-      padding: 16px;
+      padding: 12px 18px;
+      color: #ffffff;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      color: #ffffff;
     }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand img { width: 46px; height: 46px; border-radius: 11px; border: 2px solid var(--accent); background: #fff; }
-    h1 { font-size: 20px; font-weight: 900; color: var(--accent); }
-    .subtitle { font-size: 15px; color: #dbeafe; }
-    .badge {
-      background: var(--accent);
-      color: #0f172a;
-      font-weight: 800;
-      font-size: 14px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      white-space: nowrap;
+
+    .brand { display: flex; align-items: center; gap: 10px; }
+
+    .badge-32 {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--navy);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-weight: 900;
+      font-size: 18px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
     }
-    main {
-      flex: 1;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-width: 720px;
+
+    .brand h1 { font-size: 16px; font-weight: 900; color: var(--accent); }
+    .brand p { font-size: 12px; color: #cbd5e1; }
+
+    .top-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+    .container {
       width: 100%;
+      max-width: 1180px;
       margin: 0 auto;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1.35fr;
+      gap: 14px;
+      flex: 1;
     }
-    .aviso-topo {
-      background: #fffbeb;
-      border: 2px solid #f59e0b;
-      color: #78350f;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 15px;
-      font-weight: 700;
+
+    @media (max-width: 960px) {
+      .container { grid-template-columns: 1fr; }
     }
+
+    .col { display: flex; flex-direction: column; gap: 14px; }
+
     .card {
       background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
-    }
-    .card-title { font-size: 19px; font-weight: 900; color: #0f172a; }
-    .kpis {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
       gap: 10px;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
     }
-    .kpi-box {
-      background: #f8fafc;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      text-align: center;
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
     }
-    .kpi-lbl { font-size: 14px; font-weight: 700; color: var(--muted); }
-    .kpi-num { font-size: 22px; font-weight: 900; color: #0f172a; margin-top: 2px; }
-    label { font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: block; }
-    input {
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    input, select {
       width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: 2px solid #94a3b8;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1.5px solid #94a3b8;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
       background: #ffffff;
-      color: #0f172a;
-      font-size: 17px;
-      font-weight: 600;
     }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    @media (max-width: 520px) {
+      .row-2 { grid-template-columns: 1fr; }
+    }
+
+    .resumo-box {
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .resumo-box strong { color: var(--accent); }
+
     .btn {
-      width: 100%;
-      padding: 14px;
+      padding: 9px 13px;
+      border-radius: 9px;
       border: none;
-      border-radius: 12px;
-      font-size: 17px;
+      font-size: 13px;
       font-weight: 800;
       cursor: pointer;
     }
-    .btn-primary { background: #0b192c; color: #ffffff; }
-    .btn-green { background: #10b981; color: #052e16; }
-    .btn-red { background: #fee2e2; color: #991b1b; border: 2px solid #f87171; }
-    .btn-blue { background: #e0f2fe; color: #0369a1; border: 2px solid #0284c7
+
+    .btn-sm { padding: 6px 9px; font-size: 11px; }
+    .btn-accent { background: var(--accent); color: #0f172a; }
+    .btn-green { background: #059669; color: #ffffff; }
+    .btn-blue { background: var(--blue); color: #ffffff; }
+    .btn-red { background: #dc2626; color: #ffffff; }
+    .btn-outline { background: #e2e8f0; color: #0f172a; border: 1px solid #94a3b8; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .lista-scroll {
+      max-height: 360px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .item-box {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .item-box.ativa {
+      border-color: #f59e0b;
+      background: #fffbeb;
+    }
+
+    .tag-status {
+      font-size: 11px;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .tag-status.aguardando { background: #fef3c7; color: #92400e; }
+    .tag-status.aceita { background: #d1fae5; color: #065f46; }
+    .tag-status.recusada { background: #fee2e2; color: #991b1b; }
+
+    .meta-small { font-size: 12px; color: var(--muted); font-weight: 700; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="badge-32">32</div>
+      <div>
+        <h1>32 DRIVE • PAINEL ADMIN (V39 + V40)</h1>
+        <p>Central de Chamadas • Geohash • Regras de Desconto • Repasse 80/20</p>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button type="button" class="btn btn-accent btn-sm" id="btn-abrir-passageiro-v40">📱 Passageiro V40</button>
+      <span class="meta-small" id="status-firebase-admin" style="color:#fde68a;">Simulador Local (Pronto p/ Firestore)</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- COLUNA ESQUERDA: REGRAS CENTRAIS & MOTORISTAS ONLINE -->
+    <div class="col">
+      <section class="card">
+        <div class="card-title">
+          <span>1. Regras Operacionais (Separadas do V39)</span>
+          <button type="button" class="btn btn-green btn-sm" id="btn-salvar-regras">Salvar Regras</button>
+        </div>
+
+        <div class="row-2">
+          <div>
+            <label for="cfg-dinamica">Dinâmica Global (%)</label>
+            <select id="cfg-dinamica">
+              <option value="0">Normal (0%)</option>
+              <option value="10">Dinâmica +10%</option>
+              <option value="20">Dinâmica +20%</option>
+              <option value="30">Pico / Chuva +30%</option>
+            </select>
+          </div>
+          <div>
+            <label for="cfg-km-min">Km Mínimo p/ Desconto</label>
+            <input id="cfg-km-min" type="number" step="0.5" min="1" value="15" />
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div>
+            <label for="cfg-max-emb">Máx. Km Até Embarque</label>
+            <input id="cfg-max-emb" type="number" step="0.5" min="1" value="5" />
+          </div>
+          <div>
+            <label for="cfg-cota-mes">Cota Descontos / Passageiro / Mês</label>
+            <input id="cfg-cota-mes" type="number" step="1" min="0" value="3" />
+          </div>
+        </div>
+
+        <div class="resumo-box">
+          Tarifa base: até 3,50 km = <strong>R$ 7,99</strong> | ≥ 3,51 km = <strong>R$ 2,00/km</strong> (sem R$ 7,99) • Rateio: <strong>80% Motorista / 20% 32 Drive</strong>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-title">
+          <span>2. Motoristas Online (Geohash)</span>
+          <span class="meta-small" id="contador-motoristas">0 online</span>
+        </div>
+        <div class="lista-scroll" id="lista-motoristas-box"></div>
+      </section>
+    </div>
+
+    <!-- COLUNA DIREITA: CENTRAL DE CHAMADAS RECEBIDAS (V40 -> ADMIN / V39) -->
+    <div class="col">
+      <section class="card">
+        <div class="card-title">
+          <span>3. Chamadas Recebidas em Tempo Real</span>
+          <div class="chips">
+            <span class="meta-small" id="contador-chamadas-admin">0 chamadas</span>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-conversa-admin">Limpar Conversa</button>
+          </div>
+        </div>
+
+        <div class="lista-scroll" id="lista-chamadas-admin">
+          <div class="meta-small">Aguardando chamadas do Passageiro (V40) chegarem no Firestore...</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    // =========================================================================
+    // 1. CONFIGURAÇÃO DO FIREBASE (MESMO PROJETO DO V39 / V40)
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "COLE_AQUI_SUA_API_KEY",
+      authDomain: "COLE_AQUI_SEU_AUTH_DOMAIN",
+      projectId: "COLE_AQUI_SEU_PROJECT_ID",
+      storageBucket: "COLE_AQUI_SEU_STORAGE_BUCKET",
+      messagingSenderId: "COLE_AQUI_SEU_SENDER_ID",
+      appId: "COLE_AQUI_SEU_APP_ID"
+    };
+
+    // URL ou arquivo do Passageiro V40 no mesmo repositório/pasta
+    const URL_PASSAGEIRO_V40 = "index.html";
+
+    const estado = {
+      regras: {
+        dinamicaPct: 0,
+        kmMinDesconto: 15,
+        maxKmEmbarque: 5,
+        limiteDescontosMes: 3
+      },
+      motoristasOnline: [
+        { id: "mot_junior_costa", nome: "Junior Costa", veiculo: "VW Voyage 1.0 • IQD8060", geohash: "f64p9m", geohashSetor: "f64p", ruaAtual: "Balneário Cassino — Av. Rio Grande", online: true }
+      ],
+      chamadas: [],
+      ocultasTelaAdmin: {}
+    };
+
+    let db = null;
+
+    const elCfgDinamica = document.getElementById("cfg-dinamica");
+    const elCfgKmMin = document.getElementById("cfg-km-min");
+    const elCfgMaxEmb = document.getElementById("cfg-max-emb");
+    const elCfgCotaMes = document.getElementById("cfg-cota-mes");
+    const elListaMotoristas = document.getElementById("lista-motoristas-box");
+    const elContadorMotoristas = document.getElementById("contador-motoristas");
+    const elListaChamadas = document.getElementById("lista-chamadas-admin");
+    const elContadorChamadas = document.getElementById("contador-chamadas-admin");
+    const elStatusFirebase = document.getElementById("status-firebase-admin");
+
+    function moeda(v) {
+      return "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
+    }
+
+    function escapar(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function classeStatus(st) {
+      if (st === "Aguardando motorista") return "tag-status aguardando";
+      if (st === "Aceita" || st === "Em viagem" || st === "Finalizada") return "tag-status aceita";
+      if (st === "Recusada pelo passageiro" || st === "Cancelada") return "tag-status recusada";
+      return "tag-status";
+    }
+
+    async function salvarRegrasNoFirestore() {
+      estado.regras = {
+        dinamicaPct: Number(elCfgDinamica.value || 0),
+        kmMinDesconto: Math.max(1, Number(elCfgKmMin.value || 15)),
+        maxKmEmbarque: Math.max(1, Number(elCfgMaxEmb.value || 5)),
+        limiteDescontosMes: Math.max(0, Number(elCfgCotaMes.value || 3))
+      };
+
+      if (!db) {
+        elStatusFirebase.textContent = "Regras aplicadas localmente (Dinâmica +" + estado.regras.dinamicaPct + "%)";
+        return;
+      }
+
+      try {
+        await db.collection("config").doc("32drive_dinamica").set(estado.regras, { merge: true });
+        elStatusFirebase.textContent = "Regras salvas no Firestore (config/32drive_dinamica)";
+      } catch (e) {}
+    }
+
+    function renderizarMotoristas() {
+      const ativos = estado.motoristasOnline.filter((m) => m.online !== false);
+      elContadorMotoristas.textContent = ativos.length + " online";
+      if (!ativos.length) {
+        elListaMotoristas.innerHTML = '<div class="meta-small">Nenhum motorista online no momento.</div>';
+        return;
+      }
+
+      elListaMotoristas.innerHTML = ativos.map((m) => (
+        '<div class="item-box">' +
+          '<div><strong>' + escapar(m.nome || m.id) + "</strong> • Setor GH: <strong>" + escapar(m.geohashSetor || (m.geohash || "").slice(0, 4) || "—") + "</strong> (" + escapar(m.geohash || "—") + ")</div>" +
+          '<div class="meta-small">' + escapar(m.veiculo || "") + " • " + escapar(m.ruaAtual || "") + "</div>" +
+        "</div>"
+      )).join("");
+    }
+
+    function renderizarChamadas() {
+      const visiveis = estado.chamadas.filter((c) => !estado.ocultasTelaAdmin[c.id]);
+      elContadorChamadas.textContent = visiveis.length + " chamada(s)";
+
+      if (!visiveis.length) {
+        elListaChamadas.innerHTML = '<div class="meta-small">Nenhuma chamada visível no painel. Quando o Passageiro (V40) chamar, a solicitação aparece aqui.</div>';
+        return;
+      }
+
+      const opcoesMotoristas = estado.motoristasOnline
+        .filter((m) => m.online !== false)
+        .map((m) => '<option value="' + escapar(m.id) + '">' + escapar(m.nome || m.id) + " (" + escapar(m.geohashSetor || "") + ")</option>")
+        .join("");
+
+      elListaChamadas.innerHTML = visiveis.map((c) => {
+        const bruto = Number(c.valorBruto || 0);
+        const mot80 = Number(c.repasseMotorista || bruto * 0.8);
+        const app20 = Number(c.taxaPlataforma || bruto - mot80);
+
+        return (
+          '<div class="item-box ' + (c.status === "Aguardando motorista" ? "ativa" : "") + '" data-id="' + escapar(c.id) + '">' +
+            '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
+              '<strong>' + escapar(c.codigo || c.id) + " • " + escapar(c.passageiro || "Passageiro") + "</strong>" +
+              '<span class="' + classeStatus(c.status) + '">' + escapar(c.status || "Aguardando motorista") + "</span>" +
+            "</div>" +
+            '<div><strong>De:</strong> ' + escapar(c.origem) + "<br/><strong>Para:</strong> " + escapar(c.destino) +
+            ' <span class="meta-small">(' + Number(c.distanciaKm || 0).toFixed(2).replace(".", ",") + " km • GH: " + escapar(c.geohashEmbarque || "—") + ")</span></div>" +
+            '<div><strong>Valor Base:</strong> ' + moeda(c.valorBase) + " → <strong>Bruto:</strong> " + moeda(bruto) +
+            " | 80% Mot: <strong>" + moeda(mot80) + "</strong> • 20% 32 Drive: <strong>" + moeda(app20) + "</strong></div>" +
+            (c.codigo4d ? '<div class="meta-small">Código 4 dígitos: <strong>' + escapar(c.codigo4d) + "</strong></div>" : "") +
+            '<div class="chips" style="margin-top:4px;">' +
+              '<select class="sel-despacho" style="max-width:210px; padding:5px 8px; font-size:12px;">' +
+                '<option value="">Despachar p/ motorista...</option>' + opcoesMotoristas +
+              "</select>" +
+              '<button type="button" class="btn btn-green btn-sm btn-despachar">Atribuir / Aceitar</button>' +
+              '<button type="button" class="btn btn-red btn-sm btn-cancelar-admin">Cancelar</button>' +
+            "</div>" +
+          "</div>"
+        );
+      }).join("");
+    }
+
+    function conectarFirebase() {
+      if (!firebaseConfig.apiKey || firebaseConfig.apiKey.indexOf("COLE_AQUI") !== -1) {
+        return;
+      }
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      db = firebase.firestore();
+      elStatusFirebase.textContent = "Firebase Firestore Conectado";
+
+      db.collection("config").doc("32drive_dinamica").onSnapshot((doc) => {
+        if (!doc.exists) return;
+        const d = doc.data() || {};
+        estado.regras = Object.assign({}, estado.regras, d);
+        elCfgDinamica.value = String(estado.regras.dinamicaPct || 0);
+        elCfgKmMin.value = String(estado.regras.kmMinDesconto || 15);
+        elCfgMaxEmb.value = String(estado.regras.maxKmEmbarque || 5);
+        elCfgCotaMes.value = String(estado.regras.limiteDescontosMes || 3);
+      });
+
+      db.collection("motoristas_online").onSnapshot((snap) => {
+        const lista = [];
+        snap.forEach((doc) => lista.push(Object.assign({ id: doc.id }, doc.data())));
+        estado.motoristasOnline = lista;
+        renderizarMotoristas();
+        renderizarChamadas();
+      });
+
+      db.collection("corridas").onSnapshot((snap) => {
+        const lista = [];
+        snap.forEach((doc) => lista.push(Object.assign({ id: doc.id }, doc.data())));
+        estado.chamadas = lista;
+        renderizarChamadas();
+      });
+    }
+
+    // Eventos do Painel Admin
+    document.getElementById("btn-abrir-passageiro-v40").addEventListener("click", function () {
+      window.open(URL_PASSAGEIRO_V40, "_blank", "noopener,noreferrer");
+    });
+
+    document.getElementById("btn-salvar-regras").addEventListener("click", salvarRegrasNoFirestore);
+    [elCfgDinamica, elCfgKmMin, elCfgMaxEmb, elCfgCotaMes].forEach((el) => {
+      el.addEventListener("change", salvarRegrasNoFirestore);
+    });
+
+    // Botão Limpar Conversa no Painel Admin
+    document.getElementById("btn-limpar-conversa-admin").addEventListener("click", function () {
+      estado.chamadas.forEach((c) => {
+        estado.ocultasTelaAdmin[c.id] = true;
+      });
+      renderizarChamadas();
+    });
+
+    elListaChamadas.addEventListener("click", async function (ev) {
+      const box = ev.target.closest(".item-box");
+      if (!box) return;
+      const corridaId = box.getAttribute("data-id");
+      const corrida = estado.chamadas.find((c) => c.id === corridaId);
+      if (!corrida) return;
+
+      if (ev.target.classList.contains("btn-despachar")) {
+        const sel = box.querySelector(".sel-despacho");
+        const motId = (sel && sel.value) || "mot_junior_costa";
+        const motObj = estado.motoristasOnline.find((m) => m.id === motId) || { id: motId, nome: "Junior Costa", veiculo: "VW Voyage 1.0 • IQD8060" };
+        const patch = {
+          status: "Aceita",
+          motoristaId: motObj.id,
+          motoristaNome: motObj.nome || motObj.id,
+          motoristaVeiculo: motObj.veiculo || ""
+        };
+        Object.assign(corrida, patch);
+        if (db) {
+          try { await db.collection("corridas").doc(corridaId).set(patch, { merge: true }); } catch (e) {}
+        }
+        renderizarChamadas();
+        return;
+      }
+
+      if (ev.target.classList.contains("btn-cancelar-admin")) {
+        corrida.status = "Cancelada";
+        if (db) {
+          try { await db.collection("corridas").doc(corridaId).set({ status: "Cancelada" }, { merge: true }); } catch (e) {}
+        }
+        renderizarChamadas();
+      }
+    });
+
+    conectarFirebase();
+    renderizarMotoristas();
+    renderizarChamadas();
+  </script>
+</body>
+</html>
