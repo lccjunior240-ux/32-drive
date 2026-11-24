@@ -131,7 +131,7 @@
 
     #mapa-motorista {
       width: 100%;
-      height: 250px;
+      height: 240px;
       border-radius: 10px;
       border: 1.5px solid var(--border);
       background: #e2e8f0;
@@ -203,4 +203,393 @@
       color: #0f172a;
     }
 
-    .tag-status
+    .tag-status.aguardando { background: #fef3c7; color: #92400e; }
+    .tag-status.aceita { background: #d1fae5; color: #065f46; }
+    .tag-status.recusada { background: #fee2e2; color: #991b1b; }
+
+    .meta-small { font-size: 12px; color: var(--muted); font-weight: 700; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="badge-32">32</div>
+      <div>
+        <h1>32 DRIVE • PAINEL MOTORISTA (G39)</h1>
+        <p>Junior Costa • Balneário Cassino / Rio Grande • 80% Motorista</p>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button type="button" class="btn btn-green btn-sm" id="btn-toggle-online">Online</button>
+      <button type="button" class="btn btn-accent btn-sm" id="btn-gps-motorista">Atualizar GPS</button>
+      <span class="meta-small" id="status-firebase-mot" style="color:#fde68a;">Iniciando...</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="col">
+      <section class="card">
+        <div class="card-title">
+          <span>Mapa & Posição Atual (Geohash)</span>
+          <span class="meta-small" id="info-geohash-mot">GH: —</span>
+        </div>
+        <div id="mapa-motorista"></div>
+        <div class="meta-small" id="coords-motorista">Localização: Balneário Cassino, Rio Grande - RS</div>
+
+        <div class="row-2">
+          <div>
+            <label for="mot-nome">Motorista</label>
+            <input id="mot-nome" type="text" value="Junior Costa" />
+          </div>
+          <div>
+            <label for="mot-veiculo">Veículo / Placa</label>
+            <input id="mot-veiculo" type="text" value="VW Voyage 1.0 • IQD8060" />
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-title">
+          <span>Resumo de Ganhos & Regras</span>
+          <span class="meta-small" id="qtd-finalizadas-mot">0 finalizadas</span>
+        </div>
+
+        <div class="resumo-box">
+          <div>Ganhos no painel (80%): <strong id="ganhos-80-mot">R$ 0,00</strong> • Dinâmica atual: <strong id="dinamica-atual-mot">0%</strong></div>
+          <div class="meta-small" style="color:#cbd5e1;">Tarifa: até 3,50 km = R$ 7,99 | ≥ 3,51 km = R$ 2,00/km (sem R$ 7,99)</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="card">
+        <div class="card-title">
+          <span>Chamadas em Tempo Real</span>
+          <div class="chips">
+            <span class="meta-small" id="contador-chamadas-mot">0 chamadas</span>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-conversa-mot">Limpar Conversa</button>
+          </div>
+        </div>
+
+        <div class="lista-scroll" id="lista-chamadas-mot">
+          <div class="meta-small">Aguardando novas chamadas...</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    (function () {
+      const firebaseConfig = {
+        apiKey: "AIzaSyDlKouGeTQ7_NNgIRCLSYl66zB-J-9TzHs",
+        authDomain: "drive-4745f.firebaseapp.com",
+        databaseURL: "https://drive-4745f-default-rtdb.firebaseio.com",
+        projectId: "drive-4745f",
+        storageBucket: "drive-4745f.firebasestorage.app",
+        messagingSenderId: "762959482484",
+        appId: "1:762959482484:web:f40e2cb51020a61195cb21",
+        measurementId: "G-V5PZCVKTCJ"
+      };
+
+      const GEOHASH_BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
+      function encodeGeohash(lat, lon, precision) {
+        precision = precision || 6;
+        let idx = 0, bit = 0, evenBit = true, geohash = "";
+        let latMin = -90, latMax = 90, lonMin = -180, lonMax = 180;
+        while (geohash.length < precision) {
+          if (evenBit) {
+            const lonMid = (lonMin + lonMax) / 2;
+            if (lon >= lonMid) { idx = idx * 2 + 1; lonMin = lonMid; }
+            else { idx = idx * 2; lonMax = lonMid; }
+          } else {
+            const latMid = (latMin + latMax) / 2;
+            if (lat >= latMid) { idx = idx * 2 + 1; latMin = latMid; }
+            else { idx = idx * 2; latMax = latMid; }
+          }
+          evenBit = !evenBit;
+          if (++bit === 5) {
+            geohash += GEOHASH_BASE32.charAt(idx);
+            bit = 0;
+            idx = 0;
+          }
+        }
+        return geohash;
+      }
+
+      const estadoMot = {
+        id: "mot_junior_costa",
+        online: true,
+        lat: -32.1856,
+        lng: -52.1658,
+        geohash: "",
+        geohashSetor: "",
+        ruaAtual: "Balneário Cassino, Rio Grande - RS",
+        dinamicaPct: 0,
+        chamadas: [],
+        ocultasTelaMot: {}
+      };
+
+      estadoMot.geohash = encodeGeohash(estadoMot.lat, estadoMot.lng, 6);
+      estadoMot.geohashSetor = estadoMot.geohash.slice(0, 4);
+
+      let db = null;
+      let mapaMot = null;
+      let marcadorMot = null;
+
+      const elStatusFirebase = document.getElementById("status-firebase-mot");
+      const elBtnOnline = document.getElementById("btn-toggle-online");
+      const elInfoGeohash = document.getElementById("info-geohash-mot");
+      const elCoordsMot = document.getElementById("coords-motorista");
+      const elMotNome = document.getElementById("mot-nome");
+      const elMotVeiculo = document.getElementById("mot-veiculo");
+      const elGanhos80 = document.getElementById("ganhos-80-mot");
+      const elDinamicaAtual = document.getElementById("dinamica-atual-mot");
+      const elQtdFinalizadas = document.getElementById("qtd-finalizadas-mot");
+      const elListaChamadas = document.getElementById("lista-chamadas-mot");
+      const elContadorChamadas = document.getElementById("contador-chamadas-mot");
+
+      function moeda(v) {
+        return "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
+      }
+
+      function escapar(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function classeStatus(st) {
+        if (st === "Aguardando motorista") return "tag-status aguardando";
+        if (st === "Aceita" || st === "Em viagem" || st === "Finalizada") return "tag-status aceita";
+        if (st === "Recusada pelo passageiro" || st === "Cancelada" || st === "Recusada pelo motorista") return "tag-status recusada";
+        return "tag-status";
+      }
+
+      function atualizarResumoGanhos() {
+        const ativasOuFin = estadoMot.chamadas.filter((c) => c.status === "Finalizada" || c.status === "Aceita" || c.status === "Em viagem");
+        const soma80 = ativasOuFin.reduce((acc, c) => {
+          const bruto = Number(c.valorBruto || 0);
+          return acc + Number(c.repasseMotorista || bruto * 0.8);
+        }, 0);
+        const qtdFin = estadoMot.chamadas.filter((c) => c.status === "Finalizada").length;
+        elGanhos80.textContent = moeda(soma80);
+        elDinamicaAtual.textContent = Number(estadoMot.dinamicaPct || 0) + "%";
+        elQtdFinalizadas.textContent = qtdFin + " finalizada(s)";
+      }
+
+      function iniciarMapa() {
+        try {
+          if (typeof window.L === "undefined") return;
+          mapaMot = window.L.map("mapa-motorista").setView([estadoMot.lat, estadoMot.lng], 14);
+          window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "© OpenStreetMap"
+          }).addTo(mapaMot);
+          marcadorMot = window.L.marker([estadoMot.lat, estadoMot.lng], { draggable: true }).addTo(mapaMot).bindPopup("Motorista");
+
+          marcadorMot.on("dragend", function () {
+            const pt = marcadorMot.getLatLng();
+            atualizarPosicaoMot(pt.lat, pt.lng);
+          });
+
+          mapaMot.on("click", function (ev) {
+            atualizarPosicaoMot(ev.latlng.lat, ev.latlng.lng);
+          });
+
+          setTimeout(function () {
+            if (mapaMot) mapaMot.invalidateSize();
+          }, 300);
+        } catch (e) {}
+      }
+
+      async function publicarPresencaMotorista() {
+        if (!db) return;
+        try {
+          await db.collection("motoristas_online").doc(estadoMot.id).set({
+            id: estadoMot.id,
+            nome: (elMotNome.value || "").trim() || "Junior Costa",
+            veiculo: (elMotVeiculo.value || "").trim() || "VW Voyage 1.0 • IQD8060",
+            online: estadoMot.online,
+            lat: estadoMot.lat,
+            lng: estadoMot.lng,
+            geohash: estadoMot.geohash,
+            geohashSetor: estadoMot.geohashSetor,
+            ruaAtual: estadoMot.ruaAtual,
+            atualizadoEm: Date.now()
+          }, { merge: true });
+        } catch (e) {}
+      }
+
+      function atualizarPosicaoMot(lat, lng) {
+        estadoMot.lat = Number(lat);
+        estadoMot.lng = Number(lng);
+        estadoMot.geohash = encodeGeohash(estadoMot.lat, estadoMot.lng, 6);
+        estadoMot.geohashSetor = estadoMot.geohash.slice(0, 4);
+
+        elInfoGeohash.textContent = "GH: " + estadoMot.geohash + " (Setor " + estadoMot.geohashSetor + ")";
+        elCoordsMot.textContent = "Localização: Lat " + estadoMot.lat.toFixed(4) + ", Lng " + estadoMot.lng.toFixed(4) + " • " + estadoMot.ruaAtual;
+
+        if (mapaMot && marcadorMot) {
+          try {
+            marcadorMot.setLatLng([estadoMot.lat, estadoMot.lng]);
+            mapaMot.setView([estadoMot.lat, estadoMot.lng], 15);
+            mapaMot.invalidateSize();
+          } catch (e) {}
+        }
+        publicarPresencaMotorista();
+      }
+
+      function renderizarChamadas() {
+        const visiveis = estadoMot.chamadas.filter((c) => !estadoMot.ocultasTelaMot[c.id]);
+        elContadorChamadas.textContent = visiveis.length + " chamada(s)";
+
+        if (!visiveis.length) {
+          elListaChamadas.innerHTML = '<div class="meta-small">Aguardando novas chamadas...</div>';
+          return;
+        }
+
+        elListaChamadas.innerHTML = visiveis.map((c) => {
+          const bruto = Number(c.valorBruto || 0);
+          const mot80 = Number(c.repasseMotorista || bruto * 0.8);
+          const podeAceitar = c.status === "Aguardando motorista";
+          const podeIniciar = c.status === "Aceita";
+          const podeFinalizar = c.status === "Em viagem" || c.status === "Aceita";
+
+          return (
+            '<div class="corrida-box ' + (podeAceitar || podeIniciar ? "ativa" : "") + '" data-id="' + escapar(c.id) + '">' +
+              '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
+                '<strong>' + escapar(c.codigo || c.id) + " • " + escapar(c.passageiro || "Passageiro") + "</strong>" +
+                '<span class="' + classeStatus(c.status) + '">' + escapar(c.status || "Aguardando motorista") + "</span>" +
+              "</div>" +
+              '<div><strong>Embarque:</strong> ' + escapar(c.origem) + "<br/><strong>Para:</strong> " + escapar(c.destino) +
+              ' <span class="meta-small">(' + Number(c.distanciaKm || 0).toFixed(2).replace(".", ",") + " km • GH: " + escapar(c.geohashEmbarque || "—") + ")</span></div>" +
+              '<div><strong>Bruto:</strong> ' + moeda(bruto) + " • <strong>Seu ganho (80%):</strong> " + moeda(mot80) + "</div>" +
+              (c.codigo4d ? '<div class="meta-small">Código 4 dígitos: <strong>' + escapar(c.codigo4d) + "</strong></div>" : "") +
+              '<div class="chips" style="margin-top:4px;">' +
+                (podeAceitar ? '<button type="button" class="btn btn-green btn-sm btn-aceitar-mot">Aceitar Corrida</button>' : "") +
+                (podeIniciar ? '<button type="button" class="btn btn-blue btn-sm btn-iniciar-mot">Iniciar Viagem</button>' : "") +
+                (podeFinalizar ? '<button type="button" class="btn btn-accent btn-sm btn-finalizar-mot">Finalizar</button>' : "") +
+                (podeAceitar ? '<button type="button" class="btn btn-red btn-sm btn-recusar-mot">Recusar</button>' : "") +
+              "</div>" +
+            "</div>"
+          );
+        }).join("");
+      }
+
+      async function atualizarStatusCorrida(corridaId, novoStatus) {
+        const corrida = estadoMot.chamadas.find((c) => c.id === corridaId);
+        if (!corrida) return;
+
+        const patch = {
+          status: novoStatus,
+          motoristaId: estadoMot.id,
+          motoristaNome: (elMotNome.value || "").trim() || "Junior Costa",
+          motoristaVeiculo: (elMotVeiculo.value || "").trim() || "VW Voyage 1.0 • IQD8060"
+        };
+        Object.assign(corrida, patch);
+        renderizarChamadas();
+        atualizarResumoGanhos();
+
+        if (!db) return;
+        try {
+          await db.collection("corridas").doc(corridaId).set(patch, { merge: true });
+        } catch (e) {}
+      }
+
+      function conectarFirebase() {
+        try {
+          if (!window.firebase || !window.firebase.firestore) {
+            elStatusFirebase.textContent = "Modo local (sem Firebase)";
+            return;
+          }
+          if (!window.firebase.apps.length) window.firebase.initializeApp(firebaseConfig);
+          db = window.firebase.firestore();
+          elStatusFirebase.textContent = "Firestore Conectado (drive-4745f)";
+          publicarPresencaMotorista();
+
+          db.collection("config").doc("32drive_dinamica").onSnapshot(
+            (doc) => {
+              if (!doc.exists) return;
+              const d = doc.data() || {};
+              estadoMot.dinamicaPct = Number(d.dinamicaPct || 0);
+              atualizarResumoGanhos();
+            },
+            (err) => {
+              elStatusFirebase.textContent = "Regra Firestore: " + (err && err.code ? err.code : "permissão negada");
+            }
+          );
+
+          db.collection("corridas").onSnapshot(
+            (snap) => {
+              elStatusFirebase.textContent = "Firestore Conectado (drive-4745f)";
+              const lista = [];
+              snap.forEach((doc) => lista.push(Object.assign({ id: doc.id }, doc.data())));
+              lista.sort((a, b) => Number(b.criadoEm || 0) - Number(a.criadoEm || 0));
+              estadoMot.chamadas = lista;
+              renderizarChamadas();
+              atualizarResumoGanhos();
+            },
+            (err) => {
+              elStatusFirebase.textContent = "Regra Firestore: " + (err && err.code ? err.code : "permissão negada");
+            }
+          );
+        } catch (e) {
+          elStatusFirebase.textContent = "Erro ao iniciar Firebase";
+        }
+      }
+
+      elBtnOnline.addEventListener("click", function () {
+        estadoMot.online = !estadoMot.online;
+        elBtnOnline.textContent = estadoMot.online ? "Online" : "Offline";
+        elBtnOnline.className = estadoMot.online ? "btn btn-green btn-sm" : "btn btn-red btn-sm";
+        publicarPresencaMotorista();
+      });
+
+      document.getElementById("btn-gps-motorista").addEventListener("click", function () {
+        if (!navigator.geolocation) {
+          atualizarPosicaoMot(estadoMot.lat, estadoMot.lng);
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            atualizarPosicaoMot(pos.coords.latitude, pos.coords.longitude);
+          },
+          function () {
+            atualizarPosicaoMot(estadoMot.lat, estadoMot.lng);
+          },
+          { enableHighAccuracy: true, timeout: 8000 }
+        );
+      });
+
+      document.getElementById("btn-limpar-conversa-mot").addEventListener("click", function () {
+        estadoMot.chamadas.forEach((c) => {
+          estadoMot.ocultasTelaMot[c.id] = true;
+        });
+        renderizarChamadas();
+      });
+
+      elListaChamadas.addEventListener("click", function (ev) {
+        const box = ev.target.closest(".corrida-box");
+        if (!box) return;
+        const corridaId = box.getAttribute("data-id");
+        if (ev.target.classList.contains("btn-aceitar-mot")) atualizarStatusCorrida(corridaId, "Aceita");
+        else if (ev.target.classList.contains("btn-iniciar-mot")) atualizarStatusCorrida(corridaId, "Em viagem");
+        else if (ev.target.classList.contains("btn-finalizar-mot")) atualizarStatusCorrida(corridaId, "Finalizada");
+        else if (ev.target.classList.contains("btn-recusar-mot")) atualizarStatusCorrida(corridaId, "Recusada pelo motorista");
+      });
+
+      iniciarMapa();
+      atualizarPosicaoMot(estadoMot.lat, estadoMot.lng);
+      conectarFirebase();
+      renderizarChamadas();
+      atualizarResumoGanhos();
+    })();
+  </script>
+</body>
+</html>
