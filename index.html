@@ -104,7 +104,7 @@
 
     #mapa-passageiro {
       width: 100%;
-      height: 240px;
+      height: 250px;
       border-radius: 10px;
       border: 1.5px solid var(--border);
       background: #e2e8f0;
@@ -119,6 +119,17 @@
       font-size: 13px;
       font-weight: 800;
       color: var(--navy);
+    }
+
+    .chegada-box {
+      background: #ecfdf5;
+      border: 1.5px solid #10b981;
+      color: #065f46;
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-size: 13px;
+      font-weight: 800;
+      display: none;
     }
 
     .valor-box {
@@ -210,6 +221,8 @@
 
       <div id="mapa-passageiro"></div>
 
+      <div class="chegada-box" id="info-chegada-motorista"></div>
+
       <div class="rua-box" id="rua-atual-texto">Rua atual: carregando localização...</div>
 
       <div class="acoes">
@@ -285,7 +298,8 @@
         kmCalculado: null,
         valorCalculado: null,
         corridaAtualId: localStorage.getItem("32drive_corrida_atual") || "",
-        corridaAtual: null
+        corridaAtual: null,
+        tempoChegadaMin: null
       };
       state.geohash = encodeGeohash(state.lat, state.lng, 6);
       state.geohashSetor = state.geohash.slice(0, 4);
@@ -293,13 +307,17 @@
       let db = null;
       let mapa = null;
       let marcador = null;
+      let marcadorMotorista = null;
       let rotaLayer = null;
+      let rotaMotoristaLayer = null;
       let unsubscribeCorrida = null;
       let timerCalculo = null;
+      let ultimoParMotorista = "";
 
       const elOrigem = document.getElementById("pas-origem");
       const elDestino = document.getElementById("pas-destino");
       const elRuaTexto = document.getElementById("rua-atual-texto");
+      const elInfoChegada = document.getElementById("info-chegada-motorista");
       const elSubValor = document.getElementById("sub-valor-texto");
       const elValor = document.getElementById("valor-corrida");
       const elStatus = document.getElementById("status-conexao");
@@ -368,10 +386,13 @@
           if (data && data.routes && data.routes.length > 0) {
             const rota = data.routes[0];
             const km = Number((rota.distance / 1000).toFixed(2));
-            return { km, geometry: rota.geometry };
+            const minutos = Math.max(1, Math.round((rota.duration || (rota.distance / 8.5)) / 60));
+            return { km, minutos, geometry: rota.geometry };
           }
         } catch (e) {}
-        return { km: Number(haversineKm(lat1, lng1, lat2, lng2).toFixed(2)), geometry: null };
+        const kmFallback = Number(haversineKm(lat1, lng1, lat2, lng2).toFixed(2));
+        const minFallback = Math.max(1, Math.round((kmFallback / 28) * 60));
+        return { km: kmFallback, minutos: minFallback, geometry: null };
       }
 
       function desenharRotaNoMapa(geometry, lat2, lng2) {
@@ -388,6 +409,87 @@
           } else if (typeof lat2 === "number" && typeof lng2 === "number") {
             rotaLayer = window.L.polyline([[state.lat, state.lng], [lat2, lng2]], { color: "#0284c7", weight: 4, dashArray: "6,6" }).addTo(mapa);
             mapa.fitBounds(rotaLayer.getBounds(), { padding: [20, 20] });
+          }
+          mapa.invalidateSize();
+        } catch (e) {}
+      }
+
+      function limparRotaDoMotorista() {
+        ultimoParMotorista = "";
+        state.tempoChegadaMin = null;
+        elInfoChegada.style.display = "none";
+        elInfoChegada.textContent = "";
+        if (!mapa || typeof window.L === "undefined") return;
+        try {
+          if (marcadorMotorista) {
+            mapa.removeLayer(marcadorMotorista);
+            marcadorMotorista = null;
+          }
+          if (rotaMotoristaLayer) {
+            mapa.removeLayer(rotaMotoristaLayer);
+            rotaMotoristaLayer = null;
+          }
+        } catch (e) {}
+      }
+
+      async function atualizarRotaMotoristaAteEmbarque(corrida) {
+        if (!corrida || corrida.status !== "Aceita") {
+          limparRotaDoMotorista();
+          return;
+        }
+
+        const latMot = Number(corrida.latMotorista);
+        const lngMot = Number(corrida.lngMotorista);
+        const latEmb = Number(corrida.latEmbarque || state.lat);
+        const lngEmb = Number(corrida.lngEmbarque || state.lng);
+
+        if (Number.isNaN(latMot) || Number.isNaN(lngMot)) {
+          elInfoChegada.style.display = "block";
+          elInfoChegada.textContent = "Motorista a caminho • Calculando tempo de chegada...";
+          return;
+        }
+
+        const chave = [latMot.toFixed(4), lngMot.toFixed(4), latEmb.toFixed(4), lngEmb.toFixed(4)].join("|");
+        if (chave === ultimoParMotorista && state.tempoChegadaMin !== null) {
+          elInfoChegada.style.display = "block";
+          elInfoChegada.textContent = "Motorista a caminho do seu embarque • Chega em aprox. " + state.tempoChegadaMin + " min";
+          return;
+        }
+        ultimoParMotorista = chave;
+
+        const rotaInfo = await buscarRotaOSRM(latMot, lngMot, latEmb, lngEmb);
+        state.tempoChegadaMin = rotaInfo.minutos;
+        elInfoChegada.style.display = "block";
+        elInfoChegada.textContent = "Motorista a caminho do seu embarque • Chega em aprox. " + rotaInfo.minutos + " min";
+
+        if (!mapa || typeof window.L === "undefined") return;
+        try {
+          if (!marcadorMotorista) {
+            marcadorMotorista = window.L.circleMarker([latMot, lngMot], {
+              radius: 9,
+              color: "#065f46",
+              weight: 3,
+              fillColor: "#10b981",
+              fillOpacity: 0.95
+            }).addTo(mapa).bindPopup("Motorista");
+          } else {
+            marcadorMotorista.setLatLng([latMot, lngMot]);
+          }
+
+          if (rotaMotoristaLayer) {
+            mapa.removeLayer(rotaMotoristaLayer);
+            rotaMotoristaLayer = null;
+          }
+
+          if (rotaInfo.geometry && rotaInfo.geometry.coordinates && rotaInfo.geometry.coordinates.length > 1) {
+            const coords = rotaInfo.geometry.coordinates.map(function (c) { return [c[1], c[0]]; });
+            rotaMotoristaLayer = window.L.polyline(coords, { color: "#059669", weight: 5 }).addTo(mapa);
+            const bounds = window.L.latLngBounds(coords);
+            bounds.extend([latEmb, lngEmb]);
+            mapa.fitBounds(bounds, { padding: [24, 24] });
+          } else {
+            rotaMotoristaLayer = window.L.polyline([[latMot, lngMot], [latEmb, lngEmb]], { color: "#059669", weight: 4, dashArray: "5,5" }).addTo(mapa);
+            mapa.fitBounds([[latMot, lngMot], [latEmb, lngEmb]], { padding: [24, 24] });
           }
           mapa.invalidateSize();
         } catch (e) {}
@@ -481,7 +583,7 @@
           window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: "© OpenStreetMap"
           }).addTo(mapa);
-          marcador = window.L.marker([state.lat, state.lng], { draggable: true }).addTo(mapa);
+          marcador = window.L.marker([state.lat, state.lng], { draggable: true }).addTo(mapa).bindPopup("Embarque");
 
           marcador.on("dragend", function () {
             const p = marcador.getLatLng();
@@ -518,17 +620,21 @@
       function renderizarViagemAtual() {
         const c = state.corridaAtual;
         if (!c || !state.corridaAtualId) {
+          limparRotaDoMotorista();
           elCaixaAtual.style.display = "none";
           elCaixaAtual.innerHTML = "";
           return;
         }
 
         const st = c.status || "Aguardando motorista";
+        const podeCancelar = st === "Aguardando motorista";
         const aceitaOuEmAndamento = st === "Aceita" || st === "Em viagem" || st === "Finalizada";
         const textoStatus =
           st === "Aceita" ? "Motorista a caminho • Viagem iniciando" :
           st === "Em viagem" ? "Viagem em andamento" :
           st === "Finalizada" ? "Viagem finalizada" : st;
+
+        atualizarRotaMotoristaAteEmbarque(c);
 
         elCaixaAtual.style.display = "flex";
         elCaixaAtual.innerHTML =
@@ -542,17 +648,23 @@
             (c.motoristaNome
               ? '<div class="meta">Motorista: <strong>' + escapar(c.motoristaNome) + '</strong>' + (c.motoristaVeiculo ? ' • ' + escapar(c.motoristaVeiculo) : '') + '</div>'
               : '<div class="meta">Aguardando aceite do motorista...</div>') +
+            (st === "Aceita" && state.tempoChegadaMin !== null
+              ? '<div class="meta">Tempo estimado até o embarque: <strong>~' + state.tempoChegadaMin + ' min</strong></div>'
+              : '') +
             '<div class="meta">Código de confirmação: <strong>' + escapar(c.codigo4d || "") + '</strong></div>' +
             '<div class="acoes" style="margin-top:4px;">' +
-              (st === "Aguardando motorista" || st === "Aceita"
+              (podeCancelar
                 ? '<button type="button" class="btn btn-red" id="btn-cancelar-atual">Cancelar Corrida</button>'
-                : '<button type="button" class="btn btn-outline" id="btn-encerrar-tela">Nova Chamada</button>') +
+                : (st === "Finalizada" || st === "Cancelada" || st === "Recusada pelo motorista"
+                  ? '<button type="button" class="btn btn-outline" id="btn-encerrar-tela">Nova Chamada</button>'
+                  : '')) +
             '</div>' +
           '</div>';
 
         const btnCanc = document.getElementById("btn-cancelar-atual");
         if (btnCanc) {
           btnCanc.addEventListener("click", async function () {
+            if ((state.corridaAtual && state.corridaAtual.status) !== "Aguardando motorista") return;
             state.corridaAtual.status = "Cancelada";
             renderizarViagemAtual();
             if (db && state.corridaAtualId) {
