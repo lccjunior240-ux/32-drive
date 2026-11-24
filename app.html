@@ -29,8 +29,8 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      font-size: 16px;
-      line-height: 1.45;
+      font-size: 18px;
+      line-height: 1.5;
     }
 
     .topbar {
@@ -48,20 +48,20 @@
     .brand { display: flex; align-items: center; gap: 10px; }
 
     .badge-32 {
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 10px;
       background: var(--accent);
       color: var(--navy);
       font-weight: 900;
-      font-size: 19px;
+      font-size: 20px;
       display: grid;
       place-items: center;
       flex-shrink: 0;
     }
 
-    .brand h1 { font-size: 18px; font-weight: 900; color: var(--accent); }
-    .brand p { font-size: 13px; color: #cbd5e1; }
+    .brand h1 { font-size: 20px; font-weight: 900; color: var(--accent); }
+    .brand p { font-size: 14px; color: #cbd5e1; }
 
     .top-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 
@@ -94,7 +94,7 @@
     }
 
     .card-title {
-      font-size: 17px;
+      font-size: 19px;
       font-weight: 900;
       color: var(--navy);
       display: flex;
@@ -106,7 +106,7 @@
 
     label {
       display: block;
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 800;
       color: var(--muted);
       margin-bottom: 4px;
@@ -114,10 +114,10 @@
 
     input {
       width: 100%;
-      padding: 10px 12px;
+      padding: 11px 13px;
       border-radius: 9px;
       border: 1.5px solid #94a3b8;
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 700;
       color: var(--text);
       background: #ffffff;
@@ -139,15 +139,15 @@
     }
 
     .btn {
-      padding: 11px 15px;
+      padding: 12px 16px;
       border-radius: 10px;
       border: none;
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 800;
       cursor: pointer;
     }
 
-    .btn-sm { padding: 8px 12px; font-size: 13px; }
+    .btn-sm { padding: 9px 13px; font-size: 15px; }
     .btn-accent { background: var(--accent); color: #0f172a; }
     .btn-green { background: var(--green); color: #ffffff; }
     .btn-red { background: var(--red); color: #ffffff; }
@@ -161,7 +161,7 @@
       color: #f8fafc;
       border-radius: 10px;
       padding: 12px 14px;
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 700;
       display: flex;
       flex-direction: column;
@@ -171,22 +171,22 @@
     .resumo-box strong { color: var(--accent); }
 
     .lista-scroll {
-      max-height: 460px;
+      max-height: 480px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
 
     .corrida-box {
       border: 1.5px solid #cbd5e1;
       border-radius: 12px;
-      padding: 12px;
+      padding: 14px;
       background: #f8fafc;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      font-size: 14px;
+      gap: 8px;
+      font-size: 16px;
     }
 
     .corrida-box.ativa {
@@ -195,9 +195,9 @@
     }
 
     .tag-status {
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 900;
-      padding: 3px 9px;
+      padding: 4px 10px;
       border-radius: 999px;
       background: #e2e8f0;
       color: #0f172a;
@@ -207,7 +207,7 @@
     .tag-status.aceita { background: #d1fae5; color: #065f46; }
     .tag-status.recusada { background: #fee2e2; color: #991b1b; }
 
-    .meta-small { font-size: 13px; color: var(--muted); font-weight: 700; }
+    .meta-small { font-size: 15px; color: var(--muted); font-weight: 700; }
   </style>
 </head>
 <body>
@@ -268,7 +268,7 @@
           <span>Chamadas em Tempo Real</span>
           <div class="chips">
             <span class="meta-small" id="contador-chamadas-mot">0 chamadas</span>
-            <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-conversa-mot">Limpar Conversa</button>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-conversa-mot">Limpar Tela</button>
           </div>
         </div>
 
@@ -365,14 +365,17 @@
           .replace(/"/g, "&quot;");
       }
 
-      function montarLinkWaze(c) {
+      function montarLinkWaze(c, latMot, lngMot) {
         const destFinal = encodeURIComponent((c.destino || "") + ", Rio Grande, RS");
+        if (typeof latMot === "number" && typeof lngMot === "number" && !Number.isNaN(latMot) && !Number.isNaN(lngMot)) {
+          return "https://waze.com/ul?ll=" + encodeURIComponent(latMot + "," + lngMot) + "&q=" + destFinal + "&navigate=yes";
+        }
         return "https://waze.com/ul?q=" + destFinal + "&navigate=yes";
       }
 
       function classeStatus(st) {
         if (st === "Aguardando motorista") return "tag-status aguardando";
-        if (st === "Aceita" || st === "Em viagem" || st === "Finalizada") return "tag-status aceita";
+        if (st === "Aceita" || st === "Em viagem") return "tag-status aceita";
         if (st === "Recusada pelo passageiro" || st === "Cancelada" || st === "Recusada pelo motorista") return "tag-status recusada";
         return "tag-status";
       }
@@ -420,6 +423,7 @@
             await db.collection("corridas").doc(c.id).set({
               latMotorista: estadoMot.lat,
               lngMotorista: estadoMot.lng,
+              linkWaze: montarLinkWaze(c, estadoMot.lat, estadoMot.lng),
               motoristaAtualizadoEm: Date.now()
             }, { merge: true });
           } catch (e) {}
@@ -465,21 +469,21 @@
       }
 
       function renderizarChamadas() {
-        const visiveis = estadoMot.chamadas.filter((c) => !estadoMot.ocultasTelaMot[c.id]);
-        elContadorChamadas.textContent = visiveis.length + " chamada(s)";
+        const ativasNaTela = estadoMot.chamadas.filter((c) => c.status !== "Finalizada" && !estadoMot.ocultasTelaMot[c.id]);
+        elContadorChamadas.textContent = ativasNaTela.length + " chamada(s)";
 
-        if (!visiveis.length) {
+        if (!ativasNaTela.length) {
           elListaChamadas.innerHTML = '<div class="meta-small">Aguardando novas chamadas...</div>';
           return;
         }
 
-        elListaChamadas.innerHTML = visiveis.map((c) => {
+        elListaChamadas.innerHTML = ativasNaTela.map((c) => {
           const bruto = Number(c.valorBruto || 0);
           const mot80 = Number(c.repasseMotorista || bruto * 0.8);
           const podeAceitar = c.status === "Aguardando motorista";
           const podeIniciar = c.status === "Aceita";
           const podeFinalizar = c.status === "Em viagem" || c.status === "Aceita";
-          const linkWaze = montarLinkWaze(c);
+          const linkWaze = c.linkWaze || montarLinkWaze(c, estadoMot.lat, estadoMot.lng);
 
           return (
             '<div class="corrida-box ' + (podeAceitar || podeIniciar ? "ativa" : "") + '" data-id="' + escapar(c.id) + '">' +
@@ -513,6 +517,7 @@
           motoristaVeiculo: (elMotVeiculo.value || "").trim() || "VW Voyage 1.0 • IQD8060",
           latMotorista: estadoMot.lat,
           lngMotorista: estadoMot.lng,
+          linkWaze: montarLinkWaze(corrida, estadoMot.lat, estadoMot.lng),
           motoristaAtualizadoEm: Date.now()
         };
         Object.assign(corrida, patch);
