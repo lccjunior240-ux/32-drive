@@ -119,7 +119,7 @@
       margin-bottom: 4px;
     }
 
-    input {
+    input, select {
       width: 100%;
       padding: 12px 14px;
       border-radius: 9px;
@@ -128,6 +128,16 @@
       font-weight: 700;
       color: var(--text);
       background: #ffffff;
+    }
+
+    .desconto-box {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: #f8fafc;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
     }
 
     .rua-box {
@@ -258,12 +268,11 @@
   </nav>
 
   <main class="wrap">
-    <!-- TELA 1: CORRIDA (LIMPA) -->
     <section class="tela-aba ativa" id="aba-corrida">
       <section class="card">
         <div>
           <label for="pas-origem">Local de Embarque (Rua)</label>
-          <input id="pas-origem" type="text" placeholder="Buscando sua rua atual..." />
+          <input id="pas-origem" type="text" value="Avenida Rio Grande, 96 — Balneário Cassino, Rio Grande - RS" />
         </div>
 
         <div>
@@ -271,7 +280,16 @@
           <input id="pas-destino" type="text" placeholder="Digite o endereço de destino" />
         </div>
 
-        <div class="rua-box" id="rua-atual-texto">Rua atual: carregando localização...</div>
+        <div class="desconto-box" id="box-desconto-15km">
+          <label for="pas-desconto">Desconto disponível (acima de 15 km)</label>
+          <select id="pas-desconto">
+            <option value="0">Sem desconto</option>
+            <option value="10">Desconto de 10%</option>
+            <option value="15">Desconto de 15%</option>
+          </select>
+        </div>
+
+        <div class="rua-box" id="rua-atual-texto">Referência: Avenida Rio Grande, 96 — Balneário Cassino, Rio Grande - RS</div>
 
         <div class="acoes">
           <button type="button" class="btn btn-blue" id="btn-buscar-local">Buscar Localização</button>
@@ -295,7 +313,6 @@
       <section class="card" id="caixa-viagem-atual" style="display:none;"></section>
     </section>
 
-    <!-- TELA 2: MAPA E WAZE -->
     <section class="tela-aba" id="aba-mapa">
       <section class="card">
         <div class="chegada-box" id="info-chegada-motorista"></div>
@@ -333,6 +350,9 @@
       };
 
       const STORAGE_KEY_CORRIDA = "32drive_corrida_ativa_id";
+      const REF_LAT = -32.1856;
+      const REF_LNG = -52.1658;
+      const REF_ENDERECO = "Avenida Rio Grande, 96 — Balneário Cassino, Rio Grande - RS";
 
       const GEOHASH_BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
       function encodeGeohash(lat, lon, precision) {
@@ -360,11 +380,11 @@
       }
 
       const state = {
-        lat: -32.1856,
-        lng: -52.1658,
+        lat: REF_LAT,
+        lng: REF_LNG,
         geohash: "",
         geohashSetor: "",
-        rua: "Balneário Cassino, Rio Grande - RS",
+        rua: REF_ENDERECO,
         dinamicaPct: 0,
         kmCalculado: null,
         valorCalculado: null,
@@ -388,6 +408,8 @@
 
       const elOrigem = document.getElementById("pas-origem");
       const elDestino = document.getElementById("pas-destino");
+      const elBoxDesconto = document.getElementById("box-desconto-15km");
+      const elSelectDesconto = document.getElementById("pas-desconto");
       const elRuaTexto = document.getElementById("rua-atual-texto");
       const elInfoChegada = document.getElementById("info-chegada-motorista");
       const elSubValor = document.getElementById("sub-valor-texto");
@@ -455,19 +477,26 @@
           Math.sin(dLat / 2) * Math.sin(dLat / 2) +
           Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
           Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 1.28;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 1.15;
       }
 
       function montarValorPorKm(km) {
         const dist = Math.max(0.5, Number(km || 1));
+        const acima15 = dist >= 15;
+        elBoxDesconto.style.display = acima15 ? "flex" : "none";
+        if (!acima15) elSelectDesconto.value = "0";
+
         let base = 7.99;
         if (dist > 3.5) {
           base = Number((dist * 2.0).toFixed(2));
         }
-        const bruto = Number((base * (1 + Number(state.dinamicaPct || 0) / 100)).toFixed(2));
+
+        const descPct = acima15 ? Number(elSelectDesconto.value || 0) : 0;
+        const comDinamica = base * (1 + Number(state.dinamicaPct || 0) / 100);
+        const bruto = Number((comDinamica * (1 - descPct / 100)).toFixed(2));
         const mot80 = Number((bruto * 0.8).toFixed(2));
         const app20 = Number((bruto - mot80).toFixed(2));
-        return { km: Number(dist.toFixed(2)), base, bruto, mot80, app20 };
+        return { km: Number(dist.toFixed(2)), base, descontoPct: descPct, bruto, mot80, app20 };
       }
 
       async function geocodificarDestino(textoDestino) {
@@ -475,6 +504,9 @@
         if (!limpa) return null;
 
         const bLower = limpa.toLowerCase();
+        if (bLower.includes("santa casa")) {
+          return { lat: -32.0378, lng: -52.1045 };
+        }
         if (bLower.includes("centro") && (bLower.includes("rio grande") || !bLower.includes("cassino"))) {
           return { lat: -32.0350, lng: -52.0986 };
         }
@@ -503,7 +535,7 @@
           }
         } catch (e) {}
         const kmFallback = Number(haversineKm(lat1, lng1, lat2, lng2).toFixed(2));
-        const minFallback = Math.max(1, Math.round((kmFallback / 28) * 60));
+        const minFallback = Math.max(1, Math.round((kmFallback / 32) * 60));
         return { km: kmFallback, minutos: minFallback, geometry: null };
       }
 
@@ -644,6 +676,7 @@
         if (!destinoTexto) {
           state.kmCalculado = null;
           state.valorCalculado = null;
+          elBoxDesconto.style.display = "none";
           elValor.textContent = "—";
           elSubValor.textContent = "Informe o endereço final para calcular";
           if (rotaLayer && mapa) {
@@ -653,7 +686,7 @@
           return null;
         }
 
-        elSubValor.textContent = "Calculando rota e valor...";
+        elSubValor.textContent = "Calculando valor da viagem...";
         try {
           const destCoords = await geocodificarDestino(destinoTexto);
           let kmEstimado = 4.2;
@@ -670,7 +703,9 @@
           state.kmCalculado = calc.km;
           state.valorCalculado = calc;
           elValor.textContent = moeda(calc.bruto);
-          elSubValor.textContent = "Valor calculado • Pronto para solicitar";
+          elSubValor.textContent = calc.descontoPct > 0
+            ? "Valor com desconto de " + calc.descontoPct + "%"
+            : "Valor calculado • Pronto para solicitar";
           return calc;
         } catch (e) {
           const calc = montarValorPorKm(4.2);
@@ -682,7 +717,14 @@
         }
       }
 
-      async function atualizarNomeRua(lat, lng, preencherInput) {
+      async function atualizarNomeRua(lat, lng, preencherInput, usarReferenciaPadrao) {
+        if (usarReferenciaPadrao) {
+          state.rua = REF_ENDERECO;
+          elRuaTexto.textContent = "Referência: " + REF_ENDERECO;
+          if (preencherInput) elOrigem.value = REF_ENDERECO;
+          return;
+        }
+
         try {
           const r = await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" + encodeURIComponent(lat) + "&lon=" + encodeURIComponent(lng));
           const data = await r.json();
@@ -692,19 +734,19 @@
           const bairro = a.suburb || a.neighbourhood || "";
           const cidade = a.city || a.town || a.village || "Rio Grande";
           const linha = (rua ? rua + num : "") + (bairro && bairro !== rua ? " • " + bairro : "") + (rua || bairro ? " — " : "") + cidade + " - RS";
-          state.rua = linha;
-          elRuaTexto.textContent = "Rua atual: " + linha;
+          state.rua = linha || REF_ENDERECO;
+          elRuaTexto.textContent = "Localização: " + state.rua;
           if (preencherInput || !elOrigem.value.trim()) {
-            elOrigem.value = linha;
+            elOrigem.value = state.rua;
           }
         } catch (e) {
-          state.rua = "Balneário Cassino, Rio Grande - RS";
-          elRuaTexto.textContent = "Rua atual: " + state.rua;
+          state.rua = REF_ENDERECO;
+          elRuaTexto.textContent = "Referência: " + state.rua;
           if (!elOrigem.value.trim()) elOrigem.value = state.rua;
         }
       }
 
-      function moverMapa(lat, lng, preencherInput) {
+      function moverMapa(lat, lng, preencherInput, usarReferenciaPadrao) {
         state.lat = Number(lat);
         state.lng = Number(lng);
         state.geohash = encodeGeohash(state.lat, state.lng, 6);
@@ -717,7 +759,7 @@
             mapa.invalidateSize();
           } catch (e) {}
         }
-        atualizarNomeRua(state.lat, state.lng, preencherInput);
+        atualizarNomeRua(state.lat, state.lng, preencherInput, Boolean(usarReferenciaPadrao));
       }
 
       function iniciarMapa() {
@@ -731,11 +773,13 @@
 
           marcador.on("dragend", function () {
             const p = marcador.getLatLng();
-            moverMapa(p.lat, p.lng, true);
+            moverMapa(p.lat, p.lng, true, false);
+            if ((elDestino.value || "").trim()) calcularValorDestino();
           });
 
           mapa.on("click", function (ev) {
-            moverMapa(ev.latlng.lat, ev.latlng.lng, true);
+            moverMapa(ev.latlng.lat, ev.latlng.lng, true, false);
+            if ((elDestino.value || "").trim()) calcularValorDestino();
           });
 
           setTimeout(function () {
@@ -745,17 +789,18 @@
       }
 
       function buscarLocalizacaoAtual() {
-        elRuaTexto.textContent = "Rua atual: buscando GPS...";
+        elRuaTexto.textContent = "Localização: buscando GPS...";
         if (!navigator.geolocation) {
-          moverMapa(state.lat, state.lng, true);
+          moverMapa(REF_LAT, REF_LNG, true, true);
           return;
         }
         navigator.geolocation.getCurrentPosition(
           function (pos) {
-            moverMapa(pos.coords.latitude, pos.coords.longitude, true);
+            moverMapa(pos.coords.latitude, pos.coords.longitude, true, false);
+            if ((elDestino.value || "").trim()) calcularValorDestino();
           },
           function () {
-            moverMapa(state.lat, state.lng, true);
+            moverMapa(REF_LAT, REF_LNG, true, true);
           },
           { enableHighAccuracy: true, timeout: 8000 }
         );
@@ -907,7 +952,7 @@
       }
 
       async function chamarMotorista() {
-        const origem = (elOrigem.value || "").trim() || state.rua || "Balneário Cassino, Rio Grande - RS";
+        const origem = (elOrigem.value || "").trim() || REF_ENDERECO;
         const destino = (elDestino.value || "").trim();
         if (!destino) {
           elSubValor.textContent = "Digite o endereço final antes de solicitar";
@@ -930,6 +975,7 @@
           destino: destino,
           distanciaKm: calc.km,
           valorBase: calc.base,
+          descontoPct: calc.descontoPct || 0,
           dinamicaPct: Number(state.dinamicaPct || 0),
           valorBruto: calc.bruto,
           repasseMotorista: calc.mot80,
@@ -980,6 +1026,9 @@
         }
         limparRotaDoMotorista();
         elDestino.value = "";
+        elSelectDesconto.value = "0";
+        elBoxDesconto.style.display = "none";
+        moverMapa(REF_LAT, REF_LNG, true, true);
         calcularValorDestino();
         renderizarViagemAtual();
         trocarAba("corrida");
@@ -1040,8 +1089,12 @@
         timerCalculo = setTimeout(calcularValorDestino, 500);
       });
 
+      elSelectDesconto.addEventListener("change", function () {
+        if ((elDestino.value || "").trim()) calcularValorDestino();
+      });
+
       iniciarMapa();
-      moverMapa(state.lat, state.lng, true);
+      moverMapa(REF_LAT, REF_LNG, true, true);
       conectarFirebase();
     })();
   </script>
