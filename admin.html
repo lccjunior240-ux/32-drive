@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>32 Drive • Painel Admin (Integração V39 + V40 + Geohash + Firebase)</title>
+  <title>32 Drive • Painel Admin (V39 + V40)</title>
   <style>
     :root {
       --bg: #0b192c;
@@ -153,7 +153,6 @@
     .btn-sm { padding: 6px 9px; font-size: 11px; }
     .btn-accent { background: var(--accent); color: #0f172a; }
     .btn-green { background: #059669; color: #ffffff; }
-    .btn-blue { background: var(--blue); color: #ffffff; }
     .btn-red { background: #dc2626; color: #ffffff; }
     .btn-outline { background: #e2e8f0; color: #0f172a; border: 1px solid #94a3b8; }
 
@@ -205,18 +204,18 @@
       <div class="badge-32">32</div>
       <div>
         <h1>32 DRIVE • PAINEL ADMIN (V39 + V40)</h1>
-        <p>Central de Chamadas • Geohash • Regras de Desconto • Repasse 80/20</p>
+        <p>Acesso Direto • Chamadas em Tempo Real • Geohash • 80/20</p>
       </div>
     </div>
 
     <div class="top-actions">
       <button type="button" class="btn btn-accent btn-sm" id="btn-abrir-passageiro-v40">📱 Passageiro V40</button>
-      <span class="meta-small" id="status-firebase-admin" style="color:#fde68a;">Simulador Local (Pronto p/ Firestore)</span>
+      <button type="button" class="btn btn-outline btn-sm" id="btn-abrir-motorista-g39">🚗 Motorista G39</button>
+      <span class="meta-small" id="status-firebase-admin" style="color:#fde68a;">Conectando ao Firestore...</span>
     </div>
   </header>
 
   <main class="container">
-    <!-- COLUNA ESQUERDA: REGRAS CENTRAIS & MOTORISTAS ONLINE -->
     <div class="col">
       <section class="card">
         <div class="card-title">
@@ -265,7 +264,6 @@
       </section>
     </div>
 
-    <!-- COLUNA DIREITA: CENTRAL DE CHAMADAS RECEBIDAS (V40 -> ADMIN / V39) -->
     <div class="col">
       <section class="card">
         <div class="card-title">
@@ -287,20 +285,19 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
-    // =========================================================================
-    // 1. CONFIGURAÇÃO DO FIREBASE (MESMO PROJETO DO V39 / V40)
-    // =========================================================================
     const firebaseConfig = {
-      apiKey: "COLE_AQUI_SUA_API_KEY",
-      authDomain: "COLE_AQUI_SEU_AUTH_DOMAIN",
-      projectId: "COLE_AQUI_SEU_PROJECT_ID",
-      storageBucket: "COLE_AQUI_SEU_STORAGE_BUCKET",
-      messagingSenderId: "COLE_AQUI_SEU_SENDER_ID",
-      appId: "COLE_AQUI_SEU_APP_ID"
+      apiKey: "AIzaSyDlKouGeTQ7_NNgIRCLSYl66zB-J-9TzHs",
+      authDomain: "drive-4745f.firebaseapp.com",
+      databaseURL: "https://drive-4745f-default-rtdb.firebaseio.com",
+      projectId: "drive-4745f",
+      storageBucket: "drive-4745f.firebasestorage.app",
+      messagingSenderId: "762959482484",
+      appId: "1:762959482484:web:f40e2cb51020a61195cb21",
+      measurementId: "G-V5PZCVKTCJ"
     };
 
-    // URL ou arquivo do Passageiro V40 no mesmo repositório/pasta
     const URL_PASSAGEIRO_V40 = "index.html";
+    const URL_MOTORISTA_G39 = "app.html?v=39";
 
     const estado = {
       regras: {
@@ -309,9 +306,7 @@
         maxKmEmbarque: 5,
         limiteDescontosMes: 3
       },
-      motoristasOnline: [
-        { id: "mot_junior_costa", nome: "Junior Costa", veiculo: "VW Voyage 1.0 • IQD8060", geohash: "f64p9m", geohashSetor: "f64p", ruaAtual: "Balneário Cassino — Av. Rio Grande", online: true }
-      ],
+      motoristasOnline: [],
       chamadas: [],
       ocultasTelaAdmin: {}
     };
@@ -362,8 +357,10 @@
 
       try {
         await db.collection("config").doc("32drive_dinamica").set(estado.regras, { merge: true });
-        elStatusFirebase.textContent = "Regras salvas no Firestore (config/32drive_dinamica)";
-      } catch (e) {}
+        elStatusFirebase.textContent = "Regras salvas no Firestore (drive-4745f)";
+      } catch (e) {
+        elStatusFirebase.textContent = "Erro ao salvar regras no Firestore";
+      }
     }
 
     function renderizarMotoristas() {
@@ -425,14 +422,9 @@
     }
 
     function conectarFirebase() {
-      if (!firebaseConfig.apiKey || firebaseConfig.apiKey.indexOf("COLE_AQUI") !== -1) {
-        return;
-      }
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       db = firebase.firestore();
-      elStatusFirebase.textContent = "Firebase Firestore Conectado";
+      elStatusFirebase.textContent = "Firestore Conectado (drive-4745f)";
 
       db.collection("config").doc("32drive_dinamica").onSnapshot((doc) => {
         if (!doc.exists) return;
@@ -460,9 +452,12 @@
       });
     }
 
-    // Eventos do Painel Admin
     document.getElementById("btn-abrir-passageiro-v40").addEventListener("click", function () {
       window.open(URL_PASSAGEIRO_V40, "_blank", "noopener,noreferrer");
+    });
+
+    document.getElementById("btn-abrir-motorista-g39").addEventListener("click", function () {
+      window.open(URL_MOTORISTA_G39, "_blank", "noopener,noreferrer");
     });
 
     document.getElementById("btn-salvar-regras").addEventListener("click", salvarRegrasNoFirestore);
@@ -470,7 +465,6 @@
       el.addEventListener("change", salvarRegrasNoFirestore);
     });
 
-    // Botão Limpar Conversa no Painel Admin
     document.getElementById("btn-limpar-conversa-admin").addEventListener("click", function () {
       estado.chamadas.forEach((c) => {
         estado.ocultasTelaAdmin[c.id] = true;
