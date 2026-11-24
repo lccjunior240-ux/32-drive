@@ -7,7 +7,6 @@
   <style>
     :root {
       --bg: #0b192c;
-      --surface: #f1f5f9;
       --card: #ffffff;
       --navy: #0b192c;
       --navy-2: #13294b;
@@ -15,9 +14,8 @@
       --text: #0f172a;
       --muted: #475569;
       --border: #cbd5e1;
-      --green: #047857;
-      --blue: #0369a1;
-      --red: #b91c1c;
+      --green: #059669;
+      --red: #dc2626;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -152,14 +150,14 @@
 
     .btn-sm { padding: 6px 9px; font-size: 11px; }
     .btn-accent { background: var(--accent); color: #0f172a; }
-    .btn-green { background: #059669; color: #ffffff; }
-    .btn-red { background: #dc2626; color: #ffffff; }
+    .btn-green { background: var(--green); color: #ffffff; }
+    .btn-red { background: var(--red); color: #ffffff; }
     .btn-outline { background: #e2e8f0; color: #0f172a; border: 1px solid #94a3b8; }
 
     .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 
     .lista-scroll {
-      max-height: 360px;
+      max-height: 380px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -209,9 +207,9 @@
     </div>
 
     <div class="top-actions">
-      <button type="button" class="btn btn-accent btn-sm" id="btn-abrir-passageiro-v40">📱 Passageiro V40</button>
-      <button type="button" class="btn btn-outline btn-sm" id="btn-abrir-motorista-g39">🚗 Motorista G39</button>
-      <span class="meta-small" id="status-firebase-admin" style="color:#fde68a;">Conectando ao Firestore...</span>
+      <button type="button" class="btn btn-accent btn-sm" id="btn-abrir-passageiro-v40">Passageiro V40</button>
+      <button type="button" class="btn btn-outline btn-sm" id="btn-abrir-motorista-g39">Motorista G39</button>
+      <span class="meta-small" id="status-firebase-admin" style="color:#fde68a;">Iniciando...</span>
     </div>
   </header>
 
@@ -270,7 +268,8 @@
           <span>3. Chamadas Recebidas em Tempo Real</span>
           <div class="chips">
             <span class="meta-small" id="contador-chamadas-admin">0 chamadas</span>
-            <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-conversa-admin">Limpar Conversa</button>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-limpar-conversa-admin">Limpar Tela</button>
+            <button type="button" class="btn btn-red btn-sm" id="btn-apagar-testes-firestore">Apagar Testes no Banco</button>
           </div>
         </div>
 
@@ -363,6 +362,30 @@
       }
     }
 
+    async function apagarTodasChamadasDoFirestore() {
+      if (!db) {
+        estado.chamadas = [];
+        renderizarChamadas();
+        return;
+      }
+
+      try {
+        elStatusFirebase.textContent = "Apagando chamadas do Firestore...";
+        const snap = await db.collection("corridas").get();
+        const batch = db.batch();
+        snap.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+        await batch.commit();
+        estado.chamadas = [];
+        estado.ocultasTelaAdmin = {};
+        renderizarChamadas();
+        elStatusFirebase.textContent = "Todas as chamadas de teste foram apagadas!";
+      } catch (err) {
+        elStatusFirebase.textContent = "Erro ao apagar no Firestore: " + (err && err.code ? err.code : "verifique regras");
+      }
+    }
+
     function renderizarMotoristas() {
       const ativos = estado.motoristasOnline.filter((m) => m.online !== false);
       elContadorMotoristas.textContent = ativos.length + " online";
@@ -384,7 +407,7 @@
       elContadorChamadas.textContent = visiveis.length + " chamada(s)";
 
       if (!visiveis.length) {
-        elListaChamadas.innerHTML = '<div class="meta-small">Nenhuma chamada visível no painel. Quando o Passageiro (V40) chamar, a solicitação aparece aqui.</div>';
+        elListaChamadas.innerHTML = '<div class="meta-small">Painel limpo. Quando o Passageiro (V40) chamar, a solicitação aparece aqui.</div>';
         return;
       }
 
@@ -422,34 +445,55 @@
     }
 
     function conectarFirebase() {
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-      elStatusFirebase.textContent = "Firestore Conectado (drive-4745f)";
+      try {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        elStatusFirebase.textContent = "Firestore Conectado (drive-4745f)";
 
-      db.collection("config").doc("32drive_dinamica").onSnapshot((doc) => {
-        if (!doc.exists) return;
-        const d = doc.data() || {};
-        estado.regras = Object.assign({}, estado.regras, d);
-        elCfgDinamica.value = String(estado.regras.dinamicaPct || 0);
-        elCfgKmMin.value = String(estado.regras.kmMinDesconto || 15);
-        elCfgMaxEmb.value = String(estado.regras.maxKmEmbarque || 5);
-        elCfgCotaMes.value = String(estado.regras.limiteDescontosMes || 3);
-      });
+        db.collection("config").doc("32drive_dinamica").onSnapshot(
+          (doc) => {
+            if (!doc.exists) return;
+            const d = doc.data() || {};
+            estado.regras = Object.assign({}, estado.regras, d);
+            elCfgDinamica.value = String(estado.regras.dinamicaPct || 0);
+            elCfgKmMin.value = String(estado.regras.kmMinDesconto || 15);
+            elCfgMaxEmb.value = String(estado.regras.maxKmEmbarque || 5);
+            elCfgCotaMes.value = String(estado.regras.limiteDescontosMes || 3);
+          },
+          (err) => {
+            elStatusFirebase.textContent = "Regra Firestore: " + (err && err.code ? err.code : "permissão negada");
+          }
+        );
 
-      db.collection("motoristas_online").onSnapshot((snap) => {
-        const lista = [];
-        snap.forEach((doc) => lista.push(Object.assign({ id: doc.id }, doc.data())));
-        estado.motoristasOnline = lista;
-        renderizarMotoristas();
-        renderizarChamadas();
-      });
+        db.collection("motoristas_online").onSnapshot(
+          (snap) => {
+            const lista = [];
+            snap.forEach((doc) => lista.push(Object.assign({ id: doc.id }, doc.data())));
+            estado.motoristasOnline = lista;
+            renderizarMotoristas();
+            renderizarChamadas();
+          },
+          (err) => {
+            elStatusFirebase.textContent = "Regra Firestore: " + (err && err.code ? err.code : "permissão negada");
+          }
+        );
 
-      db.collection("corridas").onSnapshot((snap) => {
-        const lista = [];
-        snap.forEach((doc) => lista.push(Object.assign({ id: doc.id }, doc.data())));
-        estado.chamadas = lista;
-        renderizarChamadas();
-      });
+        db.collection("corridas").onSnapshot(
+          (snap) => {
+            elStatusFirebase.textContent = "Firestore Conectado (drive-4745f)";
+            const lista = [];
+            snap.forEach((doc) => lista.push(Object.assign({ id: doc.id }, doc.data())));
+            lista.sort((a, b) => Number(b.criadoEm || 0) - Number(a.criadoEm || 0));
+            estado.chamadas = lista;
+            renderizarChamadas();
+          },
+          (err) => {
+            elStatusFirebase.textContent = "Regra Firestore: " + (err && err.code ? err.code : "permissão negada");
+          }
+        );
+      } catch (e) {
+        elStatusFirebase.textContent = "Erro ao iniciar Firebase";
+      }
     }
 
     document.getElementById("btn-abrir-passageiro-v40").addEventListener("click", function () {
@@ -471,6 +515,8 @@
       });
       renderizarChamadas();
     });
+
+    document.getElementById("btn-apagar-testes-firestore").addEventListener("click", apagarTodasChamadasDoFirestore);
 
     elListaChamadas.addEventListener("click", async function (ev) {
       const box = ev.target.closest(".item-box");
