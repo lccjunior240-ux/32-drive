@@ -129,6 +129,33 @@
       .row-2 { grid-template-columns: 1fr; }
     }
 
+    .doc-box {
+      background: #f8fafc;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .doc-topo {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .doc-thumb {
+      width: 72px;
+      height: 52px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1.5px solid #94a3b8;
+      background: #e2e8f0;
+      flex-shrink: 0;
+    }
+
     .btn {
       padding: 12px 16px;
       border-radius: 10px;
@@ -166,7 +193,7 @@
     .resumo-box strong { color: var(--accent); }
 
     .lista-scroll {
-      max-height: 520px;
+      max-height: 560px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -258,18 +285,29 @@
         </div>
       </section>
 
-      <!-- BLOCO 2: CONFIGURAÇÃO / CADASTRO DO MOTORISTA (CNH, EAR OPCIONAL, WHATS, EMAIL) -->
+      <!-- BLOCO 2: CONFIGURAÇÃO / CADASTRO E DOCUMENTOS DO MOTORISTA -->
       <section class="card" id="card-config-motorista" style="display:none;">
         <div class="card-title">
-          <span>Configuração e Documentos do Motorista</span>
+          <span>Cadastro e Documentos do Motorista</span>
           <button type="button" class="btn btn-outline btn-sm" id="btn-fechar-config">Fechar</button>
         </div>
-        <div class="meta-small">Preencha seus dados. O EAR é opcional e pode ser aprovado sem EAR para testes e início de operação.</div>
+        <div class="meta-small">Preencha seus dados. EAR é opcional e os anexos são compactados no celular para não pesar.</div>
 
         <div class="row-2">
           <div>
             <label for="cfg-nome">Nome Completo</label>
             <input id="cfg-nome" type="text" value="Luiz Carlos Costa Junior" />
+          </div>
+          <div>
+            <label for="cfg-nasc">Data de Nascimento</label>
+            <input id="cfg-nasc" type="date" />
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div>
+            <label for="cfg-cpf">CPF</label>
+            <input id="cfg-cpf" type="text" inputmode="numeric" placeholder="000.000.000-00" />
           </div>
           <div>
             <label for="cfg-whats">WhatsApp (com DDD)</label>
@@ -283,15 +321,15 @@
             <input id="cfg-email" type="email" placeholder="seuemail@gmail.com" />
           </div>
           <div>
-            <label for="cfg-veiculo">Veículo / Placa</label>
-            <input id="cfg-veiculo" type="text" value="VW Voyage 1.0 • IQD8060" />
+            <label for="cfg-endereco">Endereço</label>
+            <input id="cfg-endereco" type="text" placeholder="Rua, número, bairro" />
           </div>
         </div>
 
         <div class="row-2">
           <div>
             <label for="cfg-cnh">Número da CNH</label>
-            <input id="cfg-cnh" type="text" placeholder="Digite o número da CNH" />
+            <input id="cfg-cnh" type="text" placeholder="Número da CNH" />
           </div>
           <div>
             <label for="cfg-ear">EAR (Opcional)</label>
@@ -302,9 +340,40 @@
           </div>
         </div>
 
-        <div>
-          <label for="cfg-doc-carro">Documento do Veículo (CRLV)</label>
-          <input id="cfg-doc-carro" type="text" value="CRLV Exercício 2026 • Placa IQD8060 (Em dia)" />
+        <div class="row-2">
+          <div>
+            <label for="cfg-veiculo">Veículo / Placa</label>
+            <input id="cfg-veiculo" type="text" value="VW Voyage 1.0 • IQD8060" />
+          </div>
+          <div>
+            <label for="cfg-seguro">Seguro (Seguradora / Apólice)</label>
+            <input id="cfg-seguro" type="text" placeholder="Ex.: Seguro auto / APP ou Sem seguro" />
+          </div>
+        </div>
+
+        <!-- UPLOAD LEVE: CNH, DOCUMENTO DO CARRO E SEGURO -->
+        <div class="doc-box">
+          <div class="doc-topo">
+            <label for="up-cnh" style="margin:0;">1. Foto / Anexo da CNH</label>
+            <img id="prev-cnh" class="doc-thumb" alt="CNH" style="display:none;" />
+          </div>
+          <input id="up-cnh" type="file" accept="image/*" style="padding:7px; font-size:14px;" />
+        </div>
+
+        <div class="doc-box">
+          <div class="doc-topo">
+            <label for="up-carro" style="margin:0;">2. Foto / Anexo do Documento do Carro (CRLV)</label>
+            <img id="prev-carro" class="doc-thumb" alt="Documento do carro" style="display:none;" />
+          </div>
+          <input id="up-carro" type="file" accept="image/*" style="padding:7px; font-size:14px;" />
+        </div>
+
+        <div class="doc-box">
+          <div class="doc-topo">
+            <label for="up-seguro" style="margin:0;">3. Foto / Anexo do Seguro</label>
+            <img id="prev-seguro" class="doc-thumb" alt="Seguro" style="display:none;" />
+          </div>
+          <input id="up-seguro" type="file" accept="image/*" style="padding:7px; font-size:14px;" />
         </div>
 
         <div class="chips">
@@ -334,7 +403,7 @@
         </div>
         <div class="meta-small">Aceite (inclusive sem EAR) ou recuse informando qual documento faltou.</div>
 
-        <div class="lista-scroll" id="lista-cadastros-mot" style="max-height:360px;">
+        <div class="lista-scroll" id="lista-cadastros-mot" style="max-height:420px;">
           <div class="meta-small">Nenhum cadastro pendente no momento.</div>
         </div>
       </section>
@@ -419,6 +488,7 @@
       estadoMot.geohashSetor = estadoMot.geohash.slice(0, 4);
 
       let db = null;
+      let docsTemp = { cnh: "", carro: "", seguro: "" };
 
       const elStatusFirebase = document.getElementById("status-firebase-mot");
       const elBtnOnline = document.getElementById("btn-toggle-online");
@@ -431,12 +501,21 @@
 
       const elCardConfig = document.getElementById("card-config-motorista");
       const elCfgNome = document.getElementById("cfg-nome");
+      const elCfgNasc = document.getElementById("cfg-nasc");
+      const elCfgCpf = document.getElementById("cfg-cpf");
       const elCfgWhats = document.getElementById("cfg-whats");
       const elCfgEmail = document.getElementById("cfg-email");
-      const elCfgVeiculo = document.getElementById("cfg-veiculo");
+      const elCfgEndereco = document.getElementById("cfg-endereco");
       const elCfgCnh = document.getElementById("cfg-cnh");
       const elCfgEar = document.getElementById("cfg-ear");
-      const elCfgDocCarro = document.getElementById("cfg-doc-carro");
+      const elCfgVeiculo = document.getElementById("cfg-veiculo");
+      const elCfgSeguro = document.getElementById("cfg-seguro");
+      const elUpCnh = document.getElementById("up-cnh");
+      const elUpCarro = document.getElementById("up-carro");
+      const elUpSeguro = document.getElementById("up-seguro");
+      const elPrevCnh = document.getElementById("prev-cnh");
+      const elPrevCarro = document.getElementById("prev-carro");
+      const elPrevSeguro = document.getElementById("prev-seguro");
       const elMsgConfig = document.getElementById("msg-config-mot");
 
       const elGanhos80 = document.getElementById("ganhos-80-mot");
@@ -466,6 +545,41 @@
         return numeros;
       }
 
+      function comprimirDocLeve(file, maxLargura) {
+        return new Promise(function (resolve) {
+          const reader = new FileReader();
+          reader.onload = function (ev) {
+            const img = new Image();
+            img.onload = function () {
+              const limite = maxLargura || 420;
+              const escala = img.width > limite ? limite / img.width : 1;
+              const w = Math.max(1, Math.round(img.width * escala));
+              const h = Math.max(1, Math.round(img.height * escala));
+              const canvas = document.createElement("canvas");
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, w, h);
+              resolve(canvas.toDataURL("image/jpeg", 0.65));
+            };
+            img.onerror = function () { resolve(""); };
+            img.src = ev.target.result;
+          };
+          reader.onerror = function () { resolve(""); };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function aplicarPreview(elImg, dataUrl) {
+        if (dataUrl) {
+          elImg.src = dataUrl;
+          elImg.style.display = "block";
+        } else {
+          elImg.removeAttribute("src");
+          elImg.style.display = "none";
+        }
+      }
+
       function carregarConfigLocalMotorista() {
         try {
           const bruto = localStorage.getItem(STORAGE_KEY_MOT_CAD);
@@ -476,15 +590,28 @@
             elMotNome.value = d.nome;
             elSubtituloMot.textContent = d.nome + " • Balneário Cassino / Rio Grande";
           }
+          if (d.nasc) elCfgNasc.value = d.nasc;
+          if (d.cpf) elCfgCpf.value = d.cpf;
           if (d.whats) elCfgWhats.value = d.whats;
           if (d.email) elCfgEmail.value = d.email;
+          if (d.endereco) elCfgEndereco.value = d.endereco;
+          if (d.cnh) elCfgCnh.value = d.cnh;
+          if (d.ear) elCfgEar.value = d.ear;
           if (d.veiculo) {
             elCfgVeiculo.value = d.veiculo;
             elMotVeiculo.value = d.veiculo;
           }
-          if (d.cnh) elCfgCnh.value = d.cnh;
-          if (d.ear) elCfgEar.value = d.ear;
-          if (d.docCarro) elCfgDocCarro.value = d.docCarro;
+          if (d.seguro) elCfgSeguro.value = d.seguro;
+
+          docsTemp = {
+            cnh: String(d.docCnhImg || ""),
+            carro: String(d.docCarroImg || ""),
+            seguro: String(d.docSeguroImg || "")
+          };
+          aplicarPreview(elPrevCnh, docsTemp.cnh);
+          aplicarPreview(elPrevCarro, docsTemp.carro);
+          aplicarPreview(elPrevSeguro, docsTemp.seguro);
+
           atualizarTextoSituacao(d.statusCadastro || "Aprovado", d.observacao || "");
         } catch (e) {}
       }
@@ -508,24 +635,33 @@
 
       async function salvarCadastroMotorista() {
         const nome = (elCfgNome.value || "").trim() || "Luiz Carlos Costa Junior";
+        const nasc = (elCfgNasc.value || "").trim();
+        const cpf = (elCfgCpf.value || "").trim();
         const whats = (elCfgWhats.value || "").trim();
         const email = (elCfgEmail.value || "").trim();
-        const veiculo = (elCfgVeiculo.value || "").trim() || "VW Voyage 1.0 • IQD8060";
+        const endereco = (elCfgEndereco.value || "").trim();
         const cnh = (elCfgCnh.value || "").trim();
         const ear = elCfgEar.value || "Sem EAR (Liberado)";
-        const docCarro = (elCfgDocCarro.value || "").trim();
+        const veiculo = (elCfgVeiculo.value || "").trim() || "VW Voyage 1.0 • IQD8060";
+        const seguro = (elCfgSeguro.value || "").trim();
 
         const cadId = "cad_" + (limparTelefoneWhats(whats) || estadoMot.id);
         const dados = {
           id: cadId,
           motoristaId: estadoMot.id,
-          nome: nome,
-          whats: whats,
-          email: email,
-          veiculo: veiculo,
-          cnh: cnh,
-          ear: ear,
-          docCarro: docCarro,
+          nome,
+          nasc,
+          cpf,
+          whats,
+          email,
+          endereco,
+          cnh,
+          ear,
+          veiculo,
+          seguro,
+          docCnhImg: docsTemp.cnh || "",
+          docCarroImg: docsTemp.carro || "",
+          docSeguroImg: docsTemp.seguro || "",
           statusCadastro: "Em análise",
           observacao: "",
           atualizadoEm: Date.now()
@@ -547,7 +683,7 @@
             await db.collection("motoristas_cadastros").doc(cadId).set(dados, { merge: true });
             elMsgConfig.textContent = "Cadastro salvo e enviado para aprovação!";
           } catch (e) {
-            elMsgConfig.textContent = "Salvo no celular (sem resposta do Firestore).";
+            elMsgConfig.textContent = "Salvo no celular (verifique tamanho das fotos ou conexão).";
           }
         }
         publicarPresencaMotorista();
@@ -565,6 +701,12 @@
         elListaCadastros.innerHTML = lista.map((m) => {
           const st = m.statusCadastro || "Em análise";
           const cls = st === "Aprovado" ? "tag-status aceita" : (st === "Recusado" ? "tag-status recusada" : "tag-status aguardando");
+          const thumbs = [
+            m.docCnhImg ? '<img class="doc-thumb" src="' + m.docCnhImg + '" alt="CNH" />' : '',
+            m.docCarroImg ? '<img class="doc-thumb" src="' + m.docCarroImg + '" alt="Carro" />' : '',
+            m.docSeguroImg ? '<img class="doc-thumb" src="' + m.docSeguroImg + '" alt="Seguro" />' : ''
+          ].filter(Boolean).join("");
+
           return (
             '<div class="corrida-box" data-cad-id="' + escapar(m.id) + '">' +
               '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
@@ -572,17 +714,24 @@
                 '<span class="' + cls + '">' + escapar(st) + '</span>' +
               '</div>' +
               '<div class="meta-small">' +
+                'CPF: ' + escapar(m.cpf || "—") + ' • Nasc.: ' + escapar(m.nasc || "—") +
+              '</div>' +
+              '<div class="meta-small">' +
                 'WhatsApp: ' + escapar(m.whats || "—") + ' • E-mail: ' + escapar(m.email || "—") +
+              '</div>' +
+              '<div class="meta-small">' +
+                'Endereço: ' + escapar(m.endereco || "—") +
               '</div>' +
               '<div class="meta-small">' +
                 'CNH: <strong>' + escapar(m.cnh || "Não informada") + '</strong> • EAR: <strong>' + escapar(m.ear || "Sem EAR") + '</strong>' +
               '</div>' +
               '<div class="meta-small">' +
-                'Veículo: ' + escapar(m.veiculo || "—") + ' • Doc.: ' + escapar(m.docCarro || "—") +
+                'Veículo: ' + escapar(m.veiculo || "—") + ' • Seguro: ' + escapar(m.seguro || "—") +
               '</div>' +
+              (thumbs ? '<div class="chips">' + thumbs + '</div>' : '') +
               '<div>' +
                 '<label>Observação / Documento que faltou:</label>' +
-                '<input type="text" class="inp-obs-cadastro" value="' + escapar(m.observacao || "") + '" placeholder="Ex.: Faltou foto da CNH / Aprovado sem EAR" />' +
+                '<input type="text" class="inp-obs-cadastro" value="' + escapar(m.observacao || "") + '" placeholder="Ex.: Faltou foto do seguro / CNH ilegível" />' +
               '</div>' +
               '<div class="chips">' +
                 '<button type="button" class="btn btn-green btn-sm btn-aprovar-cad">Aceitar Cadastro</button>' +
@@ -858,6 +1007,27 @@
           elStatusFirebase.textContent = "Erro Firebase";
         }
       }
+
+      elUpCnh.addEventListener("change", async function (ev) {
+        const arq = ev.target.files && ev.target.files[0];
+        if (!arq) return;
+        docsTemp.cnh = await comprimirDocLeve(arq, 420);
+        aplicarPreview(elPrevCnh, docsTemp.cnh);
+      });
+
+      elUpCarro.addEventListener("change", async function (ev) {
+        const arq = ev.target.files && ev.target.files[0];
+        if (!arq) return;
+        docsTemp.carro = await comprimirDocLeve(arq, 420);
+        aplicarPreview(elPrevCarro, docsTemp.carro);
+      });
+
+      elUpSeguro.addEventListener("change", async function (ev) {
+        const arq = ev.target.files && ev.target.files[0];
+        if (!arq) return;
+        docsTemp.seguro = await comprimirDocLeve(arq, 420);
+        aplicarPreview(elPrevSeguro, docsTemp.seguro);
+      });
 
       document.getElementById("btn-abrir-config").addEventListener("click", function () {
         elCardConfig.style.display = elCardConfig.style.display === "none" ? "flex" : "none";
