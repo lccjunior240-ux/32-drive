@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>32 Drive • Passageiro</title>
+  <!-- === INICIO ICONE 32 === -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f59e0b'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Arial,sans-serif' font-size='32' font-weight='900' fill='%230b192c'%3E32%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f59e0b'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Arial,sans-serif' font-size='32' font-weight='900' fill='%230b192c'%3E32%3C/text%3E%3C/svg%3E" />
+  <!-- === FIM ICONE 32 === -->
   <style>
     :root {
       --bg: #f1f5f9;
@@ -100,6 +104,32 @@
       background: #ffffff;
     }
 
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    @media (max-width: 520px) {
+      .row-2 { grid-template-columns: 1fr; }
+    }
+
+    .foto-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f8fafc;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .foto-preview {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--accent);
+      background: #e2e8f0;
+      flex-shrink: 0;
+    }
+
     .passageiro-resumo {
       background: #f8fafc;
       border: 1.5px solid var(--border);
@@ -113,6 +143,21 @@
       justify-content: space-between;
       gap: 8px;
       flex-wrap: wrap;
+    }
+
+    .passageiro-info-esq {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar-mini {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--navy);
+      flex-shrink: 0;
     }
 
     .rua-box {
@@ -221,19 +266,42 @@
         <input id="cad-nome" type="text" placeholder="Ex.: Maria Silva" />
       </div>
 
-      <div>
-        <label for="cad-whats">WhatsApp (com DDD)</label>
-        <input id="cad-whats" type="tel" placeholder="Ex.: 53999998888" />
+      <div class="row-2">
+        <div>
+          <label for="cad-whats">WhatsApp (com DDD)</label>
+          <input id="cad-whats" type="tel" placeholder="Ex.: 53999998888" />
+        </div>
+        <div>
+          <label for="cad-cpf">CPF</label>
+          <input id="cad-cpf" type="text" inputmode="numeric" placeholder="000.000.000-00" />
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div>
+          <label for="cad-nasc">Data de Nascimento</label>
+          <input id="cad-nasc" type="date" />
+        </div>
+        <div>
+          <label for="cad-email">E-mail (opcional)</label>
+          <input id="cad-email" type="email" placeholder="Ex.: maria@email.com" />
+        </div>
       </div>
 
       <div>
-        <label for="cad-email">E-mail (opcional)</label>
-        <input id="cad-email" type="email" placeholder="Ex.: maria@email.com" />
-      </div>
-
-      <div>
-        <label for="cad-endereco">Endereço Principal (opcional)</label>
+        <label for="cad-endereco">Endereço Principal</label>
         <input id="cad-endereco" type="text" placeholder="Ex.: Rua das Acácias, 120" />
+      </div>
+
+      <div>
+        <label for="cad-foto">Foto do Passageiro (opcional nos testes)</label>
+        <div class="foto-box">
+          <img id="cad-foto-preview" class="foto-preview" alt="Foto do passageiro" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23e2e8f0'/%3E%3Ccircle cx='32' cy='24' r='11' fill='%2394a3b8'/%3E%3Cellipse cx='32' cy='52' rx='18' ry='12' fill='%2394a3b8'/%3E%3C/svg%3E" />
+          <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+            <input id="cad-foto" type="file" accept="image/*" style="padding:8px; font-size:15px;" />
+            <button type="button" class="btn btn-outline btn-sm" id="btn-remover-foto">Sem foto</button>
+          </div>
+        </div>
       </div>
 
       <div class="meta" id="msg-cadastro" style="color:#b91c1c;"></div>
@@ -246,7 +314,10 @@
     <!-- TELA 2: PAINEL DEFINITIVO DA CORRIDA -->
     <section class="card" id="tela-corrida">
       <div class="passageiro-resumo">
-        <div id="resumo-dados-passageiro">Passageiro não cadastrado</div>
+        <div class="passageiro-info-esq">
+          <img id="resumo-foto-passageiro" class="avatar-mini" alt="Foto" style="display:none;" />
+          <div id="resumo-dados-passageiro">Passageiro não cadastrado</div>
+        </div>
         <button type="button" class="btn btn-outline btn-sm" id="btn-editar-cadastro">Meu Cadastro</button>
       </div>
 
@@ -304,6 +375,7 @@
       const REF_LAT = -32.1856;
       const REF_LNG = -52.1658;
       const REF_ENDERECO = "Avenida Rio Grande, 96 — Balneário Cassino, Rio Grande - RS";
+      const FOTO_PADRAO_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23e2e8f0'/%3E%3Ccircle cx='32' cy='24' r='11' fill='%2394a3b8'/%3E%3Cellipse cx='32' cy='52' rx='18' ry='12' fill='%2394a3b8'/%3E%3C/svg%3E";
 
       const GEOHASH_BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
       function encodeGeohash(lat, lon, precision) {
@@ -341,7 +413,7 @@
         valorCalculado: null,
         corridaAtualId: "",
         corridaAtual: null,
-        cadastro: { nome: "", whats: "", email: "", endereco: "" }
+        cadastro: { nome: "", whats: "", cpf: "", nasc: "", email: "", endereco: "", fotoDataUrl: "" }
       };
       state.geohash = encodeGeohash(state.lat, state.lng, 6);
       state.geohashSetor = state.geohash.slice(0, 4);
@@ -349,15 +421,21 @@
       let db = null;
       let unsubscribeCorrida = null;
       let timerCalculo = null;
+      let fotoTemporariaDataUrl = "";
 
       const elTelaCadastro = document.getElementById("tela-cadastro");
       const elTelaCorrida = document.getElementById("tela-corrida");
       const elCadNome = document.getElementById("cad-nome");
       const elCadWhats = document.getElementById("cad-whats");
+      const elCadCpf = document.getElementById("cad-cpf");
+      const elCadNasc = document.getElementById("cad-nasc");
       const elCadEmail = document.getElementById("cad-email");
       const elCadEndereco = document.getElementById("cad-endereco");
+      const elCadFoto = document.getElementById("cad-foto");
+      const elCadFotoPreview = document.getElementById("cad-foto-preview");
       const elMsgCadastro = document.getElementById("msg-cadastro");
       const elResumoPassageiro = document.getElementById("resumo-dados-passageiro");
+      const elResumoFoto = document.getElementById("resumo-foto-passageiro");
 
       const elOrigem = document.getElementById("pas-origem");
       const elDestino = document.getElementById("pas-destino");
@@ -379,11 +457,41 @@
           .replace(/"/g, "&quot;");
       }
 
+      function comprimirImagemLeve(file, maxLargura) {
+        return new Promise(function (resolve) {
+          const reader = new FileReader();
+          reader.onload = function (ev) {
+            const img = new Image();
+            img.onload = function () {
+              const limite = maxLargura || 300;
+              const escala = img.width > limite ? limite / img.width : 1;
+              const w = Math.max(1, Math.round(img.width * escala));
+              const h = Math.max(1, Math.round(img.height * escala));
+              const canvas = document.createElement("canvas");
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, w, h);
+              resolve(canvas.toDataURL("image/jpeg", 0.7));
+            };
+            img.onerror = function () { resolve(""); };
+            img.src = ev.target.result;
+          };
+          reader.onerror = function () { resolve(""); };
+          reader.readAsDataURL(file);
+        });
+      }
+
       function abrirTelaCadastro(forcar) {
         elCadNome.value = state.cadastro.nome || "";
         elCadWhats.value = state.cadastro.whats || "";
+        elCadCpf.value = state.cadastro.cpf || "";
+        elCadNasc.value = state.cadastro.nasc || "";
         elCadEmail.value = state.cadastro.email || "";
         elCadEndereco.value = state.cadastro.endereco || "";
+        fotoTemporariaDataUrl = state.cadastro.fotoDataUrl || "";
+        elCadFotoPreview.src = fotoTemporariaDataUrl || FOTO_PADRAO_SVG;
+        elCadFoto.value = "";
         elMsgCadastro.textContent = "";
 
         const temBasico = Boolean((state.cadastro.nome || "").trim() && (state.cadastro.whats || "").replace(/\D/g, "").length >= 8);
@@ -403,11 +511,20 @@
       function atualizarResumoPassageiroNaTela() {
         const nome = (state.cadastro.nome || "").trim();
         const whats = (state.cadastro.whats || "").trim();
+        const cpf = (state.cadastro.cpf || "").trim();
+        if (state.cadastro.fotoDataUrl) {
+          elResumoFoto.src = state.cadastro.fotoDataUrl;
+          elResumoFoto.style.display = "block";
+        } else {
+          elResumoFoto.style.display = "none";
+        }
+
         if (nome || whats) {
           elResumoPassageiro.innerHTML =
-            "<span><strong>" + escapar(nome || "Passageiro") + "</strong>" +
+            "<div><strong>" + escapar(nome || "Passageiro") + "</strong>" +
             (whats ? " • WhatsApp: <strong>" + escapar(whats) + "</strong>" : "") +
-            "</span>";
+            (cpf ? "<div class='meta' style='font-size:14px;'>CPF: " + escapar(cpf) + "</div>" : "") +
+            "</div>";
         } else {
           elResumoPassageiro.textContent = "Complete seu cadastro para enviar Nome e WhatsApp";
         }
@@ -416,6 +533,8 @@
       function salvarCadastro() {
         const nome = (elCadNome.value || "").trim();
         const whats = (elCadWhats.value || "").trim();
+        const cpf = (elCadCpf.value || "").trim();
+        const nasc = (elCadNasc.value || "").trim();
         const email = (elCadEmail.value || "").trim();
         const endereco = (elCadEndereco.value || "").trim();
         const digitos = whats.replace(/\D/g, "");
@@ -431,7 +550,15 @@
           return;
         }
 
-        state.cadastro = { nome, whats, email, endereco };
+        state.cadastro = {
+          nome,
+          whats,
+          cpf,
+          nasc,
+          email,
+          endereco,
+          fotoDataUrl: fotoTemporariaDataUrl || ""
+        };
         try {
           localStorage.setItem(STORAGE_KEY_CADASTRO, JSON.stringify(state.cadastro));
         } catch (e) {}
@@ -454,8 +581,11 @@
             state.cadastro = {
               nome: String(parsed.nome || ""),
               whats: String(parsed.whats || ""),
+              cpf: String(parsed.cpf || ""),
+              nasc: String(parsed.nasc || ""),
               email: String(parsed.email || ""),
-              endereco: String(parsed.endereco || "")
+              endereco: String(parsed.endereco || ""),
+              fotoDataUrl: String(parsed.fotoDataUrl || "")
             };
             if (state.cadastro.endereco) {
               elOrigem.value = state.cadastro.endereco;
@@ -809,6 +939,9 @@
           passageiro: nomePas,
           passageiroNome: nomePas,
           passageiroWhats: whatsPas,
+          passageiroCpf: state.cadastro.cpf || "",
+          passageiroNasc: state.cadastro.nasc || "",
+          passageiroEndereco: state.cadastro.endereco || "",
           passageiroEmail: state.cadastro.email || "",
           origem: origem,
           destino: destino,
@@ -897,6 +1030,19 @@
           elStatus.textContent = "Offline";
         }
       }
+
+      elCadFoto.addEventListener("change", async function (ev) {
+        const arq = ev.target.files && ev.target.files[0];
+        if (!arq) return;
+        fotoTemporariaDataUrl = await comprimirImagemLeve(arq, 300);
+        elCadFotoPreview.src = fotoTemporariaDataUrl || FOTO_PADRAO_SVG;
+      });
+
+      document.getElementById("btn-remover-foto").addEventListener("click", function () {
+        fotoTemporariaDataUrl = "";
+        elCadFoto.value = "";
+        elCadFotoPreview.src = FOTO_PADRAO_SVG;
+      });
 
       document.getElementById("btn-salvar-cadastro").addEventListener("click", salvarCadastro);
       document.getElementById("btn-editar-cadastro").addEventListener("click", function () {
